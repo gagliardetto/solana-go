@@ -28,6 +28,16 @@ var getConfirmedBlockCmd = &cobra.Command{
 		cnt, _ := json.MarshalIndent(resp, "", "  ")
 		fmt.Println(string(cnt))
 
+		// for idx, trx := range resp.Transactions {
+		// 	unpacked, err := solana.TransactionFromData(trx.Transaction)
+		// 	if err != nil {
+		// 		return err
+		// 	}
+
+		// 	cnt, _ := json.MarshalIndent(unpacked, "", "  ")
+		// 	fmt.Println(idx, string(cnt))
+		// }
+
 		return nil
 	},
 }

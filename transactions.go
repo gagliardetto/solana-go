@@ -1,5 +1,11 @@
 package solana
 
+import (
+	"bytes"
+
+	"github.com/lunixbochs/struc"
+)
+
 type Transaction struct {
 	Signatures []Signature `json:"signatures"`
 	Message    Message     `json:"message"`
@@ -24,4 +30,13 @@ type CompiledInstruction struct {
 	Accounts       []uint8 `json:"accounts"`
 	DataLength     uint16  `json:"-",struc:"sizeof=Data,little"`
 	Data           Base58  `json:"data"`
+}
+
+func TransactionFromData(in []byte) (*Transaction, error) {
+	var out Transaction
+	err := struc.Unpack(bytes.NewReader(in), &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
