@@ -3,12 +3,29 @@ package solana
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/mr-tron/base58"
 )
 
+type Padding []byte
+
 type PublicKey [32]byte
+
+func PublicKeyFromBase58(in string) (out PublicKey, err error) {
+	val, err := base58.Decode(in)
+	if err != nil {
+		return
+	}
+
+	if len(val) != 32 {
+		err = fmt.Errorf("invalid length, expected 32, got %d", len(val))
+		return
+	}
+	copy(out[:], val)
+	return
+}
 
 func (p PublicKey) MarshalJSON() ([]byte, error) {
 	return json.Marshal(base58.Encode(p[:]))

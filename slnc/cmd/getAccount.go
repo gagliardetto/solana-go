@@ -26,10 +26,25 @@ var getAccountCmd = &cobra.Command{
 			errorCheck("not found", errors.New("account not found"))
 		}
 
-		data, err := json.MarshalIndent(resp.Value, "", "  ")
+		acct := resp.Value
+
+		data, err := json.MarshalIndent(acct, "", "  ")
 		errorCheck("json marshal", err)
 
 		fmt.Println(string(data))
+
+		obj, err := decode(acct.Owner, acct.Data)
+		if err != nil {
+			return err
+		}
+
+		if obj != nil {
+			cnt, err := json.MarshalIndent(obj, "", "  ")
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Data %T: %s\n", obj, string(cnt))
+		}
 
 		return nil
 	},

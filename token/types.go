@@ -21,7 +21,7 @@ type Account struct {
 	Delegate        solana.PublicKey `struc:"[32]byte"`
 	IsInitialized   bool
 	IsNative        bool
-	Padding1        [2]byte
+	Padding1        [2]byte `json:"-",struc:"[2]pad"`
 	DelegatedAmount solana.U64
 }
 
@@ -37,5 +37,5 @@ type Mint struct {
 	Owner         solana.PublicKey `struc:"[32]byte"`
 	Decimals      byte
 	IsInitialized bool
-	Padding1      uint16
+	Padding1      uint16 `json:"-",struct:"[2]pad"`
 }

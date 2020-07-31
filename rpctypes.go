@@ -29,11 +29,11 @@ type GetAccountInfoRPCResult struct {
 }
 
 type Account struct {
-	Lamports   U64    `json:"lamports"`
-	Data       Base58 `json:"data"`
-	Owner      string `json:"owner"`
-	Executable bool   `json:"executable"`
-	RentEpoch  U64    `json:"rentEpoch"`
+	Lamports   U64       `json:"lamports"`
+	Data       Base58    `json:"data"`
+	Owner      PublicKey `json:"owner"`
+	Executable bool      `json:"executable"`
+	RentEpoch  U64       `json:"rentEpoch"`
 }
 
 type KeyedAccount struct {
