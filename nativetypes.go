@@ -8,6 +8,37 @@ import (
 	"github.com/mr-tron/base58"
 )
 
+type PublicKey [32]byte
+
+func (p PublicKey) MarshalJSON() ([]byte, error) {
+	return json.Marshal(base58.Encode(p[:]))
+}
+func (p *PublicKey) UnmarshalJSON(data []byte) (err error) {
+	var s string
+	err = json.Unmarshal(data, &s)
+	if err != nil {
+		return
+	}
+
+	dat, err := base58.Decode(s)
+	if err != nil {
+		return err
+	}
+
+	if len(dat) != 32 {
+		return errors.New("invalid data length for public key")
+	}
+
+	target := PublicKey{}
+	copy(target[:], dat)
+	*p = target
+	return
+}
+
+func (p PublicKey) String() string {
+	return base58.Encode(p[:])
+}
+
 ///
 
 type Base58 []byte
