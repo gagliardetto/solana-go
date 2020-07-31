@@ -11,6 +11,57 @@ import (
 
 type Padding []byte
 
+type Hash PublicKey
+
+///
+
+type Signature [32]byte
+
+func SignatureFromBase58(in string) (out Signature, err error) {
+	val, err := base58.Decode(in)
+	if err != nil {
+		return
+	}
+
+	if len(val) != 64 {
+		err = fmt.Errorf("invalid length, expected 64, got %d", len(val))
+		return
+	}
+	copy(out[:], val)
+	return
+}
+
+func (p Signature) MarshalJSON() ([]byte, error) {
+	return json.Marshal(base58.Encode(p[:]))
+}
+func (p *Signature) UnmarshalJSON(data []byte) (err error) {
+	var s string
+	err = json.Unmarshal(data, &s)
+	if err != nil {
+		return
+	}
+
+	dat, err := base58.Decode(s)
+	if err != nil {
+		return err
+	}
+
+	if len(dat) != 64 {
+		return errors.New("invalid data length for public key")
+	}
+
+	target := Signature{}
+	copy(target[:], dat)
+	*p = target
+	return
+}
+
+func (p Signature) String() string {
+	return base58.Encode(p[:])
+}
+
+///
+
 type PublicKey [32]byte
 
 func PublicKeyFromBase58(in string) (out PublicKey, err error) {

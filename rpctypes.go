@@ -16,14 +16,62 @@ type RPCContext struct {
 
 ///
 
-type GetBalanceRPCResult struct {
+type GetBalanceResult struct {
 	RPCContext
 	Value U64 `json:"value"`
 }
 
 ///
 
-type GetAccountInfoRPCResult struct {
+type GetSlotResult U64
+
+///
+
+type GetRecentBlockhashResult struct {
+	RPCContext
+	Value BlockhashResult `json:"value"`
+}
+
+type BlockhashResult struct {
+	Blockhash     PublicKey     `json:"blockhash"` /* make this a `Hash` type, which is a copy of the PublicKey` type */
+	FeeCalculator FeeCalculator `json:"feeCalculator"`
+}
+
+type FeeCalculator struct {
+	LamportsPerSignature U64 `json:"lamportsPerSignature"`
+}
+
+///
+
+type GetConfirmedBlockResult struct {
+	Blockhash         PublicKey             `json:"blockhash"`
+	PreviousBlockhash PublicKey             `json:"previousBlockhash"` // could be zeroes if ledger was clean-up and this is unavailable
+	ParentSlot        U64                   `json:"parentSlot"`
+	Transactions      []TransactionWithMeta `json:"transactions"`
+	Rewards           []BlockReward         `json:"rewards"`
+	BlockTime         U64                   `json:"blockTime,omitempty"`
+}
+
+type BlockReward struct {
+	Pubkey   PublicKey `json:"pubkey"`
+	Lamports U64       `json:"lamports"`
+}
+
+type TransactionWithMeta struct {
+	Transaction *Transaction     `json:"transaction"`
+	Meta        *TransactionMeta `json:"meta,omitempty"`
+}
+
+type TransactionMeta struct {
+	Err          interface{} `json:"err"`
+	Fee          U64         `json:"fee"`
+	PreBalances  []U64       `json:"preBalances"`
+	PostBalances []U64       `json:"postBalances"`
+}
+
+///
+
+type GetAccountInfoResult struct {
 	RPCContext
 	Value *Account `json:"value"`
 }
@@ -43,7 +91,7 @@ type KeyedAccount struct {
 
 ///
 
-type GetProgramAccountsRPCResult []*KeyedAccount
+type GetProgramAccountsResult []*KeyedAccount
 
 type GetProgramAccountsOpts struct {
 	Encoding string `json:"encoding,omitempty"`

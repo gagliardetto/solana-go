@@ -30,44 +30,62 @@ func (c *Client) SetHeader(k, v string) {
 	c.headers.Set(k, v)
 }
 
-func (c *Client) GetBalance(ctx context.Context, publicKey string, commitment CommitmentType) (out *GetBalanceRPCResult, err error) {
+func (c *Client) GetBalance(ctx context.Context, publicKey string, commitment CommitmentType) (out *GetBalanceResult, err error) {
 	params := []interface{}{publicKey}
 	if commitment != "" {
 		params = append(params, string(commitment))
 	}
 
 	err = c.rpcClient.CallFor(&out, "getBalance", params...)
-	if err != nil {
-		return nil, err
-	}
-
 	return
 }
 
-func (c *Client) GetAccountInfo(ctx context.Context, publicKey string, commitment CommitmentType) (out *GetAccountInfoRPCResult, err error) {
+func (c *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentType) (out *GetRecentBlockhashResult, err error) {
+	var params []interface{}
+	if commitment != "" {
+		params = append(params, string(commitment))
+	}
+
+	err = c.rpcClient.CallFor(&out, "getRecentBlockhash", params...)
+	return
+}
+
+func (c *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out GetSlotResult, err error) {
+	var params []interface{}
+	if commitment != "" {
+		params = append(params, string(commitment))
+	}
+
+	err = c.rpcClient.CallFor(&out, "getSlot", params...)
+	return
+}
+
+func (c *Client) GetConfirmedBlock(ctx context.Context, slot uint64, encoding string) (out *GetConfirmedBlockResult, err error) {
+	if encoding == "" {
+		encoding = "json"
+	}
+	params := []interface{}{slot, encoding}
+
+	err = c.rpcClient.CallFor(&out, "getConfirmedBlock", params...)
+	return
+}
+
+func (c *Client) GetAccountInfo(ctx context.Context, publicKey string, commitment CommitmentType) (out *GetAccountInfoResult, err error) {
 	params := []interface{}{publicKey}
 	if commitment != "" {
 		params = append(params, string(commitment))
 	}
 
 	err = c.rpcClient.CallFor(&out, "getAccountInfo", params...)
-	if err != nil {
-		return nil, err
-	}
-
 	return
 }
 
-func (c *Client) GetProgramAccounts(ctx context.Context, publicKey string, opts *GetProgramAccountsOpts) (out *GetProgramAccountsRPCResult, err error) {
+func (c *Client) GetProgramAccounts(ctx context.Context, publicKey string, opts *GetProgramAccountsOpts) (out *GetProgramAccountsResult, err error) {
 	params := []interface{}{publicKey}
 	if opts != nil {
 		params = append(params, opts)
 	}
 
 	err = c.rpcClient.CallFor(&out, "getProgramAccounts", params...)
-	if err != nil {
-		return nil, err
-	}
-
 	return
 }
