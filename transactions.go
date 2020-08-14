@@ -26,9 +26,9 @@ type MessageHeader struct {
 
 type CompiledInstruction struct {
 	ProgramIDIndex uint8   `json:"programIdIndex"`
-	AccountsCount  uint16  `json:"-",struc:"sizeof=Accounts,little"`
+	AccountsCount  uint16  `json:"-" struc:"sizeof=Accounts,little"`
 	Accounts       []uint8 `json:"accounts"`
-	DataLength     uint16  `json:"-",struc:"sizeof=Data,little"`
+	DataLength     uint16  `json:"-" struc:"sizeof=Data,little"`
 	Data           Base58  `json:"data"`
 }
 

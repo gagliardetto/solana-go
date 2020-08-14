@@ -67,6 +67,11 @@ func (p Signature) String() string {
 
 type PublicKey [32]byte
 
+func MustPublicKeyFromBase58(in string) PublicKey {
+	out, _ := PublicKeyFromBase58(in)
+	return out
+}
+
 func PublicKeyFromBase58(in string) (out PublicKey, err error) {
 	val, err := base58.Decode(in)
 	if err != nil {
@@ -196,7 +201,16 @@ func (w *ByteWrapper) ReadByte() (byte, error) {
 /// ShortVec
 type ShortVec uint16
 
-func (v ShortVec) Pack(p []byte, opt *struc.Options) (int, error) {
+func (v ShortVec) Pack(buf []byte, opt *struc.Options) (int, error) {
+	x := uint64(v)
+	i := 0
+	for x >= 0x80 {
+		buf[i] = byte(x) | 0x80
+		x >>= 7
+		i++
+	}
+	buf[i] = byte(x)
+	return i + 1, nil
 	// JAVASCRIPT
 	// let rem_len = len;
 	// for (;;) {
@@ -229,21 +243,26 @@ func (v ShortVec) Pack(p []byte, opt *struc.Options) (int, error) {
 	//     }
 	// }
 	// seq.end()
-
-	return 0, nil
 }
-func (v *ShortVec) Unpack(r io.Reader, length int, opt *struc.Options) error {
-	var l, s int
-	for {
 
-		// JAVASCRIPT
-		//   let elem = bytes.shift();
-		//   len |= (elem & 0x7f) << (size * 7);
-		//   size += 1;
-		//   if ((elem & 0x80) === 0) {
-		//     break;
-		//   }
+func (v *ShortVec) Unpack(r io.Reader, length int, opt *struc.Options) error {
+	res, err := readShortVec(&ByteWrapper{r})
+	if err != nil {
+		return err
 	}
+	*v = ShortVec(res)
+	return nil
+	// var l, s int
+	// for {
+
+	// JAVASCRIPT
+	//   let elem = bytes.shift();
+	//   len |= (elem & 0x7f) << (size * 7);
+	//   size += 1;
+	//   if ((elem & 0x80) === 0) {
+	//     break;
+	//   }
+	// }
 
 	// RUST
 	// let mut len: usize = 0;
