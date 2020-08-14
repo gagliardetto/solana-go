@@ -18,7 +18,7 @@ type Hash PublicKey
 
 ///
 
-type Signature [32]byte
+type Signature [64]byte
 
 func SignatureFromBase58(in string) (out Signature, err error) {
 	val, err := base58.Decode(in)
