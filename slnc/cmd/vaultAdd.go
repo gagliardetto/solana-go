@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/dfuse-io/solana-go/cli"
 	"github.com/dfuse-io/solana-go/vault"
-	"github.com/eoscanada/eosc/cli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
