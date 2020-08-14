@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/dfuse-io/solana-go"
+	"github.com/dfuse-io/solana-go/vault"
 	"github.com/spf13/viper"
 )
 
@@ -33,6 +34,14 @@ func getClient() *solana.Client {
 }
 
 func sanitizeAPIURL(input string) string {
+	switch input {
+	case "devnet":
+		return "https://devnet.solana.com"
+	case "testnet":
+		return "https://testnet.solana.com"
+	case "mainnet":
+		return "https://api.mainnet-beta.solana.com"
+	}
 	return strings.TrimRight(input, "/")
 }
 
@@ -44,4 +53,33 @@ func errorCheck(prefix string, err error) {
 		}
 		os.Exit(1)
 	}
+}
+
+func mustGetWallet() *vault.Vault {
+	vault, err := setupWallet()
+	errorCheck("wallet setup", err)
+	return vault
+}
+
+func setupWallet() (*vault.Vault, error) {
+	walletFile := viper.GetString("global-vault-file")
+	if _, err := os.Stat(walletFile); err != nil {
+		return nil, fmt.Errorf("wallet file %q missing: %s", walletFile, err)
+	}
+
+	v, err := vault.NewVaultFromWalletFile(walletFile)
+	if err != nil {
+		return nil, fmt.Errorf("loading vault: %s", err)
+	}
+
+	boxer, err := vault.SecretBoxerForType(v.SecretBoxWrap, viper.GetString("global-kms-gcp-keypath"))
+	if err != nil {
+		return nil, fmt.Errorf("secret boxer: %s", err)
+	}
+
+	if err := v.Open(boxer); err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }

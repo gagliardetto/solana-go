@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Version represents the eosc command version
+// Version represents the slnc command version
 var Version string
 
 //const defaultRPCURL = "http://localhost:8899"
@@ -35,11 +35,10 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().BoolP("debug", "", false, "Enables verbose API debug messages")
-	// RootCmd.PersistentFlags().StringP("vault-file", "", "./eosc-vault.json", "Wallet file that contains encrypted key material")
-	// RootCmd.PersistentFlags().StringSliceP("wallet-url", "", []string{}, "Base URL to wallet endpoint. You can pass this multiple times to use the multi-signer (will use each wallet to sign multi-sig transactions).")
+	RootCmd.PersistentFlags().StringP("vault-file", "", "./solana-vault.json", "Wallet file that contains encrypted key material")
 	RootCmd.PersistentFlags().StringP("rpc-url", "u", defaultRPCURL, "API endpoint of eos.io blockchain node")
 	RootCmd.PersistentFlags().StringSliceP("http-header", "H", []string{}, "HTTP header to add to JSON-RPC requests")
-	// RootCmd.PersistentFlags().StringP("kms-gcp-keypath", "", "", "Path to the cryptoKeys within a keyRing on GCP")
+	RootCmd.PersistentFlags().StringP("kms-gcp-keypath", "", "", "Path to the cryptoKeys within a keyRing on GCP")
 	// RootCmd.PersistentFlags().StringP("write-transaction", "", "", "Do not broadcast the transaction produced, but write it in json to the given filename instead.")
 	// RootCmd.PersistentFlags().StringP("offline-head-block", "", "", "Provide a recent block ID (long-form hex) for TaPoS. Use all --offline options to sign transactions offline.")
 	// RootCmd.PersistentFlags().StringP("offline-chain-id", "", "", "Chain ID to sign transaction with. Use all --offline- options to sign transactions offline.")
