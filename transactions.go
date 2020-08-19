@@ -25,11 +25,11 @@ type MessageHeader struct {
 }
 
 type CompiledInstruction struct {
-	ProgramIDIndex uint8    `json:"programIdIndex"`
-	AccountsCount  ShortVec `json:"-" struc:"sizeof=Accounts"`
-	Accounts       []uint8  `json:"accounts"`
-	DataLength     ShortVec `json:"-" struc:"sizeof=Data"`
-	Data           Base58   `json:"data"`
+	ProgramIDIndex uint8     `json:"programIdIndex"`
+	AccountsCount  Varuint16 `json:"-" struc:"sizeof=Accounts"`
+	Accounts       []uint8   `json:"accounts"`
+	DataLength     Varuint16 `json:"-" struc:"sizeof=Data"`
+	Data           Base58    `json:"data"`
 }
 
 func TransactionFromData(in []byte) (*Transaction, error) {

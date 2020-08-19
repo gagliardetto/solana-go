@@ -198,10 +198,10 @@ func (w *ByteWrapper) ReadByte() (byte, error) {
 	return b[0], err
 }
 
-/// ShortVec
-type ShortVec uint16
+/// Varuint16
+type Varuint16 uint16
 
-func (v ShortVec) Pack(buf []byte, opt *struc.Options) (int, error) {
+func (v Varuint16) Pack(buf []byte, opt *struc.Options) (int, error) {
 	x := uint64(v)
 	i := 0
 	for x >= 0x80 {
@@ -245,61 +245,26 @@ func (v ShortVec) Pack(buf []byte, opt *struc.Options) (int, error) {
 	// seq.end()
 }
 
-func (v *ShortVec) Unpack(r io.Reader, length int, opt *struc.Options) error {
-	res, err := readShortVec(&ByteWrapper{r})
+func (v *Varuint16) Unpack(r io.Reader, length int, opt *struc.Options) error {
+	res, err := readVaruint16(&ByteWrapper{r})
 	if err != nil {
 		return err
 	}
-	*v = ShortVec(res)
-	return nil
-	// var l, s int
-	// for {
-
-	// JAVASCRIPT
-	//   let elem = bytes.shift();
-	//   len |= (elem & 0x7f) << (size * 7);
-	//   size += 1;
-	//   if ((elem & 0x80) === 0) {
-	//     break;
-	//   }
-	// }
-
-	// RUST
-	// let mut len: usize = 0;
-	// let mut size: usize = 0;
-	// loop {
-	//     let elem: u8 = seq
-	//         .next_element()?
-	//         .ok_or_else(|| de::Error::invalid_length(size, &self))?;
-
-	//     len |= (elem as usize & 0x7f) << (size * 7);
-	//     size += 1;
-
-	//     if elem as usize & 0x80 == 0 {
-	//         break;
-	//     }
-
-	//     if size > size_of::<u16>() + 1 {
-	//         return Err(de::Error::invalid_length(size, &self));
-	//     }
-	// }
-
-	// Ok(ShortU16(len as u16))
-
-	// TODO: have a func that would return `size` also, separately? called twice?
+	*v = Varuint16(res)
 	return nil
 }
-func (v *ShortVec) Size(opt *struc.Options) int {
+func (v *Varuint16) Size(opt *struc.Options) int {
+	// TODO: fix the `Size`, which doesn't reflect.. need to Pack, and return the size here?
 	var buf [8]byte
 	return binary.PutUvarint(buf[:], uint64(*v))
 }
-func (v *ShortVec) String() string {
+func (v *Varuint16) String() string {
 	return strconv.FormatUint(uint64(*v), 10)
 }
 
 var shortVecOverflow = errors.New("short_vec: varint overflows a 16-bit integer")
 
-func readShortVec(r io.ByteReader) (uint64, error) {
+func readVaruint16(r io.ByteReader) (uint64, error) {
 	var x uint64
 	var s uint
 	for i := 0; ; i++ {

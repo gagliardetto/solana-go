@@ -1,44 +1,36 @@
 package system
 
 import (
-	"fmt"
 	"io"
 
-	"github.com/dfuse-io/solana-go"
+	solana "github.com/dfuse-io/solana-go"
 	"github.com/lunixbochs/struc"
 )
 
-type SystemInstruction interface{}
+var systemInstructionDef = solana.NewVariantDefinition(
+	[]solana.VariantType{
+		{"CreateAccount", (*CreateAccount)(nil)},
+		{"Assign", (*Assign)(nil)},
+		{"Transfer", (*Transfer)(nil)},
+	},
+)
 
-func (si SystemInstruction) Pack(buf []byte, opt *struc.Options) (int, error) {
-	// check the Instruction type
-	var pack interface{}
-	switch el := si.(type) {
-	case *CreateAccount:
-		buf[0] = 0x00
-		pack = el
-	case *Assign:
-		buf[0] = 0x01
-		pack = el
-	case *Transfer:
-		buf[0] = 0x02
-		pack = el
-	default:
-		return 0, fmt.Errorf("unsupported SystemInstruction: %T", si)
+type SystemInstruction struct{ solana.BaseVariant }
+
+func NewInstruction(impl interface{}) *SystemInstruction {
+	return &SystemInstruction{
+		solana.BaseVariant{
+			Type: systemInstructionDef.IDForType(impl),
+			Impl: impl,
+		},
 	}
-	// TODO: this won't work, right? we need to write in the right place, and stretch the `buf`
-	// directly?
-	written, err := struc.Pack(buf[1:], el, opt)
-	written++
-	if err != nil {
-		return written, err
-	}
-	return written, nil
 }
-func (si SystemInstruction) Unpack(r io.Reader, length int, opt *struc.Options) error {
-	// read first byte, then decode the rest based on the proper type
-	return fmt.Errorf("not implemented")
+
+func (si *SystemInstruction) Unpack(r io.Reader, length int, opt *struc.Options) error {
+	return si.BaseVariant.Unpack(systemInstructionDef, r, length, opt)
 }
+
+// si := system.NewInstruction(system.Assign{})
 
 type CreateAccount struct {
 	// prefixed with byte 0x00

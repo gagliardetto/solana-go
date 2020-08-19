@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestShortVec(t *testing.T) {
+func TestVaruint16(t *testing.T) {
 	tests := []struct {
 		input  uint16
 		expect []byte
@@ -25,7 +25,7 @@ func TestShortVec(t *testing.T) {
 
 	for idx, test := range tests {
 		t.Run(fmt.Sprintf("%d", idx+1), func(t *testing.T) {
-			el := ShortVec(test.input)
+			el := Varuint16(test.input)
 
 			b := make([]byte, 3)
 
@@ -34,7 +34,7 @@ func TestShortVec(t *testing.T) {
 			assert.Equal(t, test.expect, b[:size])
 
 			buf := bytes.NewBuffer(b)
-			target := ShortVec(0)
+			target := Varuint16(0)
 			require.NoError(t, (&target).Unpack(buf, 0, nil))
 			assert.Equal(t, test.input, uint16(target))
 		})

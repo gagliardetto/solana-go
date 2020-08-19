@@ -2,9 +2,7 @@ package token
 
 import (
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/dfuse-io/solana-go"
@@ -47,7 +45,7 @@ func TestAccount(t *testing.T) {
 	buf := &bytes.Buffer{}
 	assert.NoError(t, struc.Pack(buf, out))
 
-	fmt.Println("MAMA", hex.EncodeToString(buf.Bytes()))
+	//	fmt.Println("MAMA", hex.EncodeToString(buf.Bytes()))
 	assert.Equal(t, b58data, base58.Encode(buf.Bytes()))
 }
 
