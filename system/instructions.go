@@ -7,13 +7,11 @@ import (
 	"github.com/lunixbochs/struc"
 )
 
-var systemInstructionDef = solana.NewVariantDefinition(
-	[]solana.VariantType{
-		{"CreateAccount", (*CreateAccount)(nil)},
-		{"Assign", (*Assign)(nil)},
-		{"Transfer", (*Transfer)(nil)},
-	},
-)
+var systemInstructionDef = solana.NewVariantDefinition([]solana.VariantType{
+	{"CreateAccount", (*CreateAccount)(nil)},
+	{"Assign", (*Assign)(nil)},
+	{"Transfer", (*Transfer)(nil)},
+})
 
 type SystemInstruction struct{ solana.BaseVariant }
 
@@ -29,8 +27,6 @@ func NewInstruction(impl interface{}) *SystemInstruction {
 func (si *SystemInstruction) Unpack(r io.Reader, length int, opt *struc.Options) error {
 	return si.BaseVariant.Unpack(systemInstructionDef, r, length, opt)
 }
-
-// si := system.NewInstruction(system.Assign{})
 
 type CreateAccount struct {
 	// prefixed with byte 0x00

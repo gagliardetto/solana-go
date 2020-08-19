@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/lunixbochs/struc"
+	"go.uber.org/zap"
 )
 
 type VariantDefinition struct {
@@ -59,26 +60,35 @@ func (d *VariantDefinition) IDForType(impl interface{}) Varuint16 {
 
 type BaseVariant struct {
 	Type Varuint16
-	Impl interface{} `struc:""`
+	Impl interface{}
 }
 
 func (bv BaseVariant) Pack(p []byte, opt *struc.Options) (written int, err error) {
-	written, err = bv.Pack(p, opt)
-	if err != nil {
-		return
+	if traceEnabled {
+		zlog.Debug("packing variant to binary", zap.Uint16("type", uint16(bv.Type)))
 	}
 
-	w := bytes.NewBuffer(p[written:])
+	w := &byteCounterWritter{Writer: bytes.NewBuffer(p)}
 
-	written2, err := struc.Pack(w, bv.Impl)
-	written += written2
+	err = struc.Pack(w, bv.Type)
 	if err != nil {
-		return
+		return 0, fmt.Errorf("pack type: %w", err)
 	}
+
+	err = struc.Pack(w, bv.Impl)
+	if err != nil {
+		return 0, fmt.Errorf("pack impl: %w", err)
+	}
+
+	return w.byteCount, nil
 }
 
 func (bv BaseVariant) Size(opt *struc.Options) int {
-	//
+	return 0
+}
+
+func (bv BaseVariant) String() string {
+	return fmt.Sprintf("%T (%d)", bv.Type, bv.Impl)
 }
 
 func (bv *BaseVariant) Unpack(def *VariantDefinition, r io.Reader, length int, opt *struc.Options) (err error) {
@@ -126,4 +136,15 @@ func (bv *BaseVariant) Unpack(def *VariantDefinition, r io.Reader, length int, o
 		bv.Impl = value.Elem().Interface()
 	}
 	return nil
+}
+
+type byteCounterWritter struct {
+	io.Writer
+	byteCount int
+}
+
+func (w *byteCounterWritter) Write(p []byte) (n int, err error) {
+	n, err = w.Writer.Write(p)
+	w.byteCount += n
+	return
 }

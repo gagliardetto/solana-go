@@ -3,6 +3,7 @@ module github.com/dfuse-io/solana-go
 go 1.14
 
 require (
+	github.com/dfuse-io/logging v0.0.0-20200819170935-85f72399491a
 	github.com/lunixbochs/struc v0.0.0-20200707160740-784aaebc1d40
 	github.com/mr-tron/base58 v1.2.0
 	github.com/onsi/gomega v1.10.1 // indirect

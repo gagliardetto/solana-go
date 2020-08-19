@@ -13,7 +13,7 @@ var systemTransferCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(3),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client := getClient()
-		v := mustGetWallet()
+		// v := mustGetWallet()
 		ctx := context.Background()
 
 		from := args[0]

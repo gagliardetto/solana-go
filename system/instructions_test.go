@@ -6,8 +6,8 @@ import (
 
 	solana "github.com/dfuse-io/solana-go"
 	"github.com/lunixbochs/struc"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gotest.tools/assert"
 )
 
 func TestSystemInstructions(t *testing.T) {
@@ -18,7 +18,8 @@ func TestSystemInstructions(t *testing.T) {
 	})
 
 	buf := &bytes.Buffer{}
-	require.NoError(t, struc.Pack(buf, ins1))
+	err := struc.Pack(buf, ins1)
+	require.NoError(t, err)
 	assert.Equal(t, []byte{0, 1, 2, 3}, buf.Bytes())
 
 	// tests := []struct{
