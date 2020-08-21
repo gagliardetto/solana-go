@@ -265,6 +265,10 @@ func (v *Varuint16) String() string {
 var shortVecOverflow = errors.New("short_vec: varint overflows a 16-bit integer")
 
 func readVaruint16(r io.ByteReader) (uint64, error) {
+	// This was identified https://groups.google.com/g/golang-announce/c/NyPIaucMgXo/m/GdsyQP6QAAAJ?pli=1
+	// after I copied it here.. and I think we're using the EXACT same construct.. and in our case,
+	// we don't want to read more than 3 bytes.
+	// FIXME!!!!
 	var x uint64
 	var s uint
 	for i := 0; ; i++ {
