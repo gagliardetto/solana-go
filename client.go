@@ -70,11 +70,11 @@ func (c *Client) GetConfirmedBlock(ctx context.Context, slot uint64, encoding st
 	return
 }
 
-func (c *Client) GetAccountInfo(ctx context.Context, publicKey string, commitment CommitmentType) (out *GetAccountInfoResult, err error) {
-	params := []interface{}{publicKey}
-	if commitment != "" {
-		params = append(params, string(commitment))
+func (c *Client) GetAccountInfo(ctx context.Context, publicKey string) (out *GetAccountInfoResult, err error) {
+	obj := map[string]interface{}{
+		"encoding": "base64",
 	}
+	params := []interface{}{publicKey, obj}
 
 	err = c.rpcClient.CallFor(&out, "getAccountInfo", params...)
 	return

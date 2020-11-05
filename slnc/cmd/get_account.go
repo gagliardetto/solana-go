@@ -17,7 +17,7 @@ var getAccountCmd = &cobra.Command{
 		client := getClient()
 		ctx := context.Background()
 
-		resp, err := client.GetAccountInfo(ctx, args[0], "")
+		resp, err := client.GetAccountInfo(ctx, args[0])
 		if err != nil {
 			return err
 		}

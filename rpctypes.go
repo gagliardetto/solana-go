@@ -78,7 +78,7 @@ type GetAccountInfoResult struct {
 
 type Account struct {
 	Lamports   U64       `json:"lamports"`
-	Data       Base58    `json:"data"`
+	Data       []byte    `json:"data"`
 	Owner      PublicKey `json:"owner"`
 	Executable bool      `json:"executable"`
 	RentEpoch  U64       `json:"rentEpoch"`
