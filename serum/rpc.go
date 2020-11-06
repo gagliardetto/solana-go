@@ -51,10 +51,10 @@ func (s *SerumClient) FetchMarket(ctx context.Context, marketAddr solana.PublicK
 	}
 
 	return &MarketMeta{
-		Address:   marketAddr,
+		Address:  marketAddr,
+		MarketV2: &m,
 		QuoteMint: quoteMint,
 		BaseMint:  baseMint,
-		m:         &m,
 	}, nil
 
 }

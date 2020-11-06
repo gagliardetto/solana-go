@@ -2,16 +2,12 @@ package serum
 
 import (
 	"bytes"
-	"context"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
-
-	"github.com/dfuse-io/solana-go"
-	"github.com/dfuse-io/solana-go/rpc"
 
 	"github.com/lunixbochs/struc"
 	"github.com/stretchr/testify/require"
@@ -36,19 +32,19 @@ import (
 //	})
 //}
 
-func getMarket(t *testing.T, marketAddr solana.PublicKey) *MarketV2 {
-	c := rpc.NewClient("http://api.mainnet-beta.solana.com:80/rpc")
-	pubKey := solana.MustPublicKeyFromBase58("7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932")
-	accInfo, err := c.GetAccountInfo(context.Background(), pubKey)
-	require.NoError(t, err)
+// func getMarket(t *testing.T, marketAddr solana.PublicKey) *MarketV2 {
+// 	c := rpc.NewClient("http://api.mainnet-beta.solana.com:80/rpc")
+// 	pubKey := solana.MustPublicKeyFromBase58("7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932")
+// 	accInfo, err := c.GetAccountInfo(context.Background(), pubKey)
+// 	require.NoError(t, err)
 
-	accountData, err := accInfo.Value.DataToBytes()
-	require.NoError(t, err)
+// 	accountData, err := accInfo.Value.DataToBytes()
+// 	require.NoError(t, err)
 
-	var m MarketV2
-	require.NoError(t, struc.Unpack(bytes.NewReader(accountData), &m))
-	return &m
-}
+// 	var m MarketV2
+// 	require.NoError(t, struc.Unpack(bytes.NewReader(accountData), &m))
+// 	return &m
+// }
 
 func TestOrderbook_Items_2(t *testing.T) {
 	//market := getMarket(t, solana.MustPublicKeyFromBase58("7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"))

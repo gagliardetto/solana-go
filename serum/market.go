@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dfuse-io/solana-go/token"
-
 	"github.com/dfuse-io/solana-go"
+	"github.com/dfuse-io/solana-go/token"
+	"github.com/dfuse-io/solana-go/rpc"
 )
 
 type MarketMeta struct {
@@ -17,7 +17,7 @@ type MarketMeta struct {
 	QuoteMint  *token.Mint
 	BaseMint   *token.Mint
 
-	m *MarketV2
+	MarketV2 *MarketV2
 }
 
 func KnownMarket() ([]*MarketMeta, error) {
