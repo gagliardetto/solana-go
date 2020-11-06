@@ -2,10 +2,13 @@ package token
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/dfuse-io/solana-go"
+	"github.com/dfuse-io/solana-go/rpc"
 	"github.com/lunixbochs/struc"
 	"github.com/mr-tron/base58"
 	"github.com/stretchr/testify/assert"
@@ -49,6 +52,21 @@ func TestAccount(t *testing.T) {
 	assert.Equal(t, b58data, base58.Encode(buf.Bytes()))
 }
 
-// func TestMint(t *testing.T) {
-// 	mintData := ""
-// }
+func TestMint(t *testing.T) {
+
+	addr := solana.MustPublicKeyFromBase58("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
+	cli := rpc.NewClient("http://api.mainnet-beta.solana.com/rpc")
+	acct, err := cli.GetAccountInfo(context.Background(), addr)
+	// handle `err`
+	require.NoError(t, err)
+
+	var m Mint
+	err = struc.Unpack(bytes.NewReader(acct.Value.MustDataToBytes()), &m)
+	// handle `err`
+
+	json.NewEncoder(os.Stdout).Encode(m)
+	// {"OwnerOption":1,
+	//  "Owner":"2wmVCSfPxGPjrnMMn7rchp4uaeoTqN39mXFC2zhPdri9",
+	//  "Decimals":128,
+	//  "IsInitialized":true}
+}
