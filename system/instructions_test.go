@@ -11,16 +11,21 @@ import (
 )
 
 func TestSystemInstructions(t *testing.T) {
-	ins1 := NewInstruction(&CreateAccount{
+	ins1 := &SystemInstruction{Variant: &CreateAccount{
 		Lamports: 125,
 		Space:    120,
 		Owner:    solana.MustPublicKeyFromBase58("4JuGp6UkTewQXG1tJpYY1dxW1H9yS6sSeCDc1FSdWKNR"),
-	})
+	}}
 
 	buf := &bytes.Buffer{}
 	err := struc.Pack(buf, ins1)
 	require.NoError(t, err)
 	assert.Equal(t, []byte{0, 1, 2, 3}, buf.Bytes())
+
+	out := SystemInstruction{}
+
+	require.NoError(t, struc.Unpack(bytes.NewReader(buf.Bytes()), &out))
+	assert.Equal(t, "hello", out.String())
 
 	// tests := []struct{
 	//     name string

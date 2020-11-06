@@ -72,7 +72,7 @@ type Orderbook struct {
 	LeafCount    uint32  `struc:"uint32,little"`
 	ZeroPaddingC [4]byte `json:"-" struc:"[4]pad"`
 	// SLAB_NODE_LAYOUT
-	Nodes []SlabNode
+	Nodes []SlabNode `struc:""`
 }
 
 func (o *Orderbook) Items(descending bool, f func(node SlackLeafNode) error) error {
@@ -104,19 +104,49 @@ func (o *Orderbook) Items(descending bool, f func(node SlackLeafNode) error) err
 var slabInstructionDef = solana.NewVariantDefinition([]solana.VariantType{
 	{"uninitialized", (*SlabUninitialized)(nil)},
 	{"innerNode", (*SlabInnerNode)(nil)},
-	{"leafNode", (*SlackLeafNode)(nil)},
+	{"leafNode", (*SlabLeafNode)(nil)},
 	{"freeNode", (*SlabFreeNode)(nil)},
 	{"lastFreeNode", (*SlabLastFreeNode)(nil)},
 })
 
 type SlabNode struct {
-	solana.BaseVariant
+	Type    solana.Varuint16
+	Variant interface{}
 }
 
-func (s *SlabNode) Unpack(r io.Reader, length int, opt *struc.Options) error {
-	fmt.Println("Unpacking slab node")
-	return s.BaseVariant.Unpack(slabInstructionDef, r, length, opt)
+func (s *SlabNode) Unpack(r io.Reader, length int, opt *struc.Options) (err error) {
+	fmt.Println("Unpacking SlabNode")
+
+	if err = struc.Unpack(r, &s.Type); err != nil {
+		return
+	}
+
+	var el interface{}
+	switch s.Type {
+	case 0:
+		el = &SlabUninitialized{}
+	case 1:
+		el = &SlabInnerNode{}
+	case 2:
+		el = &SlabLeafNode{}
+	case 3:
+		el = &SlabFreeNode{}
+	case 4:
+		el = &SlabLastFreeNode{}
+	default:
+		return fmt.Errorf("unsupported SlabNode variant %d", s.Type)
+	}
+
+	return struc.Unpack(r, el)
 }
+
+func (s SlabNode) Pack(p []byte, opt *struc.Options) (written int, err error) {
+	return 0, nil
+}
+
+func (s SlabNode) Size(opt *struc.Options) int { return 0 }
+
+func (s SlabNode) String() string { return fmt.Sprintf("variant %d, %T", s.Type, s.Variant) }
 
 type SlabUninitialized struct {
 }
@@ -129,7 +159,7 @@ type SlabInnerNode struct {
 	Children []uint32   `struc:"[2]uint32,little"`
 }
 
-type SlackLeafNode struct {
+type SlabLeafNode struct {
 	//u8('ownerSlot'), // Index into OPEN_ORDERS_LAYOUT.orders
 	//u8('feeTier'),
 	//blob(2),

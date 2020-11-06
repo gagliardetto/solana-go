@@ -1,34 +1,104 @@
 package system
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 
 	solana "github.com/dfuse-io/solana-go"
 	"github.com/lunixbochs/struc"
 )
 
-var systemInstructionDef = solana.NewVariantDefinition([]solana.VariantType{
-	{"CreateAccount", (*CreateAccount)(nil)},
-	{"Assign", (*Assign)(nil)},
-	{"Transfer", (*Transfer)(nil)},
-})
-
 type SystemInstruction struct {
-	solana.BaseVariant
+	Type    solana.Varuint16
+	Variant interface{}
 }
 
 func NewInstruction(impl interface{}) *SystemInstruction {
-	return &SystemInstruction{
-		solana.BaseVariant{
-			Type: systemInstructionDef.IDForType(impl),
-			Impl: impl,
-		},
+	si := &SystemInstruction{Variant: impl}
+	switch impl.(type) {
+	case *CreateAccount:
+		si.Type = 0
+	case *Assign:
+		si.Type = 1
+	case *Transfer:
+		si.Type = 2
+	default:
+		return nil
 	}
+	return si
 }
 
-func (si *SystemInstruction) Unpack(r io.Reader, length int, opt *struc.Options) error {
-	return si.BaseVariant.Unpack(systemInstructionDef, r, length, opt)
+func (si *SystemInstruction) Unpack(r io.Reader, length int, opt *struc.Options) (err error) {
+	fmt.Println("CALLING OUR SI UNPACK", length)
+
+	if err = struc.Unpack(r, &si.Type); err != nil {
+		return
+	}
+
+	var el interface{}
+	switch si.Type {
+	case 0:
+		el = &CreateAccount{}
+	case 1:
+		el = &Assign{}
+	case 2:
+		el = &Transfer{}
+	default:
+		return fmt.Errorf("unsupported System Instruction variant %d", si.Type)
+	}
+	si.Variant = el
+
+	return struc.Unpack(r, el)
 }
+
+func (si SystemInstruction) Pack(p []byte, opt *struc.Options) (written int, err error) {
+	fmt.Println("CALLING OUR SI PACK", len(p), cap(p))
+
+	buf := &bytes.Buffer{}
+	w := &solana.ByteCountWriter{Writer: buf}
+
+	switch si.Variant.(type) {
+	case *CreateAccount:
+		si.Type = 0
+	case *Assign:
+		si.Type = 1
+	case *Transfer:
+		si.Type = 2
+	default:
+		return 0, fmt.Errorf("unsupported variant %T", si.Variant)
+	}
+
+	err = struc.Pack(w, si.Type)
+	if err != nil {
+		return 0, fmt.Errorf("pack type: %w", err)
+	}
+
+	err = struc.Pack(w, si.Variant)
+	if err != nil {
+		return 0, fmt.Errorf("pack impl: %w", err)
+	}
+
+	fmt.Println("byte count", w.ByteCount)
+
+	copy(p, buf.Bytes())
+
+	return w.ByteCount, nil
+}
+
+func (si SystemInstruction) Size(opt *struc.Options) int {
+	s1, err := struc.Sizeof(si.Type)
+	if err != nil {
+		panic(err)
+	}
+	s2, err := struc.Sizeof(si.Variant)
+	if err != nil {
+		panic(err)
+	}
+	return s1 + s2
+}
+
+func (si SystemInstruction) String() string { return fmt.Sprintf("variant %d, %T", si.Type, si.Variant) }
 
 type CreateAccount struct {
 	// prefixed with byte 0x00

@@ -59,8 +59,8 @@ func (d *VariantDefinition) IDForType(impl interface{}) Varuint16 {
 }
 
 type BaseVariant struct {
-	Type Varuint16
-	Impl interface{}
+	Type Varuint16   `struc:"type"`
+	Impl interface{} `struc:"impl"`
 }
 
 func (bv BaseVariant) Pack(p []byte, opt *struc.Options) (written int, err error) {
@@ -68,7 +68,7 @@ func (bv BaseVariant) Pack(p []byte, opt *struc.Options) (written int, err error
 		zlog.Debug("packing variant to binary", zap.Uint16("type", uint16(bv.Type)))
 	}
 
-	w := &byteCounterWritter{Writer: bytes.NewBuffer(p)}
+	w := &ByteCountWriter{Writer: bytes.NewBuffer(p)}
 
 	err = struc.Pack(w, bv.Type)
 	if err != nil {
@@ -80,7 +80,7 @@ func (bv BaseVariant) Pack(p []byte, opt *struc.Options) (written int, err error
 		return 0, fmt.Errorf("pack impl: %w", err)
 	}
 
-	return w.byteCount, nil
+	return w.ByteCount, nil
 }
 
 func (bv BaseVariant) Size(opt *struc.Options) int {
@@ -92,9 +92,12 @@ func (bv BaseVariant) String() string {
 }
 
 func (bv *BaseVariant) Unpack(def *VariantDefinition, r io.Reader, length int, opt *struc.Options) (err error) {
+
 	if err = struc.Unpack(r, &bv.Type); err != nil {
 		return
 	}
+
+	fmt.Println("IN OUR CODE HERE!")
 
 	typeGo := def.typeIDToType[bv.Type]
 	if typeGo == nil {
@@ -102,10 +105,11 @@ func (bv *BaseVariant) Unpack(def *VariantDefinition, r io.Reader, length int, o
 	}
 
 	if typeGo.Kind() == reflect.Ptr {
-		bv.Impl = reflect.New(typeGo.Elem()).Interface()
-		if err = struc.Unpack(r, bv.Impl); err != nil {
+		el := reflect.New(typeGo.Elem()).Interface()
+		if err = struc.Unpack(r, el); err != nil {
 			return fmt.Errorf("unable to decode variant type %d: %s", bv.Type, err)
 		}
+		bv.Impl = el
 	} else {
 		// This is not the most optimal way of doing things for "value"
 		// types (over "pointer" types) as we always allocate a new pointer
@@ -138,13 +142,48 @@ func (bv *BaseVariant) Unpack(def *VariantDefinition, r io.Reader, length int, o
 	return nil
 }
 
-type byteCounterWritter struct {
+type ByteCountWriter struct {
 	io.Writer
-	byteCount int
+	ByteCount int
 }
 
-func (w *byteCounterWritter) Write(p []byte) (n int, err error) {
+func (w *ByteCountWriter) Write(p []byte) (n int, err error) {
 	n, err = w.Writer.Write(p)
-	w.byteCount += n
+	w.ByteCount += n
 	return
 }
+
+/*
+struct tag: {NestedP  *struc.Nested  376 [40] false}
+Checking that type *struc.Nested 0xc00000e068
+Is not custom
+struct tag: {Test2  int struc:"int8" 0 [0] false}
+Checking that type int 0xc0000149d8
+Is not custom
+*/
+
+type VariantImpl struct {
+	Impl interface{}
+}
+
+func (bv VariantImpl) Pack(p []byte, opt *struc.Options) (written int, err error) {
+	return 0, nil
+}
+func (bv VariantImpl) Size(opt *struc.Options) int { return 0 }
+
+func (bv VariantImpl) String() string { return fmt.Sprintf("%T", bv.Impl) }
+
+func (bv *VariantImpl) Unpack(def *VariantDefinition, r io.Reader, length int, opt *struc.Options) (err error) {
+	return nil
+}
+
+/*
+struct tag: {Nodes  []serum.SlabNode struc:"" 48 [10] false}
+Checking that type []serum.SlabNode &[]
+Is not custom
+struct tag: {BaseVariant  solana.BaseVariant struc:"skip" 0 [0] true}
+Checking that type solana.BaseVariant solana.Varuint16 (%!d(<nil>))
+Is not custom
+struct tag: {BaseVariant  solana.BaseVariant struc:"skip" 0 [0] true}
+Checking that type solana.BaseVariant solana.Varuint16 (%!d(<nil>))
+*/
