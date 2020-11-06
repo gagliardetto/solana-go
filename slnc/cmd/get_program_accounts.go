@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/dfuse-io/solana-go"
+
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +19,7 @@ var getProgramAccountsCmd = &cobra.Command{
 		client := getClient()
 		ctx := context.Background()
 
-		resp, err := client.GetProgramAccounts(ctx, args[0], nil)
+		resp, err := client.GetProgramAccounts(ctx, solana.MustPublicKeyFromBase58(args[0]), nil)
 		if err != nil {
 			return err
 		}
