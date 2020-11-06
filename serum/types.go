@@ -26,6 +26,7 @@ type MarketV2 struct {
 	   publicKeyLayout('requestQueue'),
 	   publicKeyLayout('eventQueue'),
 	   publicKeyLayout('bids'),
+
 	   publicKeyLayout('asks'),
 	   u64('baseLotSize'),
 	   u64('quoteLotSize'),
@@ -75,7 +76,7 @@ type Orderbook struct {
 	Nodes []SlabNode `struc:""`
 }
 
-func (o *Orderbook) Items(descending bool, f func(node SlabLeafNode) error) error {
+func (o *Orderbook) Items(descending bool, f func(node *SlabLeafNode) error) error {
 	if o.LeafCount == 0 {
 		return nil
 	}
@@ -90,28 +91,19 @@ func (o *Orderbook) Items(descending bool, f func(node SlabLeafNode) error) erro
 			return err
 		}
 		switch s := impl.(type) {
-		case SlabInnerNode:
+		case *SlabInnerNode:
 			if descending {
 				stack = append(stack, s.Children[0], s.Children[1])
 			} else {
 				stack = append(stack, s.Children[1], s.Children[0])
-
 			}
-		case SlabLeafNode:
+		case *SlabLeafNode:
 			f(s)
 		}
 		itr++
 	}
 	return nil
 }
-
-var slabInstructionDef = solana.NewVariantDefinition([]solana.VariantType{
-	{"uninitialized", (*SlabUninitialized)(nil)},
-	{"innerNode", (*SlabInnerNode)(nil)},
-	{"leafNode", (*SlabLeafNode)(nil)},
-	{"freeNode", (*SlabFreeNode)(nil)},
-	{"lastFreeNode", (*SlabLastFreeNode)(nil)},
-})
 
 type SlabNode struct {
 	Type uint32 `struc:"uint32,little"`
@@ -140,60 +132,6 @@ func (s *SlabNode) Variant() (interface{}, error) {
 	return el, nil
 }
 
-// func (s *SlabNode) Unpack(r io.Reader, length int, opt *struc.Options) (err error) {
-// 	fmt.Println("Unpacking SlabNode")
-
-// 	if err = struc.Unpack(r, &s.Type); err != nil {
-// 		return
-// 	}
-
-// 	if err = struc.Unpack(r, &s.Blob); err != nil {
-// 		return
-// 	}
-
-// 	var el interface{}
-// 	switch s.Type {
-// 	case 0:
-// 		el = &SlabUninitialized{}
-// 	case 1:
-// 		el = &SlabInnerNode{}
-// 	case 2:
-// 		el = &SlabLeafNode{}
-// 	case 3:
-// 		el = &SlabFreeNode{}
-// 	case 4:
-// 		el = &SlabLastFreeNode{}
-// 	default:
-// 		return fmt.Errorf("unsupported SlabNode variant %d", s.Type)
-// 	}
-
-// 	if err := struc.Unpack(bytes.NewReader(s.Blob), el); err != nil {
-// 		return err
-// 	}
-
-// 	s.Variant = el
-
-// 	return nil
-// }
-
-// func (s SlabNode) Pack(p []byte, opt *struc.Options) (written int, err error) {
-// 	return 0, nil
-// }
-
-// func (s SlabNode) Size(opt *struc.Options) int {
-// 	s1, err := struc.Sizeof(s.Type)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	s2, err := struc.Sizeof(s.Blob)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return s1 + s2
-// }
-
-// func (s SlabNode) String() string { return fmt.Sprintf("variant %d, %T", s.Type, s.Variant) }
-
 type SlabUninitialized struct {
 }
 
@@ -213,11 +151,13 @@ type SlabLeafNode struct {
 	//publicKeyLayout('owner'), // Open orders account
 	//u64('quantity'), // In units of lot size
 	//u64('clientOrderId'),
-	OwnerSlot     uint8            `struc:"uint8,little"`
-	FeeTier       uint8            `struc:"uint8,little"`
-	Padding       [2]byte          `json:"-" struc:"[2]pad"`
-	KeyPrice      solana.U64       `struc:"uint64",little"`
-	KeySeq        solana.U64       `struc:"uint64",little"`
+	OwnerSlot uint8   `struc:"uint8,little"`
+	FeeTier   uint8   `struc:"uint8,little"`
+	Padding   [2]byte `json:"-" struc:"[2]pad"`
+
+	KeySeq   solana.U64 `struc:"uint64",little"`
+	KeyPrice solana.U64 `struc:"uint64",little"`
+
 	Owner         solana.PublicKey `struc:"[32]byte"`
 	Quantity      solana.U64       `struc:"uint64",little"`
 	ClientOrderId solana.U64       `struc:"uint64",little"`

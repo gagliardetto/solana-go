@@ -28,7 +28,7 @@ var getProgramAccountsCmd = &cobra.Command{
 			errorCheck("not found", errors.New("program account not found"))
 		}
 
-		for _, keyedAcct := range *resp {
+		for _, keyedAcct := range resp {
 			acct := keyedAcct.Account
 			fmt.Println("Data len:", len(acct.Data), keyedAcct.Pubkey)
 

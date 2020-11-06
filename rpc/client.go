@@ -82,7 +82,7 @@ func (c *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) (
 	return
 }
 
-func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.PublicKey, opts *GetProgramAccountsOpts) (out *GetProgramAccountsResult, err error) {
+func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.PublicKey, opts *GetProgramAccountsOpts) (out GetProgramAccountsResult, err error) {
 	params := []interface{}{publicKey}
 	if opts != nil {
 		params = append(params, opts)
