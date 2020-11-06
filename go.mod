@@ -9,6 +9,7 @@ require (
 	github.com/mr-tron/base58 v1.2.0
 	github.com/onsi/gomega v1.10.1 // indirect
 	github.com/pkg/errors v0.8.1
+	github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.0
