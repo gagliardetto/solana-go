@@ -5,14 +5,15 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dfuse-io/solana-go"
+	"github.com/dfuse-io/solana-go/rpc"
+
 	"github.com/dfuse-io/solana-go/vault"
 	"github.com/spf13/viper"
 )
 
-func getClient() *solana.Client {
+func getClient() *rpc.Client {
 	httpHeaders := viper.GetStringSlice("global-http-header")
-	api := solana.NewClient(sanitizeAPIURL(viper.GetString("global-rpc-url")))
+	api := rpc.NewClient(sanitizeAPIURL(viper.GetString("global-rpc-url")))
 
 	for i := 0; i < 25; i++ {
 		if val := os.Getenv(fmt.Sprintf("SLNC_GLOBAL_HTTP_HEADER_%d", i)); val != "" {

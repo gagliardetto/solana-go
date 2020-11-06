@@ -75,15 +75,13 @@ type MarketV2 struct {
 	EndPadding [7]byte `json:"-",struc:"[5]pad"`
 }
 
-
 type Orderbook struct {
-	BumpIndex uint32 `struc:"uint32,sizeof=Nodes"`
-	Padding [4]byte
-	FreeListLen uint32
-	Padding [4]byte
+	BumpIndex    uint32 `struc:"uint32,sizeof=Nodes"`
+	Padding      [4]byte
+	FreeListLen  uint32
 	FreeListHead uint32
-	Root uint32
-	LeafCount uint32
+	Root         uint32
+	LeafCount    uint32
 
 	Nodes []SlabNode
 }

@@ -1,8 +1,10 @@
-package solana
+package rpc
 
 import (
 	"encoding/base64"
 	"fmt"
+
+	"github.com/dfuse-io/solana-go"
 )
 
 // type ContactInfo struct {
@@ -15,7 +17,7 @@ import (
 
 type RPCContext struct {
 	Context struct {
-		Slot U64
+		Slot solana.U64
 	} `json:"context,omitempty"`
 }
 
@@ -23,12 +25,12 @@ type RPCContext struct {
 
 type GetBalanceResult struct {
 	RPCContext
-	Value U64 `json:"value"`
+	Value solana.U64 `json:"value"`
 }
 
 ///
 
-type GetSlotResult U64
+type GetSlotResult solana.U64
 
 ///
 
@@ -38,40 +40,40 @@ type GetRecentBlockhashResult struct {
 }
 
 type BlockhashResult struct {
-	Blockhash     PublicKey     `json:"blockhash"` /* make this a `Hash` type, which is a copy of the PublicKey` type */
-	FeeCalculator FeeCalculator `json:"feeCalculator"`
+	Blockhash     solana.PublicKey `json:"blockhash"` /* make this a `Hash` type, which is a copy of the PublicKey` type */
+	FeeCalculator FeeCalculator    `json:"feeCalculator"`
 }
 
 type FeeCalculator struct {
-	LamportsPerSignature U64 `json:"lamportsPerSignature"`
+	LamportsPerSignature solana.U64 `json:"lamportsPerSignature"`
 }
 
 ///
 
 type GetConfirmedBlockResult struct {
-	Blockhash         PublicKey             `json:"blockhash"`
-	PreviousBlockhash PublicKey             `json:"previousBlockhash"` // could be zeroes if ledger was clean-up and this is unavailable
-	ParentSlot        U64                   `json:"parentSlot"`
+	Blockhash         solana.PublicKey      `json:"blockhash"`
+	PreviousBlockhash solana.PublicKey      `json:"previousBlockhash"` // could be zeroes if ledger was clean-up and this is unavailable
+	ParentSlot        solana.U64            `json:"parentSlot"`
 	Transactions      []TransactionWithMeta `json:"transactions"`
 	Rewards           []BlockReward         `json:"rewards"`
-	BlockTime         U64                   `json:"blockTime,omitempty"`
+	BlockTime         solana.U64            `json:"blockTime,omitempty"`
 }
 
 type BlockReward struct {
-	Pubkey   PublicKey `json:"pubkey"`
-	Lamports U64       `json:"lamports"`
+	Pubkey   solana.PublicKey `json:"pubkey"`
+	Lamports solana.U64       `json:"lamports"`
 }
 
 type TransactionWithMeta struct {
-	Transaction *Transaction     `json:"transaction"`
-	Meta        *TransactionMeta `json:"meta,omitempty"`
+	Transaction *solana.Transaction `json:"transaction"`
+	Meta        *TransactionMeta    `json:"meta,omitempty"`
 }
 
 type TransactionMeta struct {
-	Err          interface{} `json:"err"`
-	Fee          U64         `json:"fee"`
-	PreBalances  []U64       `json:"preBalances"`
-	PostBalances []U64       `json:"postBalances"`
+	Err          interface{}  `json:"err"`
+	Fee          solana.U64   `json:"fee"`
+	PreBalances  []solana.U64 `json:"preBalances"`
+	PostBalances []solana.U64 `json:"postBalances"`
 }
 
 ///
@@ -82,11 +84,11 @@ type GetAccountInfoResult struct {
 }
 
 type Account struct {
-	Lamports   U64       `json:"lamports"`
-	Data       []string  `json:"data"`
-	Owner      PublicKey `json:"owner"`
-	Executable bool      `json:"executable"`
-	RentEpoch  U64       `json:"rentEpoch"`
+	Lamports   solana.U64       `json:"lamports"`
+	Data       []string         `json:"data"`
+	Owner      solana.PublicKey `json:"owner"`
+	Executable bool             `json:"executable"`
+	RentEpoch  solana.U64       `json:"rentEpoch"`
 }
 
 func (a *Account) MustDataToBytes() []byte {
@@ -102,8 +104,8 @@ func (a *Account) DataToBytes() ([]byte, error) {
 }
 
 type KeyedAccount struct {
-	Pubkey  PublicKey `json:"pubkey"`
-	Account *Account  `json:"account"`
+	Pubkey  solana.PublicKey `json:"pubkey"`
+	Account *Account         `json:"account"`
 }
 
 ///
@@ -121,12 +123,12 @@ type GetProgramAccountsOpts struct {
 
 type RPCFilter struct {
 	Memcmp   *RPCFilterMemcmp `json:"memcmp,omitempty"`
-	DataSize U64              `json:"dataSize,omitempty"`
+	DataSize solana.U64       `json:"dataSize,omitempty"`
 }
 
 type RPCFilterMemcmp struct {
-	Offset int    `json:"offset"`
-	Bytes  Base58 `json:"bytes"`
+	Offset int           `json:"offset"`
+	Bytes  solana.Base58 `json:"bytes"`
 }
 
 ///

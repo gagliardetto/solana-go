@@ -30,7 +30,7 @@ var getProgramAccountsCmd = &cobra.Command{
 			acct := keyedAcct.Account
 			fmt.Println("Data len:", len(acct.Data), keyedAcct.Pubkey)
 
-			obj, err := decode(acct.Owner, acct.Data)
+			obj, err := decode(acct.Owner, acct.MustDataToBytes())
 			if err != nil {
 				return err
 			}

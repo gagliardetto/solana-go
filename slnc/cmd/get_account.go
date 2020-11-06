@@ -33,7 +33,7 @@ var getAccountCmd = &cobra.Command{
 
 		fmt.Println(string(data))
 
-		obj, err := decode(acct.Owner, acct.Data)
+		obj, err := decode(acct.Owner, acct.MustDataToBytes())
 		if err != nil {
 			return err
 		}

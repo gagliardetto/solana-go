@@ -4,8 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/dfuse-io/solana-go"
-
+	//"github.com/dfuse-io/solana-go"
 	"github.com/ybbus/jsonrpc"
 )
 
@@ -32,7 +31,7 @@ func (c *Client) SetHeader(k, v string) {
 	c.headers.Set(k, v)
 }
 
-func (c *Client) GetBalance(ctx context.Context, publicKey string, commitment solana.CommitmentType) (out *solana.GetBalanceResult, err error) {
+func (c *Client) GetBalance(ctx context.Context, publicKey string, commitment CommitmentType) (out *GetBalanceResult, err error) {
 	params := []interface{}{publicKey}
 	if commitment != "" {
 		params = append(params, string(commitment))
@@ -42,7 +41,7 @@ func (c *Client) GetBalance(ctx context.Context, publicKey string, commitment so
 	return
 }
 
-func (c *Client) GetRecentBlockhash(ctx context.Context, commitment solana.CommitmentType) (out *solana.GetRecentBlockhashResult, err error) {
+func (c *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentType) (out *GetRecentBlockhashResult, err error) {
 	var params []interface{}
 	if commitment != "" {
 		params = append(params, string(commitment))
@@ -52,7 +51,7 @@ func (c *Client) GetRecentBlockhash(ctx context.Context, commitment solana.Commi
 	return
 }
 
-func (c *Client) GetSlot(ctx context.Context, commitment solana.CommitmentType) (out solana.GetSlotResult, err error) {
+func (c *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out GetSlotResult, err error) {
 	var params []interface{}
 	if commitment != "" {
 		params = append(params, string(commitment))
@@ -62,7 +61,7 @@ func (c *Client) GetSlot(ctx context.Context, commitment solana.CommitmentType) 
 	return
 }
 
-func (c *Client) GetConfirmedBlock(ctx context.Context, slot uint64, encoding string) (out *solana.GetConfirmedBlockResult, err error) {
+func (c *Client) GetConfirmedBlock(ctx context.Context, slot uint64, encoding string) (out *GetConfirmedBlockResult, err error) {
 	if encoding == "" {
 		encoding = "json"
 	}
@@ -72,17 +71,17 @@ func (c *Client) GetConfirmedBlock(ctx context.Context, slot uint64, encoding st
 	return
 }
 
-func (c *Client) GetAccountInfo(ctx context.Context, publicKey solana.PublicKey) (out *solana.GetAccountInfoResult, err error) {
+func (c *Client) GetAccountInfo(ctx context.Context, publicKey string) (out *GetAccountInfoResult, err error) {
 	obj := map[string]interface{}{
 		"encoding": "base64",
 	}
-	params := []interface{}{publicKey.String(), obj}
+	params := []interface{}{publicKey, obj}
 
 	err = c.rpcClient.CallFor(&out, "getAccountInfo", params...)
 	return
 }
 
-func (c *Client) GetProgramAccounts(ctx context.Context, publicKey string, opts *solana.GetProgramAccountsOpts) (out *solana.GetProgramAccountsResult, err error) {
+func (c *Client) GetProgramAccounts(ctx context.Context, publicKey string, opts *GetProgramAccountsOpts) (out *GetProgramAccountsResult, err error) {
 	params := []interface{}{publicKey}
 	if opts != nil {
 		params = append(params, opts)
