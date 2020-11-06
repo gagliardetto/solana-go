@@ -13,7 +13,9 @@ var systemInstructionDef = solana.NewVariantDefinition([]solana.VariantType{
 	{"Transfer", (*Transfer)(nil)},
 })
 
-type SystemInstruction struct{ solana.BaseVariant }
+type SystemInstruction struct {
+	solana.BaseVariant
+}
 
 func NewInstruction(impl interface{}) *SystemInstruction {
 	return &SystemInstruction{

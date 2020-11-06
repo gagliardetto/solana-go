@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	//"github.com/dfuse-io/solana-go"
+	"github.com/dfuse-io/solana-go"
 	"github.com/ybbus/jsonrpc"
 )
 
@@ -71,17 +72,17 @@ func (c *Client) GetConfirmedBlock(ctx context.Context, slot uint64, encoding st
 	return
 }
 
-func (c *Client) GetAccountInfo(ctx context.Context, publicKey string) (out *GetAccountInfoResult, err error) {
+func (c *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) (out *GetAccountInfoResult, err error) {
 	obj := map[string]interface{}{
 		"encoding": "base64",
 	}
-	params := []interface{}{publicKey, obj}
+	params := []interface{}{account, obj}
 
 	err = c.rpcClient.CallFor(&out, "getAccountInfo", params...)
 	return
 }
 
-func (c *Client) GetProgramAccounts(ctx context.Context, publicKey string, opts *GetProgramAccountsOpts) (out *GetProgramAccountsResult, err error) {
+func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.PublicKey, opts *GetProgramAccountsOpts) (out *GetProgramAccountsResult, err error) {
 	params := []interface{}{publicKey}
 	if opts != nil {
 		params = append(params, opts)
