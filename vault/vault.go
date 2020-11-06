@@ -131,12 +131,12 @@ func (v *Vault) WriteToFile(filename string) error {
 func (v *Vault) Open(boxer SecretBoxer) error {
 	data, err := boxer.Open(v.SecretBoxCiphertext)
 	if err != nil {
-		return err
+		return fmt.Errorf("opening boxer: %w", err)
 	}
 
-	err = json.Unmarshal(data, v.KeyBag)
+	err = json.Unmarshal(data, &v.KeyBag)
 	if err != nil {
-		return err
+		return fmt.Errorf("unmarshal: %w", err)
 	}
 
 	return nil

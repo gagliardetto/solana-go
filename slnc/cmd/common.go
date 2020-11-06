@@ -65,21 +65,21 @@ func mustGetWallet() *vault.Vault {
 func setupWallet() (*vault.Vault, error) {
 	walletFile := viper.GetString("global-vault-file")
 	if _, err := os.Stat(walletFile); err != nil {
-		return nil, fmt.Errorf("wallet file %q missing: %s", walletFile, err)
+		return nil, fmt.Errorf("wallet file %q missing: %w", walletFile, err)
 	}
 
 	v, err := vault.NewVaultFromWalletFile(walletFile)
 	if err != nil {
-		return nil, fmt.Errorf("loading vault: %s", err)
+		return nil, fmt.Errorf("loading vault: %w", err)
 	}
 
 	boxer, err := vault.SecretBoxerForType(v.SecretBoxWrap, viper.GetString("global-kms-gcp-keypath"))
 	if err != nil {
-		return nil, fmt.Errorf("secret boxer: %s", err)
+		return nil, fmt.Errorf("secret boxer: %w", err)
 	}
 
 	if err := v.Open(boxer); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("opening: %w", err)
 	}
 
 	return v, nil

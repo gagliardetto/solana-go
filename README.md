@@ -27,10 +27,85 @@ $ slnc serum market 7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16
 
 
 
-# Library
+# Library usage
+
+Loading a Serum market
 
 ```go
-solana.NewClient("https://mainnet.solana.dfuse.io")
+import "github.com/dfuse-io/solana-go/rpc"
+
+addr := solana.MustPublicKeyFromBase58("7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16")
+cli := rpc.NewClient("https://mainnet.solana.dfuse.io")
+acct, err := cli.GetAccountInfo(context.Background(), addr)
+// handle `err`
+
+var m serum.MarketV2
+err = struc.Unpack(acct.Value.MustDataToBytes(), &m)
+// handle `err`
+
+json.NewEncoder(os.Stdout).Encode(m)
+// {
+//   "AccountFlags": 3,
+//   "OwnAddress": "7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16",
+//   "VaultSignerNonce": 1,
+//   "BaseMint": "CWE8jPTUYhdCTZYWPTe1o5DFqfdjzWKc9WKz6rSjQUdG",
+//   "QuoteMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+//   "BaseVault": "BWxmscpG77m1bWH7thDCisR84JJ1e3ho6rMm4udEq2u7",
+//   "BaseDepositsTotal": "30750820000",
+//   "BaseFeesAccrued": 0,
+//   "QuoteVault": "5tFhdTCzTYMvfVTZnczZEL36YjFnkDTSaoQ7XAZvS7LR",
+//   "QuoteDepositsTotal": "269134109688",
+//   "QuoteFeesAccrued": 476785321,
+//   "QuoteDustThreshold": 100,
+//   "RequestQueue": "3SKQw5A69B72SEj3EWBe3DymWS9DPJ2mTUzJtV8i8DQ3",
+//   "EventQueue": "DNh4agYmXGYv6po3tcCjM5yFQxZHrWnrF3dKhBXY24ZR",
+//   "Bids": "627n4UWdaYxpiHrSd3RJrnhkq1zHSNuAgSg88uZXn1KZ",
+//   "Asks": "AjgrF2tKVU96fwygfMdsAdBGa5S1Mttkh7XL9P24QWx7",
+//   "BaseLotSize": 10000,
+//   "QuoteLotSize": 10,
+//   "FeeRateBPS": 0,
+//   "ReferrerRebatesAccrued": 481639
+// }
+
+```
+
+Loading an SPL token
+
+```go
+import "github.com/dfuse-io/solana-go/rpc"
+
+addr := solana.MustPublicKeyFromBase58("7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16")
+cli := rpc.NewClient("https://mainnet.solana.dfuse.io")
+acct, err := cli.GetAccountInfo(context.Background(), addr)
+// handle `err`
+
+var m serum.MarketV2
+err = struc.Unpack(acct.Value.MustDataToBytes(), &m)
+// handle `err`
+
+json.NewEncoder(os.Stdout).Encode(m)
+// {
+//   "AccountFlags": 3,
+//   "OwnAddress": "7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16",
+//   "VaultSignerNonce": 1,
+//   "BaseMint": "CWE8jPTUYhdCTZYWPTe1o5DFqfdjzWKc9WKz6rSjQUdG",
+//   "QuoteMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+//   "BaseVault": "BWxmscpG77m1bWH7thDCisR84JJ1e3ho6rMm4udEq2u7",
+//   "BaseDepositsTotal": "30750820000",
+//   "BaseFeesAccrued": 0,
+//   "QuoteVault": "5tFhdTCzTYMvfVTZnczZEL36YjFnkDTSaoQ7XAZvS7LR",
+//   "QuoteDepositsTotal": "269134109688",
+//   "QuoteFeesAccrued": 476785321,
+//   "QuoteDustThreshold": 100,
+//   "RequestQueue": "3SKQw5A69B72SEj3EWBe3DymWS9DPJ2mTUzJtV8i8DQ3",
+//   "EventQueue": "DNh4agYmXGYv6po3tcCjM5yFQxZHrWnrF3dKhBXY24ZR",
+//   "Bids": "627n4UWdaYxpiHrSd3RJrnhkq1zHSNuAgSg88uZXn1KZ",
+//   "Asks": "AjgrF2tKVU96fwygfMdsAdBGa5S1Mttkh7XL9P24QWx7",
+//   "BaseLotSize": 10000,
+//   "QuoteLotSize": 10,
+//   "FeeRateBPS": 0,
+//   "ReferrerRebatesAccrued": 481639
+// }
 
 ```
 
