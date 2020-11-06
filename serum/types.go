@@ -75,7 +75,7 @@ type Orderbook struct {
 	Nodes []SlabNode `struc:""`
 }
 
-func (o *Orderbook) Items(descending bool, f func(node SlackLeafNode) error) error {
+func (o *Orderbook) Items(descending bool, f func(node SlabLeafNode) error) error {
 	if o.LeafCount == 0 {
 		return nil
 	}
@@ -85,7 +85,11 @@ func (o *Orderbook) Items(descending bool, f func(node SlackLeafNode) error) err
 	for itr < len(stack) {
 		index := stack[itr]
 		slab := o.Nodes[index]
-		switch s := slab.Impl.(type) {
+		impl, err := slab.Variant()
+		if err != nil {
+			return err
+		}
+		switch s := impl.(type) {
 		case SlabInnerNode:
 			if descending {
 				stack = append(stack, s.Children[0], s.Children[1])
@@ -93,7 +97,7 @@ func (o *Orderbook) Items(descending bool, f func(node SlackLeafNode) error) err
 				stack = append(stack, s.Children[1], s.Children[0])
 
 			}
-		case SlackLeafNode:
+		case SlabLeafNode:
 			f(s)
 		}
 		itr++
