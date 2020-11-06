@@ -1,5 +1,10 @@
 package solana
 
+import (
+	"encoding/base64"
+	"fmt"
+)
+
 // type ContactInfo struct {
 // 	Pubkey  string `json:"pubkey"`
 // 	Gossip  string `json:"gossip,omitempty"`
@@ -78,10 +83,22 @@ type GetAccountInfoResult struct {
 
 type Account struct {
 	Lamports   U64       `json:"lamports"`
-	Data       []byte    `json:"data"`
+	Data       []string  `json:"data"`
 	Owner      PublicKey `json:"owner"`
 	Executable bool      `json:"executable"`
 	RentEpoch  U64       `json:"rentEpoch"`
+}
+
+func (a *Account) MustDataToBytes() []byte {
+	d, err := a.DataToBytes()
+	if err != nil {
+		panic(fmt.Sprintf("failed to base64 decode: %s", err))
+	}
+	return d
+}
+
+func (a *Account) DataToBytes() ([]byte, error) {
+	return base64.StdEncoding.DecodeString(a.Data[0])
 }
 
 type KeyedAccount struct {
