@@ -7,7 +7,6 @@ import (
 
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/token"
-	"github.com/dfuse-io/solana-go/rpc"
 )
 
 type MarketMeta struct {

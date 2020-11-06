@@ -14,12 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var serumOrderbookCmd = &cobra.Command{
-	Use:   "orderbook {market_addr}",
+var serumMarketCmd = &cobra.Command{
+	Use:   "market {market_addr}",
 	Short: "Get Serum orderbook for a given market",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		pubKey, err := solana.PublicKeyFromBase58(args[0])
+		marketAddr, err := solana.PublicKeyFromBase58(args[0])
 		if err != nil {
 			return fmt.Errorf("decoding market addr: %w", err)
 		}
@@ -27,12 +27,14 @@ var serumOrderbookCmd = &cobra.Command{
 		ctx := context.Background()
 
 		cli := serum.NewSerumClient("http://api.mainnet-beta.solana.com:80/rpc")
-		market, err := cli.FetchMarket(ctx, pubKey)
+		market, err := cli.FetchMarket(ctx, marketAddr)
 		if err != nil {
 			return fmt.Errorf("fetch market: %w", err)
 		}
 
 		rpcClient := rpc.NewClient("http://api.mainnet-beta.solana.com:80/rpc")
+
+		// Print first segment of the order book
 
 		bids, err := rpcClient.GetAccountInfo(ctx, market.MarketV2.Bids)
 		if err != nil {
@@ -55,15 +57,18 @@ var serumOrderbookCmd = &cobra.Command{
 		}
 
 		var highestQuantity uint64
+		var sumQty uint64
 		o.Items(true, func(node *serum.SlabLeafNode) error {
 			if uint64(node.Quantity) > highestQuantity {
 				highestQuantity = uint64(node.Quantity)
 			}
+			sumQty += uint64(node.Quantity)
 			return nil
 		})
 
 		o.Items(true, func(node *serum.SlabLeafNode) error {
 			// TODO: compute the actual price and lots size?
+			//price := serum.ComputePrice(node.KeyPrice, market.BaseMint)
 			price := node.KeyPrice
 			qty := node.Quantity
 			percent := uint64(qty) * 100 / highestQuantity
@@ -80,10 +85,12 @@ var serumOrderbookCmd = &cobra.Command{
 
 		fmt.Println(columnize.Format(output, nil))
 
+		// Repeat for second segment of the order book
+
 		return nil
 	},
 }
 
 func init() {
-	serumCmd.AddCommand(serumOrderbookCmd)
+	serumCmd.AddCommand(serumMarketCmd)
 }

@@ -3,7 +3,9 @@ package serum
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/dfuse-io/solana-go/token"
 
@@ -34,11 +36,17 @@ func (s *SerumClient) FetchMarket(ctx context.Context, marketAddr solana.PublicK
 		return nil, fmt.Errorf("unable to retrieve account data byte: %w", err)
 	}
 
+	ioutil.WriteFile("/tmp/marketaddr.dat", accountData, 0755)
+
 	var m MarketV2
 	err = struc.Unpack(bytes.NewReader(accountData), &m)
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode market: %w", err)
 	}
+
+	fmt.Println("market addr", marketAddr)
+	cnt, _ := json.MarshalIndent(m, "", "  ")
+	fmt.Println(string(cnt))
 
 	baseMint, err := s.getToken(ctx, m.BaseMint)
 	if err != nil {
@@ -51,8 +59,8 @@ func (s *SerumClient) FetchMarket(ctx context.Context, marketAddr solana.PublicK
 	}
 
 	return &MarketMeta{
-		Address:  marketAddr,
-		MarketV2: &m,
+		Address:   marketAddr,
+		MarketV2:  &m,
 		QuoteMint: quoteMint,
 		BaseMint:  baseMint,
 	}, nil
@@ -64,6 +72,8 @@ func (s *SerumClient) getToken(ctx context.Context, mintPubKey solana.PublicKey)
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve base mint: %w", err)
 	}
+
+	fmt.Println(accInfo, mintPubKey)
 
 	accountData, err := accInfo.Value.DataToBytes()
 	if err != nil {
