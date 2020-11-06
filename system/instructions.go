@@ -14,21 +14,6 @@ type SystemInstruction struct {
 	Variant interface{}
 }
 
-func NewInstruction(impl interface{}) *SystemInstruction {
-	si := &SystemInstruction{Variant: impl}
-	switch impl.(type) {
-	case *CreateAccount:
-		si.Type = 0
-	case *Assign:
-		si.Type = 1
-	case *Transfer:
-		si.Type = 2
-	default:
-		return nil
-	}
-	return si
-}
-
 func (si *SystemInstruction) Unpack(r io.Reader, length int, opt *struc.Options) (err error) {
 	fmt.Println("CALLING OUR SI UNPACK", length)
 

@@ -25,7 +25,7 @@ func TestSystemInstructions(t *testing.T) {
 	out := SystemInstruction{}
 
 	require.NoError(t, struc.Unpack(bytes.NewReader(buf.Bytes()), &out))
-	assert.Equal(t, "hello", out.String())
+	assert.Equal(t, "hello", out.String(), out.Variant)
 
 	// tests := []struct{
 	//     name string

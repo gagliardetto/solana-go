@@ -1,8 +1,8 @@
 package serum
 
 import (
+	"bytes"
 	"fmt"
-	"io"
 
 	"github.com/dfuse-io/solana-go"
 	"github.com/lunixbochs/struc"
@@ -63,7 +63,7 @@ type Orderbook struct {
 	AccountFlags solana.U64 `struc:"uint64,little"`
 	// SLAB_LAYOUT
 	// SLAB_HEADER_LAYOUT
-	BumpIndex    uint32  `struc:"uint32,sizeof=Nodes"`
+	BumpIndex    uint32  `struc:"uint32,little,sizeof=Nodes"`
 	ZeroPaddingA [4]byte `json:"-" struc:"[4]pad"`
 	FreeListLen  uint32  `struc:"uint32,little"`
 	ZeroPaddingB [4]byte `json:"-" struc:"[4]pad"`
@@ -110,17 +110,11 @@ var slabInstructionDef = solana.NewVariantDefinition([]solana.VariantType{
 })
 
 type SlabNode struct {
-	Type    solana.Varuint16
-	Variant interface{}
+	Type uint32 `struc:"uint32,little"`
+	Blob []byte `struc:"[68]byte"`
 }
 
-func (s *SlabNode) Unpack(r io.Reader, length int, opt *struc.Options) (err error) {
-	fmt.Println("Unpacking SlabNode")
-
-	if err = struc.Unpack(r, &s.Type); err != nil {
-		return
-	}
-
+func (s *SlabNode) Variant() (interface{}, error) {
 	var el interface{}
 	switch s.Type {
 	case 0:
@@ -134,19 +128,67 @@ func (s *SlabNode) Unpack(r io.Reader, length int, opt *struc.Options) (err erro
 	case 4:
 		el = &SlabLastFreeNode{}
 	default:
-		return fmt.Errorf("unsupported SlabNode variant %d", s.Type)
+		return nil, fmt.Errorf("unsupported SlabNode variant %d", s.Type)
 	}
-
-	return struc.Unpack(r, el)
+	if err := struc.Unpack(bytes.NewReader(s.Blob), el); err != nil {
+		return nil, err
+	}
+	return el, nil
 }
 
-func (s SlabNode) Pack(p []byte, opt *struc.Options) (written int, err error) {
-	return 0, nil
-}
+// func (s *SlabNode) Unpack(r io.Reader, length int, opt *struc.Options) (err error) {
+// 	fmt.Println("Unpacking SlabNode")
 
-func (s SlabNode) Size(opt *struc.Options) int { return 0 }
+// 	if err = struc.Unpack(r, &s.Type); err != nil {
+// 		return
+// 	}
 
-func (s SlabNode) String() string { return fmt.Sprintf("variant %d, %T", s.Type, s.Variant) }
+// 	if err = struc.Unpack(r, &s.Blob); err != nil {
+// 		return
+// 	}
+
+// 	var el interface{}
+// 	switch s.Type {
+// 	case 0:
+// 		el = &SlabUninitialized{}
+// 	case 1:
+// 		el = &SlabInnerNode{}
+// 	case 2:
+// 		el = &SlabLeafNode{}
+// 	case 3:
+// 		el = &SlabFreeNode{}
+// 	case 4:
+// 		el = &SlabLastFreeNode{}
+// 	default:
+// 		return fmt.Errorf("unsupported SlabNode variant %d", s.Type)
+// 	}
+
+// 	if err := struc.Unpack(bytes.NewReader(s.Blob), el); err != nil {
+// 		return err
+// 	}
+
+// 	s.Variant = el
+
+// 	return nil
+// }
+
+// func (s SlabNode) Pack(p []byte, opt *struc.Options) (written int, err error) {
+// 	return 0, nil
+// }
+
+// func (s SlabNode) Size(opt *struc.Options) int {
+// 	s1, err := struc.Sizeof(s.Type)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	s2, err := struc.Sizeof(s.Blob)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	return s1 + s2
+// }
+
+// func (s SlabNode) String() string { return fmt.Sprintf("variant %d, %T", s.Type, s.Variant) }
 
 type SlabUninitialized struct {
 }
