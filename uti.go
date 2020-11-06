@@ -1,6 +1,8 @@
 package solana
 
-import "math/big"
+import (
+	"math/big"
+)
 
 var _10b = big.NewInt(10)
 var decimalsBigInt = []*big.Int{
@@ -25,6 +27,9 @@ var decimalsBigInt = []*big.Int{
 }
 
 func DecimalsInBigInt(decimal uint32) *big.Int {
+	if decimal == 0 {
+		return big.NewInt(1)
+	}
 	var decimalsBig *big.Int
 	if decimal <= uint32(len(decimalsBigInt)) {
 		decimalsBig = decimalsBigInt[decimal-1]

@@ -21,7 +21,7 @@ type Account struct {
 	Delegate        solana.PublicKey `struc:"[32]byte"`
 	IsInitialized   bool
 	IsNative        bool
-	Padding1        [2]byte `json:"-",struc:"[2]pad"`
+	Padding         [2]byte `json:"-",struc:"[2]pad"`
 	DelegatedAmount solana.U64
 }
 
@@ -32,10 +32,20 @@ type Multisig struct {
 	Signers       [11]solana.PublicKey
 }
 
+//type Mint struct {
+//	OwnerOption   uint32           `struc:"uint32,little"`
+//	Owner         solana.PublicKey `struc:"[32]byte"`
+//	Decimals      byte
+//	IsInitialized bool
+//	Padding1      uint16 `json:"-",struct:"[2]pad"`
+//}
+
 type Mint struct {
-	OwnerOption   uint32           `struc:"uint32,little"`
-	Owner         solana.PublicKey `struc:"[32]byte"`
-	Decimals      byte
-	IsInitialized bool
-	Padding1      uint16 `json:"-",struct:"[2]pad"`
+	MintAuthorityOption   uint32           `struc:"uint32,little"`
+	MintAuthority         solana.PublicKey `struc:"[32]byte"`
+	Supply                solana.U64       `struc:"uint64,little"`
+	Decimals              uint8            `struc:"uint8,little"`
+	IsInitialized         bool
+	FreezeAuthorityOption uint32           `struc:"uint32,little"`
+	FreezeAuthority       solana.PublicKey `struc:"[32]byte"`
 }

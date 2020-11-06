@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math/big"
 	"strings"
 
 	"github.com/dfuse-io/solana-go"
@@ -69,13 +70,14 @@ var serumMarketCmd = &cobra.Command{
 		o.Items(true, func(node *serum.SlabLeafNode) error {
 			// TODO: compute the actual price and lots size?
 			//price := serum.ComputePrice(node.KeyPrice, market.BaseMint)
-			price := node.KeyPrice
-			qty := node.Quantity
-			percent := uint64(qty) * 100 / highestQuantity
+
+			price := market.PriceLotsToNumber(big.NewInt(int64(node.KeyPrice)))
+			qty := market.BaseSizeLotsToNumber(big.NewInt(int64(node.Quantity)))
+			percent := uint64(node.Quantity) * 100 / highestQuantity
 			output = append(output,
-				fmt.Sprintf("%d | %d | %s",
-					price,
-					qty,
+				fmt.Sprintf("%s | %s | %s",
+					price.String(),
+					qty.String(),
 					strings.Repeat("-", int(percent/10))+strings.Repeat("#", int(10-(percent/10))),
 				),
 			)

@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/dfuse-io/solana-go/token"
 
@@ -36,8 +35,6 @@ func (s *SerumClient) FetchMarket(ctx context.Context, marketAddr solana.PublicK
 		return nil, fmt.Errorf("unable to retrieve account data byte: %w", err)
 	}
 
-	ioutil.WriteFile("/tmp/marketaddr.dat", accountData, 0755)
-
 	var m MarketV2
 	err = struc.Unpack(bytes.NewReader(accountData), &m)
 	if err != nil {
@@ -53,10 +50,16 @@ func (s *SerumClient) FetchMarket(ctx context.Context, marketAddr solana.PublicK
 		return nil, fmt.Errorf("unable to retrieve base token: %w", err)
 	}
 
+	cnt, _ = json.MarshalIndent(baseMint, "", "  ")
+	fmt.Println(string(cnt))
+
 	quoteMint, err := s.getToken(ctx, m.QuoteMint)
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve base token: %w", err)
 	}
+
+	cnt, _ = json.MarshalIndent(quoteMint, "", "  ")
+	fmt.Println(string(cnt))
 
 	return &MarketMeta{
 		Address:   marketAddr,
