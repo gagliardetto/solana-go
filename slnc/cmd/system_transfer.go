@@ -8,7 +8,7 @@ import (
 )
 
 var systemTransferCmd = &cobra.Command{
-	Use:   "transfer [from] [to] [amount]",
+	Use:   "transfer {from} {to} {amount}",
 	Short: "Create and sign a native SOL token transfer",
 	Args:  cobra.ExactArgs(3),
 	RunE: func(cmd *cobra.Command, args []string) error {

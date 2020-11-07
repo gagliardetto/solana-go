@@ -10,7 +10,7 @@ import (
 )
 
 var getConfirmedBlockCmd = &cobra.Command{
-	Use:   "confirmed-block",
+	Use:   "confirmed-block {block_num}",
 	Short: "Retrieve a confirmed block, with all of its transactions",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

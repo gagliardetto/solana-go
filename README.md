@@ -5,7 +5,6 @@ Go library to interface with Solana nodes's JSON-RPC interface, Solana's SPL tok
 
 
 # Command-line
-
 ```
 $ slnc get balance EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 1461600 lamports
@@ -22,6 +21,15 @@ $ slnc get account EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
   "rentEpoch": 108
 }
 
+$ slnc spl get-mint  SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt
+
+Mint Authority Option:  0
+Mint Authority:  73uWQpzn1AmUZkZ7MhafSSwQJmNmQ3fN4guANBrXg8uD
+Supply:  9999709435300000
+Decimals:  6
+Is Initialized:  true
+Freeze Authority Option:  0
+Freeze Authority:  73uWQpzn1AmUZkZ7MhafSSwQJmNmQ3fN4guANBrXg8uD
 
 $ slnc serum markets
 ...
@@ -40,33 +48,7 @@ $ slnc serum market 7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16
 
 ```
 
-
-
 # Library usage
-
-Loading an SPL Mint
-
-```golang
-
-    import "github.com/dfuse-io/solana-go/rpc"
-
-	addr := solana.MustPublicKeyFromBase58("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
-	cli := rpc.NewClient("http://api.mainnet-beta.solana.com/rpc")
-	acct, err := cli.GetAccountInfo(context.Background(), addr)
-	// handle `err`
-
-	var m Mint
-	err = struc.Unpack(bytes.NewReader(acct.Value.MustDataToBytes()), &m)
-	// handle `err`
-
-	json.NewEncoder(os.Stdout).Encode(m)
-	// {"OwnerOption":1,
-	//  "Owner":"2wmVCSfPxGPjrnMMn7rchp4uaeoTqN39mXFC2zhPdri9",
-	//  "Decimals":128,
-	//  "IsInitialized":true}
-```
-
-
 Loading a Serum market
 
 ```golang
@@ -107,10 +89,6 @@ json.NewEncoder(os.Stdout).Encode(m)
 // }
 
 ```
-
-
-
-
 # Examples
 
 

@@ -8,7 +8,7 @@ import (
 )
 
 var splTransferCmd = &cobra.Command{
-	Use:   "transfer [from] [to] [amount]",
+	Use:   "transfer {from} {to} {amount}",
 	Short: "Create and sign an SPL transfer transaction",
 	Args:  cobra.ExactArgs(3),
 	RunE: func(cmd *cobra.Command, args []string) error {

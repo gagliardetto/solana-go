@@ -25,14 +25,24 @@ func (m *MarketMeta) baseSplTokenMultiplier() *big.Int {
 }
 
 func (m *MarketMeta) quoteSplTokenMultiplier() *big.Int {
-	return solana.DecimalsInBigInt(uint32(m.BaseMint.Decimals))
+	return solana.DecimalsInBigInt(uint32(m.QuoteMint.Decimals))
 }
 
-func (m *MarketMeta) PriceLotsToNumber(price *big.Int) *big.Float {
+func divideBnToNumber(numerator, denomiator *big.Int) *big.Int {
+	quotient := new(big.Int).Quo(numerator, denomiator)
+	rem := new(big.Int).Mod(numerator, denomiator)
+	gcd := new(big.Int).GCD(nil, nil, rem, denomiator)
+	n1 := new(big.Int).Quo(rem, gcd)
+	d1 := new(big.Int).Quo(denomiator, gcd)
+	div1 := new(big.Int).Quo(n1, d1)
+	return new(big.Int).Add(quotient, div1)
+}
+
+func (m *MarketMeta) PriceLotsToNumber(price *big.Int) *big.Int {
 	ratio := new(big.Int).Mul(big.NewInt(int64(m.MarketV2.QuoteLotSize)), m.baseSplTokenMultiplier())
 	numerator := new(big.Int).Mul(price, ratio)
 	denomiator := new(big.Int).Mul(big.NewInt(int64(m.MarketV2.BaseLotSize)), m.quoteSplTokenMultiplier())
-	return new(big.Float).Quo(new(big.Float).SetInt(numerator), new(big.Float).SetInt(denomiator))
+	return divideBnToNumber(numerator, denomiator)
 }
 
 func (m *MarketMeta) BaseSizeLotsToNumber(size *big.Int) *big.Float {

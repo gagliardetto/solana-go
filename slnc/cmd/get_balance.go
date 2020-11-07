@@ -9,7 +9,7 @@ import (
 )
 
 var getBalanceCmd = &cobra.Command{
-	Use:   "balance",
+	Use:   "balance {account_addr}",
 	Short: "Retrieve an account's balance",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

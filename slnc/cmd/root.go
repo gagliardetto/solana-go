@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 // Version represents the slnc command version
@@ -44,6 +43,8 @@ func init() {
 	// RootCmd.PersistentFlags().StringP("offline-chain-id", "", "", "Chain ID to sign transaction with. Use all --offline- options to sign transactions offline.")
 	// RootCmd.PersistentFlags().StringSliceP("offline-sign-key", "", []string{}, "Public key to use to sign transaction. Must be in your vault or wallet. Use all --offline- options to sign transactions offline.")
 	// RootCmd.PersistentFlags().BoolP("skip-sign", "", false, "Do not sign the transaction. Use with --write-transaction.")
+
+	SetupLogger(viper.GetBool("global-debug"))
 }
 
 func initConfig() {
@@ -53,13 +54,6 @@ func initConfig() {
 	viper.SetEnvKeyReplacer(replacer)
 
 	recurseViperCommands(RootCmd, nil)
-
-	if viper.GetBool("global-debug") {
-		zlog, err := zap.NewDevelopment()
-		if err == nil {
-			SetLogger(zlog)
-		}
-	}
 }
 
 func recurseViperCommands(root *cobra.Command, segments []string) {

@@ -107,9 +107,6 @@ type KeyedAccount struct {
 	Pubkey  solana.PublicKey `json:"pubkey"`
 	Account *Account         `json:"account"`
 }
-
-///
-
 type GetProgramAccountsResult []*KeyedAccount
 
 type GetProgramAccountsOpts struct {

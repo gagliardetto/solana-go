@@ -12,7 +12,7 @@ import (
 )
 
 var getProgramAccountsCmd = &cobra.Command{
-	Use:   "program-accounts",
+	Use:   "program-accounts {program_addr}",
 	Short: "Retrieve info about an account",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -30,7 +30,7 @@ var getProgramAccountsCmd = &cobra.Command{
 
 		for _, keyedAcct := range resp {
 			acct := keyedAcct.Account
-			fmt.Println("Data len:", len(acct.Data), keyedAcct.Pubkey)
+			//fmt.Println("Data len:", len(acct.Data), keyedAcct.Pubkey)
 
 			obj, err := decode(acct.Owner, acct.MustDataToBytes())
 			if err != nil {

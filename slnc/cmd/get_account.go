@@ -12,7 +12,7 @@ import (
 )
 
 var getAccountCmd = &cobra.Command{
-	Use:   "account",
+	Use:   "account {account_addr}",
 	Short: "Retrieve info about an account",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -2,10 +2,8 @@ package cmd
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"math/big"
-	"strings"
 
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/rpc"
@@ -20,15 +18,15 @@ var serumMarketCmd = &cobra.Command{
 	Short: "Get Serum orderbook for a given market",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := cmd.Context()
+
 		marketAddr, err := solana.PublicKeyFromBase58(args[0])
 		if err != nil {
 			return fmt.Errorf("decoding market addr: %w", err)
 		}
 
-		ctx := context.Background()
-
-		cli := serum.NewSerumClient("http://api.mainnet-beta.solana.com:80/rpc")
-		market, err := cli.FetchMarket(ctx, marketAddr)
+		cli := getClient()
+		market, err := serum.FetchMarket(ctx, cli, marketAddr)
 		if err != nil {
 			return fmt.Errorf("fetch market: %w", err)
 		}
@@ -57,33 +55,43 @@ var serumMarketCmd = &cobra.Command{
 			"Price | Quantity | Depth",
 		}
 
-		var highestQuantity uint64
-		var sumQty uint64
+		//var highestQuantity uint64
+		//var sumQty uint64
+		//o.Items(true, func(node *serum.SlabLeafNode) error {
+		//	if uint64(node.Quantity) > highestQuantity {
+		//		highestQuantity = uint64(node.Quantity)
+		//	}
+		//	sumQty += uint64(node.Quantity)
+		//	return nil
+		//})
+
+		limit := 20
+		levels := [][]uint64{}
 		o.Items(true, func(node *serum.SlabLeafNode) error {
-			if uint64(node.Quantity) > highestQuantity {
-				highestQuantity = uint64(node.Quantity)
+			fmt.Println("leaf: ", node.KeyPrice, node.Quantity)
+			if len(levels) > 0 && levels[len(levels)-1][0] == uint64(node.KeyPrice) {
+				levels[len(levels)-1][1] += uint64(node.Quantity)
+			} else if len(levels) == limit {
+				return fmt.Errorf("done")
+			} else {
+				levels = append(levels, []uint64{uint64(node.KeyPrice), uint64(node.Quantity)})
 			}
-			sumQty += uint64(node.Quantity)
 			return nil
 		})
 
-		o.Items(true, func(node *serum.SlabLeafNode) error {
-			// TODO: compute the actual price and lots size?
-			//price := serum.ComputePrice(node.KeyPrice, market.BaseMint)
-
-			price := market.PriceLotsToNumber(big.NewInt(int64(node.KeyPrice)))
-			qty := market.BaseSizeLotsToNumber(big.NewInt(int64(node.Quantity)))
-			percent := uint64(node.Quantity) * 100 / highestQuantity
+		for _, level := range levels {
+			price := market.PriceLotsToNumber(big.NewInt(int64(level[0])))
+			qty := market.BaseSizeLotsToNumber(big.NewInt(int64(level[1])))
 			output = append(output,
-				fmt.Sprintf("%s | %s | %s",
+				fmt.Sprintf("%s | %s",
 					price.String(),
 					qty.String(),
-					strings.Repeat("-", int(percent/10))+strings.Repeat("#", int(10-(percent/10))),
 				),
 			)
+		}
 
-			return nil
-		})
+		// TODO: compute the actual price and lots size?
+		//price := serum.ComputePrice(node.KeyPrice, market.BaseMint)
 
 		fmt.Println(columnize.Format(output, nil))
 
