@@ -11,11 +11,7 @@ import (
 )
 
 func TestClient_GetAccountInfo(t *testing.T) {
-
-	//rpcClient := NewRPCClient("api.mainnet-beta.solana.com:443")
 	c := NewClient("http://api.mainnet-beta.solana.com:80/rpc")
-	//c := NewClient("testnet.solana.com:8899")
-
 	pubKey := solana.MustPublicKeyFromBase58("7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932")
 	accInfo, err := c.GetAccountInfo(context.Background(), pubKey)
 	require.NoError(t, err)
@@ -51,5 +47,4 @@ func TestClient_ProgramAccount(t *testing.T) {
 	//d, err := json.MarshalIndent(accInfo, "", " ")
 	//require.NoError(t, err)
 	//fmt.Println(string(d))
-
 }

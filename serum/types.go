@@ -81,10 +81,10 @@ func (o *Orderbook) Items(descending bool, f func(node *SlabLeafNode) error) err
 		return nil
 	}
 
-	itr := 0
+	index := uint32(0)
 	stack := []uint32{o.Root}
-	for itr < len(stack) {
-		index := stack[itr]
+	for len(stack) > 0 {
+		index, stack = stack[len(stack)-1], stack[:len(stack)-1]
 		slab := o.Nodes[index]
 		impl, err := slab.Variant()
 		if err != nil {
@@ -100,7 +100,6 @@ func (o *Orderbook) Items(descending bool, f func(node *SlabLeafNode) error) err
 		case *SlabLeafNode:
 			f(s)
 		}
-		itr++
 	}
 	return nil
 }
@@ -138,8 +137,8 @@ type SlabUninitialized struct {
 type SlabInnerNode struct {
 	PrefixLen uint32 `struc:"uint32,little"`
 	// this corresponds to the uint128 key
-	KeyPrice solana.U64 `struc:"uint64",little"`
-	KeySeq   solana.U64 `struc:"uint64",little"`
+	KeySeq   solana.U64 `struc:"uint64,little"`
+	KeyPrice solana.U64 `struc:"uint64,little"`
 	Children []uint32   `struc:"[2]uint32,little"`
 }
 
@@ -155,12 +154,13 @@ type SlabLeafNode struct {
 	FeeTier   uint8   `struc:"uint8,little"`
 	Padding   [2]byte `json:"-" struc:"[2]pad"`
 
-	KeySeq   solana.U64 `struc:"uint64",little"`
-	KeyPrice solana.U64 `struc:"uint64",little"`
+	Price solana.U128 `struc:"[16]byte,little"`
+	//KeySeq   solana.U64 `struc:"uint64",little"`
+	//KeyPrice solana.U64 `struc:"uint64",little"`
 
-	Owner         solana.PublicKey `struc:"[32]byte"`
-	Quantity      solana.U64       `struc:"uint64",little"`
-	ClientOrderId solana.U64       `struc:"uint64",little"`
+	Owner         solana.PublicKey
+	Quantity      solana.U64 `struc:"uint64,little"`
+	ClientOrderId solana.U64 `struc:"uint64,little"`
 }
 
 type SlabFreeNode struct {

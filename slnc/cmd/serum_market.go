@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"math/big"
 
 	"github.com/dfuse-io/solana-go"
@@ -40,7 +42,7 @@ var serumMarketCmd = &cobra.Command{
 			return fmt.Errorf("failed query: %w", err)
 		}
 
-		fmt.Println("Query done")
+		ioutil.WriteFile("/tmp/bids-go.txt", []byte(hex.EncodeToString(bids.Value.MustDataToBytes())), 0644)
 
 		data, err := bids.Value.DataToBytes()
 		if err != nil {
@@ -66,22 +68,23 @@ var serumMarketCmd = &cobra.Command{
 		//})
 
 		limit := 20
-		levels := [][]uint64{}
+		levels := [][]*big.Int{}
 		o.Items(true, func(node *serum.SlabLeafNode) error {
-			fmt.Println("leaf: ", node.KeyPrice, node.Quantity)
-			if len(levels) > 0 && levels[len(levels)-1][0] == uint64(node.KeyPrice) {
-				levels[len(levels)-1][1] += uint64(node.Quantity)
+			quantity := big.NewInt(int64(node.Quantity))
+			if len(levels) > 0 && levels[len(levels)-1][0].Cmp(node.Price.BigInt()) == 0 {
+				current := levels[len(levels)-1][1]
+				levels[len(levels)-1][1] = new(big.Int).Add(current, quantity)
 			} else if len(levels) == limit {
 				return fmt.Errorf("done")
 			} else {
-				levels = append(levels, []uint64{uint64(node.KeyPrice), uint64(node.Quantity)})
+				levels = append(levels, []*big.Int{node.Price.BigInt(), quantity})
 			}
 			return nil
 		})
 
 		for _, level := range levels {
-			price := market.PriceLotsToNumber(big.NewInt(int64(level[0])))
-			qty := market.BaseSizeLotsToNumber(big.NewInt(int64(level[1])))
+			price := market.PriceLotsToNumber(level[0])
+			qty := market.BaseSizeLotsToNumber(level[1])
 			output = append(output,
 				fmt.Sprintf("%s | %s",
 					price.String(),

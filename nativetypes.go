@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/big"
 	"strconv"
 
 	"github.com/lunixbochs/struc"
@@ -139,6 +140,40 @@ func (t Base58) String() string {
 }
 
 ///
+type U128 big.Int
+
+func (u U128) BigInt() *big.Int {
+	v := big.Int(u)
+	return &v
+}
+
+func (u U128) Pack(p []byte, opt *struc.Options) (int, error) {
+	panic("implement me")
+}
+
+func (u *U128) Unpack(r io.Reader, length int, opt *struc.Options) error {
+	buf := make([]byte, 16)
+	reader := &ByteWrapper{r}
+	for i := 0; i < 16; i++ {
+		b, err := reader.ReadByte()
+		if err != nil {
+			return err
+		}
+		buf[16-i-1] = b
+	}
+	big := new(big.Int).SetBytes(buf)
+	*u = U128(*big)
+	return nil
+}
+
+func (u U128) Size(opt *struc.Options) int {
+	return 16
+}
+
+func (u U128) String() string {
+	v := big.Int(u)
+	return v.String()
+}
 
 type U64 uint64
 
