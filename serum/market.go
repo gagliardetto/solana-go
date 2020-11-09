@@ -1,10 +1,7 @@
 package serum
 
 import (
-	"encoding/json"
-	"fmt"
 	"math/big"
-	"os"
 
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/token"
@@ -51,22 +48,6 @@ func (m *MarketMeta) PriceNumberToLots(price *big.Int) *big.Float {
 	numerator = I().Mul(numerator, big.NewInt(int64(m.MarketV2.BaseLotSize)))
 	denomiator := I().Mul(m.baseSplTokenMultiplier(), I().SetInt64(int64(m.MarketV2.QuoteLotSize)))
 	return F().Quo(F().SetInt(numerator), F().SetInt(denomiator))
-}
-
-func KnownMarket() ([]*MarketMeta, error) {
-	f, err := os.Open("serum/markets.json")
-	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve known markets: %w", err)
-	}
-	defer f.Close()
-
-	dec := json.NewDecoder(f)
-	var markets []*MarketMeta
-	err = dec.Decode(&markets)
-	if err != nil {
-		return nil, fmt.Errorf("unable to decode known markets: %w", err)
-	}
-	return markets, nil
 }
 
 func I() *big.Int {

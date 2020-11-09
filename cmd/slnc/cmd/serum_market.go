@@ -2,9 +2,8 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/hex"
+	"context"
 	"fmt"
-	"io/ioutil"
 	"math/big"
 
 	"github.com/dfuse-io/solana-go"
@@ -33,66 +32,86 @@ var serumMarketCmd = &cobra.Command{
 			return fmt.Errorf("fetch market: %w", err)
 		}
 
-		rpcClient := rpc.NewClient("http://api.mainnet-beta.solana.com:80/rpc")
-
-		// Print first segment of the order book
-
-		bids, err := rpcClient.GetAccountInfo(ctx, market.MarketV2.Bids)
-		if err != nil {
-			return fmt.Errorf("failed query: %w", err)
-		}
-
-		ioutil.WriteFile("/tmp/bids-go.txt", []byte(hex.EncodeToString(bids.Value.MustDataToBytes())), 0644)
-
-		data, err := bids.Value.DataToBytes()
-		if err != nil {
-			return fmt.Errorf("decoding bid account data: %w", err)
-		}
-		var o serum.Orderbook
-		if err := struc.Unpack(bytes.NewReader(data), &o); err != nil {
-			return fmt.Errorf("decoding bid orderbook data: %w", err)
-		}
-
 		output := []string{
 			"Price | Quantity | Depth",
+			"Asks",
 		}
 
-		limit := 20
-		levels := [][]*big.Int{}
-		o.Items(true, func(node *serum.SlabLeafNode) error {
-			quantity := big.NewInt(int64(node.Quantity))
-			price := node.GetPrice()
-			if len(levels) > 0 && levels[len(levels)-1][0].Cmp(price) == 0 {
-				current := levels[len(levels)-1][1]
-				levels[len(levels)-1][1] = new(big.Int).Add(current, quantity)
-			} else if len(levels) == limit {
-				return fmt.Errorf("done")
-			} else {
-				levels = append(levels, []*big.Int{price, quantity})
-			}
-			return nil
-		})
-
-		for _, level := range levels {
-			price := market.PriceLotsToNumber(level[0])
-			qty := market.BaseSizeLotsToNumber(level[1])
-			output = append(output,
-				fmt.Sprintf("%s | %s",
-					price.String(),
-					qty.String(),
-				),
-			)
+		asks, err := getOrderBook(ctx, market, cli, market.MarketV2.Asks, true)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve asks: %w", err)
+		}
+		for _, a := range asks {
+			output = append(output, fmt.Sprintf("%s | %s",
+				a.price.String(),
+				a.quantity.String(),
+			))
 		}
 
-		// TODO: compute the actual price and lots size?
-		//price := serum.ComputePrice(node.KeyPrice, market.BaseMint)
+		output = append(output, "Bids")
+		bids, err := getOrderBook(ctx, market, cli, market.MarketV2.Bids, true)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve bids: %w", err)
+		}
+		for _, b := range bids {
+			output = append(output, fmt.Sprintf("%s | %s",
+				b.price.String(),
+				b.quantity.String(),
+			))
+		}
 
 		fmt.Println(columnize.Format(output, nil))
-
-		// Repeat for second segment of the order book
-
 		return nil
 	},
+}
+
+type orderBookEntry struct {
+	price    *big.Float
+	quantity *big.Float
+}
+
+func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client, address solana.PublicKey, desc bool) (out []*orderBookEntry, err error) {
+	bids, err := cli.GetAccountInfo(ctx, address)
+	if err != nil {
+		return nil, fmt.Errorf("failed retrieving account: %w", err)
+	}
+
+	data, err := bids.Value.DataToBytes()
+	if err != nil {
+		return nil, fmt.Errorf("decoding account data: %w", err)
+	}
+	var o serum.Orderbook
+	if err := struc.Unpack(bytes.NewReader(data), &o); err != nil {
+		return nil, fmt.Errorf("decoding bid orderbook data: %w", err)
+	}
+
+	limit := 20
+	levels := [][]*big.Int{}
+	o.Items(desc, func(node *serum.SlabLeafNode) error {
+		quantity := big.NewInt(int64(node.Quantity))
+		price := node.GetPrice()
+		if len(levels) > 0 && levels[len(levels)-1][0].Cmp(price) == 0 {
+			current := levels[len(levels)-1][1]
+			levels[len(levels)-1][1] = new(big.Int).Add(current, quantity)
+		} else if len(levels) == limit {
+			return fmt.Errorf("done")
+		} else {
+			levels = append(levels, []*big.Int{price, quantity})
+		}
+		return nil
+	})
+
+	for _, level := range levels {
+		price := market.PriceLotsToNumber(level[0])
+		qty := market.BaseSizeLotsToNumber(level[1])
+		out = append(out,
+			&orderBookEntry{
+				price:    price,
+				quantity: qty,
+			},
+		)
+	}
+	return out, nil
 }
 
 func init() {

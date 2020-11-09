@@ -3,14 +3,33 @@ package serum
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 
-	"github.com/dfuse-io/solana-go/token"
-
+	rice "github.com/GeertJohan/go.rice"
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/rpc"
+	"github.com/dfuse-io/solana-go/token"
 	"github.com/lunixbochs/struc"
 )
+
+//go:generate rice embed-go
+
+// TODO: hit the chain and
+func KnownMarket() ([]*MarketMeta, error) {
+	box := rice.MustFindBox("data").MustBytes("markets.json")
+	if box == nil {
+		return nil, fmt.Errorf("unable to retrieve known markets")
+	}
+
+	dec := json.NewDecoder(bytes.NewReader(box))
+	var markets []*MarketMeta
+	err := dec.Decode(&markets)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode known markets: %w", err)
+	}
+	return markets, nil
+}
 
 func FetchMarket(ctx context.Context, rpcCli *rpc.Client, marketAddr solana.PublicKey) (*MarketMeta, error) {
 	accInfo, err := rpcCli.GetAccountInfo(ctx, marketAddr)
