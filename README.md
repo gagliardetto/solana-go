@@ -4,8 +4,6 @@ Go library to interface with Solana nodes's JSON-RPC interface, Solana's SPL tok
 [https://dex.projectserum.com](Serum DEX) instructions.  More contracts to come.
 
 ## Installation
-> :warning: During the beta phase (prior to v1.0.0), minor version increases will indicate breaking changes, in conformance with Semantic Versioning.
-
 
 > :warning: `solana-go` works using SemVer but in 0 version, which means that the 'minor' will be changed when some broken changes are introduced into the application, and the 'patch' will be changed when a new feature with new changes is added or for bug fixing. As soon as v1.0.0 be released, `solana-go` will start to use SemVer as usual.
 
