@@ -19,8 +19,8 @@ type reqID uint64
 type subscription int
 type result interface {
 }
-type callBack struct {
-	f           func(result)
+type callBackInfo struct {
+	stream      chan result
 	reflectType reflect.Type
 }
 
@@ -29,16 +29,16 @@ type WSClient struct {
 	rpcURL           string
 	conn             *websocket.Conn
 	lock             sync.Mutex
-	pendingCallbacks map[reqID]*callBack
-	callbacks        map[subscription]*callBack
+	pendingCallbacks map[reqID]*callBackInfo
+	callbacks        map[subscription]*callBackInfo
 }
 
 func NewWSClient(rpcURL string) (*WSClient, error) {
 	c := &WSClient{
 		currentID:        0,
 		rpcURL:           rpcURL,
-		pendingCallbacks: map[reqID]*callBack{},
-		callbacks:        map[subscription]*callBack{},
+		pendingCallbacks: map[reqID]*callBackInfo{},
+		callbacks:        map[subscription]*callBackInfo{},
 	}
 
 	conn, _, err := websocket.DefaultDialer.Dial(rpcURL, nil)
@@ -65,12 +65,14 @@ func (c *WSClient) receiveMessages() {
 				continue
 			}
 
-			//ioutil.WriteFile(fmt.Sprintf("/tmp/t%d.t", k), message, 775)
-
+			// when receiving message with id. the result will be a subscription number.
+			// that number will be associated to all future message destine to this request
 			if gjson.GetBytes(message, "id").Exists() {
+				zlog.Info("received subscription for id")
 				id := reqID(gjson.GetBytes(message, "id").Int())
 				sub := subscription(gjson.GetBytes(message, "result").Int())
 
+				//moving pending callback info to the actual callbacks list
 				c.lock.Lock()
 				callBack := c.pendingCallbacks[id]
 				delete(c.pendingCallbacks, id)
@@ -81,16 +83,19 @@ func (c *WSClient) receiveMessages() {
 				continue
 			}
 
+			//getting the callback
 			sub := subscription(gjson.GetBytes(message, "params.subscription").Int())
-			cb := c.callbacks[sub]
+			callBack := c.callbacks[sub]
 
-			result := reflect.New(cb.reflectType)
-			i := result.Interface()
-			err = decodeClientResponse(bytes.NewReader(message), &i)
+			//getting and instantiate the return type for the call back.
+			resultType := reflect.New(callBack.reflectType)
+			result := resultType.Interface()
+
+			err = decodeClientResponse(bytes.NewReader(message), &result)
 			if err != nil {
 				zlog.Error("failed to decode result", zap.Uint64("subscription", uint64(sub)), zap.Error(err))
 			}
-			cb.f(i)
+			callBack.stream <- result
 		}
 	}()
 }
@@ -104,9 +109,11 @@ type ProgramResult struct {
 	} `json:"value"`
 }
 
-func (c *WSClient) ProgramSubscribe(programID string, commitment CommitmentType, resultCallBack func(programResult result)) error {
+func (c *WSClient) ProgramSubscribe(programID string, commitment CommitmentType) (stream chan result, err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+
+	stream = make(chan result, 200)
 
 	params := []interface{}{programID}
 	conf := map[string]interface{}{
@@ -119,20 +126,20 @@ func (c *WSClient) ProgramSubscribe(programID string, commitment CommitmentType,
 	params = append(params, conf)
 	data, id, err := encodeClientRequest("programSubscribe", params)
 	if err != nil {
-		return fmt.Errorf("program subscribe: encode request: %c", err)
+		return nil, fmt.Errorf("program subscribe: encode request: %c", err)
 	}
 
 	err = c.conn.WriteMessage(websocket.TextMessage, data)
 	if err != nil {
-		return fmt.Errorf("program subscribe: write message: %c", err)
+		return nil, fmt.Errorf("program subscribe: write message: %c", err)
 	}
 
-	c.pendingCallbacks[reqID(id)] = &callBack{
-		f:           resultCallBack,
+	c.pendingCallbacks[reqID(id)] = &callBackInfo{
+		stream:      stream,
 		reflectType: reflect.TypeOf(ProgramResult{}),
 	}
 
-	return nil
+	return stream, nil
 }
 
 type clientRequest struct {
