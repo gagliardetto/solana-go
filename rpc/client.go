@@ -83,10 +83,19 @@ func (c *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) (
 }
 
 func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.PublicKey, opts *GetProgramAccountsOpts) (out GetProgramAccountsResult, err error) {
-	params := []interface{}{publicKey}
-	if opts != nil {
-		params = append(params, opts)
+	obj := map[string]interface{}{
+		"encoding": "base64",
 	}
+	if opts != nil {
+		if opts.Commitment != "" {
+			obj["commitment"] = string(opts.Commitment)
+		}
+		if len(opts.Filters) != 0 {
+			obj["filters"] = opts.Filters
+		}
+	}
+
+	params := []interface{}{publicKey, obj}
 
 	err = c.rpcClient.CallFor(&out, "getProgramAccounts", params...)
 	return

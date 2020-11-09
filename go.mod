@@ -3,6 +3,7 @@ module github.com/dfuse-io/solana-go
 go 1.14
 
 require (
+	github.com/GeertJohan/go.rice v1.0.0
 	github.com/dfuse-io/logging v0.0.0-20201023175426-d0173f8508dc
 	github.com/dfuse-io/slnc v0.0.0-20201106145424-57968f2253be
 	github.com/google/go-cmp v0.4.1 // indirect
@@ -17,7 +18,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
-	github.com/tidwall/gjson v1.6.3
 	github.com/ybbus/jsonrpc v2.1.2+incompatible
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550

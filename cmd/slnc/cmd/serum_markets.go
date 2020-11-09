@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dfuse-io/solana-go/serum"
-
 	"github.com/spf13/cobra"
 )
 
@@ -13,6 +12,7 @@ var serumMarketsCmd = &cobra.Command{
 	Short: "Get serum markets",
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
+
 		markets, err := serum.KnownMarket()
 		if err != nil {
 			return fmt.Errorf("unable to retrieve markets: %w", err)

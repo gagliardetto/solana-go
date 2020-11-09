@@ -97,8 +97,6 @@ func (bv *BaseVariant) Unpack(def *VariantDefinition, r io.Reader, length int, o
 		return
 	}
 
-	fmt.Println("IN OUR CODE HERE!")
-
 	typeGo := def.typeIDToType[bv.Type]
 	if typeGo == nil {
 		return fmt.Errorf("no known type for type %d on %#v", bv.Type, def)
