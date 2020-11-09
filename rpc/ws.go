@@ -5,37 +5,109 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"math/rand"
+	"reflect"
+	"sync"
 
 	"github.com/gorilla/rpc/v2/json2"
 	"github.com/gorilla/websocket"
+	"github.com/tidwall/gjson"
+	"go.uber.org/zap"
 )
 
+type reqID uint64
+type subscription int
+type result interface {
+}
+type callBack struct {
+	f           func(result)
+	reflectType reflect.Type
+}
+
 type WSClient struct {
-	rpcURL string
-	conn   *websocket.Conn
+	currentID        uint64
+	rpcURL           string
+	conn             *websocket.Conn
+	lock             sync.Mutex
+	pendingCallbacks map[reqID]*callBack
+	callbacks        map[subscription]*callBack
 }
 
-func NewWSClient(rpcURL string) *WSClient {
-	return &WSClient{
-		rpcURL: rpcURL,
+func NewWSClient(rpcURL string) (*WSClient, error) {
+	c := &WSClient{
+		currentID:        0,
+		rpcURL:           rpcURL,
+		pendingCallbacks: map[reqID]*callBack{},
+		callbacks:        map[subscription]*callBack{},
 	}
-}
 
-func (w *WSClient) getConnection() (*websocket.Conn, error) {
-	if w.conn != nil {
-		return w.conn, nil
-	}
-	c, _, err := websocket.DefaultDialer.Dial(w.rpcURL, nil)
+	conn, _, err := websocket.DefaultDialer.Dial(rpcURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("ws dial: %w", err)
+		return nil, fmt.Errorf("new ws client: dial: %w", err)
 	}
-	w.conn = c
+	c.conn = conn
+
+	c.receiveMessages()
+
 	return c, nil
 }
 
-func (w *WSClient) ProgramSubscribe(programID string, commitment CommitmentType) error {
+func (c *WSClient) receiveMessages() {
+	zlog.Info("ready to receive message")
+	go func() {
+		k := 0
+		for {
+			k++
+			_, message, err := c.conn.ReadMessage()
+			zlog.Info("")
+			if err != nil {
+				zlog.Error("message reception", zap.Error(err))
+				continue
+			}
+
+			//ioutil.WriteFile(fmt.Sprintf("/tmp/t%d.t", k), message, 775)
+
+			if gjson.GetBytes(message, "id").Exists() {
+				id := reqID(gjson.GetBytes(message, "id").Int())
+				sub := subscription(gjson.GetBytes(message, "result").Int())
+
+				c.lock.Lock()
+				callBack := c.pendingCallbacks[id]
+				delete(c.pendingCallbacks, id)
+				c.callbacks[sub] = callBack
+				c.lock.Unlock()
+
+				zlog.Info("move sub from pending to callback", zap.Uint64("id", uint64(id)), zap.Uint64("subscription", uint64(sub)))
+				continue
+			}
+
+			sub := subscription(gjson.GetBytes(message, "params.subscription").Int())
+			cb := c.callbacks[sub]
+
+			result := reflect.New(cb.reflectType)
+			i := result.Interface()
+			err = decodeClientResponse(bytes.NewReader(message), &i)
+			if err != nil {
+				zlog.Error("failed to decode result", zap.Uint64("subscription", uint64(sub)), zap.Error(err))
+			}
+			cb.f(i)
+		}
+	}()
+}
+
+type ProgramResult struct {
+	Context struct {
+		Slot uint64
+	} `json:"context"`
+	Value struct {
+		Account Account `json:"account"`
+	} `json:"value"`
+}
+
+func (c *WSClient) ProgramSubscribe(programID string, commitment CommitmentType, resultCallBack func(programResult result)) error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	params := []interface{}{programID}
 	conf := map[string]interface{}{
 		"encoding": "jsonParsed",
@@ -45,73 +117,47 @@ func (w *WSClient) ProgramSubscribe(programID string, commitment CommitmentType)
 	}
 
 	params = append(params, conf)
-	data, err := encodeClientRequest("programSubscribe", params)
+	data, id, err := encodeClientRequest("programSubscribe", params)
 	if err != nil {
-		return fmt.Errorf("program subscribe: encode request: %w", err)
+		return fmt.Errorf("program subscribe: encode request: %c", err)
 	}
 
-	conn, err := w.getConnection()
+	err = c.conn.WriteMessage(websocket.TextMessage, data)
 	if err != nil {
-		return fmt.Errorf("program subscribe: get connection: %w", err)
+		return fmt.Errorf("program subscribe: write message: %c", err)
 	}
 
-	go func() {
-		k := 0
-		for {
-			k++
-			_, message, err := conn.ReadMessage()
-			if err != nil {
-				log.Println("read:", err)
-				return
-			}
-
-			o := map[string]interface{}{}
-			subscription, err := decodeClientResponse(bytes.NewReader(message), &o)
-			if err != nil {
-				panic(err)
-			}
-			log.Printf("recv: %d: %s", subscription, o)
-		}
-	}()
-
-	err = conn.WriteMessage(websocket.TextMessage, data)
-	if err != nil {
-		return fmt.Errorf("program subscribe: write message: %w", err)
+	c.pendingCallbacks[reqID(id)] = &callBack{
+		f:           resultCallBack,
+		reflectType: reflect.TypeOf(ProgramResult{}),
 	}
 
 	return nil
 }
 
 type clientRequest struct {
-	// JSON-RPC protocol.
-	Version string `json:"jsonrpc"`
-
-	// A String containing the name of the method to be invoked.
-	Method string `json:"method"`
-
-	// Object to pass as request parameter to the method.
-	Params interface{} `json:"params"`
-
-	// The request id. This can be of any type. It is used to match the
-	// response with the request that it is replying to.
-	Id uint64 `json:"id"`
+	Version string      `json:"jsonrpc"`
+	Method  string      `json:"method"`
+	Params  interface{} `json:"params"`
+	Id      uint64      `json:"id"`
 }
 
-// EncodeClientRequest encodes parameters for a JSON-RPC client request.
-func encodeClientRequest(method string, args interface{}) ([]byte, error) {
+func encodeClientRequest(method string, args interface{}) ([]byte, uint64, error) {
 	c := &clientRequest{
 		Version: "2.0",
 		Method:  method,
 		Params:  args,
 		Id:      uint64(rand.Int63()),
 	}
-	return json.Marshal(c)
+	data, err := json.Marshal(c)
+	if err != nil {
+		return nil, 0, fmt.Errorf("encode request: json marshall: %w", err)
+	}
+	return data, c.Id, nil
 }
 
 type wsClientResponse struct {
 	Version string                  `json:"jsonrpc"`
-	Method  string                  `json:"method"`
-	Result  int                     `json:"result"` //Ça c'est pas cool
 	Params  *wsClientResponseParams `json:"params"`
 	Error   *json.RawMessage        `json:"error"`
 }
@@ -121,30 +167,26 @@ type wsClientResponseParams struct {
 	Subscription int              `json:"subscription"`
 }
 
-func decodeClientResponse(r io.Reader, reply interface{}) (subscriptionID int, err error) {
+func decodeClientResponse(r io.Reader, reply interface{}) (err error) {
 	var c *wsClientResponse
 	if err := json.NewDecoder(r).Decode(&c); err != nil {
-		return -1, err
+		return err
 	}
 
 	if c.Error != nil {
 		jsonErr := &json2.Error{}
 		if err := json.Unmarshal(*c.Error, jsonErr); err != nil {
-			return -1, &json2.Error{
+			return &json2.Error{
 				Code:    json2.E_SERVER,
 				Message: string(*c.Error),
 			}
 		}
-		return -1, jsonErr
-	}
-
-	if c.Method == "" {
-		return c.Result, nil
+		return jsonErr
 	}
 
 	if c.Params == nil {
-		return -1, json2.ErrNullResult
+		return json2.ErrNullResult
 	}
 
-	return c.Params.Subscription, json.Unmarshal(*c.Params.Result, reply)
+	return json.Unmarshal(*c.Params.Result, &reply)
 }
