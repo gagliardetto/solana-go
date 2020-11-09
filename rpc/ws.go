@@ -17,8 +17,7 @@ import (
 
 type reqID uint64
 type subscription int
-type result interface {
-}
+type result interface{}
 type callBackInfo struct {
 	stream      chan result
 	reflectType reflect.Type
@@ -100,48 +99,6 @@ func (c *WSClient) receiveMessages() {
 	}()
 }
 
-type ProgramResult struct {
-	Context struct {
-		Slot uint64
-	} `json:"context"`
-	Value struct {
-		Account Account `json:"account"`
-	} `json:"value"`
-}
-
-func (c *WSClient) ProgramSubscribe(programID string, commitment CommitmentType) (stream chan result, err error) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	stream = make(chan result, 200)
-
-	params := []interface{}{programID}
-	conf := map[string]interface{}{
-		"encoding": "jsonParsed",
-	}
-	if commitment != "" {
-		conf["commitment"] = string(commitment)
-	}
-
-	params = append(params, conf)
-	data, id, err := encodeClientRequest("programSubscribe", params)
-	if err != nil {
-		return nil, fmt.Errorf("program subscribe: encode request: %c", err)
-	}
-
-	err = c.conn.WriteMessage(websocket.TextMessage, data)
-	if err != nil {
-		return nil, fmt.Errorf("program subscribe: write message: %c", err)
-	}
-
-	c.pendingCallbacks[reqID(id)] = &callBackInfo{
-		stream:      stream,
-		reflectType: reflect.TypeOf(ProgramResult{}),
-	}
-
-	return stream, nil
-}
-
 type clientRequest struct {
 	Version string      `json:"jsonrpc"`
 	Method  string      `json:"method"`
@@ -196,4 +153,46 @@ func decodeClientResponse(r io.Reader, reply interface{}) (err error) {
 	}
 
 	return json.Unmarshal(*c.Params.Result, &reply)
+}
+
+type ProgramWSResult struct {
+	Context struct {
+		Slot uint64
+	} `json:"context"`
+	Value struct {
+		Account Account `json:"account"`
+	} `json:"value"`
+}
+
+func (c *WSClient) ProgramSubscribe(programID string, commitment CommitmentType) (stream chan result, err error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	stream = make(chan result, 200)
+
+	params := []interface{}{programID}
+	conf := map[string]interface{}{
+		"encoding": "jsonParsed",
+	}
+	if commitment != "" {
+		conf["commitment"] = string(commitment)
+	}
+
+	params = append(params, conf)
+	data, id, err := encodeClientRequest("programSubscribe", params)
+	if err != nil {
+		return nil, fmt.Errorf("program subscribe: encode request: %c", err)
+	}
+
+	err = c.conn.WriteMessage(websocket.TextMessage, data)
+	if err != nil {
+		return nil, fmt.Errorf("program subscribe: write message: %c", err)
+	}
+
+	c.pendingCallbacks[reqID(id)] = &callBackInfo{
+		stream:      stream,
+		reflectType: reflect.TypeOf(ProgramWSResult{}),
+	}
+
+	return stream, nil
 }
