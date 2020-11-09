@@ -4,6 +4,12 @@ release:
     owner: dfuse-io
     name: solana-go
   name_template: '{{.Tag}}'
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod download
+    # you may remove this if you don't need go generate
+    - go generate ./...
 builds:
 - goos:
   - linux
@@ -46,7 +52,7 @@ archives:
   - changelog*
   - CHANGELOG*
 nfpms:
-- name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
+- file_name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
     }}v{{ .Arm }}{{ end }}'
   bindir: /usr/local/bin
 snapcrafts:
