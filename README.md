@@ -5,6 +5,8 @@ Go library to interface with Solana nodes's JSON-RPC interface, Solana's SPL tok
 
 ## Installation
 
+> :warning: `solana-go` works using SemVer but in 0 version, which means that the 'minor' will be changed when some broken changes are introduced into the application, and the 'patch' will be changed when a new feature with new changes is added or for bug fixing. As soon as v1.0.0 be released, `solana-go` will start to use SemVer as usual.
+
 1. Install from https://github.com/dfuse-io/solana-go/releases
 
 **or**
@@ -16,7 +18,8 @@ go get -u -v github.com/dfuse-io/solana/cmd/slnc
 ```
 
 # Command-line
-```
+
+```bash
 $ slnc get balance EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 1461600 lamports
 
@@ -32,8 +35,7 @@ $ slnc get account EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
   "rentEpoch": 108
 }
 
-$ slnc spl get-mint  SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt
-
+$ slnc spl get-mint SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt
 Mint Authority Option:  0
 Mint Authority:  73uWQpzn1AmUZkZ7MhafSSwQJmNmQ3fN4guANBrXg8uD
 Supply:  9999709435300000
@@ -72,11 +74,13 @@ Bids
 ```
 
 # Library usage
+
 Loading a Serum market
 
 ```golang
 
 import "github.com/dfuse-io/solana-go/rpc"
+import "github.com/lunixbochs/struc"
 
 addr := solana.MustPublicKeyFromBase58("7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16")
 cli := rpc.NewClient("http://api.mainnet-beta.solana.com/rpc")
@@ -114,8 +118,9 @@ json.NewEncoder(os.Stdout).Encode(m)
 ```
 
 # Contributing
+
 Any contributions are welcome, use your standard GitHub-fu to pitch in and improve.
 
-License
--------
-Apache-2
+# License
+
+[Apache 2.0](LICENSE)
