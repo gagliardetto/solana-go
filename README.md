@@ -1,7 +1,7 @@
 # Solana library for Go
 
 Go library to interface with Solana nodes's JSON-RPC interface, Solana's SPL tokens and the
-[https://dex.projectserum.com](Serum DEX) instructions.  More contracts to come.
+[Serum DEX](https://dex.projectserum.com) instructions.  More contracts to come.
 
 ## Installation
 
