@@ -9,7 +9,7 @@ import (
 )
 
 var splListMintsCmd = &cobra.Command{
-	Use:   "list-mints",
+	Use:   "mints",
 	Short: "Lists mints",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// TODO: implement a different network argument,
@@ -32,5 +32,5 @@ var splListMintsCmd = &cobra.Command{
 }
 
 func init() {
-	splCmd.AddCommand(splListMintsCmd)
+	splListCmd.AddCommand(splListMintsCmd)
 }

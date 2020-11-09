@@ -10,7 +10,7 @@ import (
 )
 
 var splGetMintCmd = &cobra.Command{
-	Use:   "get-mint {mint_addr}",
+	Use:   "mint {mint_addr}",
 	Short: "Retrieves mint information",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -40,16 +40,16 @@ var splGetMintCmd = &cobra.Command{
 
 		var out []string
 
-		out = append(out, fmt.Sprintf("Data length | %d", len(acct.Value.Data)))
+		//out = append(out, fmt.Sprintf("Data length | %d", len(acct.Value.Data)))
+
+		out = append(out, fmt.Sprintf("Supply | %d", mint.Supply))
+		out = append(out, fmt.Sprintf("Decimals | %d", mint.Decimals))
 
 		if mint.MintAuthorityOption != 0 {
 			out = append(out, fmt.Sprintf("Mint Authority | %s", mint.MintAuthority))
 		} else {
 			out = append(out, "No mint authority")
 		}
-
-		out = append(out, fmt.Sprintf("Supply | %d", mint.Supply))
-		out = append(out, fmt.Sprintf("Decimals | %d", mint.Decimals))
 
 		if mint.FreezeAuthorityOption != 0 {
 			out = append(out, fmt.Sprintf("Freeze Authority | %s", mint.FreezeAuthority))
@@ -64,5 +64,5 @@ var splGetMintCmd = &cobra.Command{
 }
 
 func init() {
-	splCmd.AddCommand(splGetMintCmd)
+	splGetCmd.AddCommand(splGetMintCmd)
 }

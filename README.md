@@ -35,10 +35,10 @@ $ slnc get account EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
   "rentEpoch": 108
 }
 
-$ slnc spl get-mint SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt
-No mint authority
+$ slnc spl get mint SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt
 Supply               9999647664800000
 Decimals             6
+No mint authority
 No freeze authority
 
 $ slnc serum list markets
