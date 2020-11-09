@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"strings"
 
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/rpc"
@@ -30,34 +31,25 @@ var serumGetMarketCmd = &cobra.Command{
 			return fmt.Errorf("fetch market: %w", err)
 		}
 
+		asks, askSize, err := getOrderBook(ctx, market, cli, market.MarketV2.Asks, false)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve asks: %w", err)
+		}
+
+		bids, bidSize, err := getOrderBook(ctx, market, cli, market.MarketV2.Bids, true)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve bids: %w", err)
+		}
+		totalSize := new(big.Float).Add(askSize, bidSize)
+
 		output := []string{
 			"Price | Quantity | Depth",
 			"Asks",
 		}
-
-		asks, err := getOrderBook(ctx, market, cli, market.MarketV2.Asks, true)
-		if err != nil {
-			return fmt.Errorf("unable to retrieve asks: %w", err)
-		}
-		for _, a := range asks {
-			output = append(output, fmt.Sprintf("%s | %s",
-				a.price.String(),
-				a.quantity.String(),
-			))
-		}
-
+		output = append(output, outputOrderBook(asks, totalSize, true)...)
+		output = append(output, "------- | --------")
+		output = append(output, outputOrderBook(bids, totalSize, false)...)
 		output = append(output, "Bids")
-		bids, err := getOrderBook(ctx, market, cli, market.MarketV2.Bids, true)
-		if err != nil {
-			return fmt.Errorf("unable to retrieve bids: %w", err)
-		}
-		for _, b := range bids {
-			output = append(output, fmt.Sprintf("%s | %s",
-				b.price.String(),
-				b.quantity.String(),
-			))
-		}
-
 		fmt.Println(columnize.Format(output, nil))
 		return nil
 	},
@@ -68,7 +60,7 @@ type orderBookEntry struct {
 	quantity *big.Float
 }
 
-func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client, address solana.PublicKey, desc bool) (out []*orderBookEntry, err error) {
+func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client, address solana.PublicKey, desc bool) (out []*orderBookEntry, totalSize *big.Float, err error) {
 	var o serum.Orderbook
 	if err := cli.GetAccountDataIn(ctx, address, &o); err != nil {
 		return nil, fmt.Errorf("getting orderbook: %w", err)
@@ -76,6 +68,7 @@ func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client
 
 	limit := 20
 	levels := [][]*big.Int{}
+
 	o.Items(desc, func(node *serum.SlabLeafNode) error {
 		quantity := big.NewInt(int64(node.Quantity))
 		price := node.GetPrice()
@@ -90,9 +83,11 @@ func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client
 		return nil
 	})
 
+	totalSize = big.NewFloat(0)
 	for _, level := range levels {
 		price := market.PriceLotsToNumber(level[0])
 		qty := market.BaseSizeLotsToNumber(level[1])
+		totalSize = new(big.Float).Add(totalSize, qty)
 		out = append(out,
 			&orderBookEntry{
 				price:    price,
@@ -100,9 +95,58 @@ func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client
 			},
 		)
 	}
-	return out, nil
+	return out, totalSize, nil
 }
 
+func depth(value *big.Float) string {
+	v, _ := value.Int(nil)
+	return strings.Repeat("#", int(v.Int64()))
+}
+
+func outputOrderBook(entries []*orderBookEntry, totalSize *big.Float, reverse bool) (out []string) {
+	total := totalSize
+	if totalSize == nil {
+		total = new(big.Float).SetInt64(1)
+	}
+
+	type orderBookRow struct {
+		price    string
+		quantity string
+		depth    string
+	}
+
+	rows := []*orderBookRow{}
+	cumulativeSize := big.NewFloat(0)
+	for i := 0; i < len(entries); i++ {
+		entry := entries[i]
+		cumulativeSize = new(big.Float).Add(cumulativeSize, entry.quantity)
+		sizePercent := new(big.Float).Mul(new(big.Float).Quo(cumulativeSize, total), new(big.Float).SetInt64(100))
+		rows = append(rows, &orderBookRow{
+			price:    entry.price.String(),
+			quantity: entry.quantity.String(),
+			depth:    depth(sizePercent),
+		})
+	}
+
+	if reverse {
+		for i := len(entries) - 1; i >= 0; i-- {
+			out = append(out, fmt.Sprintf("%s | %s | %s",
+				rows[i].quantity,
+				rows[i].price,
+				rows[i].depth,
+			))
+		}
+		return
+	}
+	for i := 0; i < len(rows); i++ {
+		out = append(out, fmt.Sprintf("%s | %s | %s",
+			rows[i].quantity,
+			rows[i].price,
+			rows[i].depth,
+		))
+	}
+	return
+}
 func init() {
 	serumGetCmd.AddCommand(serumGetMarketCmd)
 }

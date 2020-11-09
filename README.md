@@ -1,7 +1,7 @@
 # Solana library for Go
 
 Go library to interface with Solana nodes's JSON-RPC interface, Solana's SPL tokens and the
-[https://dex.projectserum.com](Serum DEX) instructions.  More contracts to come.
+[Serum DEX](https://dex.projectserum.com) instructions.  More contracts to come.
 
 ## Installation
 
@@ -57,22 +57,29 @@ CREAM/USDC -> 2M8EBxFbLANnCoHydypL1jupnRHG782RofnvkatuKyLL
 ...
 
 $ slnc serum market 7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16
-Price   Quantity  Depth
+Price    Quantity  Depth
 Asks
 ...
-441.03  181.806
-440.99  200
-440.5   171.225
-440.22  50
+527.06   444.09    ####################
+393.314  443.52    ###############
+463.158  443.17    ###########
+200      442.63    ######
+234.503  442.54    ####
+50       441.86    ##
+61.563   441.47    #
+84.377   440.98
+-------  --------
+10       439.96
+193.303  439.24    ##
+50       438.94    ##
+0.5      438.87    ##
+247.891  437.65    #####
+458.296  436.99    #########
+452.693  435.68    ##############
+372.722  435.12    ##################
+0.043    431.94    ##################
 ...
-Bids
-...
-431.94  0.043
-430.31  625.865
-427.66  0.059
-423.43  0.078
 ```
-
 # Library usage
 
 Loading a Serum market
