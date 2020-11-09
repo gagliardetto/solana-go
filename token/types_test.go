@@ -69,15 +69,29 @@ func TestMint(t *testing.T) {
 
 	addr := solana.MustPublicKeyFromBase58("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
 	cli := rpc.NewClient("http://api.mainnet-beta.solana.com/rpc")
-	acct, err := cli.GetAccountInfo(context.Background(), addr)
+
+	var m Mint
+	err := cli.GetAccountDataIn(context.Background(), addr, &m)
 	// handle `err`
 	require.NoError(t, err)
 
-	var m Mint
-	err = m.Decode(acct.Value.Data)
-	// handle err
-
 	json.NewEncoder(os.Stdout).Encode(m)
+	// {"OwnerOption":1,
+	//  "Owner":"2wmVCSfPxGPjrnMMn7rchp4uaeoTqN39mXFC2zhPdri9",
+	//  "Decimals":128,
+	//  "IsInitialized":true}
+}
+
+func TestRawMint(t *testing.T) {
+
+	addr := solana.MustPublicKeyFromBase58("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
+	cli := rpc.NewClient("http://api.mainnet-beta.solana.com/rpc")
+
+	resp, err := cli.GetAccountInfo(context.Background(), addr)
+	// handle `err`
+	require.NoError(t, err)
+
+	json.NewEncoder(os.Stdout).Encode(resp)
 	// {"OwnerOption":1,
 	//  "Owner":"2wmVCSfPxGPjrnMMn7rchp4uaeoTqN39mXFC2zhPdri9",
 	//  "Decimals":128,
