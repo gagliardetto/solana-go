@@ -110,8 +110,6 @@ type KeyedAccount struct {
 type GetProgramAccountsResult []*KeyedAccount
 
 type GetProgramAccountsOpts struct {
-	Encoding string `json:"encoding,omitempty"`
-
 	Commitment CommitmentType `json:"commitment,omitempty"`
 
 	// Filter on accounts, implicit AND between filters
