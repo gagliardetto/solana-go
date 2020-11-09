@@ -57,27 +57,18 @@ var serumMarketCmd = &cobra.Command{
 			"Price | Quantity | Depth",
 		}
 
-		//var highestQuantity uint64
-		//var sumQty uint64
-		//o.Items(true, func(node *serum.SlabLeafNode) error {
-		//	if uint64(node.Quantity) > highestQuantity {
-		//		highestQuantity = uint64(node.Quantity)
-		//	}
-		//	sumQty += uint64(node.Quantity)
-		//	return nil
-		//})
-
 		limit := 20
 		levels := [][]*big.Int{}
 		o.Items(true, func(node *serum.SlabLeafNode) error {
 			quantity := big.NewInt(int64(node.Quantity))
-			if len(levels) > 0 && levels[len(levels)-1][0].Cmp(node.Price.BigInt()) == 0 {
+			price := node.GetPrice()
+			if len(levels) > 0 && levels[len(levels)-1][0].Cmp(price) == 0 {
 				current := levels[len(levels)-1][1]
 				levels[len(levels)-1][1] = new(big.Int).Add(current, quantity)
 			} else if len(levels) == limit {
 				return fmt.Errorf("done")
 			} else {
-				levels = append(levels, []*big.Int{node.Price.BigInt(), quantity})
+				levels = append(levels, []*big.Int{price, quantity})
 			}
 			return nil
 		})

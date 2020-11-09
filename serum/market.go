@@ -28,35 +28,29 @@ func (m *MarketMeta) quoteSplTokenMultiplier() *big.Int {
 	return solana.DecimalsInBigInt(uint32(m.QuoteMint.Decimals))
 }
 
-func divideBnToNumber(numerator, denomiator *big.Int) *big.Int {
-	quotient := new(big.Int).Quo(numerator, denomiator)
-	rem := new(big.Int).Mod(numerator, denomiator)
-	gcd := new(big.Int).GCD(nil, nil, rem, denomiator)
-	n1 := new(big.Int).Quo(rem, gcd)
-	d1 := new(big.Int).Quo(denomiator, gcd)
-	div1 := new(big.Int).Quo(n1, d1)
-	return new(big.Int).Add(quotient, div1)
+func divideBnToNumber(numerator, denomiator *big.Float) *big.Float {
+	return F().Quo(numerator, denomiator)
 }
 
-func (m *MarketMeta) PriceLotsToNumber(price *big.Int) *big.Int {
-	ratio := new(big.Int).Mul(big.NewInt(int64(m.MarketV2.QuoteLotSize)), m.baseSplTokenMultiplier())
-	numerator := new(big.Int).Mul(price, ratio)
-	denomiator := new(big.Int).Mul(big.NewInt(int64(m.MarketV2.BaseLotSize)), m.quoteSplTokenMultiplier())
-	return divideBnToNumber(numerator, denomiator)
+func (m *MarketMeta) PriceLotsToNumber(price *big.Int) *big.Float {
+	ratio := I().Mul(I().SetInt64(int64(m.MarketV2.QuoteLotSize)), m.baseSplTokenMultiplier())
+	numerator := F().Mul(F().SetInt(price), F().SetInt(ratio))
+	denomiator := F().Mul(F().SetFloat64(float64(m.MarketV2.BaseLotSize)), F().SetInt(m.quoteSplTokenMultiplier()))
+	v := divideBnToNumber(numerator, denomiator)
+	return v
 }
 
 func (m *MarketMeta) BaseSizeLotsToNumber(size *big.Int) *big.Float {
-	numerator := new(big.Int).Mul(size, big.NewInt(int64(m.MarketV2.BaseLotSize)))
+	numerator := I().Mul(size, I().SetInt64(int64(m.MarketV2.BaseLotSize)))
 	denomiator := m.baseSplTokenMultiplier()
-	return new(big.Float).Quo(new(big.Float).SetInt(numerator), new(big.Float).SetInt(denomiator))
+	return F().Quo(F().SetInt(numerator), F().SetInt(denomiator))
 }
 
 func (m *MarketMeta) PriceNumberToLots(price *big.Int) *big.Float {
-	numerator := new(big.Int).Mul(price, m.quoteSplTokenMultiplier())
-	numerator = new(big.Int).Mul(numerator, big.NewInt(int64(m.MarketV2.BaseLotSize)))
-
-	denomiator := new(big.Int).Mul(m.baseSplTokenMultiplier(), big.NewInt(int64(m.MarketV2.QuoteLotSize)))
-	return new(big.Float).Quo(new(big.Float).SetInt(numerator), new(big.Float).SetInt(denomiator))
+	numerator := I().Mul(price, m.quoteSplTokenMultiplier())
+	numerator = I().Mul(numerator, big.NewInt(int64(m.MarketV2.BaseLotSize)))
+	denomiator := I().Mul(m.baseSplTokenMultiplier(), I().SetInt64(int64(m.MarketV2.QuoteLotSize)))
+	return F().Quo(F().SetInt(numerator), F().SetInt(denomiator))
 }
 
 func KnownMarket() ([]*MarketMeta, error) {
@@ -73,4 +67,12 @@ func KnownMarket() ([]*MarketMeta, error) {
 		return nil, fmt.Errorf("unable to decode known markets: %w", err)
 	}
 	return markets, nil
+}
+
+func I() *big.Int {
+	return new(big.Int)
+}
+
+func F() *big.Float {
+	return new(big.Float)
 }

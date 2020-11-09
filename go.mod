@@ -3,6 +3,8 @@ module github.com/dfuse-io/solana-go
 go 1.14
 
 require (
+	github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6 // indirect
+	github.com/davecgh/go-spew v1.1.1
 	github.com/dfuse-io/logging v0.0.0-20201023175426-d0173f8508dc
 	github.com/dfuse-io/slnc v0.0.0-20201106145424-57968f2253be
 	github.com/google/go-cmp v0.4.1 // indirect

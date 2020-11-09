@@ -3,6 +3,9 @@ package serum
 import (
 	"bytes"
 	"fmt"
+	"math/big"
+
+	"go.uber.org/zap"
 
 	"github.com/dfuse-io/solana-go"
 	"github.com/lunixbochs/struc"
@@ -85,6 +88,9 @@ func (o *Orderbook) Items(descending bool, f func(node *SlabLeafNode) error) err
 	stack := []uint32{o.Root}
 	for len(stack) > 0 {
 		index, stack = stack[len(stack)-1], stack[:len(stack)-1]
+		if traceEnabled {
+			zlog.Debug("looking at slab index", zap.Int("index", int(index)))
+		}
 		slab := o.Nodes[index]
 		impl, err := slab.Variant()
 		if err != nil {
@@ -98,6 +104,9 @@ func (o *Orderbook) Items(descending bool, f func(node *SlabLeafNode) error) err
 				stack = append(stack, s.Children[1], s.Children[0])
 			}
 		case *SlabLeafNode:
+			if traceEnabled {
+				zlog.Debug("found leaf", zap.Int("leaf", int(index)))
+			}
 			f(s)
 		}
 	}
@@ -135,11 +144,12 @@ type SlabUninitialized struct {
 }
 
 type SlabInnerNode struct {
-	PrefixLen uint32 `struc:"uint32,little"`
-	// this corresponds to the uint128 key
-	KeySeq   solana.U64 `struc:"uint64,little"`
-	KeyPrice solana.U64 `struc:"uint64,little"`
-	Children []uint32   `struc:"[2]uint32,little"`
+	//    u32('prefixLen'),
+	//    u128('key'),
+	//    seq(u32(), 2, 'children'),
+	PrefixLen uint32      `struc:"uint32,little"`
+	Key       solana.U128 `struc:"[16]byte,little"`
+	Children  []uint32    `struc:"[2]uint32,little"`
 }
 
 type SlabLeafNode struct {
@@ -150,17 +160,22 @@ type SlabLeafNode struct {
 	//publicKeyLayout('owner'), // Open orders account
 	//u64('quantity'), // In units of lot size
 	//u64('clientOrderId'),
-	OwnerSlot uint8   `struc:"uint8,little"`
-	FeeTier   uint8   `struc:"uint8,little"`
-	Padding   [2]byte `json:"-" struc:"[2]pad"`
-
-	Price solana.U128 `struc:"[16]byte,little"`
-	//KeySeq   solana.U64 `struc:"uint64",little"`
-	//KeyPrice solana.U64 `struc:"uint64",little"`
-
+	OwnerSlot     uint8       `struc:"uint8,little"`
+	FeeTier       uint8       `struc:"uint8,little"`
+	Padding       [2]byte     `json:"-" struc:"[2]pad"`
+	Key           solana.U128 `struc:"[16]byte,little"`
 	Owner         solana.PublicKey
 	Quantity      solana.U64 `struc:"uint64,little"`
 	ClientOrderId solana.U64 `struc:"uint64,little"`
+}
+
+func (s *SlabLeafNode) GetPrice() *big.Int {
+	raw := s.Key.BigInt().Bytes()
+	if len(raw) <= 8 {
+		return big.NewInt(0)
+	}
+	v := new(big.Int).SetBytes(raw[0 : len(raw)-8])
+	return v
 }
 
 type SlabFreeNode struct {

@@ -15,8 +15,6 @@ type SystemInstruction struct {
 }
 
 func (si *SystemInstruction) Unpack(r io.Reader, length int, opt *struc.Options) (err error) {
-	fmt.Println("CALLING OUR SI UNPACK", length)
-
 	if err = struc.Unpack(r, &si.Type); err != nil {
 		return
 	}
@@ -83,7 +81,9 @@ func (si SystemInstruction) Size(opt *struc.Options) int {
 	return s1 + s2
 }
 
-func (si SystemInstruction) String() string { return fmt.Sprintf("variant %d, %T", si.Type, si.Variant) }
+func (si SystemInstruction) String() string {
+	return fmt.Sprintf("variant %d, %T", si.Type, si.Variant)
+}
 
 type CreateAccount struct {
 	// prefixed with byte 0x00
