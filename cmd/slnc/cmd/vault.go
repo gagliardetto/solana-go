@@ -9,7 +9,3 @@ var vaultCmd = &cobra.Command{
 	Use:   "vault",
 	Short: "The solana-go Vault is a secure Solana key vault",
 }
-
-func init() {
-	RootCmd.AddCommand(vaultCmd)
-}
