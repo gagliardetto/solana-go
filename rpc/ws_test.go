@@ -26,7 +26,7 @@ func TestWSClient_ProgramSubscribe(t *testing.T) {
 	c, err := NewWSClient("ws://api.mainnet-beta.solana.com:80/rpc")
 	require.NoError(t, err)
 
-	stream, err := c.ProgramSubscribe("EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o", "")
+	stream, _, err := c.ProgramSubscribe("EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o", "")
 	require.NoError(t, err)
 
 	select {

@@ -178,7 +178,7 @@ type ProgramWSResult struct {
 	} `json:"value"`
 }
 
-func (c *WSClient) ProgramSubscribe(programID string, commitment CommitmentType) (stream chan result, err error) {
+func (c *WSClient) ProgramSubscribe(programID string, commitment CommitmentType) (stream chan result, id uint64, err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -195,12 +195,12 @@ func (c *WSClient) ProgramSubscribe(programID string, commitment CommitmentType)
 	params = append(params, conf)
 	data, id, err := encodeClientRequest("programSubscribe", params)
 	if err != nil {
-		return nil, fmt.Errorf("program subscribe: encode request: %c", err)
+		return nil, 0, fmt.Errorf("program subscribe: encode request: %c", err)
 	}
 
 	err = c.conn.WriteMessage(websocket.TextMessage, data)
 	if err != nil {
-		return nil, fmt.Errorf("program subscribe: write message: %c", err)
+		return nil, 0, fmt.Errorf("program subscribe: write message: %c", err)
 	}
 
 	c.pendingCallbacks[reqID(id)] = &callBackInfo{
@@ -208,5 +208,7 @@ func (c *WSClient) ProgramSubscribe(programID string, commitment CommitmentType)
 		reflectType: reflect.TypeOf(ProgramWSResult{}),
 	}
 
-	return stream, nil
+	return stream, id, nil
 }
+
+func (c *WSClient) ProgramUnsubscribe(reqID int) {}
