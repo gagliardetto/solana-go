@@ -15,33 +15,36 @@
 package cmd
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 
+	"github.com/dfuse-io/solana-go/serum"
+	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 )
 
-var getRecentBlockhashCmd = &cobra.Command{
-	Use:   "recent-blockhash",
-	Short: "Retrieve a recent blockhash, needed for crafting transactions",
+var serumListMarketsCmd = &cobra.Command{
+	Use:   "markets",
+	Short: "Get serum markets",
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client := getClient()
-		ctx := context.Background()
 
-		resp, err := client.GetRecentBlockhash(ctx, "")
+		markets, err := serum.KnownMarket()
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to retrieve markets: %w", err)
 		}
 
-		cnt, _ := json.MarshalIndent(resp.Value, "", "  ")
-		fmt.Println(string(cnt))
+		out := []string{"Pairs | Market Address"}
+
+		for _, market := range markets {
+			out = append(out, fmt.Sprintf("%s | %s ", market.Name, market.Address.String()))
+		}
+
+		fmt.Println(columnize.Format(out, nil))
 
 		return nil
 	},
 }
 
 func init() {
-	getCmd.AddCommand(getRecentBlockhashCmd)
+	serumListCmd.AddCommand(serumListMarketsCmd)
 }

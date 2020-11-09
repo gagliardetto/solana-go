@@ -1,6 +1,21 @@
+// Copyright 2020 dfuse Platform Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package solana
 
 import (
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -137,6 +152,41 @@ func (t *Base58) UnmarshalJSON(data []byte) (err error) {
 
 func (t Base58) String() string {
 	return base58.Encode(t)
+}
+
+///
+
+type Data []byte
+
+func (t Data) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]interface{}{
+		"data":     []byte(t),
+		"encoding": "base64",
+	})
+}
+
+func (t *Data) UnmarshalJSON(data []byte) (err error) {
+	var in []string
+	if err := json.Unmarshal(data, &in); err != nil {
+		return err
+	}
+
+	if len(in) != 2 {
+		return fmt.Errorf("invalid length for solana.Data, expected 2, found %d", len(in))
+	}
+
+	if in[1] == "base64" {
+		*t, err = base64.StdEncoding.DecodeString(in[0])
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return fmt.Errorf("unsupported encoding %s", in[1])
+}
+
+func (t Data) String() string {
+	return base64.StdEncoding.EncodeToString(t)
 }
 
 ///

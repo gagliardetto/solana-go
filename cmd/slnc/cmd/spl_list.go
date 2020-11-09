@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cmd
 
 import (
-	"github.com/dfuse-io/solana-go/cmd/slnc/cmd"
+	"github.com/spf13/cobra"
 )
 
-var version = "dev"
-
-func init() {
-	cmd.Version = version
+var splListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "Retrieves SPL token objects",
 }
 
-func main() {
-	cmd.Execute()
+func init() {
+	splCmd.AddCommand(splListCmd)
 }

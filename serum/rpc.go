@@ -1,3 +1,17 @@
+// Copyright 2020 dfuse Platform Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package serum
 
 import (
@@ -9,8 +23,6 @@ import (
 	rice "github.com/GeertJohan/go.rice"
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/rpc"
-	"github.com/dfuse-io/solana-go/token"
-	"github.com/lunixbochs/struc"
 )
 
 //go:generate rice embed-go
@@ -32,37 +44,39 @@ func KnownMarket() ([]*MarketMeta, error) {
 }
 
 func FetchMarket(ctx context.Context, rpcCli *rpc.Client, marketAddr solana.PublicKey) (*MarketMeta, error) {
-	accInfo, err := rpcCli.GetAccountInfo(ctx, marketAddr)
+	acctInfo, err := rpcCli.GetAccountInfo(ctx, marketAddr)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get market account:%w", err)
 	}
 
-	accountData, err := accInfo.Value.DataToBytes()
-	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve account data byte: %w", err)
+	meta := &MarketMeta{
+		Address: marketAddr,
 	}
 
-	var m MarketV2
-	err = struc.Unpack(bytes.NewReader(accountData), &m)
-	if err != nil {
-		return nil, fmt.Errorf("unable to decode market: %w", err)
+	dataLen := len(acctInfo.Value.Data)
+	switch dataLen {
+	// case 380:
+	// 	// if err := meta.MarketV1.Decode(acctInfo.Value.Data); err != nil {
+	// 	// 	return nil, fmt.Errorf("decoding market v1: %w", err)
+	// 	// }
+	// 	return nil, fmt.Errorf("Unsupported market version, w/ data length of 380")
+
+	case 388:
+		if err := meta.MarketV2.Decode(acctInfo.Value.Data); err != nil {
+			return nil, fmt.Errorf("decoding market v2: %w", err)
+		}
+
+	default:
+		return nil, fmt.Errorf("unsupported market data length: %d", dataLen)
 	}
 
-	baseMint, err := token.GetMint(ctx, rpcCli, m.BaseMint)
-	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve base token: %w", err)
+	if err := rpcCli.GetAccountDataIn(ctx, meta.MarketV2.QuoteMint, &meta.QuoteMint); err != nil {
+		return nil, fmt.Errorf("getting quote mint: %w", err)
 	}
 
-	quoteMint, err := token.GetMint(ctx, rpcCli, m.QuoteMint)
-	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve base token: %w", err)
+	if err := rpcCli.GetAccountDataIn(ctx, meta.MarketV2.BaseMint, &meta.BaseMint); err != nil {
+		return nil, fmt.Errorf("getting base token: %w", err)
 	}
 
-	return &MarketMeta{
-		Address:   marketAddr,
-		MarketV2:  &m,
-		QuoteMint: quoteMint,
-		BaseMint:  baseMint,
-	}, nil
-
+	return meta, nil
 }

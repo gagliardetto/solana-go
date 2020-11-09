@@ -1,7 +1,20 @@
+// Copyright 2020 dfuse Platform Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cmd
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"math/big"
@@ -10,12 +23,11 @@ import (
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/rpc"
 	"github.com/dfuse-io/solana-go/serum"
-	"github.com/lunixbochs/struc"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 )
 
-var serumMarketCmd = &cobra.Command{
+var serumGetMarketCmd = &cobra.Command{
 	Use:   "market {market_addr}",
 	Short: "Get Serum orderbook for a given market",
 	Args:  cobra.ExactArgs(1),
@@ -63,18 +75,9 @@ type orderBookEntry struct {
 }
 
 func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client, address solana.PublicKey, desc bool) (out []*orderBookEntry, totalSize *big.Float, err error) {
-	bids, err := cli.GetAccountInfo(ctx, address)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed retrieving account: %w", err)
-	}
-
-	data, err := bids.Value.DataToBytes()
-	if err != nil {
-		return nil, nil, fmt.Errorf("decoding account data: %w", err)
-	}
 	var o serum.Orderbook
-	if err := struc.Unpack(bytes.NewReader(data), &o); err != nil {
-		return nil, nil, fmt.Errorf("decoding bid orderbook data: %w", err)
+	if err := cli.GetAccountDataIn(ctx, address, &o); err != nil {
+		return nil, nil, fmt.Errorf("getting orderbook: %w", err)
 	}
 
 	limit := 20
@@ -159,5 +162,5 @@ func outputOrderBook(entries []*orderBookEntry, totalSize *big.Float, reverse bo
 	return
 }
 func init() {
-	serumCmd.AddCommand(serumMarketCmd)
+	serumGetCmd.AddCommand(serumGetMarketCmd)
 }

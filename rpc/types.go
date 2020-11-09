@@ -1,9 +1,20 @@
+// Copyright 2020 dfuse Platform Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rpc
 
 import (
-	"encoding/base64"
-	"fmt"
-
 	"github.com/dfuse-io/solana-go"
 )
 
@@ -85,22 +96,10 @@ type GetAccountInfoResult struct {
 
 type Account struct {
 	Lamports   solana.U64       `json:"lamports"`
-	Data       []string         `json:"data"`
+	Data       solana.Data      `json:"data"`
 	Owner      solana.PublicKey `json:"owner"`
 	Executable bool             `json:"executable"`
 	RentEpoch  solana.U64       `json:"rentEpoch"`
-}
-
-func (a *Account) MustDataToBytes() []byte {
-	d, err := a.DataToBytes()
-	if err != nil {
-		panic(fmt.Sprintf("failed to base64 decode: %s", err))
-	}
-	return d
-}
-
-func (a *Account) DataToBytes() ([]byte, error) {
-	return base64.StdEncoding.DecodeString(a.Data[0])
 }
 
 type KeyedAccount struct {

@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cmd
 
 import (
-	"github.com/dfuse-io/solana-go/cmd/slnc/cmd"
+	"github.com/spf13/cobra"
 )
 
-var version = "dev"
-
-func init() {
-	cmd.Version = version
+var serumGetCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Get Serum objects",
 }
 
-func main() {
-	cmd.Execute()
+func init() {
+	serumCmd.AddCommand(serumGetCmd)
 }
