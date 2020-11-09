@@ -6,6 +6,8 @@ require (
 	github.com/dfuse-io/logging v0.0.0-20201023175426-d0173f8508dc
 	github.com/dfuse-io/slnc v0.0.0-20201106145424-57968f2253be
 	github.com/google/go-cmp v0.4.1 // indirect
+	github.com/gorilla/rpc v1.2.0
+	github.com/gorilla/websocket v1.4.2
 	github.com/lunixbochs/struc v0.0.0-20200707160740-784aaebc1d40
 	github.com/mr-tron/base58 v1.2.0
 	github.com/onsi/gomega v1.10.1 // indirect
