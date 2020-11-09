@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"math/big"
@@ -9,12 +8,11 @@ import (
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/rpc"
 	"github.com/dfuse-io/solana-go/serum"
-	"github.com/lunixbochs/struc"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 )
 
-var serumMarketCmd = &cobra.Command{
+var serumGetMarketCmd = &cobra.Command{
 	Use:   "market {market_addr}",
 	Short: "Get Serum orderbook for a given market",
 	Args:  cobra.ExactArgs(1),
@@ -71,18 +69,9 @@ type orderBookEntry struct {
 }
 
 func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client, address solana.PublicKey, desc bool) (out []*orderBookEntry, err error) {
-	bids, err := cli.GetAccountInfo(ctx, address)
-	if err != nil {
-		return nil, fmt.Errorf("failed retrieving account: %w", err)
-	}
-
-	data, err := bids.Value.DataToBytes()
-	if err != nil {
-		return nil, fmt.Errorf("decoding account data: %w", err)
-	}
 	var o serum.Orderbook
-	if err := struc.Unpack(bytes.NewReader(data), &o); err != nil {
-		return nil, fmt.Errorf("decoding bid orderbook data: %w", err)
+	if err := cli.GetAccountDataIn(ctx, address, &o); err != nil {
+		return nil, fmt.Errorf("getting orderbook: %w", err)
 	}
 
 	limit := 20
@@ -115,5 +104,5 @@ func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client
 }
 
 func init() {
-	serumCmd.AddCommand(serumMarketCmd)
+	serumGetCmd.AddCommand(serumGetMarketCmd)
 }

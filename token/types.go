@@ -1,6 +1,12 @@
 package token
 
-import "github.com/dfuse-io/solana-go"
+import (
+	"bytes"
+	"fmt"
+
+	"github.com/dfuse-io/solana-go"
+	"github.com/lunixbochs/struc"
+)
 
 // Token contract interface
 
@@ -48,4 +54,20 @@ type Mint struct {
 	IsInitialized         bool
 	FreezeAuthorityOption uint32           `struc:"uint32,little"`
 	FreezeAuthority       solana.PublicKey `struc:"[32]byte"`
+}
+
+func DecodeMint(in []byte) (*Mint, error) {
+	var m Mint
+	err := struc.Unpack(bytes.NewReader(in), &m)
+	if err != nil {
+		return nil, fmt.Errorf("unpack: %w", err)
+	}
+	return &m, nil
+}
+
+type MintMeta struct {
+	TokenSymbol string
+	MintAddress solana.PublicKey
+	TokenName   string
+	IconURL     string `json:"icon"`
 }

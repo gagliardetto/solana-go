@@ -1,9 +1,6 @@
 package rpc
 
 import (
-	"encoding/base64"
-	"fmt"
-
 	"github.com/dfuse-io/solana-go"
 )
 
@@ -85,22 +82,10 @@ type GetAccountInfoResult struct {
 
 type Account struct {
 	Lamports   solana.U64       `json:"lamports"`
-	Data       []string         `json:"data"`
+	Data       solana.Data      `json:"data"`
 	Owner      solana.PublicKey `json:"owner"`
 	Executable bool             `json:"executable"`
 	RentEpoch  solana.U64       `json:"rentEpoch"`
-}
-
-func (a *Account) MustDataToBytes() []byte {
-	d, err := a.DataToBytes()
-	if err != nil {
-		panic(fmt.Sprintf("failed to base64 decode: %s", err))
-	}
-	return d
-}
-
-func (a *Account) DataToBytes() ([]byte, error) {
-	return base64.StdEncoding.DecodeString(a.Data[0])
 }
 
 type KeyedAccount struct {

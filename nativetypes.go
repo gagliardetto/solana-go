@@ -1,6 +1,7 @@
 package solana
 
 import (
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -137,6 +138,41 @@ func (t *Base58) UnmarshalJSON(data []byte) (err error) {
 
 func (t Base58) String() string {
 	return base58.Encode(t)
+}
+
+///
+
+type Data []byte
+
+func (t Data) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]interface{}{
+		"data":     []byte(t),
+		"encoding": "base64",
+	})
+}
+
+func (t *Data) UnmarshalJSON(data []byte) (err error) {
+	var in []string
+	if err := json.Unmarshal(data, &in); err != nil {
+		return err
+	}
+
+	if len(in) != 2 {
+		return fmt.Errorf("invalid length for solana.Data, expected 2, found %d", len(in))
+	}
+
+	if in[1] == "base64" {
+		*t, err = base64.StdEncoding.DecodeString(in[0])
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return fmt.Errorf("unsupported encoding %s", in[1])
+}
+
+func (t Data) String() string {
+	return base64.StdEncoding.EncodeToString(t)
 }
 
 ///

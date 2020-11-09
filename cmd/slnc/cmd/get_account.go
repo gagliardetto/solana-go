@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/dfuse-io/solana-go"
@@ -24,10 +23,6 @@ var getAccountCmd = &cobra.Command{
 			return err
 		}
 
-		if resp.Value == nil {
-			errorCheck("not found", errors.New("account not found"))
-		}
-
 		acct := resp.Value
 
 		data, err := json.MarshalIndent(acct, "", "  ")
@@ -35,7 +30,7 @@ var getAccountCmd = &cobra.Command{
 
 		fmt.Println(string(data))
 
-		obj, err := decode(acct.Owner, acct.MustDataToBytes())
+		obj, err := decode(acct.Owner, acct.Data)
 		if err != nil {
 			return err
 		}

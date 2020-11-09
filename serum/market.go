@@ -11,10 +11,10 @@ type MarketMeta struct {
 	Address    solana.PublicKey `json:"address"`
 	Name       string           `json:"name"`
 	Deprecated bool             `json:"deprecated"`
-	QuoteMint  *token.Mint
-	BaseMint   *token.Mint
+	QuoteMint  token.Mint
+	BaseMint   token.Mint
 
-	MarketV2 *MarketV2
+	MarketV2 MarketV2
 }
 
 func (m *MarketMeta) baseSplTokenMultiplier() *big.Int {

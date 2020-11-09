@@ -3,28 +3,36 @@ package token
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 
+	rice "github.com/GeertJohan/go.rice"
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/rpc"
-	"github.com/lunixbochs/struc"
 )
 
+//go:generate rice embed-go
+
+func KnownMints(network string) ([]*MintMeta, error) {
+	box := rice.MustFindBox("mints-data").MustBytes(network + "-tokens.json")
+	if box == nil {
+		return nil, fmt.Errorf("unable to retrieve known markets")
+	}
+
+	dec := json.NewDecoder(bytes.NewReader(box))
+	var markets []*MintMeta
+	err := dec.Decode(&markets)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode known markets: %w", err)
+	}
+	return markets, nil
+}
+
 func GetMint(ctx context.Context, cli *rpc.Client, mintPubKey solana.PublicKey) (*Mint, error) {
-	accInfo, err := cli.GetAccountInfo(ctx, mintPubKey)
+	acctInfo, err := cli.GetAccountInfo(ctx, mintPubKey)
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve base mint: %w", err)
 	}
 
-	accountData, err := accInfo.Value.DataToBytes()
-	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve account data byte: %w", err)
-	}
-
-	var m Mint
-	err = struc.Unpack(bytes.NewReader(accountData), &m)
-	if err != nil {
-		return nil, fmt.Errorf("unable to decode market: %w", err)
-	}
-	return &m, nil
+	return DecodeMint(acctInfo.Value.Data)
 }

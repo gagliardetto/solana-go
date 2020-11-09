@@ -61,8 +61,8 @@ func TestMint(t *testing.T) {
 	require.NoError(t, err)
 
 	var m Mint
-	err = struc.Unpack(bytes.NewReader(acct.Value.MustDataToBytes()), &m)
-	// handle `err`
+	err = m.Decode(acct.Value.Data)
+	// handle err
 
 	json.NewEncoder(os.Stdout).Encode(m)
 	// {"OwnerOption":1,

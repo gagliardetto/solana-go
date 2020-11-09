@@ -1,13 +1,18 @@
 package rpc
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"net/http"
 
 	//"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go"
+	"github.com/lunixbochs/struc"
 	"github.com/ybbus/jsonrpc"
 )
+
+var ErrNotFound = errors.New("not found")
 
 type Client struct {
 	rpcURL    string
@@ -79,7 +84,24 @@ func (c *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) (
 	params := []interface{}{account, obj}
 
 	err = c.rpcClient.CallFor(&out, "getAccountInfo", params...)
-	return
+	if err != nil {
+		return nil, err
+	}
+
+	if out.Value == nil {
+		return nil, ErrNotFound
+	}
+
+	return out, nil
+}
+
+func (c *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey, inVar interface{}) (err error) {
+	resp, err := c.GetAccountInfo(ctx, account)
+	if err != nil {
+		return err
+	}
+
+	return struc.Unpack(bytes.NewReader(resp.Value.Data), inVar)
 }
 
 func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.PublicKey, opts *GetProgramAccountsOpts) (out GetProgramAccountsResult, err error) {

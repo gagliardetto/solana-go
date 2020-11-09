@@ -61,6 +61,14 @@ type MarketV2 struct {
 	EndPadding             [7]byte          `json:"-" struc:"[7]pad"`
 }
 
+func (m *MarketV2) Decode(in []byte) error {
+	err := struc.Unpack(bytes.NewReader(in), m)
+	if err != nil {
+		return fmt.Errorf("unpack: %w", err)
+	}
+	return nil
+}
+
 type Orderbook struct {
 	// ORDERBOOK_LAYOUT
 	SerumPadding [5]byte    `json:"-" struc:"[5]pad"`

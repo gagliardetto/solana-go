@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	"github.com/dfuse-io/solana-go/serum"
+	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 )
 
-var serumMarketsCmd = &cobra.Command{
+var serumListMarketsCmd = &cobra.Command{
 	Use:   "markets",
 	Short: "Get serum markets",
 	Args:  cobra.ExactArgs(0),
@@ -18,14 +19,18 @@ var serumMarketsCmd = &cobra.Command{
 			return fmt.Errorf("unable to retrieve markets: %w", err)
 		}
 
+		out := []string{"Pairs | Market Address"}
+
 		for _, market := range markets {
-			fmt.Printf("%s -> %s\n", market.Name, market.Address.String())
+			out = append(out, fmt.Sprintf("%s | %s ", market.Name, market.Address.String()))
 		}
+
+		fmt.Println(columnize.Format(out, nil))
 
 		return nil
 	},
 }
 
 func init() {
-	serumCmd.AddCommand(serumMarketsCmd)
+	serumListCmd.AddCommand(serumListMarketsCmd)
 }
