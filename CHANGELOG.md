@@ -17,4 +17,7 @@ First release
 
 # Includes the following features:
 
-*
+* Get basic information from the chain about accounts, balances, etc.
+* Issue SOL native token transfer
+* Issue SPL token transfers
+* Get Project SERUM markets list and live market data
