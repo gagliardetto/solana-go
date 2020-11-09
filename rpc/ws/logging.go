@@ -12,34 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rpc
+package ws
 
 import (
-	"context"
-	"fmt"
-	"testing"
+	"os"
 
+	"github.com/dfuse-io/logging"
 	"go.uber.org/zap"
-
-	"github.com/stretchr/testify/require"
 )
 
-func TestWSClient_ProgramSubscribe(t *testing.T) {
-	zlog, _ = zap.NewDevelopment()
+var traceEnabled = os.Getenv("TRACE") == "true"
+var zlog *zap.Logger
 
-	c, err := Dial(context.Background(), "ws://api.mainnet-beta.solana.com:80/rpc")
-	defer c.Close()
-	require.NoError(t, err)
-
-	sub, err := c.ProgramSubscribe("EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o", "")
-	require.NoError(t, err)
-
-	data, err := sub.Recv()
-	if err != nil {
-		fmt.Println("receive an error: ", err)
-		return
-	}
-	fmt.Println("data received: ", data.(*ProgramWSResult).Value.Account.Owner)
-	return
-
+func init() {
+	logging.Register("github.com/dfuse-io/solana-go/rpc/ws", &zlog)
 }

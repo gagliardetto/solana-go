@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rpc
+package ws
 
 import (
 	"bytes"
@@ -20,10 +20,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
 	"reflect"
 	"sync"
 
+	"github.com/dfuse-io/solana-go/rpc"
 	"github.com/gorilla/rpc/v2/json2"
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
@@ -32,7 +32,7 @@ import (
 
 type result interface{}
 
-type WSClient struct {
+type Client struct {
 	rpcURL                  string
 	conn                    *websocket.Conn
 	lock                    sync.RWMutex
@@ -41,8 +41,8 @@ type WSClient struct {
 	reconnectOnErr          bool
 }
 
-func Dial(ctx context.Context, rpcURL string) (c *WSClient, err error) {
-	c = &WSClient{
+func Dial(ctx context.Context, rpcURL string) (c *Client, err error) {
+	c = &Client{
 		rpcURL:                  rpcURL,
 		subscriptionByRequestID: map[uint64]*Subscription{},
 		subscriptionByWSSubID:   map[uint64]*Subscription{},
@@ -57,11 +57,11 @@ func Dial(ctx context.Context, rpcURL string) (c *WSClient, err error) {
 	return c, nil
 }
 
-func (c *WSClient) Close() {
+func (c *Client) Close() {
 	c.conn.Close()
 }
 
-func (c *WSClient) receiveMessages() {
+func (c *Client) receiveMessages() {
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
@@ -72,7 +72,7 @@ func (c *WSClient) receiveMessages() {
 	}
 }
 
-func (c *WSClient) handleMessage(message []byte) {
+func (c *Client) handleMessage(message []byte) {
 	// when receiving message with id. the result will be a subscription number.
 	// that number will be associated to all future message destine to this request
 	if gjson.GetBytes(message, "id").Exists() {
@@ -86,7 +86,7 @@ func (c *WSClient) handleMessage(message []byte) {
 
 }
 
-func (c *WSClient) handleNewSubscriptionMessage(requestID, subID uint64) {
+func (c *Client) handleNewSubscriptionMessage(requestID, subID uint64) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -100,7 +100,7 @@ func (c *WSClient) handleNewSubscriptionMessage(requestID, subID uint64) {
 	return
 }
 
-func (c *WSClient) handleSubscriptionMessage(subID uint64, message []byte) {
+func (c *Client) handleSubscriptionMessage(subID uint64, message []byte) {
 	zlog.Info("received subscription message",
 		zap.Uint64("subscription_id", subID),
 	)
@@ -116,7 +116,7 @@ func (c *WSClient) handleSubscriptionMessage(subID uint64, message []byte) {
 	//getting and instantiate the return type for the call back.
 	resultType := reflect.New(sub.reflectType)
 	result := resultType.Interface()
-	err := decodeClientResponse(bytes.NewReader(message), &result)
+	err := decodeResponse(bytes.NewReader(message), &result)
 	if err != nil {
 		c.closeSubscription(sub.req.ID, fmt.Errorf("unable to decode client response: %w", err))
 		return
@@ -133,7 +133,7 @@ func (c *WSClient) handleSubscriptionMessage(subID uint64, message []byte) {
 	return
 }
 
-func (c *WSClient) closeAllSubscription(err error) {
+func (c *Client) closeAllSubscription(err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -145,7 +145,7 @@ func (c *WSClient) closeAllSubscription(err error) {
 	c.subscriptionByWSSubID = map[uint64]*Subscription{}
 }
 
-func (c *WSClient) closeSubscription(reqID uint64, err error) {
+func (c *Client) closeSubscription(reqID uint64, err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -156,7 +156,7 @@ func (c *WSClient) closeSubscription(reqID uint64, err error) {
 
 	sub.err <- err
 
-	err = c.rpcUnsubscribe(sub.subID, sub.unsubscriptionMethod)
+	err = c.unsubscribe(sub.subID, sub.unsubscriptionMethod)
 	if err != nil {
 		zlog.Warn("unable to send rpc unsubscribe call",
 			zap.Error(err),
@@ -167,8 +167,8 @@ func (c *WSClient) closeSubscription(reqID uint64, err error) {
 	delete(c.subscriptionByWSSubID, sub.subID)
 }
 
-func (c *WSClient) rpcUnsubscribe(subID uint64, method string) error {
-	req := newClientRequest([]interface{}{subID}, method, map[string]interface{}{})
+func (c *Client) unsubscribe(subID uint64, method string) error {
+	req := newRequest([]interface{}{subID}, method, map[string]interface{}{})
 	data, err := req.encode()
 	if err != nil {
 		return fmt.Errorf("unable to encode unsubscription message for subID %d and method %s", subID, method)
@@ -181,57 +181,15 @@ func (c *WSClient) rpcUnsubscribe(subID uint64, method string) error {
 	return nil
 }
 
-type Subscription struct {
-	req                  *clientRequest
-	subID                uint64
-	stream               chan result
-	err                  chan error
-	reflectType          reflect.Type
-	closeFunc            func(err error)
-	unsubscriptionMethod string
-}
-
-func newSubscription(req *clientRequest, reflectType reflect.Type, closeFunc func(err error)) *Subscription {
-	return &Subscription{
-		req:         req,
-		reflectType: reflectType,
-		stream:      make(chan result, 200),
-		err:         make(chan error, 1),
-		closeFunc:   closeFunc,
-	}
-}
-
-func (s *Subscription) Recv() (interface{}, error) {
-	select {
-	case d := <-s.stream:
-		return d, nil
-	case err := <-s.err:
-		return nil, err
-	}
-}
-
-func (s *Subscription) Unsubscribe() {
-	s.unsubscribe(nil)
-}
-
-func (s *Subscription) unsubscribe(err error) {
-	s.closeFunc(err)
-
-}
-
-func (c *WSClient) ProgramSubscribe(programID string, commitment CommitmentType) (*Subscription, error) {
-	return c.subscribe([]interface{}{programID}, "programSubscribe", "programUnsubscribe", commitment, ProgramWSResult{})
-}
-
-func (c *WSClient) subscribe(params []interface{}, subscriptionMethod, unsubscriptionMethod string, commitment CommitmentType, resultType interface{}) (*Subscription, error) {
+func (c *Client) subscribe(params []interface{}, subscriptionMethod, unsubscriptionMethod string, commitment rpc.CommitmentType, resultType interface{}) (*Subscription, error) {
 	conf := map[string]interface{}{
-		"encoding": "jsonParsed",
+		"encoding": "base64",
 	}
 	if commitment != "" {
 		conf["commitment"] = string(commitment)
 	}
 
-	req := newClientRequest(params, subscriptionMethod, conf)
+	req := newRequest(params, subscriptionMethod, conf)
 	data, err := req.encode()
 	if err != nil {
 		return nil, fmt.Errorf("subscribe: unable to encode subsciption request: %w", err)
@@ -254,53 +212,8 @@ func (c *WSClient) subscribe(params []interface{}, subscriptionMethod, unsubscri
 	return sub, nil
 }
 
-type ProgramWSResult struct {
-	Context struct {
-		Slot uint64
-	} `json:"context"`
-	Value struct {
-		Account Account `json:"account"`
-	} `json:"value"`
-}
-
-type clientRequest struct {
-	Version string      `json:"jsonrpc"`
-	Method  string      `json:"method"`
-	Params  interface{} `json:"params"`
-	ID      uint64      `json:"id"`
-}
-
-func newClientRequest(params []interface{}, method string, configuration map[string]interface{}) *clientRequest {
-	params = append(params, configuration)
-	return &clientRequest{
-		Version: "2.0",
-		Method:  method,
-		Params:  params,
-		ID:      uint64(rand.Int63()),
-	}
-}
-
-func (c *clientRequest) encode() ([]byte, error) {
-	data, err := json.Marshal(c)
-	if err != nil {
-		return nil, fmt.Errorf("encode request: json marshall: %w", err)
-	}
-	return data, nil
-}
-
-type wsClientResponse struct {
-	Version string                  `json:"jsonrpc"`
-	Params  *wsClientResponseParams `json:"params"`
-	Error   *json.RawMessage        `json:"error"`
-}
-
-type wsClientResponseParams struct {
-	Result       *json.RawMessage `json:"result"`
-	Subscription int              `json:"subscription"`
-}
-
-func decodeClientResponse(r io.Reader, reply interface{}) (err error) {
-	var c *wsClientResponse
+func decodeResponse(r io.Reader, reply interface{}) (err error) {
+	var c *response
 	if err := json.NewDecoder(r).Decode(&c); err != nil {
 		return err
 	}
