@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Version represents the slnc command version
+// Version represents the cmd command version
 var Version string
 
 //const defaultRPCURL = "http://localhost:8899"
@@ -18,8 +18,8 @@ const defaultRPCURL = "http://api.mainnet-beta.solana.com/rpc"
 
 // RootCmd represents the eosc command
 var RootCmd = &cobra.Command{
-	Use:   "slnc",
-	Short: "slnc is a client to Solana clusters - by dfuse.io",
+	Use:   "cmd",
+	Short: "cmd is a client to Solana clusters - by dfuse.io",
 }
 
 // Execute executes the configured RootCmd

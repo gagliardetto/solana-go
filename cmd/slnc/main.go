@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/dfuse-io/solana-go/slnc/cmd"
+	"github.com/dfuse-io/solana-go/cmd/slnc/cmd"
 )
 
 var version = "dev"
@@ -13,4 +13,3 @@ func init() {
 func main() {
 	cmd.Execute()
 }
-

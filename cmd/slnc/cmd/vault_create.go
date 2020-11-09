@@ -16,25 +16,25 @@ var vaultCreateCmd = &cobra.Command{
 	Short: "Create a new encrypted Solana keys vault",
 	Long: `Create a new encrypted Solana keys vault.
 
-A vault contains encrypted private keys, and with 'slnc', can be used to
+A vault contains encrypted private keys, and with 'cmd', can be used to
 securely sign transactions.
 
 You can create a passphrase protected vault with:
 
-    slnc vault create --keys=2
+    cmd vault create --keys=2
 
 This uses the default --vault-type=passphrase
 
 You can create a Google Cloud Platform KMS-wrapped vault with:
 
-    slnc vault create --keys=2 --vault-type=kms-gcp --kms-gcp-keypath projects/.../locations/.../keyRings/.../cryptoKeys/name
+    cmd vault create --keys=2 --vault-type=kms-gcp --kms-gcp-keypath projects/.../locations/.../keyRings/.../cryptoKeys/name
 
-You can then use this vault for the different slnc operations.`,
+You can then use this vault for the different cmd operations.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		walletFile := viper.GetString("global-vault-file")
 
 		if _, err := os.Stat(walletFile); err == nil {
-			fmt.Printf("Wallet file %q already exists, rename it before running `slnc vault create`.\n", walletFile)
+			fmt.Printf("Wallet file %q already exists, rename it before running `cmd vault create`.\n", walletFile)
 			os.Exit(1)
 		}
 

@@ -14,7 +14,7 @@ import (
 var zlog *zap.Logger
 
 func init() {
-	logging.Register("github.com/dfuse-io/slnc/cmd/slnc/commands", &zlog)
+	logging.Register("github.com/dfuse-io/cmd/cmd/cmd/commands", &zlog)
 }
 
 func SetupLogger(debug bool) {
