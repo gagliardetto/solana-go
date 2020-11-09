@@ -63,7 +63,7 @@ type orderBookEntry struct {
 func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client, address solana.PublicKey, desc bool) (out []*orderBookEntry, totalSize *big.Float, err error) {
 	var o serum.Orderbook
 	if err := cli.GetAccountDataIn(ctx, address, &o); err != nil {
-		return nil, fmt.Errorf("getting orderbook: %w", err)
+		return nil, nil, fmt.Errorf("getting orderbook: %w", err)
 	}
 
 	limit := 20

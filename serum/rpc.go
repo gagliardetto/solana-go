@@ -40,7 +40,6 @@ func FetchMarket(ctx context.Context, rpcCli *rpc.Client, marketAddr solana.Publ
 	}
 
 	dataLen := len(acctInfo.Value.Data)
-	fmt.Println("MAMA", dataLen)
 	switch dataLen {
 	// case 380:
 	// 	// if err := meta.MarketV1.Decode(acctInfo.Value.Data); err != nil {

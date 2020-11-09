@@ -36,27 +36,24 @@ $ slnc get account EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 }
 
 $ slnc spl get-mint SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt
-Mint Authority Option:  0
-Mint Authority:  73uWQpzn1AmUZkZ7MhafSSwQJmNmQ3fN4guANBrXg8uD
-Supply:  9999709435300000
-Decimals:  6
-Is Initialized:  true
-Freeze Authority Option:  0
-Freeze Authority:  73uWQpzn1AmUZkZ7MhafSSwQJmNmQ3fN4guANBrXg8uD
+No mint authority
+Supply               9999647664800000
+Decimals             6
+No freeze authority
 
-$ slnc serum markets
+$ slnc serum list markets
 ...
-SUSHI/USDC -> 7LVJtqSrF6RudMaz5rKGTmR3F3V5TKoDcN6bnk68biYZ
-SXP/USDC -> 13vjJ8pxDMmzen26bQ5UrouX8dkXYPW1p3VLVDjxXrKR
-MSRM/USDC -> AwvPwwSprfDZ86beBJDNH5vocFvuw4ZbVQ6upJDbSCXZ
-FTT/USDC -> FfDb3QZUdMW2R2aqJQgzeieys4ETb3rPrFFfPSemzq7R
-YFI/USDC -> 4QL5AQvXdMSCVZmnKXiuMMU83Kq3LCwVfU8CyznqZELG
-LINK/USDC -> 7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16
-HGET/USDC -> 3otQFkeQ7GNUKT3i2p3aGTQKS2SAw6NLYPE5qxh3PoqZ
-CREAM/USDC -> 2M8EBxFbLANnCoHydypL1jupnRHG782RofnvkatuKyLL
+ALEPH/USDT   EmCzMQfXMgNHcnRoFwAdPe1i2SuiSzMj1mx6wu3KN2uA
+ALEPH/WUSDC  B37pZmwrwXHjpgvd9hHDAx1yeDsNevTnbbrN9W12BoGK
+BTC/USDT     8AcVjMG2LTbpkjNoyq8RwysokqZunkjy3d5JDzxC6BJa
+BTC/WUSDC    CAgAeMD7quTdnr6RPa7JySQpjf3irAmefYNdTb6anemq
+ETH/USDT     HfCZdJ1wfsWKfYP2qyWdXTT5PWAGWFctzFjLH48U1Hsd
+ETH/WUSDC    ASKiV944nKg1W9vsf7hf3fTsjawK6DwLwrnB2LH9n61c
+SOL/USDT     8mDuvJJSgoodovMRYArtVVYBbixWYdGzR47GPrRT65YJ
+SOL/WUSDC    Cdp72gDcYMCLLk3aDkPxjeiirKoFqK38ECm8Ywvk94Wi
 ...
 
-$ slnc serum market 7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16
+$ slnc serum get market 7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16
 Price    Quantity  Depth
 Asks
 ...
