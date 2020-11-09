@@ -3,6 +3,17 @@
 Go library to interface with Solana nodes's JSON-RPC interface, Solana's SPL tokens and the
 [https://dex.projectserum.com](Serum DEX) instructions.  More contracts to come.
 
+## Installation
+
+1. Install from https://github.com/dfuse-io/solana-go/releases
+
+**or**
+
+2. Build from source with:
+
+```bash
+go get -u -v github.com/dfuse-io/solana/cmd/slnc
+```
 
 # Command-line
 ```
@@ -44,8 +55,20 @@ CREAM/USDC -> 2M8EBxFbLANnCoHydypL1jupnRHG782RofnvkatuKyLL
 ...
 
 $ slnc serum market 7JCG9TsCx3AErSV3pvhxiW4AbkKRcJ6ZAveRmJwrgQ16
-
-
+Price   Quantity  Depth
+Asks
+...
+441.03  181.806
+440.99  200
+440.5   171.225
+440.22  50
+...
+Bids
+...
+431.94  0.043
+430.31  625.865
+427.66  0.059
+423.43  0.078
 ```
 
 # Library usage
@@ -89,17 +112,10 @@ json.NewEncoder(os.Stdout).Encode(m)
 // }
 
 ```
-# Examples
-
-
-
 
 # Contributing
-
 Any contributions are welcome, use your standard GitHub-fu to pitch in and improve.
-
 
 License
 -------
-
 Apache-2
