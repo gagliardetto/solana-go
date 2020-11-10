@@ -5,6 +5,8 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/dfuse-io/solana-go/api/graphql/static"
+
 	"github.com/gorilla/handlers"
 
 	"github.com/dfuse-io/derr"
@@ -55,8 +57,8 @@ func StartHTTPServer(listenAddr string, schema *graphql.Schema) error {
 		w.Write([]byte("ok"))
 	})
 
-	//staticRouter := router.PathPrefix("/").Subrouter()
-	//static.RegisterStaticRoutes(staticRouter)
+	staticRouter := router.PathPrefix("/").Subrouter()
+	static.RegisterStaticRoutes(staticRouter)
 
 	restRouter := router.PathPrefix("/").Subrouter()
 	restRouter.Use(apollo.NewMiddleware(schema).Handler)

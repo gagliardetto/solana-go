@@ -1,4 +1,4 @@
-// Copyright 2020 dfuse Platform Inc.
+// Copyright 2019 dfuse Platform Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,28 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package static
 
 import (
-	"github.com/spf13/viper"
-
-	"github.com/dfuse-io/solana-go/api/graphql"
-	"github.com/spf13/cobra"
+	"github.com/dfuse-io/logging"
+	"go.uber.org/zap"
 )
 
-var apiGraphqlCmd = &cobra.Command{
-	Use:   "graphql",
-	Short: "start serving graphql api",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		SetupLogger(viper.GetBool("global-debug"))
-
-		server := graphql.NewServer("/Users/cbillett/devel/dfuse/go/solana-go/api/graphql/schema.graphql", ":8080")
-		zlog.Info("serving ...")
-		return server.Launch()
-
-	},
-}
+var zlog *zap.Logger
 
 func init() {
-	apiCmd.AddCommand(apiGraphqlCmd)
+	logging.Register("github.com/dfuse-io/dgraphql/static", &zlog)
 }
