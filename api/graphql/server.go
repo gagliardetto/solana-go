@@ -1,9 +1,10 @@
 package graphql
 
 import (
-	"io/ioutil"
 	"net"
 	"net/http"
+
+	rice "github.com/GeertJohan/go.rice"
 
 	"github.com/dfuse-io/solana-go/api/graphql/static"
 
@@ -32,17 +33,16 @@ func NewServer(schemaFile string, servingAddr string) *Server {
 
 func (s *Server) Launch() error {
 	// initialize GraphQL
-	cnt, err := ioutil.ReadFile(s.schemaFile)
-	derr.Check("error reading schema.graphql", err)
+	box := rice.MustFindBox("build")
 
 	resolver := resolvers.NewRoot()
 	schema, err := graphql.ParseSchema(
-		string(cnt),
+		string(box.MustBytes("schema.graphql")),
 		resolver,
 		graphql.UseFieldResolvers(),
 		graphql.UseStringDescriptions(),
 	)
-
+	derr.Check("parse schema", err)
 	return StartHTTPServer(s.servingAddr, schema)
 
 }
