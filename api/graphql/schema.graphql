@@ -1,0 +1,14 @@
+schema {
+  query: Queries
+  mutation: Mutations
+}
+
+type Queries {
+}
+
+type Mutations {
+}
+
+scalar Int32
+scalar Int64
+scalar JSON

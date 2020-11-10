@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -28,13 +29,16 @@ import (
 var zlog *zap.Logger
 
 func init() {
-	logging.Register("github.com/dfuse-io/cmd/cmd/cmd/commands", &zlog)
+	logging.Register("github.com/dfuse-io/solana-go/cmd/slnc/cmd", &zlog)
 }
 
 func SetupLogger(debug bool) {
+	fmt.Println("setting logger with debug:", debug)
 	if debug {
 		zlog, err := zap.NewDevelopment()
+		fmt.Println("setting logger1")
 		if err == nil {
+			fmt.Println("setting logger2")
 			logging.Set(zlog)
 		}
 		// Hijack standard Golang `log` and redirect it to our common logger
