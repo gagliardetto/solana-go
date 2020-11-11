@@ -19,7 +19,7 @@ import (
 	"os"
 	"strings"
 
-	zapbox "github.com/dfuse-io/slnc/zap-box"
+	zapbox "github.com/dfuse-io/solana-go/zap-box"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
