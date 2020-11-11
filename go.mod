@@ -7,13 +7,13 @@ require (
 	github.com/dfuse-io/derr v0.0.0-20201001203637-4dc9d8014152
 	github.com/dfuse-io/dgraphql v0.0.1
 	github.com/dfuse-io/logging v0.0.0-20201023175426-d0173f8508dc
-	github.com/dfuse-io/slnc v0.0.0-20201106145424-57968f2253be
 	github.com/google/go-cmp v0.4.1 // indirect
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/rpc v1.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/graph-gophers/graphql-go v0.0.0-20201027172035-4c772c181653
+	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/lunixbochs/struc v0.0.0-20200707160740-784aaebc1d40
 	github.com/mr-tron/base58 v1.2.0
 	github.com/onsi/gomega v1.10.1 // indirect
