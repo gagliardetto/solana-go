@@ -101,6 +101,14 @@ type Orderbook struct {
 	Nodes []SlabNode `struc:""`
 }
 
+func (o *Orderbook) Decode(in []byte) error {
+	err := struc.Unpack(bytes.NewReader(in), o)
+	if err != nil {
+		return fmt.Errorf("order book: unpack: %w", err)
+	}
+	return nil
+}
+
 func (o *Orderbook) Items(descending bool, f func(node *SlabLeafNode) error) error {
 	if o.LeafCount == 0 {
 		return nil
