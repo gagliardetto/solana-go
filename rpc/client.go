@@ -118,6 +118,21 @@ func (c *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey,
 	return struc.Unpack(bytes.NewReader(resp.Value.Data), inVar)
 }
 
+func (c *Client) GetConfirmedTransaction(ctx context.Context, signature string) (out TransactionParsed, err error) {
+	params := []interface{}{signature, "jsonParsed"}
+
+	err = c.rpcClient.CallFor(&out, "getConfirmedTransaction", params...)
+	return
+}
+
+func (c *Client) GetConfirmedSignaturesForAddress2(ctx context.Context, address solana.PublicKey, opts *GetConfirmedSignaturesForAddress2Opts) (out GetConfirmedSignaturesForAddress2Result, err error) {
+
+	params := []interface{}{address.String(), opts}
+
+	err = c.rpcClient.CallFor(&out, "getConfirmedSignaturesForAddress2", params...)
+	return
+}
+
 func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.PublicKey, opts *GetProgramAccountsOpts) (out GetProgramAccountsResult, err error) {
 	obj := map[string]interface{}{
 		"encoding": "base64",

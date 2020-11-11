@@ -18,32 +18,18 @@ import (
 	"github.com/dfuse-io/solana-go"
 )
 
-// type ContactInfo struct {
-// 	Pubkey  string `json:"pubkey"`
-// 	Gossip  string `json:"gossip,omitempty"`
-// 	TPU     string `json:"tpu,omitempty"`
-// 	RPC     string `json:"rpc,omitempty"`
-// 	Version string `json:"version,omitempty"`
-// }
-
 type RPCContext struct {
 	Context struct {
 		Slot solana.U64
 	} `json:"context,omitempty"`
 }
 
-///
-
 type GetBalanceResult struct {
 	RPCContext
 	Value solana.U64 `json:"value"`
 }
 
-///
-
 type GetSlotResult solana.U64
-
-///
 
 type GetRecentBlockhashResult struct {
 	RPCContext
@@ -58,8 +44,6 @@ type BlockhashResult struct {
 type FeeCalculator struct {
 	LamportsPerSignature solana.U64 `json:"lamportsPerSignature"`
 }
-
-///
 
 type GetConfirmedBlockResult struct {
 	Blockhash         solana.PublicKey      `json:"blockhash"`
@@ -80,6 +64,11 @@ type TransactionWithMeta struct {
 	Meta        *TransactionMeta    `json:"meta,omitempty"`
 }
 
+type TransactionParsed struct {
+	Transaction *ParsedTransaction `json:"transaction"`
+	Meta        *TransactionMeta   `json:"meta,omitempty"`
+}
+
 type TransactionMeta struct {
 	Err          interface{}  `json:"err"`
 	Fee          solana.U64   `json:"fee"`
@@ -87,7 +76,12 @@ type TransactionMeta struct {
 	PostBalances []solana.U64 `json:"postBalances"`
 }
 
-///
+type TransactionSignature struct {
+	Err       interface{} `json:"err,omitempty"`
+	Memo      string      `json:"memo,omitempty"`
+	Signature string      `json:"signature,omitempty"`
+	Slot      solana.U64  `json:"slot,omitempty"`
+}
 
 type GetAccountInfoResult struct {
 	RPCContext
@@ -102,18 +96,27 @@ type Account struct {
 	RentEpoch  solana.U64       `json:"rentEpoch"`
 }
 
-type KeyedAccount struct {
-	Pubkey  solana.PublicKey `json:"pubkey"`
-	Account *Account         `json:"account"`
-}
-type GetProgramAccountsResult []*KeyedAccount
-
 type GetProgramAccountsOpts struct {
 	Commitment CommitmentType `json:"commitment,omitempty"`
 
 	// Filter on accounts, implicit AND between filters
 	Filters []RPCFilter `json:"filters,omitempty"`
 }
+
+type GetProgramAccountsResult []*KeyedAccount
+
+type KeyedAccount struct {
+	Pubkey  solana.PublicKey `json:"pubkey"`
+	Account *Account         `json:"account"`
+}
+
+type GetConfirmedSignaturesForAddress2Opts struct {
+	Limit  uint64 `json:"limit,omitempty"`
+	Before string `json:"limit,omitempty"`
+	Until  string `json:"until,omitempty"`
+}
+
+type GetConfirmedSignaturesForAddress2Result []*TransactionSignature
 
 type RPCFilter struct {
 	Memcmp   *RPCFilterMemcmp `json:"memcmp,omitempty"`
@@ -125,8 +128,6 @@ type RPCFilterMemcmp struct {
 	Bytes  solana.Base58 `json:"bytes"`
 }
 
-///
-
 type CommitmentType string
 
 const (
@@ -136,3 +137,39 @@ const (
 	CommitmentSingle       = CommitmentType("single")
 	CommitmentSingleGossip = CommitmentType("singleGossip")
 )
+
+/// Parsed Transaction
+
+type ParsedTransaction struct {
+	Signatures []solana.Signature `json:"signatures"`
+	Message    Message            `json:"message"`
+}
+
+type Message struct {
+	AccountKeys     []*AccountKey `json:"accountKeys"`
+	RecentBlockhash solana.PublicKey/* TODO: change to Hash */ `json:"recentBlockhash"`
+	Instructions    []ParsedInstruction `json:"instructions"`
+}
+
+type AccountKey struct {
+	PublicKey solana.PublicKey `json:"pubkey"`
+	Signer    bool             `json:"signer"`
+	Writable  bool             `json:"writable"`
+}
+
+type ParsedInstruction struct {
+	Accounts  []solana.PublicKey `json:"accounts,omitempty"`
+	Data      solana.Base58      `json:"data,omitempty"`
+	Parsed    *InstructionInfo   `json:"parsed,omitempty"`
+	Program   string             `json:"program,omitempty"`
+	ProgramID solana.PublicKey   `json:"programId"`
+}
+
+type InstructionInfo struct {
+	Info            map[string]interface{} `json:"info"`
+	InstructionType string                 `json:"type"`
+}
+
+func (p *ParsedInstruction) IsParsed() bool {
+	return p.Parsed != nil
+}

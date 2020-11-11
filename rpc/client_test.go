@@ -20,6 +20,10 @@ import (
 	"fmt"
 	"testing"
 
+	"gotest.tools/assert"
+
+	"go.uber.org/zap"
+
 	"github.com/dfuse-io/solana-go"
 	"github.com/stretchr/testify/require"
 )
@@ -38,5 +42,41 @@ func TestClient_GetAccountInfo(t *testing.T) {
 	d, err = json.MarshalIndent(accInfo, "", " ")
 	require.NoError(t, err)
 	fmt.Println(string(d))
+}
 
+func TestClient_GetConfirmedSignaturesForAddress2(t *testing.T) {
+	c := NewClient("http://api.mainnet-beta.solana.com:80/rpc")
+	account := solana.MustPublicKeyFromBase58("CG1XSWuXo2rw2SuHTRc54nihKvLKh4wMYi7oF3487LYt")
+	accInfo, err := c.GetConfirmedSignaturesForAddress2(context.Background(), account, nil)
+	require.NoError(t, err)
+
+	d, err := json.MarshalIndent(accInfo, "", " ")
+	require.NoError(t, err)
+	fmt.Println(string(d))
+
+}
+
+func TestClient_GetConfirmedTransaction(t *testing.T) {
+	zlog, _ = zap.NewDevelopment()
+	c := NewClient("http://api.mainnet-beta.solana.com:80/rpc")
+	c.Debug = true
+	signature := "53hoZ98EsCMA6L63GWM65M3Bd3WqA4LxD8bcJkbKoKWhbJFqX9M1WZ4fSjt8bYyZn21NwNnV2A25zirBni9Qk6LR"
+	trx, err := c.GetConfirmedTransaction(context.Background(), signature)
+	require.NoError(t, err)
+
+	d, err := json.MarshalIndent(trx, "", " ")
+	require.NoError(t, err)
+	fmt.Println(string(d))
+
+	assert.Equal(t, false, trx.Transaction.Message.Instructions[0].IsParsed())
+
+	signature = "4ZK6ofUodMP8NrB8RGkKFpXWVKMk5eqjkBTbq7DKiDu34gbdrpgctJHp3cU79ZGEBgTaohbjy56KJwhraVmgYq9i"
+	trx, err = c.GetConfirmedTransaction(context.Background(), signature)
+	require.NoError(t, err)
+
+	d, err = json.MarshalIndent(trx, "", " ")
+	require.NoError(t, err)
+	fmt.Println(string(d))
+
+	assert.Equal(t, true, trx.Transaction.Message.Instructions[0].IsParsed())
 }
