@@ -19,7 +19,7 @@ $ brew install dfuse-io/tap/solana-go
 3. Build from source with:
 
 ```bash
-$ go get -u -v github.com/dfuse-io/solana/cmd/slnc
+$ go get -u -v github.com/dfuse-io/solana-go/cmd/slnc
 ```
 
 # Command-line
