@@ -156,7 +156,7 @@ func (c *Client) closeSubscription(reqID uint64, err error) {
 
 	sub.err <- err
 
-	err = c.unsubscribe(sub.subID, sub.unsubscriptionMethod)
+	err = c.unsubscribe(sub.subID, sub.unsubscribeMethod)
 	if err != nil {
 		zlog.Warn("unable to send rpc unsubscribe call",
 			zap.Error(err),
@@ -181,10 +181,7 @@ func (c *Client) unsubscribe(subID uint64, method string) error {
 	return nil
 }
 
-func (c *Client) subscribe(params []interface{}, subscriptionMethod, unsubscriptionMethod string, commitment rpc.CommitmentType, resultType interface{}) (*Subscription, error) {
-	conf := map[string]interface{}{
-		"encoding": "base64",
-	}
+func (c *Client) subscribe(params []interface{}, conf map[string]interface{}, subscriptionMethod, unsubscribeMethod string, commitment rpc.CommitmentType, resultType interface{}) (*Subscription, error) {
 	if commitment != "" {
 		conf["commitment"] = string(commitment)
 	}
@@ -197,13 +194,14 @@ func (c *Client) subscribe(params []interface{}, subscriptionMethod, unsubscript
 
 	sub := newSubscription(req, reflect.TypeOf(resultType), func(err error) {
 		c.closeSubscription(req.ID, err)
-	})
+	}, unsubscribeMethod)
 
 	c.lock.Lock()
 	c.subscriptionByRequestID[req.ID] = sub
 	zlog.Info("added new subscription to websocket client", zap.Int("count", len(c.subscriptionByRequestID)))
 	c.lock.Unlock()
 
+	zlog.Debug("writing data to conn", zap.String("data", string(data)))
 	err = c.conn.WriteMessage(websocket.TextMessage, data)
 	if err != nil {
 		return nil, fmt.Errorf("unable to write request: %w", err)

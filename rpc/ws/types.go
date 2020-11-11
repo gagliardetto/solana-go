@@ -11,12 +11,14 @@ import (
 type request struct {
 	Version string      `json:"jsonrpc"`
 	Method  string      `json:"method"`
-	Params  interface{} `json:"params"`
+	Params  interface{} `json:"params,omitempty"`
 	ID      uint64      `json:"id"`
 }
 
 func newRequest(params []interface{}, method string, configuration map[string]interface{}) *request {
-	params = append(params, configuration)
+	if params != nil && configuration != nil {
+		params = append(params, configuration)
+	}
 	return &request{
 		Version: "2.0",
 		Method:  method,
@@ -60,4 +62,10 @@ type AccountResult struct {
 	Value struct {
 		Account rpc.Account `json:"account"`
 	} `json:"value"`
+}
+
+type SlotResult struct {
+	Parent uint64
+	Root   uint64
+	Slot   uint64
 }

@@ -67,3 +67,22 @@ func Test_ProgramSubscribe(t *testing.T) {
 	return
 
 }
+func Test_SlotSubscribe(t *testing.T) {
+	zlog, _ = zap.NewDevelopment()
+
+	c, err := Dial(context.Background(), "ws://api.mainnet-beta.solana.com:80/rpc")
+	defer c.Close()
+	require.NoError(t, err)
+
+	sub, err := c.SlotSubscribe()
+	require.NoError(t, err)
+
+	data, err := sub.Recv()
+	if err != nil {
+		fmt.Println("receive an error: ", err)
+		return
+	}
+	fmt.Println("data received: ", data.(*SlotResult).Parent)
+	return
+
+}
