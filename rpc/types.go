@@ -15,6 +15,7 @@
 package rpc
 
 import (
+	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
 )
 
@@ -28,7 +29,7 @@ import (
 
 type RPCContext struct {
 	Context struct {
-		Slot solana.U64
+		Slot bin.Uint64
 	} `json:"context,omitempty"`
 }
 
@@ -36,12 +37,12 @@ type RPCContext struct {
 
 type GetBalanceResult struct {
 	RPCContext
-	Value solana.U64 `json:"value"`
+	Value bin.Uint64 `json:"value"`
 }
 
 ///
 
-type GetSlotResult solana.U64
+type GetSlotResult bin.Uint64
 
 ///
 
@@ -56,7 +57,7 @@ type BlockhashResult struct {
 }
 
 type FeeCalculator struct {
-	LamportsPerSignature solana.U64 `json:"lamportsPerSignature"`
+	LamportsPerSignature bin.Uint64 `json:"lamportsPerSignature"`
 }
 
 ///
@@ -64,15 +65,15 @@ type FeeCalculator struct {
 type GetConfirmedBlockResult struct {
 	Blockhash         solana.PublicKey      `json:"blockhash"`
 	PreviousBlockhash solana.PublicKey      `json:"previousBlockhash"` // could be zeroes if ledger was clean-up and this is unavailable
-	ParentSlot        solana.U64            `json:"parentSlot"`
+	ParentSlot        bin.Uint64            `json:"parentSlot"`
 	Transactions      []TransactionWithMeta `json:"transactions"`
 	Rewards           []BlockReward         `json:"rewards"`
-	BlockTime         solana.U64            `json:"blockTime,omitempty"`
+	BlockTime         bin.Uint64            `json:"blockTime,omitempty"`
 }
 
 type BlockReward struct {
 	Pubkey   solana.PublicKey `json:"pubkey"`
-	Lamports solana.U64       `json:"lamports"`
+	Lamports bin.Uint64       `json:"lamports"`
 }
 
 type TransactionWithMeta struct {
@@ -82,9 +83,9 @@ type TransactionWithMeta struct {
 
 type TransactionMeta struct {
 	Err          interface{}  `json:"err"`
-	Fee          solana.U64   `json:"fee"`
-	PreBalances  []solana.U64 `json:"preBalances"`
-	PostBalances []solana.U64 `json:"postBalances"`
+	Fee          bin.Uint64   `json:"fee"`
+	PreBalances  []bin.Uint64 `json:"preBalances"`
+	PostBalances []bin.Uint64 `json:"postBalances"`
 }
 
 ///
@@ -95,11 +96,11 @@ type GetAccountInfoResult struct {
 }
 
 type Account struct {
-	Lamports   solana.U64       `json:"lamports"`
+	Lamports   bin.Uint64       `json:"lamports"`
 	Data       solana.Data      `json:"data"`
 	Owner      solana.PublicKey `json:"owner"`
 	Executable bool             `json:"executable"`
-	RentEpoch  solana.U64       `json:"rentEpoch"`
+	RentEpoch  bin.Uint64       `json:"rentEpoch"`
 }
 
 type KeyedAccount struct {
@@ -117,7 +118,7 @@ type GetProgramAccountsOpts struct {
 
 type RPCFilter struct {
 	Memcmp   *RPCFilterMemcmp `json:"memcmp,omitempty"`
-	DataSize solana.U64       `json:"dataSize,omitempty"`
+	DataSize bin.Uint64       `json:"dataSize,omitempty"`
 }
 
 type RPCFilterMemcmp struct {

@@ -15,9 +15,7 @@
 package solana
 
 import (
-	"bytes"
-
-	"github.com/lunixbochs/struc"
+	bin "github.com/dfuse-io/binary"
 )
 
 type Transaction struct {
@@ -39,18 +37,19 @@ type MessageHeader struct {
 }
 
 type CompiledInstruction struct {
-	ProgramIDIndex uint8     `json:"programIdIndex"`
-	AccountsCount  Varuint16 `json:"-" struc:"sizeof=Accounts"`
-	Accounts       []uint8   `json:"accounts"`
-	DataLength     Varuint16 `json:"-" struc:"sizeof=Data"`
-	Data           Base58    `json:"data"`
+	ProgramIDIndex uint8         `json:"programIdIndex"`
+	AccountsCount  bin.Varuint16 `json:"-" bin:"sizeof=Accounts"`
+	Accounts       []uint8       `json:"accounts"`
+	DataLength     bin.Varuint16 `json:"-" bin:"sizeof=Data"`
+	Data           Base58        `json:"data"`
 }
 
 func TransactionFromData(in []byte) (*Transaction, error) {
-	var out Transaction
-	err := struc.Unpack(bytes.NewReader(in), &out)
+	var out *Transaction
+	decoder := bin.NewDecoder(in)
+	err := decoder.Decode(&out)
 	if err != nil {
 		return nil, err
 	}
-	return &out, nil
+	return out, nil
 }

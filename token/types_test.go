@@ -21,6 +21,7 @@ import (
 	"os"
 	"testing"
 
+	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/rpc"
 	"github.com/lunixbochs/struc"
@@ -48,7 +49,7 @@ func TestAccount(t *testing.T) {
 	expect := Account{
 		Mint:          solana.MustPublicKeyFromBase58("DYoajiN32pjK8zMAa67ScNn2E7EmXrZ6doABRqfSZ63F"),
 		Owner:         solana.MustPublicKeyFromBase58("FWjmNcjufwC3QFdcHrAK1yAQkCwJSUAxvVFFgvQ1nAJM"),
-		Amount:        solana.U64(52830),
+		Amount:        bin.Uint64(52830),
 		IsInitialized: true,
 	}
 	expectJSON, err := json.MarshalIndent(expect, "", "  ")

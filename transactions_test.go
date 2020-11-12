@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/lunixbochs/struc"
+	bin "github.com/dfuse-io/binary"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -30,6 +30,8 @@ func TestCompiledInstructions(t *testing.T) {
 		Data:           Base58([]byte{1, 2, 3, 4, 5}),
 	}
 	buf := &bytes.Buffer{}
-	require.NoError(t, struc.Pack(buf, ci))
+	encoder := bin.NewEncoder(buf)
+	err := encoder.Encode(ci)
+	require.NoError(t, err)
 	assert.Equal(t, []byte{5, 3, 2, 5, 8, 5, 1, 2, 3, 4, 5}, buf.Bytes())
 }

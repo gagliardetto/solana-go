@@ -42,6 +42,6 @@ func NewInstruction(programID PublicKey, accountMetas []AccountMeta, instruction
 	return &Instruction{
 		ProgramID: programID,
 		Accounts:  accountMetas,
-		Data:      Base58(buf.Bytes()),
+		Data:      buf.Bytes(),
 	}, nil
 }
