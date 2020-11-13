@@ -37,14 +37,6 @@ type Multisig struct {
 	Signers       [11]solana.PublicKey
 }
 
-//type Mint struct {
-//	OwnerOption   uint32           `struc:"uint32,little"`
-//	Owner         solana.PublicKey `struc:"[32]byte"`
-//	Decimals      byte
-//	IsInitialized bool
-//	Padding1      uint16 `json:"-",struct:"[2]pad"`
-//}
-
 type Mint struct {
 	MintAuthorityOption   uint32
 	MintAuthority         solana.PublicKey

@@ -15,14 +15,14 @@
 package rpc
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"net/http"
 
+	bin "github.com/dfuse-io/binary"
+
 	//"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go"
-	"github.com/lunixbochs/struc"
 	"github.com/ybbus/jsonrpc"
 )
 
@@ -115,7 +115,7 @@ func (c *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey,
 		return err
 	}
 
-	return struc.Unpack(bytes.NewReader(resp.Value.Data), inVar)
+	return bin.NewDecoder(resp.Value.Data).Decode(inVar)
 }
 
 func (c *Client) GetConfirmedTransaction(ctx context.Context, signature string) (out TransactionParsed, err error) {

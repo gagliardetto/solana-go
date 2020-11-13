@@ -15,13 +15,12 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 
+	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/token"
-	"github.com/lunixbochs/struc"
 )
 
 func decode(owner solana.PublicKey, data []byte) (interface{}, error) {
@@ -35,19 +34,19 @@ func decode(owner solana.PublicKey, data []byte) (interface{}, error) {
 }
 
 func decodeAsToken(data []byte) (out interface{}, err error) {
-	reader := bytes.NewReader(data)
 
 	switch len(data) {
 	case 120:
 		var tokenAcct token.Account
-		if err := struc.Unpack(reader, &tokenAcct); err != nil {
+
+		if err := bin.NewDecoder(data).Decode(&tokenAcct); err != nil {
 			return nil, fmt.Errorf("failed unpacking: %w", err)
 		}
 
 		return tokenAcct, nil
 	case 40:
 		var mint token.Mint
-		if err := struc.Unpack(reader, &mint); err != nil {
+		if err := bin.NewDecoder(data).Decode(&mint); err != nil {
 			log.Fatalln("failed unpack", err)
 		}
 

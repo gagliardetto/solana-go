@@ -17,7 +17,7 @@ package solana
 import (
 	"bytes"
 
-	"github.com/lunixbochs/struc"
+	bin "github.com/dfuse-io/binary"
 )
 
 type AccountMeta struct {
@@ -34,7 +34,7 @@ type Instruction struct {
 
 func NewInstruction(programID PublicKey, accountMetas []AccountMeta, instruction interface{}) (*Instruction, error) {
 	buf := &bytes.Buffer{}
-	err := struc.Pack(buf, instruction)
+	err := bin.NewEncoder(buf).Encode(instruction)
 	if err != nil {
 		return nil, err
 	}

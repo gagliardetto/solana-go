@@ -55,7 +55,7 @@ type Transfer struct {
 type CreateAccountWithSeed struct {
 	// Prefixed with byte 0x03
 	Base     solana.PublicKey
-	SeedSize int `struc:"sizeof=Seed"`
+	SeedSize int `bin:"sizeof=Seed"`
 	Seed     string
 	Lamports bin.Uint64
 	Space    bin.Uint64
@@ -89,7 +89,7 @@ type Allocate struct {
 type AllocateWithSeed struct {
 	// Prefixed with byte 0x09
 	Base     solana.PublicKey
-	SeedSize int `struc:"sizeof=Seed"`
+	SeedSize int `bin:"sizeof=Seed"`
 	Seed     string
 	Space    bin.Uint64
 	Owner    solana.PublicKey
@@ -98,7 +98,7 @@ type AllocateWithSeed struct {
 type AssignWithSeed struct {
 	// Prefixed with byte 0x0a
 	Base     solana.PublicKey
-	SeedSize int `struc:"sizeof=Seed"`
+	SeedSize int `bin:"sizeof=Seed"`
 	Seed     string
 	Owner    solana.PublicKey
 }
