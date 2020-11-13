@@ -69,6 +69,12 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dfuse-io/binary v0.0.0-20201112224506-51f34a8dba0b h1:2NWveAQS+xy4wb/iTg/1X8Qr70GidmTW/bmozWUQ9Pk=
 github.com/dfuse-io/binary v0.0.0-20201112224506-51f34a8dba0b/go.mod h1:GDFX6qH3BQZPWTeYaA4ZW98T94zs2skRoG3oMz/0jw0=
+github.com/dfuse-io/binary v0.0.0-20201113023603-c9fa399519b4 h1:ZnobDPlS6eXDUHjsk5oxsdwn9U4nvd8EpoBLVzJafxA=
+github.com/dfuse-io/binary v0.0.0-20201113023603-c9fa399519b4/go.mod h1:GDFX6qH3BQZPWTeYaA4ZW98T94zs2skRoG3oMz/0jw0=
+github.com/dfuse-io/binary v0.0.0-20201113125316-ded9ef4ba4f3 h1:49mP2UMaYvSB5BUIE6NloqSlpwY0RN64lFlGT6h/CgI=
+github.com/dfuse-io/binary v0.0.0-20201113125316-ded9ef4ba4f3/go.mod h1:GDFX6qH3BQZPWTeYaA4ZW98T94zs2skRoG3oMz/0jw0=
+github.com/dfuse-io/binary v0.0.0-20201113132610-5a1e246afeec h1:VmIyiZuZzW1ENZyIHBwyCaj/w3rHDdfFrtSXzFeXIGg=
+github.com/dfuse-io/binary v0.0.0-20201113132610-5a1e246afeec/go.mod h1:GDFX6qH3BQZPWTeYaA4ZW98T94zs2skRoG3oMz/0jw0=
 github.com/dfuse-io/dauth v0.0.0-20200529171443-21c0e2d262c2/go.mod h1:tab5biQg59hbrHjaXTjaLcsP3zblx6B0I0Keu03xB44=
 github.com/dfuse-io/derr v0.0.0-20200406214256-c690655246a1/go.mod h1:JW/hUKChGd6ytDtvwx4JFo57m1pnFvMxaq9WbDAb2fQ=
 github.com/dfuse-io/derr v0.0.0-20200417132224-d333cfd0e9a0/go.mod h1:/DjjRCyTi/KIiI1E1hnhvfWwg+K06jo+qM4VcjHvHq4=

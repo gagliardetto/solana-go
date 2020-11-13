@@ -24,9 +24,13 @@ import (
 )
 
 func TestCompiledInstructions(t *testing.T) {
+	traceEnabled = true
+
 	ci := &CompiledInstruction{
 		ProgramIDIndex: 5,
+		AccountsCount:  3,
 		Accounts:       []uint8{2, 5, 8},
+		DataLength:     5,
 		Data:           Base58([]byte{1, 2, 3, 4, 5}),
 	}
 	buf := &bytes.Buffer{}

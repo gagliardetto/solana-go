@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/GeertJohan/go.rice v1.0.0
-	github.com/dfuse-io/binary v0.0.0-20201112224506-51f34a8dba0b
+	github.com/dfuse-io/binary v0.0.0-20201113132610-5a1e246afeec
 	github.com/dfuse-io/logging v0.0.0-20201110202154-26697de88c79
 	github.com/google/go-cmp v0.4.1 // indirect
 	github.com/gorilla/rpc v1.2.0

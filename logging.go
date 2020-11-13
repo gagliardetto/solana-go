@@ -15,13 +15,12 @@
 package solana
 
 import (
-	"os"
-
 	"github.com/dfuse-io/logging"
 	"go.uber.org/zap"
 )
 
-var traceEnabled = os.Getenv("TRACE") != ""
+var traceEnabled = logging.IsTraceEnabled("solana-go", "github.com/dfuse-io/solana-go")
+
 var zlog = zap.NewNop()
 
 func init() {
