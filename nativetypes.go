@@ -79,6 +79,10 @@ func (p Signature) String() string {
 
 type PublicKey [32]byte
 
+func (p PublicKey) Equals(pb PublicKey) bool {
+	return p.String() == pb.String()
+}
+
 func MustPublicKeyFromBase58(in string) PublicKey {
 	out, _ := PublicKeyFromBase58(in)
 	return out

@@ -2,6 +2,8 @@ package serum
 
 import (
 	"encoding/hex"
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"testing"
 
@@ -22,6 +24,10 @@ func TestDecoder_Orderbook(t *testing.T) {
 	var ob *Orderbook
 	err = decoder.Decode(&ob)
 	require.NoError(t, err)
+
+	jsonCnt, err := json.MarshalIndent(ob, "", " ")
+	require.NoError(t, err)
+	fmt.Println(string(jsonCnt))
 
 	assert.Equal(t, uint32(101), ob.BumpIndex)
 	assert.Equal(t, uint32(68), ob.FreeListLen)

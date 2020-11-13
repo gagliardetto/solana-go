@@ -118,8 +118,8 @@ func (c *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey,
 	return bin.NewDecoder(resp.Value.Data).Decode(inVar)
 }
 
-func (c *Client) GetConfirmedTransaction(ctx context.Context, signature string) (out TransactionParsed, err error) {
-	params := []interface{}{signature, "jsonParsed"}
+func (c *Client) GetConfirmedTransaction(ctx context.Context, signature string) (out TransactionWithMeta, err error) {
+	params := []interface{}{signature, "json"}
 
 	err = c.rpcClient.CallFor(&out, "getConfirmedTransaction", params...)
 	return

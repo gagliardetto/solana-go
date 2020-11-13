@@ -94,7 +94,13 @@ func (c *Client) handleNewSubscriptionMessage(requestID, subID uint64) {
 		zap.Uint64("message_id", requestID),
 		zap.Uint64("subscription_id", subID),
 	)
-	callBack := c.subscriptionByRequestID[requestID]
+	callBack, found := c.subscriptionByRequestID[requestID]
+	if !found {
+		zlog.Error("cannot find websocket message handler for a new stream.... this should not happen",
+			zap.Uint64("request_id", requestID),
+			zap.Uint64("subscription_id", subID),
+		)
+	}
 	callBack.subID = subID
 	c.subscriptionByWSSubID[subID] = callBack
 	return

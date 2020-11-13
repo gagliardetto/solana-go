@@ -25,30 +25,6 @@ import (
 )
 
 type MarketV2 struct {
-	/*
-	   blob(5),
-	   accountFlagsLayout('accountFlags'),
-	   publicKeyLayout('ownAddress'),
-	   u64('vaultSignerNonce'),
-	   publicKeyLayout('baseMint'),
-	   publicKeyLayout('quoteMint'),
-	   publicKeyLayout('baseVault'),
-	   u64('baseDepositsTotal'),
-	   u64('baseFeesAccrued'),
-	   publicKeyLayout('quoteVault'),
-	   u64('quoteDepositsTotal'),
-	   u64('quoteFeesAccrued'),
-	   u64('quoteDustThreshold'),
-	   publicKeyLayout('requestQueue'),
-	   publicKeyLayout('eventQueue'),
-	   publicKeyLayout('bids'),
-	   publicKeyLayout('asks'),
-	   u64('baseLotSize'),
-	   u64('quoteLotSize'),
-	   u64('feeRateBps'),
-	   u64('referrerRebatesAccrued'),
-	   blob(7),
-	*/
 	SerumPadding           [5]byte `json:"-"`
 	AccountFlags           bin.Uint64
 	OwnAddress             solana.PublicKey
