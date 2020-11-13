@@ -42,7 +42,6 @@ type MarketV2 struct {
 	   publicKeyLayout('requestQueue'),
 	   publicKeyLayout('eventQueue'),
 	   publicKeyLayout('bids'),
-
 	   publicKeyLayout('asks'),
 	   u64('baseLotSize'),
 	   u64('quoteLotSize'),
@@ -50,28 +49,28 @@ type MarketV2 struct {
 	   u64('referrerRebatesAccrued'),
 	   blob(7),
 	*/
-	SerumPadding           [5]byte          `json:"-" struc:"[5]pad"`
-	AccountFlags           bin.Uint64       `struc:"uint64,little"`
-	OwnAddress             solana.PublicKey `struc:"[32]byte"`
-	VaultSignerNonce       bin.Uint64       `struc:"uint64,little"`
-	BaseMint               solana.PublicKey `struc:"[32]byte"`
-	QuoteMint              solana.PublicKey `struc:"[32]byte"`
-	BaseVault              solana.PublicKey `struc:"[32]byte"`
-	BaseDepositsTotal      bin.Uint64       `struc:"uint64,little"`
-	BaseFeesAccrued        bin.Uint64       `struc:"uint64,little"`
-	QuoteVault             solana.PublicKey `struc:"[32]byte"`
-	QuoteDepositsTotal     bin.Uint64       `struc:"uint64,little"`
-	QuoteFeesAccrued       bin.Uint64       `struc:"uint64,little"`
-	QuoteDustThreshold     bin.Uint64       `struc:"uint64,little"`
-	RequestQueue           solana.PublicKey `struc:"[32]byte"`
-	EventQueue             solana.PublicKey `struc:"[32]byte"`
-	Bids                   solana.PublicKey `struc:"[32]byte"`
-	Asks                   solana.PublicKey `struc:"[32]byte"`
-	BaseLotSize            bin.Uint64       `struc:"uint64,little"`
-	QuoteLotSize           bin.Uint64       `struc:"uint64,little"`
-	FeeRateBPS             bin.Uint64       `struc:"uint64,little"`
-	ReferrerRebatesAccrued bin.Uint64       `struc:"uint64,little"`
-	EndPadding             [7]byte          `json:"-" struc:"[7]pad"`
+	SerumPadding           [5]byte `json:"-"`
+	AccountFlags           bin.Uint64
+	OwnAddress             solana.PublicKey
+	VaultSignerNonce       bin.Uint64
+	BaseMint               solana.PublicKey
+	QuoteMint              solana.PublicKey
+	BaseVault              solana.PublicKey
+	BaseDepositsTotal      bin.Uint64
+	BaseFeesAccrued        bin.Uint64
+	QuoteVault             solana.PublicKey
+	QuoteDepositsTotal     bin.Uint64
+	QuoteFeesAccrued       bin.Uint64
+	QuoteDustThreshold     bin.Uint64
+	RequestQueue           solana.PublicKey
+	EventQueue             solana.PublicKey
+	Bids                   solana.PublicKey
+	Asks                   solana.PublicKey
+	BaseLotSize            bin.Uint64
+	QuoteLotSize           bin.Uint64
+	FeeRateBPS             bin.Uint64
+	ReferrerRebatesAccrued bin.Uint64
+	EndPadding             [7]byte `json:"-"`
 }
 
 func (m *MarketV2) Decode(in []byte) error {
@@ -83,78 +82,9 @@ func (m *MarketV2) Decode(in []byte) error {
 	return nil
 }
 
-type SlabUninitialized struct {
-	Padding [4]byte `json:"-"`
-}
-
-type SlabInnerNode struct {
-	//    u32('prefixLen'),
-	//    u128('key'),
-	//    seq(u32(), 2, 'children'),
-	PrefixLen uint32
-	Key       bin.Uint128
-	Children  [2]uint32
-}
-
-type SlabLeafNode struct {
-	OwnerSlot     uint8
-	FeeTier       uint8
-	Padding       [2]byte `json:"-"`
-	Key           bin.Uint128
-	Owner         PublicKey
-	Quantity      bin.Uint64
-	ClientOrderId bin.Uint64
-}
-
-func (s *SlabLeafNode) GetPrice() *big.Int {
-	raw := s.Key.BigInt().Bytes()
-	if len(raw) <= 8 {
-		return big.NewInt(0)
-	}
-	v := new(big.Int).SetBytes(raw[0 : len(raw)-8])
-	return v
-}
-
-type SlabFreeNode struct {
-	Next uint32
-}
-
-type SlabLastFreeNode struct {
-	//Padding [68]byte `json:"-"`
-	Padding [4]byte `json:"-"`
-}
-
-type PublicKey [32]byte
-
-var SlabFactoryImplDef = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
-	{"uninitialized", (*SlabUninitialized)(nil)},
-	{"inner_node", (*SlabInnerNode)(nil)},
-	{"leaf_node", (*SlabLeafNode)(nil)},
-	{"free_node", (*SlabFreeNode)(nil)},
-	{"last_free_node", (*SlabLastFreeNode)(nil)},
-})
-
-type Slab struct {
-	bin.BaseVariant
-}
-
-func (s *Slab) UnmarshalBinary(decoder *bin.Decoder) error {
-	return s.BaseVariant.UnmarshalBinaryVariant(decoder, SlabFactoryImplDef)
-}
-func (s *Slab) MarshalBinary(encoder *bin.Encoder) error {
-	err := encoder.WriteUint32(s.TypeID)
-	if err != nil {
-		return err
-	}
-	return encoder.Encode(s.Impl)
-}
-
 type Orderbook struct {
-	// ORDERBOOK_LAYOUT
 	SerumPadding [5]byte `json:"-"`
 	AccountFlags uint64
-	// SLAB_LAYOUT
-	// SLAB_HEADER_LAYOUT
 	BumpIndex    uint32  `bin:"sizeof=Nodes"`
 	ZeroPaddingA [4]byte `json:"-"`
 	FreeListLen  uint32
@@ -163,9 +93,7 @@ type Orderbook struct {
 	Root         uint32
 	LeafCount    uint32
 	ZeroPaddingC [4]byte `json:"-"`
-
-	// SLAB_NODE_LAYOUT
-	Nodes []*Slab
+	Nodes        []*Slab
 }
 
 func (o *Orderbook) Items(descending bool, f func(node *SlabLeafNode) error) error {
@@ -197,4 +125,68 @@ func (o *Orderbook) Items(descending bool, f func(node *SlabLeafNode) error) err
 		}
 	}
 	return nil
+}
+
+var SlabFactoryImplDef = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
+	{"uninitialized", (*SlabUninitialized)(nil)},
+	{"inner_node", (*SlabInnerNode)(nil)},
+	{"leaf_node", (*SlabLeafNode)(nil)},
+	{"free_node", (*SlabFreeNode)(nil)},
+	{"last_free_node", (*SlabLastFreeNode)(nil)},
+})
+
+type Slab struct {
+	bin.BaseVariant
+}
+
+func (s *Slab) UnmarshalBinary(decoder *bin.Decoder) error {
+	return s.BaseVariant.UnmarshalBinaryVariant(decoder, SlabFactoryImplDef)
+}
+func (s *Slab) MarshalBinary(encoder *bin.Encoder) error {
+	err := encoder.WriteUint32(s.TypeID)
+	if err != nil {
+		return err
+	}
+	return encoder.Encode(s.Impl)
+}
+
+type SlabUninitialized struct {
+	Padding  [4]byte  `json:"-"`
+	PaddingA [64]byte `json:"-"` // ensure variant is 68 bytes
+}
+
+type SlabInnerNode struct {
+	PrefixLen uint32
+	Key       bin.Uint128
+	Children  [2]uint32
+	Padding   [40]byte `json:"-"` // ensure variant is 68 bytes
+}
+
+type SlabFreeNode struct {
+	Next    uint32
+	Padding [64]byte `json:"-"` // ensure variant is 68 bytes
+}
+
+type SlabLastFreeNode struct {
+	Padding  [4]byte  `json:"-"`
+	PaddingA [64]byte `json:"-"` // ensure variant is 68 bytes
+}
+
+type SlabLeafNode struct {
+	OwnerSlot     uint8
+	FeeTier       uint8
+	Padding       [2]byte `json:"-"`
+	Key           bin.Uint128
+	Owner         solana.PublicKey
+	Quantity      bin.Uint64
+	ClientOrderId bin.Uint64
+}
+
+func (s *SlabLeafNode) GetPrice() *big.Int {
+	raw := s.Key.BigInt().Bytes()
+	if len(raw) <= 8 {
+		return big.NewInt(0)
+	}
+	v := new(big.Int).SetBytes(raw[0 : len(raw)-8])
+	return v
 }
