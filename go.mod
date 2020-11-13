@@ -10,7 +10,6 @@ require (
 	github.com/gorilla/rpc v1.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
-	github.com/lunixbochs/struc v0.0.0-20200707160740-784aaebc1d40
 	github.com/mr-tron/base58 v1.2.0
 	github.com/onsi/gomega v1.10.1 // indirect
 	github.com/pkg/errors v0.9.1
