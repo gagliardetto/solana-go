@@ -15,12 +15,56 @@
 package solana
 
 import (
+	"fmt"
+
 	bin "github.com/dfuse-io/binary"
 )
 
 type Transaction struct {
 	Signatures []Signature `json:"signatures"`
 	Message    Message     `json:"message"`
+}
+
+func (t *Transaction) TouchAccount(account PublicKey) bool {
+	for _, a := range t.Message.AccountKeys {
+		if a.Equals(account) {
+			return true
+		}
+	}
+	return false
+}
+
+func (t *Transaction) IsSigner(account PublicKey) bool {
+	for idx, acc := range t.Message.AccountKeys {
+		if acc.Equals(account) {
+			return idx < int(t.Message.Header.NumRequiredSignatures)
+		}
+	}
+	return false
+}
+
+func (t *Transaction) IsWritable(account PublicKey) bool {
+	index := 0
+	found := false
+	for idx, acc := range t.Message.AccountKeys {
+		if acc.Equals(account) {
+			found = true
+			index = idx
+		}
+	}
+	if !found {
+		return false
+	}
+	h := t.Message.Header
+	return (index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)) ||
+		((index >= int(h.NumRequiredSignatures)) && (index < len(t.Message.AccountKeys)-int(h.NumReadonlyunsignedAccounts)))
+}
+
+func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint8) (PublicKey, error) {
+	if int(programIDIndex) < len(t.Message.AccountKeys) {
+		return t.Message.AccountKeys[programIDIndex], nil
+	}
+	return PublicKey{}, fmt.Errorf("programID index not found %d", programIDIndex)
 }
 
 type Message struct {
@@ -38,7 +82,7 @@ type MessageHeader struct {
 
 type CompiledInstruction struct {
 	ProgramIDIndex uint8         `json:"programIdIndex"`
-	AccountsCount  bin.Varuint16 `json:"-" bin:"sizeof=Accounts"`
+	AccountCount   bin.Varuint16 `json:"-" bin:"sizeof=Accounts"`
 	Accounts       []uint8       `json:"accounts"`
 	DataLength     bin.Varuint16 `json:"-" bin:"sizeof=Data"`
 	Data           Base58        `json:"data"`

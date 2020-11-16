@@ -20,8 +20,6 @@ import (
 	"fmt"
 	"testing"
 
-	"gotest.tools/assert"
-
 	"go.uber.org/zap"
 
 	"github.com/dfuse-io/solana-go"
@@ -68,8 +66,6 @@ func TestClient_GetConfirmedTransaction(t *testing.T) {
 	require.NoError(t, err)
 	fmt.Println(string(d))
 
-	assert.Equal(t, false, trx.Transaction.Message.Instructions[0].IsParsed())
-
 	signature = "4ZK6ofUodMP8NrB8RGkKFpXWVKMk5eqjkBTbq7DKiDu34gbdrpgctJHp3cU79ZGEBgTaohbjy56KJwhraVmgYq9i"
 	trx, err = c.GetConfirmedTransaction(context.Background(), signature)
 	require.NoError(t, err)
@@ -78,5 +74,4 @@ func TestClient_GetConfirmedTransaction(t *testing.T) {
 	require.NoError(t, err)
 	fmt.Println(string(d))
 
-	assert.Equal(t, true, trx.Transaction.Message.Instructions[0].IsParsed())
 }

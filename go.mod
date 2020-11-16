@@ -4,13 +4,12 @@ go 1.14
 
 require (
 	github.com/GeertJohan/go.rice v1.0.0
-	github.com/dfuse-io/binary v0.0.0-20201113132610-5a1e246afeec
+	github.com/dfuse-io/binary v0.0.0-20201113172957-3eda1bb6412c
 	github.com/dfuse-io/logging v0.0.0-20201110202154-26697de88c79
 	github.com/google/go-cmp v0.4.1 // indirect
 	github.com/gorilla/rpc v1.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
-	github.com/lunixbochs/struc v0.0.0-20200707160740-784aaebc1d40
 	github.com/mr-tron/base58 v1.2.0
 	github.com/onsi/gomega v1.10.1 // indirect
 	github.com/pkg/errors v0.9.1

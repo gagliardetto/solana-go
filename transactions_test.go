@@ -28,7 +28,7 @@ func TestCompiledInstructions(t *testing.T) {
 
 	ci := &CompiledInstruction{
 		ProgramIDIndex: 5,
-		AccountsCount:  3,
+		AccountCount:   3,
 		Accounts:       []uint8{2, 5, 8},
 		DataLength:     5,
 		Data:           Base58([]byte{1, 2, 3, 4, 5}),
