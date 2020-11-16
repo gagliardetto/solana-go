@@ -101,7 +101,7 @@ func (c *Client) handleNewSubscriptionMessage(requestID, subID uint64) {
 }
 
 func (c *Client) handleSubscriptionMessage(subID uint64, message []byte) {
-	zlog.Info("received subscription message",
+	zlog.Debug("received subscription message",
 		zap.Uint64("subscription_id", subID),
 	)
 
