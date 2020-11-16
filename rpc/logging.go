@@ -15,13 +15,11 @@
 package rpc
 
 import (
-	"os"
-
 	"github.com/dfuse-io/logging"
 	"go.uber.org/zap"
 )
 
-var traceEnabled = os.Getenv("TRACE") == "true"
+var traceEnabled = logging.IsTraceEnabled("solana-go", "github.com/dfuse-io/solana-go/rpc")
 var zlog *zap.Logger
 
 func init() {

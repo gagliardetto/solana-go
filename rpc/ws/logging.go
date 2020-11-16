@@ -15,14 +15,12 @@
 package ws
 
 import (
-	"os"
-
 	"github.com/dfuse-io/logging"
 	"go.uber.org/zap"
 )
 
-var traceEnabled = os.Getenv("TRACE") == "true"
 var zlog *zap.Logger
+var traceEnabled = logging.IsTraceEnabled("solana-go", "github.com/dfuse-io/solana-go/rpc/ws")
 
 func init() {
 	logging.Register("github.com/dfuse-io/solana-go/rpc/ws", &zlog)

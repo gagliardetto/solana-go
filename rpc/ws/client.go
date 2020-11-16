@@ -108,9 +108,11 @@ func (c *Client) handleNewSubscriptionMessage(requestID, subID uint64) {
 }
 
 func (c *Client) handleSubscriptionMessage(subID uint64, message []byte) {
-	zlog.Debug("received subscription message",
-		zap.Uint64("subscription_id", subID),
-	)
+	if traceEnabled {
+		zlog.Debug("received subscription message",
+			zap.Uint64("subscription_id", subID),
+		)
+	}
 
 	c.lock.RLock()
 	sub, found := c.subscriptionByWSSubID[subID]
