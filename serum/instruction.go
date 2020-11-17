@@ -28,14 +28,17 @@ func DecodeInstruction(accounts []solana.PublicKey, compiledInstruction *solana.
 	}
 
 	if v, ok := inst.Impl.(AccountSettable); ok {
-		v.setAccounts(accounts, compiledInstruction.Accounts)
+		err := v.setAccounts(accounts, compiledInstruction.Accounts)
+		if err != nil {
+			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
+		}
 	}
 
 	return inst, nil
 }
 
 type AccountSettable interface {
-	setAccounts(accounts []solana.PublicKey, instructionActIdx []uint8)
+	setAccounts(accounts []solana.PublicKey, instructionActIdx []uint8) error
 }
 
 type Instruction struct {
