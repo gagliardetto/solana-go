@@ -21,9 +21,9 @@ func registryDecodeInstruction(accounts []solana.PublicKey, rawInstruction *sola
 	return inst, nil
 }
 
-func DecodeInstruction(accounts []solana.PublicKey, rawInstruction *solana.CompiledInstruction) (*Instruction, error) {
+func DecodeInstruction(accounts []solana.PublicKey, compiledInstruction *solana.CompiledInstruction) (*Instruction, error) {
 	var inst *Instruction
-	if err := bin.NewDecoder(rawInstruction.Data).Decode(&inst); err != nil {
+	if err := bin.NewDecoder(compiledInstruction.Data).Decode(&inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
 
@@ -165,7 +165,7 @@ type MatchOrderAccounts struct {
 type InstructionMatchOrder struct {
 	Limit uint16
 
-	Accounts *MatchOrderAccounts `bin="-"`
+	Accounts *MatchOrderAccounts `bin:"-"`
 }
 
 func (i *InstructionMatchOrder) setAccounts(accounts []solana.PublicKey) error {

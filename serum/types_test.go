@@ -1,12 +1,15 @@
 package serum
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"testing"
+
+	"github.com/dfuse-io/solana-go/rpc"
 
 	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
@@ -29,19 +32,27 @@ func TestDecoder_Market(t *testing.T) {
 }
 func TestDecoder_Event(t *testing.T) {
 
-	b64 := `c2VydW0RAAAAAAAAAKMoAAAAAAAAAAAAAAAAAAAD+gUAAAAAAAYJAAAAAAAAP9MRAAAAAACwUAY6AAAAAAAAAAAAAAAA/Af4//////8aBQAAAAAAAJGeNN64UdRK+szEsGLeTBiPnrTkfJaOEzsacSpRiAYs6zimHOimKK8CAQAAAAAAAEC6CycAAAAAAAAAAAAAAAAAAAAAAAAAAP/3BwAAAAAAIAUAAAAAAACRnjTeuFHUSvrMxLBi3kwYj5605HyWjhM7GnEqUYgGLH2wFQ01ceby`
+	//b64 := `c2VydW0RAAAAAAAAAKMoAAAAAAAAAAAAAAAAAAAD+gUAAAAAAAYJAAAAAAAAP9MRAAAAAACwUAY6AAAAAAAAAAAAAAAA/Af4//////8aBQAAAAAAAJGeNN64UdRK+szEsGLeTBiPnrTkfJaOEzsacSpRiAYs6zimHOimKK8CAQAAAAAAAEC6CycAAAAAAAAAAAAAAAAAAAAAAAAAAP/3BwAAAAAAIAUAAAAAAACRnjTeuFHUSvrMxLBi3kwYj5605HyWjhM7GnEqUYgGLH2wFQ01ceby`
 
-	q := &EventQueue{}
-	err := q.DecodeFromBase64(b64)
+	client := rpc.NewClient("http://api.mainnet-beta.solana.com:80/rpc")
+	info, err := client.GetAccountInfo(context.Background(), solana.MustPublicKeyFromBase58("13iGJcA4w5hcJZDjJbJQor1zUiDLE4jv2rMW9HkD5Eo1"))
 	require.NoError(t, err)
 
+	q := &EventQueue{}
+	err = q.Decode(info.Value.Data)
+	require.NoError(t, err)
+
+	fmt.Println("data length:", len(info.Value.Data))
 	fmt.Println("serum?:", string(q.Header.Serum[:]))
-	for _, e := range q.Events {
-		fmt.Println("Type:", e.Flag)
-		fmt.Println("Side:", e.Side())
-		fmt.Println("Filled:", e.Filled())
-		fmt.Println("event owner:", e.Owner)
-	}
+	fmt.Println("count:", q.Header.Count)
+	fmt.Println("seq", q.Header.SeqNum)
+	fmt.Println("events", len(q.Events))
+	//for _, e := range q.Events {
+	//	fmt.Println("Type:", e.Flag)
+	//	fmt.Println("Side:", e.Side())
+	//	fmt.Println("Filled:", e.Filled())
+	//	fmt.Println("event owner:", e.Owner)
+	//}
 
 }
 

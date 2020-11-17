@@ -239,14 +239,14 @@ func (q *EventQueue) Decode(data []byte) error {
 		return fmt.Errorf("event queue: decode header: %w", err)
 	}
 
-	remainingData := decoder.Remaining()
-	if remainingData%EventDataLength != 0 {
-		return fmt.Errorf("event queue: wrong event data length %d", remainingData)
-	}
+	//remainingData := decoder.Remaining()
+	//if remainingData%EventDataLength != 0 {
+	//	return fmt.Errorf("event queue: wrong event data length %d", remainingData)
+	//}
+	//
+	//eventCount := remainingData / EventDataLength
 
-	eventCount := remainingData / EventDataLength
-
-	for i := 0; i < eventCount; i++ {
+	for decoder.Remaining() >= 88 {
 		var e *Event
 		err = decoder.Decode(&e)
 		if err != nil {
