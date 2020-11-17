@@ -2,7 +2,7 @@ package solana
 
 import "fmt"
 
-type InstructionDecoder func(*CompiledInstruction) (interface{}, error)
+type InstructionDecoder func([]PublicKey, *CompiledInstruction) (interface{}, error)
 
 var instructionDecoderRegistry = map[string]InstructionDecoder{}
 
@@ -14,7 +14,7 @@ func RegisterInstructionDecoder(programID PublicKey, decoder InstructionDecoder)
 	instructionDecoderRegistry[p] = decoder
 }
 
-func DecodeInstruction(programID PublicKey, inst *CompiledInstruction) (interface{}, error) {
+func DecodeInstruction(programID PublicKey, accounts []PublicKey, inst *CompiledInstruction) (interface{}, error) {
 	p := programID.String()
 
 	decoder, found := instructionDecoderRegistry[p]
@@ -22,5 +22,5 @@ func DecodeInstruction(programID PublicKey, inst *CompiledInstruction) (interfac
 		return nil, fmt.Errorf("unknown programID, cannot find any instruction decoder %q", p)
 	}
 
-	return decoder(inst)
+	return decoder(accounts, inst)
 }

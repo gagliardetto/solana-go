@@ -13,20 +13,29 @@ func init() {
 	solana.RegisterInstructionDecoder(DEX_PROGRAM_ID, registryDecodeInstruction)
 }
 
-func registryDecodeInstruction(rawInstruction *solana.CompiledInstruction) (interface{}, error) {
-	inst, err := DecodeInstruction(rawInstruction)
+func registryDecodeInstruction(accounts []solana.PublicKey, rawInstruction *solana.CompiledInstruction) (interface{}, error) {
+	inst, err := DecodeInstruction(accounts, rawInstruction)
 	if err != nil {
 		return nil, err
 	}
 	return inst, nil
 }
 
-func DecodeInstruction(rawInstruction *solana.CompiledInstruction) (*Instruction, error) {
+func DecodeInstruction(accounts []solana.PublicKey, rawInstruction *solana.CompiledInstruction) (*Instruction, error) {
 	var inst *Instruction
 	if err := bin.NewDecoder(rawInstruction.Data).Decode(&inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
+
+	if v, ok := inst.Impl.(AccountSettable); ok {
+		v.setAccounts(accounts)
+	}
+
 	return inst, nil
+}
+
+type AccountSettable interface {
+	setAccounts(accounts []solana.PublicKey)
 }
 
 type Instruction struct {
@@ -65,12 +74,49 @@ var InstructionDefVariant = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, [
 	{"cancel_order_by_client_id", (*InstructionCancelOrderByClientId)(nil)},
 })
 
+type InitializeMarketAccounts struct {
+	Market        solana.AccountMeta
+	SPLCoinToken  solana.AccountMeta
+	SPLPriceToken solana.AccountMeta
+	CoinMint      solana.AccountMeta
+	PriceMint     solana.AccountMeta
+}
+
 type InstructionInitializeMarket struct {
 	BaseLotSize        uint64
 	QuoteLotSize       uint64
 	FeeRateBps         uint16
 	VaultSignerNonce   uint64
 	QuoteDustThreshold uint64
+
+	Accounts *InitializeMarketAccounts `bin="_"`
+}
+
+func (i *InstructionInitializeMarket) setAccounts(accounts []solana.PublicKey) error {
+	if len(accounts) < 9 {
+		return fmt.Errorf("insuficient account, Initialize Market requires at-least 8 accounts not %d", len(accounts))
+	}
+	i.Accounts = &InitializeMarketAccounts{
+		Market:        solana.AccountMeta{accounts[0], false, true},
+		SPLCoinToken:  solana.AccountMeta{accounts[5], false, true},
+		SPLPriceToken: solana.AccountMeta{accounts[6], false, true},
+		CoinMint:      solana.AccountMeta{accounts[7], false, false},
+		PriceMint:     solana.AccountMeta{accounts[8], false, false},
+	}
+	return nil
+}
+
+type NewOrderAccounts struct {
+	Market             solana.AccountMeta
+	OpenOrders         solana.AccountMeta
+	RequestQueue       solana.AccountMeta
+	Payer              solana.AccountMeta
+	Owner              solana.AccountMeta
+	CoinVault          solana.AccountMeta
+	PCVault            solana.AccountMeta
+	SPLTokenProgram    solana.AccountMeta
+	Rent               solana.AccountMeta
+	SRMDiscountAccount *solana.AccountMeta
 }
 
 type InstructionNewOrder struct {
@@ -79,14 +125,102 @@ type InstructionNewOrder struct {
 	MaxQuantity uint64
 	OrderType   uint32
 	ClientID    uint64
+
+	Accounts *NewOrderAccounts `bin="_"`
+}
+
+func (i *InstructionNewOrder) setAccounts(accounts []solana.PublicKey) error {
+	if len(accounts) < 9 {
+		return fmt.Errorf("insuficient account, New Order requires at-least 10 accounts not %d", len(accounts))
+	}
+	i.Accounts = &NewOrderAccounts{
+		Market:          solana.AccountMeta{accounts[0], false, true},
+		OpenOrders:      solana.AccountMeta{accounts[1], false, true},
+		RequestQueue:    solana.AccountMeta{accounts[2], false, true},
+		Payer:           solana.AccountMeta{accounts[3], false, true},
+		Owner:           solana.AccountMeta{accounts[4], true, false},
+		CoinVault:       solana.AccountMeta{accounts[5], false, true},
+		PCVault:         solana.AccountMeta{accounts[6], false, true},
+		SPLTokenProgram: solana.AccountMeta{accounts[7], false, false},
+		Rent:            solana.AccountMeta{accounts[8], false, false},
+	}
+
+	if len(accounts) >= 10 {
+		i.Accounts.SRMDiscountAccount = &solana.AccountMeta{accounts[9], false, true}
+	}
+
+	return nil
+}
+
+type MatchOrderAccounts struct {
+	Market            solana.AccountMeta
+	RequestQueue      solana.AccountMeta
+	EventQueue        solana.AccountMeta
+	Bids              solana.AccountMeta
+	Asks              solana.AccountMeta
+	CoinFeeReceivable solana.AccountMeta
+	PCFeeReceivable   solana.AccountMeta
 }
 
 type InstructionMatchOrder struct {
 	Limit uint16
+
+	Accounts *MatchOrderAccounts `bin="_"`
+}
+
+func (i *InstructionMatchOrder) setAccounts(accounts []solana.PublicKey) error {
+	if len(accounts) < 7 {
+		return fmt.Errorf("insuficient account, Match Order requires at-least 7 accounts not %d", len(accounts))
+	}
+	i.Accounts = &MatchOrderAccounts{
+		Market:            solana.AccountMeta{accounts[0], false, true},
+		RequestQueue:      solana.AccountMeta{accounts[1], false, true},
+		EventQueue:        solana.AccountMeta{accounts[2], false, true},
+		Bids:              solana.AccountMeta{accounts[3], false, true},
+		Asks:              solana.AccountMeta{accounts[4], false, true},
+		CoinFeeReceivable: solana.AccountMeta{accounts[5], false, true},
+		PCFeeReceivable:   solana.AccountMeta{accounts[6], false, true},
+	}
+	return nil
+}
+
+type ConsumeEventsAccounts struct {
+	OpenOrders        []solana.AccountMeta
+	Market            solana.AccountMeta
+	EventQueue        solana.AccountMeta
+	CoinFeeReceivable solana.AccountMeta
+	PCFeeReceivable   solana.AccountMeta
 }
 
 type InstructionConsumeEvents struct {
 	Limit uint16
+
+	Accounts *ConsumeEventsAccounts `bin="_"`
+}
+
+func (i *InstructionConsumeEvents) setAccounts(accounts []solana.PublicKey) error {
+	if len(accounts) < 4 {
+		return fmt.Errorf("insuficient account, Consume Events requires at-least 4 accounts not %d", len(accounts))
+	}
+	i.Accounts = &ConsumeEventsAccounts{
+		Market:            solana.AccountMeta{accounts[len(accounts)-4], false, true},
+		EventQueue:        solana.AccountMeta{accounts[len(accounts)-3], false, true},
+		CoinFeeReceivable: solana.AccountMeta{accounts[len(accounts)-2], false, true},
+		PCFeeReceivable:   solana.AccountMeta{accounts[len(accounts)-1], false, true},
+	}
+
+	for itr := 0; itr < len(accounts)-4; itr++ {
+		i.Accounts.OpenOrders = append(i.Accounts.OpenOrders, solana.AccountMeta{accounts[itr], false, true})
+	}
+
+	return nil
+}
+
+type CancelOrderAccounts struct {
+	Market       solana.AccountMeta
+	OpenOrders   solana.AccountMeta
+	RequestQueue solana.AccountMeta
+	Owner        solana.AccountMeta
 }
 
 type InstructionCancelOrder struct {
@@ -94,13 +228,89 @@ type InstructionCancelOrder struct {
 	OrderID       bin.Uint128
 	OpenOrders    solana.PublicKey
 	OpenOrderSlot uint8
+
+	Accounts *CancelOrderAccounts `bin="_"`
+}
+
+func (i *InstructionCancelOrder) setAccounts(accounts []solana.PublicKey) error {
+	if len(accounts) < 4 {
+		return fmt.Errorf("insuficient account, Cancel Order requires at-least 4 accounts not %d", len(accounts))
+	}
+	i.Accounts = &CancelOrderAccounts{
+		Market:       solana.AccountMeta{accounts[0], false, false},
+		OpenOrders:   solana.AccountMeta{accounts[1], false, true},
+		RequestQueue: solana.AccountMeta{accounts[2], false, true},
+		Owner:        solana.AccountMeta{accounts[3], true, false},
+	}
+
+	return nil
+}
+
+type SettleFundsAccounts struct {
+	Market           solana.AccountMeta
+	OpenOrders       solana.AccountMeta
+	Owner            solana.AccountMeta
+	CoinVault        solana.AccountMeta
+	PVVault          solana.AccountMeta
+	CoinWallet       solana.AccountMeta
+	PCWallet         solana.AccountMeta
+	Signer           solana.AccountMeta
+	SPLTokenProgram  solana.AccountMeta
+	ReferrerPCWallet *solana.AccountMeta
 }
 
 type InstructionSettleFunds struct {
+	Accounts *SettleFundsAccounts `bin="_"`
+}
+
+func (i *InstructionSettleFunds) setAccounts(accounts []solana.PublicKey) error {
+	if len(accounts) < 9 {
+		return fmt.Errorf("insuficient account, Settle Funds requires at-least 10 accounts not %d", len(accounts))
+	}
+	i.Accounts = &SettleFundsAccounts{
+		Market:          solana.AccountMeta{accounts[0], false, true},
+		OpenOrders:      solana.AccountMeta{accounts[1], false, true},
+		Owner:           solana.AccountMeta{accounts[2], true, false},
+		CoinVault:       solana.AccountMeta{accounts[3], false, true},
+		PVVault:         solana.AccountMeta{accounts[4], false, true},
+		CoinWallet:      solana.AccountMeta{accounts[5], false, true},
+		PCWallet:        solana.AccountMeta{accounts[6], false, true},
+		Signer:          solana.AccountMeta{accounts[7], false, false},
+		SPLTokenProgram: solana.AccountMeta{accounts[8], false, false},
+	}
+
+	if len(accounts) >= 10 {
+		i.Accounts.ReferrerPCWallet = &solana.AccountMeta{accounts[9], false, true}
+	}
+
+	return nil
+}
+
+type CancelOrderByClientIdAccounts struct {
+	Market       solana.AccountMeta
+	OpenOrders   solana.AccountMeta
+	RequestQueue solana.AccountMeta
+	Owner        solana.AccountMeta
 }
 
 type InstructionCancelOrderByClientId struct {
 	ClientID uint64
+
+	Accounts *CancelOrderByClientIdAccounts
+}
+
+func (i *InstructionCancelOrderByClientId) setAccounts(accounts []solana.PublicKey) error {
+	if len(accounts) < 4 {
+		return fmt.Errorf("insuficient account, Cancel Order By Client Id requires at-least 4 accounts not %d", len(accounts))
+	}
+	i.Accounts = &CancelOrderByClientIdAccounts{
+		Market:       solana.AccountMeta{accounts[0], false, false},
+		OpenOrders:   solana.AccountMeta{accounts[1], false, true},
+		RequestQueue: solana.AccountMeta{accounts[2], false, true},
+		Owner:        solana.AccountMeta{accounts[3], true, false},
+	}
+
+	return nil
 }
 
 type SideLayoutType string
@@ -145,49 +355,3 @@ func (o OrderTypeLayout) getOrderType() OrderType {
 	}
 	return OrderTypeUnknown
 }
-
-//
-//export const INSTRUCTION_LAYOUT = new VersionedLayout(
-//0,
-//union(u32('instruction')),
-//);
-//INSTRUCTION_LAYOUT.inner.addVariant(
-//0,
-//struct([
-//u64('baseLotSize'),
-//u64('quoteLotSize'),
-//u16('feeRateBps'),
-//u64('vaultSignerNonce'),
-//u64('quoteDustThreshold'),
-//]),
-//'initializeMarket',
-//);
-//INSTRUCTION_LAYOUT.inner.addVariant(
-//1,
-//struct([
-//sideLayout('side'),
-//u64('limitPrice'),
-//u64('maxQuantity'),
-//orderTypeLayout('orderType'),
-//u64('clientId'),
-//]),
-//'newOrder',
-//);
-//INSTRUCTION_LAYOUT.inner.addVariant(2, struct([u16('limit')]), 'matchOrders');
-//INSTRUCTION_LAYOUT.inner.addVariant(3, struct([u16('limit')]), 'consumeEvents');
-//INSTRUCTION_LAYOUT.inner.addVariant(
-//4,
-//struct([
-//sideLayout('side'),
-//u128('orderId'),
-//publicKeyLayout('openOrders'),
-//u8('openOrdersSlot'),
-//]),
-//'cancelOrder',
-//);
-//INSTRUCTION_LAYOUT.inner.addVariant(5, struct([]), 'settleFunds');
-//INSTRUCTION_LAYOUT.inner.addVariant(
-//6,
-//struct([u64('clientId')]),
-//'cancelOrderByClientId',
-//);
