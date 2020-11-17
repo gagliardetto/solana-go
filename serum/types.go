@@ -14,6 +14,7 @@
 package serum
 
 import (
+	"encoding/base64"
 	"fmt"
 	"math/big"
 
@@ -173,19 +174,6 @@ type EventQueueHeader struct {
 	SeqNum       uint64
 }
 
-type Event struct {
-	Flag              EventFlag
-	OwnerSlot         uint8
-	FeeTier           uint8
-	Padding           [5]uint8
-	NativeQtyReleased uint64
-	NativeQtyPaid     uint64
-	NativeFeeOrRebate uint64
-	OrderID           bin.Uint128
-	Owner             solana.PublicKey
-	ClientOrderID     uint64
-}
-
 type EventFlag uint8
 
 const (
@@ -202,6 +190,19 @@ const (
 	EventSideBid EventSide = "BID"
 )
 
+type Event struct {
+	Flag              EventFlag
+	OwnerSlot         uint8
+	FeeTier           uint8
+	Padding           [5]uint8
+	NativeQtyReleased uint64
+	NativeQtyPaid     uint64
+	NativeFeeOrRebate uint64
+	OrderID           bin.Uint128
+	Owner             solana.PublicKey
+	ClientOrderID     uint64
+}
+
 func (e *Event) Side() EventSide {
 	if Has(uint8(e.Flag), uint8(EventFlagBid)) {
 		return EventSideBid
@@ -214,3 +215,45 @@ func (e *Event) Filled() bool {
 }
 
 func Has(b, flag uint8) bool { return b&flag != 0 }
+
+type EventQueue struct {
+	Header *EventQueueHeader
+	Events []*Event
+}
+
+func (q *EventQueue) DecodeFromBase64(b64 string) error {
+	data, err := base64.StdEncoding.DecodeString(b64)
+	if err != nil {
+		return fmt.Errorf("event queue: from base64: %w", err)
+	}
+
+	return q.Decode(data)
+}
+
+const EventDataLength = 88
+
+func (q *EventQueue) Decode(data []byte) error {
+	decoder := bin.NewDecoder(data)
+	err := decoder.Decode(&q.Header)
+	if err != nil {
+		return fmt.Errorf("event queue: decode header: %w", err)
+	}
+
+	remainingData := decoder.Remaining()
+	if remainingData%EventDataLength != 0 {
+		return fmt.Errorf("event queue: wrong event data length %d", remainingData)
+	}
+
+	eventCount := remainingData / EventDataLength
+
+	for i := 0; i < eventCount; i++ {
+		var e *Event
+		err = decoder.Decode(&e)
+		if err != nil {
+			return fmt.Errorf("event queue: decode events: %w", err)
+		}
+		q.Events = append(q.Events, e)
+	}
+
+	return nil
+}

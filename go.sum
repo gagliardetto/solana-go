@@ -81,6 +81,8 @@ github.com/dfuse-io/binary v0.0.0-20201113172957-3eda1bb6412c h1:ufKbFyLlpy/Rg6i
 github.com/dfuse-io/binary v0.0.0-20201113172957-3eda1bb6412c/go.mod h1:GDFX6qH3BQZPWTeYaA4ZW98T94zs2skRoG3oMz/0jw0=
 github.com/dfuse-io/binary v0.0.0-20201113225852-eb73efbfa745 h1:41kLpvyYOkN/VenBzd5fwH069Oc11xJTvGwqK3kf6IU=
 github.com/dfuse-io/binary v0.0.0-20201113225852-eb73efbfa745/go.mod h1:GDFX6qH3BQZPWTeYaA4ZW98T94zs2skRoG3oMz/0jw0=
+github.com/dfuse-io/binary v0.0.0-20201117130902-7df96997b0a8 h1:/bHa8o+/kXoQU4VBLPm+Pe8aR+UPotIqzh3UVNi11cA=
+github.com/dfuse-io/binary v0.0.0-20201117130902-7df96997b0a8/go.mod h1:GDFX6qH3BQZPWTeYaA4ZW98T94zs2skRoG3oMz/0jw0=
 github.com/dfuse-io/dauth v0.0.0-20200529171443-21c0e2d262c2/go.mod h1:tab5biQg59hbrHjaXTjaLcsP3zblx6B0I0Keu03xB44=
 github.com/dfuse-io/derr v0.0.0-20200406214256-c690655246a1/go.mod h1:JW/hUKChGd6ytDtvwx4JFo57m1pnFvMxaq9WbDAb2fQ=
 github.com/dfuse-io/derr v0.0.0-20200417132224-d333cfd0e9a0/go.mod h1:/DjjRCyTi/KIiI1E1hnhvfWwg+K06jo+qM4VcjHvHq4=

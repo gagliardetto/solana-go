@@ -31,25 +31,12 @@ func TestDecoder_Event(t *testing.T) {
 
 	b64 := `c2VydW0RAAAAAAAAAKMoAAAAAAAAAAAAAAAAAAAD+gUAAAAAAAYJAAAAAAAAP9MRAAAAAACwUAY6AAAAAAAAAAAAAAAA/Af4//////8aBQAAAAAAAJGeNN64UdRK+szEsGLeTBiPnrTkfJaOEzsacSpRiAYs6zimHOimKK8CAQAAAAAAAEC6CycAAAAAAAAAAAAAAAAAAAAAAAAAAP/3BwAAAAAAIAUAAAAAAACRnjTeuFHUSvrMxLBi3kwYj5605HyWjhM7GnEqUYgGLH2wFQ01ceby`
 
-	data, err := base64.StdEncoding.DecodeString(b64)
-	headerData := data[0:38]
-	eventData := data[37:]
+	q := &EventQueue{}
+	err := q.DecodeFromBase64(b64)
 	require.NoError(t, err)
 
-	fmt.Println("Size of data:", len(data), hex.EncodeToString(data))
-
-	//read the header
-	//read the rest ...
-	var h *EventQueueHeader
-	err = bin.NewDecoder(headerData).Decode(&h)
-
-	var events [2]*Event
-	err = bin.NewDecoder(eventData).Decode(&events)
-
-	require.NoError(t, err)
-
-	for _, e := range events {
-		fmt.Println("serum?:", string(h.Serum[:]))
+	fmt.Println("serum?:", string(q.Header.Serum[:]))
+	for _, e := range q.Events {
 		fmt.Println("Type:", e.Flag)
 		fmt.Println("Side:", e.Side())
 		fmt.Println("Filled:", e.Filled())
