@@ -89,7 +89,7 @@ type InstructionInitializeMarket struct {
 	VaultSignerNonce   uint64
 	QuoteDustThreshold uint64
 
-	Accounts *InitializeMarketAccounts `bin="_"`
+	Accounts *InitializeMarketAccounts `bin="-"`
 }
 
 func (i *InstructionInitializeMarket) setAccounts(accounts []solana.PublicKey) error {
@@ -126,7 +126,7 @@ type InstructionNewOrder struct {
 	OrderType   uint32
 	ClientID    uint64
 
-	Accounts *NewOrderAccounts `bin="_"`
+	Accounts *NewOrderAccounts `bin="-"`
 }
 
 func (i *InstructionNewOrder) setAccounts(accounts []solana.PublicKey) error {
@@ -165,7 +165,7 @@ type MatchOrderAccounts struct {
 type InstructionMatchOrder struct {
 	Limit uint16
 
-	Accounts *MatchOrderAccounts `bin="_"`
+	Accounts *MatchOrderAccounts `bin="-"`
 }
 
 func (i *InstructionMatchOrder) setAccounts(accounts []solana.PublicKey) error {
@@ -195,7 +195,7 @@ type ConsumeEventsAccounts struct {
 type InstructionConsumeEvents struct {
 	Limit uint16
 
-	Accounts *ConsumeEventsAccounts `bin="_"`
+	Accounts *ConsumeEventsAccounts `bin="-"`
 }
 
 func (i *InstructionConsumeEvents) setAccounts(accounts []solana.PublicKey) error {
@@ -229,7 +229,7 @@ type InstructionCancelOrder struct {
 	OpenOrders    solana.PublicKey
 	OpenOrderSlot uint8
 
-	Accounts *CancelOrderAccounts `bin="_"`
+	Accounts *CancelOrderAccounts `bin="-"`
 }
 
 func (i *InstructionCancelOrder) setAccounts(accounts []solana.PublicKey) error {
@@ -251,7 +251,7 @@ type SettleFundsAccounts struct {
 	OpenOrders       solana.AccountMeta
 	Owner            solana.AccountMeta
 	CoinVault        solana.AccountMeta
-	PVVault          solana.AccountMeta
+	PCVault          solana.AccountMeta
 	CoinWallet       solana.AccountMeta
 	PCWallet         solana.AccountMeta
 	Signer           solana.AccountMeta
@@ -260,7 +260,7 @@ type SettleFundsAccounts struct {
 }
 
 type InstructionSettleFunds struct {
-	Accounts *SettleFundsAccounts `bin="_"`
+	Accounts *SettleFundsAccounts `bin="-"`
 }
 
 func (i *InstructionSettleFunds) setAccounts(accounts []solana.PublicKey) error {
@@ -272,7 +272,7 @@ func (i *InstructionSettleFunds) setAccounts(accounts []solana.PublicKey) error 
 		OpenOrders:      solana.AccountMeta{accounts[1], false, true},
 		Owner:           solana.AccountMeta{accounts[2], true, false},
 		CoinVault:       solana.AccountMeta{accounts[3], false, true},
-		PVVault:         solana.AccountMeta{accounts[4], false, true},
+		PCVault:         solana.AccountMeta{accounts[4], false, true},
 		CoinWallet:      solana.AccountMeta{accounts[5], false, true},
 		PCWallet:        solana.AccountMeta{accounts[6], false, true},
 		Signer:          solana.AccountMeta{accounts[7], false, false},
