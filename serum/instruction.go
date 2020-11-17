@@ -89,7 +89,7 @@ type InstructionInitializeMarket struct {
 	VaultSignerNonce   uint64
 	QuoteDustThreshold uint64
 
-	Accounts *InitializeMarketAccounts `bin="-"`
+	Accounts *InitializeMarketAccounts `bin:"-"`
 }
 
 func (i *InstructionInitializeMarket) setAccounts(accounts []solana.PublicKey) error {
@@ -126,7 +126,7 @@ type InstructionNewOrder struct {
 	OrderType   uint32
 	ClientID    uint64
 
-	Accounts *NewOrderAccounts `bin="-"`
+	Accounts *NewOrderAccounts `bin:"-"`
 }
 
 func (i *InstructionNewOrder) setAccounts(accounts []solana.PublicKey) error {
@@ -195,7 +195,7 @@ type ConsumeEventsAccounts struct {
 type InstructionConsumeEvents struct {
 	Limit uint16
 
-	Accounts *ConsumeEventsAccounts `bin="-"`
+	Accounts *ConsumeEventsAccounts `bin:"-"`
 }
 
 func (i *InstructionConsumeEvents) setAccounts(accounts []solana.PublicKey) error {
@@ -229,7 +229,7 @@ type InstructionCancelOrder struct {
 	OpenOrders    solana.PublicKey
 	OpenOrderSlot uint8
 
-	Accounts *CancelOrderAccounts `bin="-"`
+	Accounts *CancelOrderAccounts `bin:"-"`
 }
 
 func (i *InstructionCancelOrder) setAccounts(accounts []solana.PublicKey) error {
@@ -260,7 +260,7 @@ type SettleFundsAccounts struct {
 }
 
 type InstructionSettleFunds struct {
-	Accounts *SettleFundsAccounts `bin="-"`
+	Accounts *SettleFundsAccounts `bin:"-"`
 }
 
 func (i *InstructionSettleFunds) setAccounts(accounts []solana.PublicKey) error {
