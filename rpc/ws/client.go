@@ -89,11 +89,12 @@ func (c *Client) handleMessage(message []byte) {
 func (c *Client) handleNewSubscriptionMessage(requestID, subID uint64) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-
-	zlog.Info("received new subscription message",
-		zap.Uint64("message_id", requestID),
-		zap.Uint64("subscription_id", subID),
-	)
+	if traceEnabled {
+		zlog.Debug("received new subscription message",
+			zap.Uint64("message_id", requestID),
+			zap.Uint64("subscription_id", subID),
+		)
+	}
 	callBack, found := c.subscriptionByRequestID[requestID]
 	if !found {
 		zlog.Error("cannot find websocket message handler for a new stream.... this should not happen",
@@ -107,9 +108,11 @@ func (c *Client) handleNewSubscriptionMessage(requestID, subID uint64) {
 }
 
 func (c *Client) handleSubscriptionMessage(subID uint64, message []byte) {
-	zlog.Debug("received subscription message",
-		zap.Uint64("subscription_id", subID),
-	)
+	if traceEnabled {
+		zlog.Debug("received subscription message",
+			zap.Uint64("subscription_id", subID),
+		)
+	}
 
 	c.lock.RLock()
 	sub, found := c.subscriptionByWSSubID[subID]
