@@ -51,6 +51,8 @@ func TestDecoder_Event(t *testing.T) {
 	for _, e := range events {
 		fmt.Println("serum?:", string(h.Serum[:]))
 		fmt.Println("Type:", e.Flag)
+		fmt.Println("Side:", e.Side())
+		fmt.Println("Filled:", e.Filled())
 		fmt.Println("event owner:", e.Owner)
 	}
 

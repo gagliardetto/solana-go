@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package serum
 
 import (
@@ -174,19 +173,8 @@ type EventQueueHeader struct {
 	SeqNum       uint64
 }
 
-type EventFlag uint8
-
-const (
-	FillEventFlag = iota
-	OutEventFlag
-	BidEventFlag
-	MakerEventFlag
-)
-
-var EventFlagStrings = []string{"FILL", "OUT", "BID", "MAKER"}
-
 type Event struct {
-	Flag              uint8
+	Flag              EventFlag
 	OwnerSlot         uint8
 	FeeTier           uint8
 	Padding           [5]uint8
@@ -198,6 +186,31 @@ type Event struct {
 	ClientOrderID     uint64
 }
 
-func (e *Event) Type() string {
-	return EventFlagStrings[e.Flag]
+type EventFlag uint8
+
+const (
+	EventFlagFill  EventFlag = 0x1
+	EventFlagOut   EventFlag = 0x2
+	EventFlagBid   EventFlag = 0x4
+	EventFlagMaker EventFlag = 0x8
+)
+
+type EventSide string
+
+const (
+	EventSideAsk EventSide = "ASK"
+	EventSideBid EventSide = "BID"
+)
+
+func (e *Event) Side() EventSide {
+	if Has(uint8(e.Flag), uint8(EventFlagBid)) {
+		return EventSideBid
+	}
+	return EventSideAsk
 }
+
+func (e *Event) Filled() bool {
+	return Has(uint8(e.Flag), uint8(EventFlagFill))
+}
+
+func Has(b, flag uint8) bool { return b&flag != 0 }
