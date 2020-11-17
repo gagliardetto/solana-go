@@ -18,10 +18,9 @@ import (
 	"fmt"
 	"math/big"
 
-	"go.uber.org/zap"
-
 	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
+	"go.uber.org/zap"
 )
 
 type MarketV2 struct {
@@ -165,4 +164,40 @@ func (s *SlabLeafNode) GetPrice() *big.Int {
 	}
 	v := new(big.Int).SetBytes(raw[0 : len(raw)-8])
 	return v
+}
+
+type EventQueueHeader struct {
+	Serum        [5]byte
+	AccountFlags uint64
+	Head         uint64
+	Count        uint64
+	SeqNum       uint64
+}
+
+type EventFlag uint8
+
+const (
+	FillEventFlag = iota
+	OutEventFlag
+	BidEventFlag
+	MakerEventFlag
+)
+
+var EventFlagStrings = []string{"FILL", "OUT", "BID", "MAKER"}
+
+type Event struct {
+	Flag              uint8
+	OwnerSlot         uint8
+	FeeTier           uint8
+	Padding           [5]uint8
+	NativeQtyReleased uint64
+	NativeQtyPaid     uint64
+	NativeFeeOrRebate uint64
+	OrderID           bin.Uint128
+	Owner             solana.PublicKey
+	ClientOrderID     uint64
+}
+
+func (e *Event) Type() string {
+	return EventFlagStrings[e.Flag]
 }

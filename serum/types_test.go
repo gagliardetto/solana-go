@@ -1,6 +1,7 @@
 package serum
 
 import (
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -12,6 +13,48 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestDecoder_Market(t *testing.T) {
+	b64 := `c2VydW0DAAAAAAAAAF4kKlwSa8cc6xshYrDN0SrwrDDLBBUwemtddQHhfjgKAQAAAAAAAACL34duLBe2W5K3QFyI1rhNSESYe+cR/nc2UqvgE9x1VMb6evO+2606PWXzaqvJdDGxu+TC0vbg5HymAgNFL11habDAgiZH59TQw5/Y/52i1DhnPZFYOUB4C3G0hhSSXiRAZw8oAwAAAAAAAAAAAAAANvvq/rQwheCOf85MPshRgZEhXzDFAUh3IjalXs/zJ3I5cTmQBAAAABoqGA0AAAAAZAAAAAAAAACuBhNqk2KYdlbj/V5jbAGnnybh+XBss48/P00r053wbACx0Z1WrY+X9jL+huHdyUdpKzL/JScDimaQlNfzjpWANi1Nu6kEazO0bu0NkhnKFyQt2psF0SRCimAVpNimaOjou1Esrd0dKTtLbedHvt62Vi1bRJYveY74GEP6vkH/qBAnAAAAAAAACgAAAAAAAAAAAAAAAAAAAMsrAAAAAAAAcGFkZGluZw==`
+
+	data, err := base64.StdEncoding.DecodeString(b64)
+	require.NoError(t, err)
+
+	var m *MarketV2
+	err = bin.NewDecoder(data).Decode(&m)
+	require.NoError(t, err)
+
+	fmt.Println("market event queue:", m.EventQueue.String())
+
+}
+func TestDecoder_Event(t *testing.T) {
+
+	b64 := `c2VydW0RAAAAAAAAAKMoAAAAAAAAAAAAAAAAAAAD+gUAAAAAAAYJAAAAAAAAP9MRAAAAAACwUAY6AAAAAAAAAAAAAAAA/Af4//////8aBQAAAAAAAJGeNN64UdRK+szEsGLeTBiPnrTkfJaOEzsacSpRiAYs6zimHOimKK8CAQAAAAAAAEC6CycAAAAAAAAAAAAAAAAAAAAAAAAAAP/3BwAAAAAAIAUAAAAAAACRnjTeuFHUSvrMxLBi3kwYj5605HyWjhM7GnEqUYgGLH2wFQ01ceby`
+
+	data, err := base64.StdEncoding.DecodeString(b64)
+	headerData := data[0:38]
+	eventData := data[37:]
+	require.NoError(t, err)
+
+	fmt.Println("Size of data:", len(data), hex.EncodeToString(data))
+
+	//read the header
+	//read the rest ...
+	var h *EventQueueHeader
+	err = bin.NewDecoder(headerData).Decode(&h)
+
+	var events [2]*Event
+	err = bin.NewDecoder(eventData).Decode(&events)
+
+	require.NoError(t, err)
+
+	for _, e := range events {
+		fmt.Println("serum?:", string(h.Serum[:]))
+		fmt.Println("Type:", e.Flag)
+		fmt.Println("event owner:", e.Owner)
+	}
+
+}
 
 func TestDecoder_Orderbook(t *testing.T) {
 	cnt, err := ioutil.ReadFile("./testdata/orderbook.hex")
