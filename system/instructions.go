@@ -15,9 +15,38 @@
 package system
 
 import (
+	"fmt"
+
 	bin "github.com/dfuse-io/binary"
 	solana "github.com/dfuse-io/solana-go"
 )
+
+var SYSTEM_PROGRAM_ID = solana.MustPublicKeyFromBase58("11111111111111111111111111111111")
+
+func init() {
+	solana.RegisterInstructionDecoder(SYSTEM_PROGRAM_ID, registryDecodeInstruction)
+}
+
+func registryDecodeInstruction(accounts []solana.PublicKey, rawInstruction *solana.CompiledInstruction) (interface{}, error) {
+	inst, err := DecodeInstruction(accounts, rawInstruction)
+	if err != nil {
+		return nil, err
+	}
+	return inst, nil
+}
+
+func DecodeInstruction(accounts []solana.PublicKey, compiledInstruction *solana.CompiledInstruction) (*SystemInstruction, error) {
+	var inst *SystemInstruction
+	if err := bin.NewDecoder(compiledInstruction.Data).Decode(&inst); err != nil {
+		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
+	}
+
+	if v, ok := inst.Impl.(solana.AccountSettable); ok {
+		v.SetAccounts(accounts)
+	}
+
+	return inst, nil
+}
 
 type SystemInstruction struct {
 	//Type    bin.Varuint16

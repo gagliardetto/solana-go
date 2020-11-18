@@ -27,15 +27,11 @@ func DecodeInstruction(accounts []solana.PublicKey, compiledInstruction *solana.
 		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
 
-	if v, ok := inst.Impl.(AccountSettable); ok {
-		v.setAccounts(accounts)
+	if v, ok := inst.Impl.(solana.AccountSettable); ok {
+		v.SetAccounts(accounts)
 	}
 
 	return inst, nil
-}
-
-type AccountSettable interface {
-	setAccounts(accounts []solana.PublicKey)
 }
 
 type Instruction struct {
@@ -92,7 +88,7 @@ type InstructionInitializeMarket struct {
 	Accounts *InitializeMarketAccounts `bin:"-"`
 }
 
-func (i *InstructionInitializeMarket) setAccounts(accounts []solana.PublicKey) error {
+func (i *InstructionInitializeMarket) SetAccounts(accounts []solana.PublicKey) error {
 	if len(accounts) < 9 {
 		return fmt.Errorf("insuficient account, Initialize Market requires at-least 8 accounts not %d", len(accounts))
 	}
@@ -129,7 +125,7 @@ type InstructionNewOrder struct {
 	Accounts *NewOrderAccounts `bin:"-"`
 }
 
-func (i *InstructionNewOrder) setAccounts(accounts []solana.PublicKey) error {
+func (i *InstructionNewOrder) SetAccounts(accounts []solana.PublicKey) error {
 	if len(accounts) < 9 {
 		return fmt.Errorf("insuficient account, New Order requires at-least 10 accounts not %d", len(accounts))
 	}
@@ -168,7 +164,7 @@ type InstructionMatchOrder struct {
 	Accounts *MatchOrderAccounts `bin:"-"`
 }
 
-func (i *InstructionMatchOrder) setAccounts(accounts []solana.PublicKey) error {
+func (i *InstructionMatchOrder) SetAccounts(accounts []solana.PublicKey) error {
 	if len(accounts) < 7 {
 		return fmt.Errorf("insuficient account, Match Order requires at-least 7 accounts not %d", len(accounts))
 	}
@@ -198,7 +194,7 @@ type InstructionConsumeEvents struct {
 	Accounts *ConsumeEventsAccounts `bin:"-"`
 }
 
-func (i *InstructionConsumeEvents) setAccounts(accounts []solana.PublicKey) error {
+func (i *InstructionConsumeEvents) SetAccounts(accounts []solana.PublicKey) error {
 	if len(accounts) < 4 {
 		return fmt.Errorf("insuficient account, Consume Events requires at-least 4 accounts not %d", len(accounts))
 	}
@@ -232,7 +228,7 @@ type InstructionCancelOrder struct {
 	Accounts *CancelOrderAccounts `bin:"-"`
 }
 
-func (i *InstructionCancelOrder) setAccounts(accounts []solana.PublicKey) error {
+func (i *InstructionCancelOrder) SetAccounts(accounts []solana.PublicKey) error {
 	if len(accounts) < 4 {
 		return fmt.Errorf("insuficient account, Cancel Order requires at-least 4 accounts not %d", len(accounts))
 	}
@@ -263,7 +259,7 @@ type InstructionSettleFunds struct {
 	Accounts *SettleFundsAccounts `bin:"-"`
 }
 
-func (i *InstructionSettleFunds) setAccounts(accounts []solana.PublicKey) error {
+func (i *InstructionSettleFunds) SetAccounts(accounts []solana.PublicKey) error {
 	if len(accounts) < 9 {
 		return fmt.Errorf("insuficient account, Settle Funds requires at-least 10 accounts not %d", len(accounts))
 	}
@@ -299,7 +295,7 @@ type InstructionCancelOrderByClientId struct {
 	Accounts *CancelOrderByClientIdAccounts
 }
 
-func (i *InstructionCancelOrderByClientId) setAccounts(accounts []solana.PublicKey) error {
+func (i *InstructionCancelOrderByClientId) SetAccounts(accounts []solana.PublicKey) error {
 	if len(accounts) < 4 {
 		return fmt.Errorf("insuficient account, Cancel Order By Client Id requires at-least 4 accounts not %d", len(accounts))
 	}
