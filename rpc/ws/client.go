@@ -101,6 +101,7 @@ func (c *Client) handleNewSubscriptionMessage(requestID, subID uint64) {
 			zap.Uint64("request_id", requestID),
 			zap.Uint64("subscription_id", subID),
 		)
+		return
 	}
 	callBack.subID = subID
 	c.subscriptionByWSSubID[subID] = callBack
