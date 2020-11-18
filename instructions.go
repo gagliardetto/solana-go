@@ -16,6 +16,7 @@ package solana
 
 import (
 	"bytes"
+	"fmt"
 
 	bin "github.com/dfuse-io/binary"
 )
@@ -24,6 +25,10 @@ type AccountMeta struct {
 	PublicKey  PublicKey
 	IsSigner   bool
 	IsWritable bool
+}
+
+func (a *AccountMeta) String() string {
+	return fmt.Sprintf("%s  Signer: %t Writable: %t", a.PublicKey.String(), a.IsSigner, a.IsWritable)
 }
 
 type Instruction struct {

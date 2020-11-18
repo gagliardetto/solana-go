@@ -21,10 +21,10 @@ import (
 	solana "github.com/dfuse-io/solana-go"
 )
 
-var SYSTEM_PROGRAM_ID = solana.MustPublicKeyFromBase58("11111111111111111111111111111111")
+var PROGRAM_ID = solana.MustPublicKeyFromBase58("11111111111111111111111111111111")
 
 func init() {
-	solana.RegisterInstructionDecoder(SYSTEM_PROGRAM_ID, registryDecodeInstruction)
+	solana.RegisterInstructionDecoder(PROGRAM_ID, registryDecodeInstruction)
 }
 
 func registryDecodeInstruction(accounts []solana.PublicKey, rawInstruction *solana.CompiledInstruction) (interface{}, error) {
@@ -35,8 +35,8 @@ func registryDecodeInstruction(accounts []solana.PublicKey, rawInstruction *sola
 	return inst, nil
 }
 
-func DecodeInstruction(accounts []solana.PublicKey, compiledInstruction *solana.CompiledInstruction) (*SystemInstruction, error) {
-	var inst *SystemInstruction
+func DecodeInstruction(accounts []solana.PublicKey, compiledInstruction *solana.CompiledInstruction) (*Instruction, error) {
+	var inst *Instruction
 	if err := bin.NewDecoder(compiledInstruction.Data).Decode(&inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
@@ -48,20 +48,22 @@ func DecodeInstruction(accounts []solana.PublicKey, compiledInstruction *solana.
 	return inst, nil
 }
 
-type SystemInstruction struct {
-	//Type    bin.Varuint16
-	//Variant interface{}
+type Instruction struct {
 	bin.BaseVariant
 }
 
-var SystemInstructionImplDef = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
+func (i *Instruction) String() string {
+	return fmt.Sprintf("%s", i.Impl)
+}
+
+var InstructionImplDef = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
 	{"create_account", (*CreateAccount)(nil)},
 	{"assign", (*Assign)(nil)},
 	{"transfer", (*Transfer)(nil)},
 })
 
-func (i *SystemInstruction) UnmarshalBinary(decoder *bin.Decoder) error {
-	return i.BaseVariant.UnmarshalBinaryVariant(decoder, SystemInstructionImplDef)
+func (i *Instruction) UnmarshalBinary(decoder *bin.Decoder) error {
+	return i.BaseVariant.UnmarshalBinaryVariant(decoder, InstructionImplDef)
 }
 
 type CreateAccount struct {
@@ -71,14 +73,32 @@ type CreateAccount struct {
 	Owner    solana.PublicKey
 }
 
+func (i *CreateAccount) String() string {
+	out := "Create Account\n"
+	out += fmt.Sprintf("Lamports: %d, space: %d, Owner: %s", i.Lamports, i.Space, i.Owner.String())
+	return out
+}
+
 type Assign struct {
 	// prefixed with byte 0x01
 	Owner solana.PublicKey
 }
 
+func (i *Assign) String() string {
+	out := "Assign\n"
+	out += fmt.Sprintf("Owner: %s", i.Owner.String())
+	return out
+}
+
 type Transfer struct {
 	// Prefixed with byte 0x02
 	Lamports bin.Uint64
+}
+
+func (t *Transfer) String() string {
+	out := "Transfer\n"
+	out += fmt.Sprintf("Lamports: %d", t.Lamports)
+	return out
 }
 
 type CreateAccountWithSeed struct {
@@ -91,8 +111,20 @@ type CreateAccountWithSeed struct {
 	Owner    solana.PublicKey
 }
 
+func (i *CreateAccountWithSeed) String() string {
+	out := "Create Account With Seed\n"
+	out += fmt.Sprintf("Base: %s SeedSize: %d Seed: %s Lamports: %d Space: %d Owner: %s", i.Base, i.SeedSize, i.Seed, i.Lamports, i.Space, i.Owner.String())
+	return out
+}
+
 type AdvanceNonceAccount struct {
 	// Prefix with 0x04
+}
+
+func (i *AdvanceNonceAccount) String() string {
+	out := "Advance Nonce Account\n"
+	out += "Accounts:"
+	return out
 }
 
 type WithdrawNonceAccount struct {
@@ -100,9 +132,21 @@ type WithdrawNonceAccount struct {
 	Lamports bin.Uint64
 }
 
+func (i *WithdrawNonceAccount) String() string {
+	out := "Withdraw Nonce Account\n"
+	out += fmt.Sprintf("Lamports: %d", i.Lamports)
+	return out
+}
+
 type InitializeNonceAccount struct {
 	// Prefix with 0x06
 	AuthorizedAccount solana.PublicKey
+}
+
+func (i *InitializeNonceAccount) String() string {
+	out := "Initialize Nonce Account\n"
+	out += fmt.Sprintf("AuthorizedAccount: %s", i.AuthorizedAccount.String())
+	return out
 }
 
 type AuthorizeNonceAccount struct {
@@ -110,9 +154,21 @@ type AuthorizeNonceAccount struct {
 	AuthorizeAccount solana.PublicKey
 }
 
+func (i *AuthorizeNonceAccount) String() string {
+	out := "Authorize Nonce Account\n"
+	out += fmt.Sprintf("AuthorizedAccount: %s", i.AuthorizeAccount.String())
+	return out
+}
+
 type Allocate struct {
 	// Prefix with 0x08
 	Space bin.Uint64
+}
+
+func (i *Allocate) String() string {
+	out := "Allocate"
+	out += fmt.Sprintf("Space: %d", i.Space)
+	return out
 }
 
 type AllocateWithSeed struct {
@@ -124,10 +180,22 @@ type AllocateWithSeed struct {
 	Owner    solana.PublicKey
 }
 
+func (i *AllocateWithSeed) String() string {
+	out := "Allocate With Seed\n"
+	out += fmt.Sprintf("Base: %s SeedSize: %d Seed: %s Space: %d Owner: %s", i.Base, i.SeedSize, i.Seed, i.Owner)
+	return out
+}
+
 type AssignWithSeed struct {
 	// Prefixed with byte 0x0a
 	Base     solana.PublicKey
 	SeedSize int `bin:"sizeof=Seed"`
 	Seed     string
 	Owner    solana.PublicKey
+}
+
+func (i *AssignWithSeed) String() string {
+	out := "Assign With Seed\n"
+	out += fmt.Sprintf("Base: %s SeedSize: %d Seed: %s Owner: %s", i.Base, i.SeedSize, i.Seed, i.Owner)
+	return out
 }

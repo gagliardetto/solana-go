@@ -18,3 +18,7 @@ func TestDecodeInstruction(t *testing.T) {
 	require.NoError(t, err)
 	fmt.Println(instruction)
 }
+
+func TestString(t *testing.T) {
+
+}

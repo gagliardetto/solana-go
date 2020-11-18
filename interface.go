@@ -1,5 +1,5 @@
 package solana
 
 type AccountSettable interface {
-	SetAccounts(accounts []PublicKey)
+	SetAccounts(accounts []PublicKey) error
 }

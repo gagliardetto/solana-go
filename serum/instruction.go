@@ -22,7 +22,7 @@ func registryDecodeInstruction(accounts []solana.PublicKey, rawInstruction *sola
 }
 
 func DecodeInstruction(accounts []solana.PublicKey, compiledInstruction *solana.CompiledInstruction) (*Instruction, error) {
-	var inst *Instruction
+	var inst Instruction
 	if err := bin.NewDecoder(compiledInstruction.Data).Decode(&inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
@@ -31,12 +31,16 @@ func DecodeInstruction(accounts []solana.PublicKey, compiledInstruction *solana.
 		v.SetAccounts(accounts)
 	}
 
-	return inst, nil
+	return &inst, nil
 }
 
 type Instruction struct {
 	bin.BaseVariant
 	Version uint8
+}
+
+func (i *Instruction) String() string {
+	return fmt.Sprintf("%s", i.Impl)
 }
 
 func (i *Instruction) UnmarshalBinary(decoder *bin.Decoder) (err error) {
@@ -93,11 +97,11 @@ func (i *InstructionInitializeMarket) SetAccounts(accounts []solana.PublicKey) e
 		return fmt.Errorf("insuficient account, Initialize Market requires at-least 8 accounts not %d", len(accounts))
 	}
 	i.Accounts = &InitializeMarketAccounts{
-		Market:        solana.AccountMeta{accounts[0], false, true},
-		SPLCoinToken:  solana.AccountMeta{accounts[5], false, true},
-		SPLPriceToken: solana.AccountMeta{accounts[6], false, true},
-		CoinMint:      solana.AccountMeta{accounts[7], false, false},
-		PriceMint:     solana.AccountMeta{accounts[8], false, false},
+		Market:        solana.AccountMeta{PublicKey: accounts[0], IsWritable: true},
+		SPLCoinToken:  solana.AccountMeta{PublicKey: accounts[5], IsWritable: true},
+		SPLPriceToken: solana.AccountMeta{PublicKey: accounts[6], IsWritable: true},
+		CoinMint:      solana.AccountMeta{PublicKey: accounts[7]},
+		PriceMint:     solana.AccountMeta{PublicKey: accounts[8]},
 	}
 	return nil
 }
@@ -115,14 +119,41 @@ type NewOrderAccounts struct {
 	SRMDiscountAccount *solana.AccountMeta
 }
 
+func (a *NewOrderAccounts) String() string {
+	out := a.Market.String() + " Market\n"
+	out += a.OpenOrders.String() + " OpenOrders\n"
+	out += a.RequestQueue.String() + " RequestQueue\n"
+	out += a.Payer.String() + " Payer\n"
+	out += a.Owner.String() + " Owner\n"
+	out += a.CoinVault.String() + " CoinVault\n"
+	out += a.PCVault.String() + " PCVault\n"
+	out += a.SPLTokenProgram.String() + " SPLTokenProgram\n"
+	out += a.Rent.String() + " Rent\n"
+	out += a.SRMDiscountAccount.String() + " SRMDiscountAccount"
+
+	return out
+}
+
 type InstructionNewOrder struct {
-	Side        uint32
+	Side        Side
 	LimitPrice  uint64
 	MaxQuantity uint64
-	OrderType   uint32
+	OrderType   OrderType
 	ClientID    uint64
 
 	Accounts *NewOrderAccounts `bin:"-"`
+}
+
+func (i *InstructionNewOrder) String() string {
+	out := "New Order\n"
+	out += fmt.Sprintf("Side: %q OrderType: %q Limit price: %d  Max Quantity: %d Client ID: %d\n", i.Side, i.OrderType, i.LimitPrice, i.MaxQuantity, i.ClientID)
+	out += "Accounts:\n"
+
+	if i.Accounts != nil {
+		out += i.Accounts.String()
+	}
+
+	return out
 }
 
 func (i *InstructionNewOrder) SetAccounts(accounts []solana.PublicKey) error {
@@ -130,19 +161,19 @@ func (i *InstructionNewOrder) SetAccounts(accounts []solana.PublicKey) error {
 		return fmt.Errorf("insuficient account, New Order requires at-least 10 accounts not %d", len(accounts))
 	}
 	i.Accounts = &NewOrderAccounts{
-		Market:          solana.AccountMeta{accounts[0], false, true},
-		OpenOrders:      solana.AccountMeta{accounts[1], false, true},
-		RequestQueue:    solana.AccountMeta{accounts[2], false, true},
-		Payer:           solana.AccountMeta{accounts[3], false, true},
-		Owner:           solana.AccountMeta{accounts[4], true, false},
-		CoinVault:       solana.AccountMeta{accounts[5], false, true},
-		PCVault:         solana.AccountMeta{accounts[6], false, true},
-		SPLTokenProgram: solana.AccountMeta{accounts[7], false, false},
-		Rent:            solana.AccountMeta{accounts[8], false, false},
+		Market:          solana.AccountMeta{PublicKey: accounts[0], IsWritable: true},
+		OpenOrders:      solana.AccountMeta{PublicKey: accounts[1], IsWritable: true},
+		RequestQueue:    solana.AccountMeta{PublicKey: accounts[2], IsWritable: true},
+		Payer:           solana.AccountMeta{PublicKey: accounts[3], IsWritable: true},
+		Owner:           solana.AccountMeta{PublicKey: accounts[4], IsSigner: true},
+		CoinVault:       solana.AccountMeta{PublicKey: accounts[5], IsWritable: true},
+		PCVault:         solana.AccountMeta{PublicKey: accounts[6], IsWritable: true},
+		SPLTokenProgram: solana.AccountMeta{PublicKey: accounts[7]},
+		Rent:            solana.AccountMeta{PublicKey: accounts[8]},
 	}
 
 	if len(accounts) >= 10 {
-		i.Accounts.SRMDiscountAccount = &solana.AccountMeta{accounts[9], false, true}
+		i.Accounts.SRMDiscountAccount = &solana.AccountMeta{PublicKey: accounts[9], IsWritable: true}
 	}
 
 	return nil
@@ -158,6 +189,17 @@ type MatchOrderAccounts struct {
 	PCFeeReceivable   solana.AccountMeta
 }
 
+func (a *MatchOrderAccounts) String() string {
+	out := a.Market.String() + " Market\n"
+	out += a.RequestQueue.String() + " RequestQueue\n"
+	out += a.EventQueue.String() + " EventQueue\n"
+	out += a.Bids.String() + " Bids\n"
+	out += a.Asks.String() + " Asks\n"
+	out += a.CoinFeeReceivable.String() + " CoinFeeReceivable\n"
+	out += a.PCFeeReceivable.String() + " PCFeeReceivable"
+	return out
+}
+
 type InstructionMatchOrder struct {
 	Limit uint16
 
@@ -166,18 +208,30 @@ type InstructionMatchOrder struct {
 
 func (i *InstructionMatchOrder) SetAccounts(accounts []solana.PublicKey) error {
 	if len(accounts) < 7 {
-		return fmt.Errorf("insuficient account, Match Order requires at-least 7 accounts not %d", len(accounts))
+		return fmt.Errorf("insuficient account, Match Order requires at-least 7 accounts not %d\n", len(accounts))
 	}
 	i.Accounts = &MatchOrderAccounts{
-		Market:            solana.AccountMeta{accounts[0], false, true},
-		RequestQueue:      solana.AccountMeta{accounts[1], false, true},
-		EventQueue:        solana.AccountMeta{accounts[2], false, true},
-		Bids:              solana.AccountMeta{accounts[3], false, true},
-		Asks:              solana.AccountMeta{accounts[4], false, true},
-		CoinFeeReceivable: solana.AccountMeta{accounts[5], false, true},
-		PCFeeReceivable:   solana.AccountMeta{accounts[6], false, true},
+		Market:            solana.AccountMeta{PublicKey: accounts[0], IsWritable: true},
+		RequestQueue:      solana.AccountMeta{PublicKey: accounts[1], IsWritable: true},
+		EventQueue:        solana.AccountMeta{PublicKey: accounts[2], IsWritable: true},
+		Bids:              solana.AccountMeta{PublicKey: accounts[3], IsWritable: true},
+		Asks:              solana.AccountMeta{PublicKey: accounts[4], IsWritable: true},
+		CoinFeeReceivable: solana.AccountMeta{PublicKey: accounts[5], IsWritable: true},
+		PCFeeReceivable:   solana.AccountMeta{PublicKey: accounts[6], IsWritable: true},
 	}
 	return nil
+}
+
+func (i *InstructionMatchOrder) String() string {
+	out := "Match Order\n"
+	out += fmt.Sprintf("Limit: %d\n", i.Limit)
+	out += "Accounts:\n"
+
+	if i.Accounts != nil {
+		out += i.Accounts.String()
+	}
+
+	return out
 }
 
 type ConsumeEventsAccounts struct {
@@ -199,14 +253,14 @@ func (i *InstructionConsumeEvents) SetAccounts(accounts []solana.PublicKey) erro
 		return fmt.Errorf("insuficient account, Consume Events requires at-least 4 accounts not %d", len(accounts))
 	}
 	i.Accounts = &ConsumeEventsAccounts{
-		Market:            solana.AccountMeta{accounts[len(accounts)-4], false, true},
-		EventQueue:        solana.AccountMeta{accounts[len(accounts)-3], false, true},
-		CoinFeeReceivable: solana.AccountMeta{accounts[len(accounts)-2], false, true},
-		PCFeeReceivable:   solana.AccountMeta{accounts[len(accounts)-1], false, true},
+		Market:            solana.AccountMeta{PublicKey: accounts[len(accounts)-4], IsWritable: true},
+		EventQueue:        solana.AccountMeta{PublicKey: accounts[len(accounts)-3], IsWritable: true},
+		CoinFeeReceivable: solana.AccountMeta{PublicKey: accounts[len(accounts)-2], IsWritable: true},
+		PCFeeReceivable:   solana.AccountMeta{PublicKey: accounts[len(accounts)-1], IsWritable: true},
 	}
 
 	for itr := 0; itr < len(accounts)-4; itr++ {
-		i.Accounts.OpenOrders = append(i.Accounts.OpenOrders, solana.AccountMeta{accounts[itr], false, true})
+		i.Accounts.OpenOrders = append(i.Accounts.OpenOrders, solana.AccountMeta{PublicKey: accounts[itr], IsWritable: true})
 	}
 
 	return nil
@@ -219,6 +273,14 @@ type CancelOrderAccounts struct {
 	Owner        solana.AccountMeta
 }
 
+func (a *CancelOrderAccounts) String() string {
+	out := a.Market.String() + " Market\n"
+	out += a.OpenOrders.String() + " OpenOrders\n"
+	out += a.RequestQueue.String() + " RequestQueue\n"
+	out += a.Owner.String() + " Owner"
+	return out
+}
+
 type InstructionCancelOrder struct {
 	Side          uint32
 	OrderID       bin.Uint128
@@ -228,15 +290,27 @@ type InstructionCancelOrder struct {
 	Accounts *CancelOrderAccounts `bin:"-"`
 }
 
+func (i *InstructionCancelOrder) String() string {
+	out := "Cancel Order\n"
+	out += fmt.Sprintf("Side: %q Order ID: %q Open Orders: %s Slot: %d\n", i.Side, i.OrderID, i.OpenOrders.String(), i.OpenOrderSlot)
+	out += "Accounts:\n"
+
+	if i.Accounts != nil {
+		out += i.Accounts.String()
+	}
+
+	return out
+}
+
 func (i *InstructionCancelOrder) SetAccounts(accounts []solana.PublicKey) error {
 	if len(accounts) < 4 {
-		return fmt.Errorf("insuficient account, Cancel Order requires at-least 4 accounts not %d", len(accounts))
+		return fmt.Errorf("insuficient account, Cancel Order requires at-least 4 accounts not %d\n", len(accounts))
 	}
 	i.Accounts = &CancelOrderAccounts{
-		Market:       solana.AccountMeta{accounts[0], false, false},
-		OpenOrders:   solana.AccountMeta{accounts[1], false, true},
-		RequestQueue: solana.AccountMeta{accounts[2], false, true},
-		Owner:        solana.AccountMeta{accounts[3], true, false},
+		Market:       solana.AccountMeta{PublicKey: accounts[0]},
+		OpenOrders:   solana.AccountMeta{PublicKey: accounts[1], IsWritable: true},
+		RequestQueue: solana.AccountMeta{PublicKey: accounts[2], IsWritable: true},
+		Owner:        solana.AccountMeta{PublicKey: accounts[3], IsSigner: true},
 	}
 
 	return nil
@@ -255,8 +329,32 @@ type SettleFundsAccounts struct {
 	ReferrerPCWallet *solana.AccountMeta
 }
 
+func (a *SettleFundsAccounts) String() string {
+	out := a.Market.String() + " Market\n"
+	out += a.OpenOrders.String() + " OpenOrders\n"
+	out += a.Owner.String() + " Owner\n"
+	out += a.CoinVault.String() + " CoinVault\n"
+	out += a.PCVault.String() + " PCVault\n"
+	out += a.CoinWallet.String() + " CoinWallet\n"
+	out += a.PCWallet.String() + " PCWallet\n"
+	out += a.Signer.String() + " Signer\n"
+	out += a.SPLTokenProgram.String() + " SPLTokenProgram\n"
+	out += a.ReferrerPCWallet.String() + " ReferrerPCWallet"
+
+	return out
+}
+
 type InstructionSettleFunds struct {
 	Accounts *SettleFundsAccounts `bin:"-"`
+}
+
+func (i *InstructionSettleFunds) String() string {
+	out := "Settle Funds\n"
+	out += "Accounts:\n"
+	if i.Accounts != nil {
+		out += i.Accounts.String()
+	}
+	return out
 }
 
 func (i *InstructionSettleFunds) SetAccounts(accounts []solana.PublicKey) error {
@@ -264,19 +362,19 @@ func (i *InstructionSettleFunds) SetAccounts(accounts []solana.PublicKey) error 
 		return fmt.Errorf("insuficient account, Settle Funds requires at-least 10 accounts not %d", len(accounts))
 	}
 	i.Accounts = &SettleFundsAccounts{
-		Market:          solana.AccountMeta{accounts[0], false, true},
-		OpenOrders:      solana.AccountMeta{accounts[1], false, true},
-		Owner:           solana.AccountMeta{accounts[2], true, false},
-		CoinVault:       solana.AccountMeta{accounts[3], false, true},
-		PCVault:         solana.AccountMeta{accounts[4], false, true},
-		CoinWallet:      solana.AccountMeta{accounts[5], false, true},
-		PCWallet:        solana.AccountMeta{accounts[6], false, true},
-		Signer:          solana.AccountMeta{accounts[7], false, false},
-		SPLTokenProgram: solana.AccountMeta{accounts[8], false, false},
+		Market:          solana.AccountMeta{PublicKey: accounts[0], IsWritable: true},
+		OpenOrders:      solana.AccountMeta{PublicKey: accounts[1], IsWritable: true},
+		Owner:           solana.AccountMeta{PublicKey: accounts[2], IsSigner: true},
+		CoinVault:       solana.AccountMeta{PublicKey: accounts[3], IsWritable: true},
+		PCVault:         solana.AccountMeta{PublicKey: accounts[4], IsWritable: true},
+		CoinWallet:      solana.AccountMeta{PublicKey: accounts[5], IsWritable: true},
+		PCWallet:        solana.AccountMeta{PublicKey: accounts[6], IsWritable: true},
+		Signer:          solana.AccountMeta{PublicKey: accounts[7]},
+		SPLTokenProgram: solana.AccountMeta{PublicKey: accounts[8]},
 	}
 
 	if len(accounts) >= 10 {
-		i.Accounts.ReferrerPCWallet = &solana.AccountMeta{accounts[9], false, true}
+		i.Accounts.ReferrerPCWallet = &solana.AccountMeta{PublicKey: accounts[9], IsWritable: true}
 	}
 
 	return nil
@@ -289,10 +387,30 @@ type CancelOrderByClientIdAccounts struct {
 	Owner        solana.AccountMeta
 }
 
+func (a *CancelOrderByClientIdAccounts) String() string {
+	out := a.Market.String() + " Market\n"
+	out += a.OpenOrders.String() + " OpenOrders\n"
+	out += a.RequestQueue.String() + " RequestQueue\n"
+	out += a.Owner.String() + " Owner"
+	return out
+}
+
 type InstructionCancelOrderByClientId struct {
 	ClientID uint64
 
 	Accounts *CancelOrderByClientIdAccounts
+}
+
+func (i *InstructionCancelOrderByClientId) String() string {
+	out := "Cancel Order by Client\n"
+	out += fmt.Sprintf("ClientID: %d\n", i.ClientID)
+	out += "Accounts:\n"
+
+	if i.Accounts != nil {
+		out += i.Accounts.String()
+	}
+
+	return out
 }
 
 func (i *InstructionCancelOrderByClientId) SetAccounts(accounts []solana.PublicKey) error {
@@ -300,26 +418,26 @@ func (i *InstructionCancelOrderByClientId) SetAccounts(accounts []solana.PublicK
 		return fmt.Errorf("insuficient account, Cancel Order By Client Id requires at-least 4 accounts not %d", len(accounts))
 	}
 	i.Accounts = &CancelOrderByClientIdAccounts{
-		Market:       solana.AccountMeta{accounts[0], false, false},
-		OpenOrders:   solana.AccountMeta{accounts[1], false, true},
-		RequestQueue: solana.AccountMeta{accounts[2], false, true},
-		Owner:        solana.AccountMeta{accounts[3], true, false},
+		Market:       solana.AccountMeta{PublicKey: accounts[0]},
+		OpenOrders:   solana.AccountMeta{PublicKey: accounts[1], IsWritable: true},
+		RequestQueue: solana.AccountMeta{PublicKey: accounts[2], IsWritable: true},
+		Owner:        solana.AccountMeta{PublicKey: accounts[3], IsSigner: true},
 	}
 
 	return nil
 }
 
-type SideLayoutType string
+type SideType string
 
 const (
-	SideLayoutTypeUnknown SideLayoutType = "UNKNOWN"
-	SideLayoutTypeBid     SideLayoutType = "BID"
-	SideLayoutTypeAsk     SideLayoutType = "ASK"
+	SideLayoutTypeUnknown SideType = "UNKNOWN"
+	SideLayoutTypeBid     SideType = "BID"
+	SideLayoutTypeAsk     SideType = "ASK"
 )
 
-type SideLayout uint32
+type Side uint32
 
-func (s SideLayout) getSide() SideLayoutType {
+func (s Side) getSide() SideType {
 	switch s {
 	case 0:
 		return SideLayoutTypeBid
@@ -329,18 +447,22 @@ func (s SideLayout) getSide() SideLayoutType {
 	return SideLayoutTypeUnknown
 }
 
-type OrderType string
+func (s Side) String() string {
+	return string(s.getSide())
+}
+
+type OrderTypeString string
 
 const (
-	OrderTypeUnknown           OrderType = "UNKNOWN"
-	OrderTypeLimit             OrderType = "LIMIT"
-	OrderTypeImmediateOrCancel OrderType = "IMMEDIATE_OR_CANCEL"
-	OrderTypePostOnly          OrderType = "POST_ONLY"
+	OrderTypeUnknown           OrderTypeString = "UNKNOWN"
+	OrderTypeLimit             OrderTypeString = "LIMIT"
+	OrderTypeImmediateOrCancel OrderTypeString = "IMMEDIATE_OR_CANCEL"
+	OrderTypePostOnly          OrderTypeString = "POST_ONLY"
 )
 
-type OrderTypeLayout uint32
+type OrderType uint32
 
-func (o OrderTypeLayout) getOrderType() OrderType {
+func (o OrderType) getOrderType() OrderTypeString {
 	switch o {
 	case 0:
 		return OrderTypeLimit
@@ -350,4 +472,7 @@ func (o OrderTypeLayout) getOrderType() OrderType {
 		return OrderTypePostOnly
 	}
 	return OrderTypeUnknown
+}
+func (t OrderType) String() string {
+	return string(t.getOrderType())
 }

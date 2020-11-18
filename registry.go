@@ -1,23 +1,25 @@
 package solana
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type InstructionDecoder func([]PublicKey, *CompiledInstruction) (interface{}, error)
 
-var instructionDecoderRegistry = map[string]InstructionDecoder{}
+var InstructionDecoderRegistry = map[string]InstructionDecoder{}
 
 func RegisterInstructionDecoder(programID PublicKey, decoder InstructionDecoder) {
 	p := programID.String()
-	if _, found := instructionDecoderRegistry[p]; found {
+	if _, found := InstructionDecoderRegistry[p]; found {
 		panic(fmt.Sprintf("unable to re-register instruction decoder for program %q", p))
 	}
-	instructionDecoderRegistry[p] = decoder
+	InstructionDecoderRegistry[p] = decoder
 }
 
 func DecodeInstruction(programID PublicKey, accounts []PublicKey, inst *CompiledInstruction) (interface{}, error) {
 	p := programID.String()
 
-	decoder, found := instructionDecoderRegistry[p]
+	decoder, found := InstructionDecoderRegistry[p]
 	if !found {
 		return nil, fmt.Errorf("unknown programID, cannot find any instruction decoder %q", p)
 	}
