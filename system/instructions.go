@@ -42,7 +42,11 @@ func DecodeInstruction(accounts []solana.PublicKey, compiledInstruction *solana.
 	}
 
 	if v, ok := inst.Impl.(solana.AccountSettable); ok {
-		v.SetAccounts(accounts)
+		err := v.SetAccounts(accounts, compiledInstruction.Accounts)
+		if err != nil {
+			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
+		}
+
 	}
 
 	return inst, nil
@@ -182,7 +186,7 @@ type AllocateWithSeed struct {
 
 func (i *AllocateWithSeed) String() string {
 	out := "Allocate With Seed\n"
-	out += fmt.Sprintf("Base: %s SeedSize: %d Seed: %s Space: %d Owner: %s", i.Base, i.SeedSize, i.Seed, i.Owner)
+	out += fmt.Sprintf("Base: %s SeedSize: %d Seed: %s Space: %d Owner: %s", i.Base, i.SeedSize, i.Seed, i.Space, i.Owner)
 	return out
 }
 

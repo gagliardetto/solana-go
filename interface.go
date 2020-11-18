@@ -1,5 +1,5 @@
 package solana
 
 type AccountSettable interface {
-	SetAccounts(accounts []PublicKey) error
+	SetAccounts(accounts []PublicKey, instructionActIdx []uint8) error
 }
