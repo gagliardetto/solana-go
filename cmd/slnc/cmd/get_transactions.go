@@ -61,10 +61,22 @@ var getTransactionsCmd = &cobra.Command{
 
 			fmt.Print("\nInstructions:\n-------------\n\n")
 			for _, i := range ct.Transaction.Message.Instructions {
+
+				//Missing Initial account instruction ??????
+
 				id, err := ct.Transaction.ResolveProgramIDIndex(i.ProgramIDIndex)
 				errorCheck("resolving programID", err)
 				decoder := solana.InstructionDecoderRegistry[id.String()]
 				if decoder == nil {
+					fmt.Println("raw instruction:")
+					fmt.Printf("Program: %s Data: %s\n", id.String(), i.Data)
+					fmt.Println("Accounts:")
+					for _, accIndex := range i.Accounts {
+						key := ct.Transaction.Message.AccountKeys[accIndex]
+
+						fmt.Printf("%s Is Writable: %t Is Signer: %t\n", key.String(), ct.Transaction.IsWritable(key), ct.Transaction.IsSigner(key))
+					}
+					fmt.Printf("\n\n")
 					continue
 				}
 

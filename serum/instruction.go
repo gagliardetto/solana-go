@@ -132,7 +132,9 @@ func (a *NewOrderAccounts) String() string {
 	out += a.PCVault.String() + " PCVault\n"
 	out += a.SPLTokenProgram.String() + " SPLTokenProgram\n"
 	out += a.Rent.String() + " Rent\n"
-	out += a.SRMDiscountAccount.String() + " SRMDiscountAccount"
+	if a.SRMDiscountAccount != nil {
+		out += a.SRMDiscountAccount.String() + " SRMDiscountAccount"
+	}
 
 	return out
 }
