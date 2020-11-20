@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-type InstructionDecoder func([]PublicKey, *CompiledInstruction) (interface{}, error)
+type InstructionDecoder func([]*AccountMeta, *CompiledInstruction) (interface{}, error)
 
 var InstructionDecoderRegistry = map[string]InstructionDecoder{}
 
@@ -16,7 +16,7 @@ func RegisterInstructionDecoder(programID PublicKey, decoder InstructionDecoder)
 	InstructionDecoderRegistry[p] = decoder
 }
 
-func DecodeInstruction(programID PublicKey, accounts []PublicKey, inst *CompiledInstruction) (interface{}, error) {
+func DecodeInstruction(programID PublicKey, accounts []*AccountMeta, inst *CompiledInstruction) (interface{}, error) {
 	p := programID.String()
 
 	decoder, found := InstructionDecoderRegistry[p]

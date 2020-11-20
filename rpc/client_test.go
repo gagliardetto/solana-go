@@ -44,8 +44,8 @@ func TestClient_GetAccountInfo(t *testing.T) {
 
 func TestClient_GetConfirmedSignaturesForAddress2(t *testing.T) {
 	c := NewClient("http://api.mainnet-beta.solana.com:80/rpc")
-	account := solana.MustPublicKeyFromBase58("CG1XSWuXo2rw2SuHTRc54nihKvLKh4wMYi7oF3487LYt")
-	accInfo, err := c.GetConfirmedSignaturesForAddress2(context.Background(), account, nil)
+	account := solana.MustPublicKeyFromBase58("H7ATJQGhwG8Uf8sUntUognFpsKixPy2buFnXkvyNbGUb")
+	accInfo, err := c.GetConfirmedSignaturesForAddress2(context.Background(), account, &GetConfirmedSignaturesForAddress2Opts{Limit: 1})
 	require.NoError(t, err)
 
 	d, err := json.MarshalIndent(accInfo, "", " ")

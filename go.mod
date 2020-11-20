@@ -6,6 +6,7 @@ require (
 	github.com/GeertJohan/go.rice v1.0.0
 	github.com/dfuse-io/binary v0.0.0-20201117201711-8656308cf309
 	github.com/dfuse-io/logging v0.0.0-20201110202154-26697de88c79
+	github.com/fatih/color v1.7.0
 	github.com/google/go-cmp v0.4.1 // indirect
 	github.com/gorilla/rpc v1.2.0
 	github.com/gorilla/websocket v1.4.2
@@ -25,5 +26,4 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/tools v0.0.0-20200601175630-2caf76543d99 // indirect
 	google.golang.org/api v0.15.0
-	gotest.tools v2.2.0+incompatible
 )

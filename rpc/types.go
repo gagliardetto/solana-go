@@ -113,7 +113,7 @@ type KeyedAccount struct {
 
 type GetConfirmedSignaturesForAddress2Opts struct {
 	Limit  uint64 `json:"limit,omitempty"`
-	Before string `json:"limit,omitempty"`
+	Before string `json:"before,omitempty"`
 	Until  string `json:"until,omitempty"`
 }
 

@@ -67,6 +67,17 @@ func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint8) (PublicKey, er
 	return PublicKey{}, fmt.Errorf("programID index not found %d", programIDIndex)
 }
 
+func (t *Transaction) AccountMetaList() (out []*AccountMeta) {
+	for _, a := range t.Message.AccountKeys {
+		out = append(out, &AccountMeta{
+			PublicKey:  a,
+			IsSigner:   t.IsSigner(a),
+			IsWritable: t.IsWritable(a),
+		})
+	}
+	return out
+}
+
 type Message struct {
 	Header          MessageHeader `json:"header"`
 	AccountKeys     []PublicKey   `json:"accountKeys"`
@@ -97,3 +108,16 @@ func TransactionFromData(in []byte) (*Transaction, error) {
 	}
 	return out, nil
 }
+
+type AccountMeta struct {
+	PublicKey  PublicKey
+	IsSigner   bool
+	IsWritable bool
+}
+
+//func (a *AccountMeta) String() string {
+//	if a == nil {
+//		return ""
+//	}
+//	return fmt.Sprintf("%s  Signer: %t Writable: %t", a.PublicKey.String(), a.IsSigner, a.IsWritable)
+//}

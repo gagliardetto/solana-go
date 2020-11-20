@@ -17,6 +17,9 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
+
+	"github.com/dfuse-io/solana-go/text"
 
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/rpc"
@@ -38,7 +41,7 @@ var getTransactionsCmd = &cobra.Command{
 		errorCheck("public key", err)
 
 		csList, err := client.GetConfirmedSignaturesForAddress2(ctx, pubKey, &rpc.GetConfirmedSignaturesForAddress2Opts{
-			Limit:  10,
+			Limit:  100,
 			Before: "",
 			Until:  "",
 		})
@@ -47,9 +50,13 @@ var getTransactionsCmd = &cobra.Command{
 
 		for _, cs := range csList {
 			fmt.Println("-----------------------------------------------------------------------------------------------")
-			fmt.Println("Transaction: ", cs.Signature)
-			fmt.Println("Slot: ", cs.Slot)
-			fmt.Println("Memo: ", cs.Memo)
+			text.EncoderColorCyan.Print("Transaction: ")
+			fmt.Println(cs.Signature)
+
+			text.EncoderColorGreen.Print("Slot: ")
+			fmt.Println(cs.Slot)
+			text.EncoderColorGreen.Print("Memo: ")
+			fmt.Println(cs.Memo)
 
 			ct, err := client.GetConfirmedTransaction(ctx, cs.Signature)
 			errorCheck("confirm transaction", err)
@@ -57,7 +64,6 @@ var getTransactionsCmd = &cobra.Command{
 				fmt.Println("ERROR:", ct.Meta.Err)
 				//	for k, _ := range ct.Meta.Err
 			}
-			fmt.Println("account count:", len(ct.Transaction.Message.AccountKeys))
 
 			fmt.Print("\nInstructions:\n-------------\n\n")
 			for _, i := range ct.Transaction.Message.Instructions {
@@ -80,10 +86,11 @@ var getTransactionsCmd = &cobra.Command{
 					continue
 				}
 
-				decoded, err := decoder(ct.Transaction.Message.AccountKeys, &i)
-				fmt.Printf("%s\n\n", decoded)
+				decoded, err := decoder(ct.Transaction.AccountMetaList(), &i)
+				err = text.NewEncoder(os.Stdout).Encode(decoded, nil)
+				errorCheck("textEncoding", err)
 			}
-			fmt.Print("End of transaction\n\n")
+			text.EncoderColorCyan.Print("\n\nEnd of transaction\n\n")
 		}
 
 		return nil
