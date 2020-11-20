@@ -29,7 +29,6 @@ type Padding []byte
 type Hash PublicKey
 
 ///
-
 type Signature [64]byte
 
 func SignatureFromBase58(in string) (out Signature, err error) {
@@ -49,6 +48,7 @@ func SignatureFromBase58(in string) (out Signature, err error) {
 func (p Signature) MarshalJSON() ([]byte, error) {
 	return json.Marshal(base58.Encode(p[:]))
 }
+
 func (p *Signature) UnmarshalJSON(data []byte) (err error) {
 	var s string
 	err = json.Unmarshal(data, &s)
@@ -76,7 +76,6 @@ func (p Signature) String() string {
 }
 
 ///
-
 type PublicKey [32]byte
 
 func (p PublicKey) Equals(pb PublicKey) bool {
@@ -105,6 +104,7 @@ func PublicKeyFromBase58(in string) (out PublicKey, err error) {
 func (p PublicKey) MarshalJSON() ([]byte, error) {
 	return json.Marshal(base58.Encode(p[:]))
 }
+
 func (p *PublicKey) UnmarshalJSON(data []byte) (err error) {
 	var s string
 	err = json.Unmarshal(data, &s)
@@ -132,7 +132,6 @@ func (p PublicKey) String() string {
 }
 
 ///
-
 type Base58 []byte
 
 func (t Base58) MarshalJSON() ([]byte, error) {
@@ -155,7 +154,6 @@ func (t Base58) String() string {
 }
 
 ///
-
 type Data []byte
 
 func (t Data) MarshalJSON() ([]byte, error) {
@@ -190,7 +188,6 @@ func (t Data) String() string {
 }
 
 ///
-
 type ByteWrapper struct {
 	io.Reader
 }

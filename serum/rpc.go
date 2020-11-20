@@ -43,6 +43,21 @@ func KnownMarket() ([]*MarketMeta, error) {
 	return markets, nil
 }
 
+func FetchOpenOrders(ctx context.Context, rpcCli *rpc.Client, openOrdersAddr solana.PublicKey) (*OpenOrdersMeta, error) {
+	acctInfo, err := rpcCli.GetAccountInfo(ctx, openOrdersAddr)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get open orders account:%w", err)
+	}
+
+	openOrdersMeta := &OpenOrdersMeta{}
+
+	if err := openOrdersMeta.OpenOrdersV2.Decode(acctInfo.Value.Data); err != nil {
+		return nil, fmt.Errorf("decoding market v2: %w", err)
+	}
+
+	return openOrdersMeta, nil
+}
+
 func FetchMarket(ctx context.Context, rpcCli *rpc.Client, marketAddr solana.PublicKey) (*MarketMeta, error) {
 	acctInfo, err := rpcCli.GetAccountInfo(ctx, marketAddr)
 	if err != nil {

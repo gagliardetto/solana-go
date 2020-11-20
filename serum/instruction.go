@@ -140,7 +140,7 @@ func (a *NewOrderAccounts) String() string {
 }
 
 type InstructionNewOrder struct {
-	Side        Side
+	Side        uint32
 	LimitPrice  uint64
 	MaxQuantity uint64
 	OrderType   OrderType
@@ -430,54 +430,4 @@ func (i *InstructionCancelOrderByClientId) SetAccounts(accounts []solana.PublicK
 	}
 
 	return nil
-}
-
-type SideType string
-
-const (
-	SideLayoutTypeUnknown SideType = "UNKNOWN"
-	SideLayoutTypeBid     SideType = "BID"
-	SideLayoutTypeAsk     SideType = "ASK"
-)
-
-type Side uint32
-
-func (s Side) getSide() SideType {
-	switch s {
-	case 0:
-		return SideLayoutTypeBid
-	case 1:
-		return SideLayoutTypeAsk
-	}
-	return SideLayoutTypeUnknown
-}
-
-func (s Side) String() string {
-	return string(s.getSide())
-}
-
-type OrderTypeString string
-
-const (
-	OrderTypeUnknown           OrderTypeString = "UNKNOWN"
-	OrderTypeLimit             OrderTypeString = "LIMIT"
-	OrderTypeImmediateOrCancel OrderTypeString = "IMMEDIATE_OR_CANCEL"
-	OrderTypePostOnly          OrderTypeString = "POST_ONLY"
-)
-
-type OrderType uint32
-
-func (o OrderType) getOrderType() OrderTypeString {
-	switch o {
-	case 0:
-		return OrderTypeLimit
-	case 1:
-		return OrderTypeImmediateOrCancel
-	case 2:
-		return OrderTypePostOnly
-	}
-	return OrderTypeUnknown
-}
-func (t OrderType) String() string {
-	return string(t.getOrderType())
 }

@@ -238,14 +238,6 @@ func (q *EventQueue) Decode(data []byte) error {
 	if err != nil {
 		return fmt.Errorf("event queue: decode header: %w", err)
 	}
-
-	//remainingData := decoder.Remaining()
-	//if remainingData%EventDataLength != 0 {
-	//	return fmt.Errorf("event queue: wrong event data length %d", remainingData)
-	//}
-	//
-	//eventCount := remainingData / EventDataLength
-
 	for decoder.Remaining() >= 88 {
 		var e *Event
 		err = decoder.Decode(&e)
@@ -255,5 +247,31 @@ func (q *EventQueue) Decode(data []byte) error {
 		q.Events = append(q.Events, e)
 	}
 
+	return nil
+}
+
+type OpenOrdersV2 struct {
+	SerumPadding           [5]byte `json:"-"`
+	AccountFlags           bin.Uint64
+	Market                 solana.PublicKey
+	Owner                  solana.PublicKey
+	BaseTokenFree          bin.Uint64
+	BaseTokenTotal         bin.Uint64
+	QuoteTokenFree         bin.Uint64
+	QuoteTokenTotal        bin.Uint64
+	FreeSlotBits           bin.Uint128
+	IsBidBits              bin.Uint128
+	Orders                 [128]bin.Uint128
+	ClientIDs              [128]bin.Uint64
+	ReferrerRebatesAccrued bin.Uint64
+	EndPadding             [7]byte `json:"-"`
+}
+
+func (m *OpenOrdersV2) Decode(in []byte) error {
+	decoder := bin.NewDecoder(in)
+	err := decoder.Decode(&m)
+	if err != nil {
+		return fmt.Errorf("unpack: %w", err)
+	}
 	return nil
 }
