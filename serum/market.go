@@ -39,10 +39,6 @@ func (m *MarketMeta) quoteSplTokenMultiplier() *big.Int {
 	return solana.DecimalsInBigInt(uint32(m.QuoteMint.Decimals))
 }
 
-func divideBnToNumber(numerator, denomiator *big.Float) *big.Float {
-	return F().Quo(numerator, denomiator)
-}
-
 func (m *MarketMeta) PriceLotsToNumber(price *big.Int) *big.Float {
 	ratio := I().Mul(I().SetInt64(int64(m.MarketV2.QuoteLotSize)), m.baseSplTokenMultiplier())
 	numerator := F().Mul(F().SetInt(price), F().SetInt(ratio))
@@ -64,10 +60,56 @@ func (m *MarketMeta) PriceNumberToLots(price *big.Int) *big.Float {
 	return F().Quo(F().SetInt(numerator), F().SetInt(denomiator))
 }
 
-func I() *big.Int {
-	return new(big.Int)
+type OpenOrdersMeta struct {
+	OpenOrdersV2 OpenOrdersV2
 }
 
-func F() *big.Float {
-	return new(big.Float)
+
+type Order struct {
+	Limit *big.Int   `json:"limit"`
+	Side  SideLayout `json:"side"`
+	Price *big.Int   `json:"price"`
+}
+
+type SideLayoutType string
+
+const (
+	SideLayoutTypeUnknown SideLayoutType = "UNKNOWN"
+	SideLayoutTypeBid     SideLayoutType = "BID"
+	SideLayoutTypeAsk     SideLayoutType = "ASK"
+)
+
+type SideLayout uint32
+
+func (s SideLayout) getSide() SideLayoutType {
+	switch s {
+	case 0:
+		return SideLayoutTypeBid
+	case 1:
+		return SideLayoutTypeAsk
+	}
+	return SideLayoutTypeUnknown
+}
+
+type OrderType string
+
+const (
+	OrderTypeUnknown           OrderType = "UNKNOWN"
+	OrderTypeLimit             OrderType = "LIMIT"
+	OrderTypeImmediateOrCancel OrderType = "IMMEDIATE_OR_CANCEL"
+	OrderTypePostOnly          OrderType = "POST_ONLY"
+)
+
+type OrderTypeLayout uint32
+
+func (o OrderTypeLayout) getOrderType() OrderType {
+	switch o {
+	case 0:
+		return OrderTypeLimit
+	case 1:
+		return OrderTypeImmediateOrCancel
+	case 2:
+		return OrderTypePostOnly
+	}
+	return OrderTypeUnknown
 }
