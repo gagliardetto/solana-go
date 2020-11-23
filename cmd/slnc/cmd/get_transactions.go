@@ -25,6 +25,7 @@ import (
 	"github.com/dfuse-io/solana-go/rpc"
 	_ "github.com/dfuse-io/solana-go/serum"
 	_ "github.com/dfuse-io/solana-go/system"
+	_ "github.com/dfuse-io/solana-go/token"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +42,7 @@ var getTransactionsCmd = &cobra.Command{
 		errorCheck("public key", err)
 
 		csList, err := client.GetConfirmedSignaturesForAddress2(ctx, pubKey, &rpc.GetConfirmedSignaturesForAddress2Opts{
-			Limit:  100,
+			Limit:  1,
 			Before: "",
 			Until:  "",
 		})
@@ -87,6 +88,7 @@ var getTransactionsCmd = &cobra.Command{
 				}
 
 				decoded, err := decoder(ct.Transaction.AccountMetaList(), &i)
+				errorCheck("bin decode", err)
 				err = text.NewEncoder(os.Stdout).Encode(decoded, nil)
 				errorCheck("textEncoding", err)
 			}

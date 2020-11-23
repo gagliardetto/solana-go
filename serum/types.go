@@ -15,6 +15,7 @@ package serum
 
 import (
 	"encoding/base64"
+	"encoding/binary"
 	"fmt"
 	"math/big"
 
@@ -118,7 +119,7 @@ func (s *Slab) UnmarshalBinary(decoder *bin.Decoder) error {
 	return s.BaseVariant.UnmarshalBinaryVariant(decoder, SlabFactoryImplDef)
 }
 func (s *Slab) MarshalBinary(encoder *bin.Encoder) error {
-	err := encoder.WriteUint32(s.TypeID)
+	err := encoder.WriteUint32(s.TypeID, binary.LittleEndian)
 	if err != nil {
 		return err
 	}
