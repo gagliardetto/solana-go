@@ -17,6 +17,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 
@@ -68,10 +69,22 @@ var getSPLTokenCmd = &cobra.Command{
 				log.Fatalln("failed unpack", err)
 			}
 
+			text.EncoderColorCyan.Print("Address: ")
+			fmt.Println(keyedAcct.Pubkey.String())
+
+			text.EncoderColorCyan.Print("Owner: ")
+			fmt.Println(keyedAcct.Pubkey.String())
+
+			text.EncoderColorCyan.Print("Lamports: ")
+			fmt.Println(keyedAcct.Account.Lamports)
+
 			if err := text.NewEncoder(os.Stdout).Encode(mint, nil); err != nil {
 				log.Fatalln("failed string encode", err)
 			}
+			fmt.Println("-------------------------------")
+			fmt.Println("")
 		}
+		fmt.Println("\nTotal result:", len(resp))
 
 		return nil
 	},
