@@ -1,7 +1,6 @@
 package tokenregistry
 
 import (
-	"encoding/binary"
 	"fmt"
 
 	"github.com/dfuse-io/solana-go/text"
@@ -42,7 +41,7 @@ type Instruction struct {
 	bin.BaseVariant
 }
 
-var InstructionDefVariant = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
+var InstructionDefVariant = bin.NewVariantDefinition(bin.Uint8TypeIDEncoding, []bin.VariantType{
 	{"register_token", (*RegisterToken)(nil)},
 })
 
@@ -55,7 +54,7 @@ func (i *Instruction) UnmarshalBinary(decoder *bin.Decoder) (err error) {
 }
 
 func (i *Instruction) MarshalBinary(encoder *bin.Encoder) error {
-	err := encoder.WriteUint32(i.TypeID, binary.LittleEndian)
+	err := encoder.WriteUint8(uint8(i.TypeID))
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)
 	}
