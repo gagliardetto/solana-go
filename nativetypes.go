@@ -83,7 +83,10 @@ func (p PublicKey) Equals(pb PublicKey) bool {
 }
 
 func MustPublicKeyFromBase58(in string) PublicKey {
-	out, _ := PublicKeyFromBase58(in)
+	out, err := PublicKeyFromBase58(in)
+	if err != nil {
+		panic(err)
+	}
 	return out
 }
 
