@@ -13,8 +13,33 @@
 // limitations under the License.
 package tokenregistry
 
+type Logo [32]byte
+type Name [32]byte
+type Symbol [12]byte
+
 type TokenMeta struct {
-	Logo   [32]byte
-	Name   [32]byte
-	Symbol [12]byte
+	Logo   Logo
+	Name   Name
+	Symbol Symbol
+}
+
+func (l Logo) String() string {
+	return AsciiString(l[:])
+}
+func (n Name) String() string {
+	return AsciiString(n[:])
+}
+
+func (s Symbol) String() string {
+	return AsciiString(s[:])
+}
+
+func AsciiString(data []byte) string {
+	var trimmed []byte
+	for _, b := range data {
+		if b > 0 {
+			trimmed = append(trimmed, b)
+		}
+	}
+	return string(trimmed)
 }
