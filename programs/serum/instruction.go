@@ -10,10 +10,8 @@ import (
 	"github.com/dfuse-io/solana-go"
 )
 
-var DEX_PROGRAM_ID = solana.MustPublicKeyFromBase58("EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o")
-
 func init() {
-	solana.RegisterInstructionDecoder(DEX_PROGRAM_ID, registryDecodeInstruction)
+	solana.RegisterInstructionDecoder(PROGRAM_ID, registryDecodeInstruction)
 }
 
 func registryDecodeInstruction(accounts []*solana.AccountMeta, rawInstruction *solana.CompiledInstruction) (interface{}, error) {

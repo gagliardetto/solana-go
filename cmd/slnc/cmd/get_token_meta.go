@@ -52,5 +52,5 @@ var getTokenMetaCmd = &cobra.Command{
 }
 
 func init() {
-	getCmd.AddCommand(getTransactionsCmd)
+	getCmd.AddCommand(getTokenMetaCmd)
 }

@@ -15,6 +15,7 @@
 package system
 
 import (
+	"bytes"
 	"fmt"
 
 	bin "github.com/dfuse-io/binary"
@@ -83,12 +84,33 @@ type CreateAccount struct {
 	Accounts *CreateAccountAccounts `bin:"-"`
 }
 
-func (i *CreateAccount) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
+func (i *CreateAccount) SetAccounts(accounts []*solana.AccountMeta, accountIndex []uint8) error {
 	i.Accounts = &CreateAccountAccounts{
-		From: accounts[instructionActIdx[0]],
-		New:  accounts[instructionActIdx[1]],
+		From: accounts[accountIndex[0]],
+		New:  accounts[accountIndex[1]],
 	}
 	return nil
+}
+
+func NewCreateAccount(lamports bin.Uint64, space bin.Uint64, owner solana.PublicKey, programIdIndex uint8, accountIndex []uint8) (*solana.CompiledInstruction, error) {
+	ca := &CreateAccount{
+		Lamports: lamports,
+		Space:    space,
+		Owner:    owner,
+	}
+	var data []byte
+	buf := bytes.NewBuffer(data)
+	if err := bin.NewEncoder(buf).Encode(ca); err != nil {
+		return nil, fmt.Errorf("new create account: encode: %w", err)
+	}
+
+	return &solana.CompiledInstruction{
+		ProgramIDIndex: programIdIndex,
+		AccountCount:   bin.Varuint16(len(accountIndex)),
+		Accounts:       accountIndex,
+		DataLength:     0,
+		Data:           data,
+	}, nil
 }
 
 type Assign struct {

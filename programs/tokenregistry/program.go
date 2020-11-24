@@ -1,6 +1,7 @@
 package tokenregistry
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/dfuse-io/solana-go"
@@ -17,6 +18,8 @@ func ProgramID() solana.PublicKey {
 	}
 
 	network := os.Getenv("SOL_NETWORK")
+	fmt.Println("grrr: net", network, mainnetProgramID, testnetProgramID)
+
 	switch network {
 	case "mainnet":
 		return mainnetProgramID
@@ -25,6 +28,7 @@ func ProgramID() solana.PublicKey {
 	case "devnet":
 		return devnetProgramID
 	default:
+		fmt.Println("grrr: ret", mainnetProgramID)
 		return mainnetProgramID
 	}
 }
