@@ -47,6 +47,7 @@ var getTokenMetaCmd = &cobra.Command{
 		err = text.NewEncoder(os.Stdout).Encode(tm, nil)
 		errorCheck("textEncoding", err)
 
+		//fmt.Println("raw data", hex.EncodeToString(accountInfo.Value.Data))
 		return nil
 	},
 }

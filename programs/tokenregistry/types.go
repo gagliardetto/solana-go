@@ -13,14 +13,21 @@
 // limitations under the License.
 package tokenregistry
 
+import "github.com/dfuse-io/solana-go"
+
 type Logo [32]byte
 type Name [32]byte
 type Symbol [12]byte
 
 type TokenMeta struct {
-	Logo   Logo
-	Name   Name
-	Symbol Symbol
+	IsInitialized         bool
+	Reg                   [3]byte `text:"-"`
+	DataType              byte
+	MintAddress           *solana.PublicKey
+	RegistrationAuthority *solana.PublicKey
+	Logo                  Logo
+	Name                  Name
+	Symbol                Symbol
 }
 
 func (l Logo) String() string {
