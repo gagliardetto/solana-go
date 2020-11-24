@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	solana.RegisterInstructionDecoder(PROGRAM_ID, registryDecodeInstruction)
+	solana.RegisterInstructionDecoder(ProgramID(), registryDecodeInstruction)
 }
 
 func registryDecodeInstruction(accounts []*solana.AccountMeta, rawInstruction *solana.CompiledInstruction) (interface{}, error) {
