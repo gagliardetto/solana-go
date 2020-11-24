@@ -7,9 +7,9 @@ import (
 	"github.com/dfuse-io/solana-go"
 )
 
-var mainnetProgramID = solana.MustPublicKeyFromBase58("ask julien for program id")
-var testnetProgramID = solana.MustPublicKeyFromBase58("ask julien for program id")
-var devnetProgramID = solana.MustPublicKeyFromBase58("ask julien for program id")
+var mainnetProgramID = solana.MustPublicKeyFromBase58("99999999999999999999999999999999999999999999")
+var testnetProgramID = solana.MustPublicKeyFromBase58("99999999999999999999999999999999999999999999")
+var devnetProgramID = solana.MustPublicKeyFromBase58("99999999999999999999999999999999999999999999")
 
 func ProgramID() solana.PublicKey {
 
