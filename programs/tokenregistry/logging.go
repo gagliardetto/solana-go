@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package serum
+package tokenregistry
 
 import (
 	"github.com/dfuse-io/logging"
@@ -20,8 +20,8 @@ import (
 )
 
 var zlog = zap.NewNop()
-var traceEnabled = logging.IsTraceEnabled("solana-go", "github.com/dfuse-io/solana-go/serum")
+var traceEnabled = logging.IsTraceEnabled("solana-go", "github.com/dfuse-io/solana-go/program/tokenregistry")
 
 func init() {
-	logging.Register("github.com/dfuse-io/solana-go/serum", &zlog)
+	logging.Register("github.com/dfuse-io/solana-go/program/tokenregistry", &zlog)
 }
