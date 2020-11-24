@@ -10,8 +10,6 @@ import (
 	"github.com/dfuse-io/solana-go"
 )
 
-var PROGRAM_ID = solana.MustPublicKeyFromBase58("ask julien for program id")
-
 func init() {
 	solana.RegisterInstructionDecoder(PROGRAM_ID, registryDecodeInstruction)
 }
