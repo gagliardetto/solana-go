@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/dfuse-io/solana-go"
+
 	"github.com/dfuse-io/solana-go/rpc"
 )
 
@@ -51,7 +53,8 @@ type ProgramResult struct {
 		Slot uint64
 	} `json:"context"`
 	Value struct {
-		Account rpc.Account `json:"account"`
+		PubKey  solana.PublicKey `json:"pub_key"`
+		Account rpc.Account      `json:"account"`
 	} `json:"value"`
 }
 

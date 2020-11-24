@@ -21,16 +21,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/dfuse-io/solana-go/text"
-
-	"github.com/dfuse-io/solana-go/token"
-
-	"github.com/dfuse-io/solana-go/rpc"
-
 	bin "github.com/dfuse-io/binary"
-
 	"github.com/dfuse-io/solana-go"
-
+	"github.com/dfuse-io/solana-go/rpc"
+	"github.com/dfuse-io/solana-go/text"
+	"github.com/dfuse-io/solana-go/token"
 	"github.com/spf13/cobra"
 )
 

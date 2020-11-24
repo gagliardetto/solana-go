@@ -22,6 +22,7 @@ import (
 	"io"
 	"reflect"
 	"sync"
+	"time"
 
 	"github.com/dfuse-io/solana-go/rpc"
 	"github.com/gorilla/rpc/v2/json2"
@@ -53,6 +54,15 @@ func Dial(ctx context.Context, rpcURL string) (c *Client, err error) {
 		return nil, fmt.Errorf("new ws client: dial: %w", err)
 	}
 
+	go func() {
+		for {
+			c.conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+			time.Sleep(20 * time.Second)
+		}
+	}()
 	go c.receiveMessages()
 	return c, nil
 }
@@ -200,6 +210,8 @@ func (c *Client) unsubscribe(subID uint64, method string) error {
 }
 
 func (c *Client) subscribe(params []interface{}, conf map[string]interface{}, subscriptionMethod, unsubscribeMethod string, commitment rpc.CommitmentType, resultType interface{}) (*Subscription, error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	if commitment != "" {
 		conf["commitment"] = string(commitment)
 	}
@@ -214,10 +226,8 @@ func (c *Client) subscribe(params []interface{}, conf map[string]interface{}, su
 		c.closeSubscription(req.ID, err)
 	}, unsubscribeMethod)
 
-	c.lock.Lock()
 	c.subscriptionByRequestID[req.ID] = sub
 	zlog.Info("added new subscription to websocket client", zap.Int("count", len(c.subscriptionByRequestID)))
-	c.lock.Unlock()
 
 	zlog.Debug("writing data to conn", zap.String("data", string(data)))
 	err = c.conn.WriteMessage(websocket.TextMessage, data)
