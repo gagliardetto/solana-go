@@ -19,13 +19,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dfuse-io/solana-go/text"
-
 	"github.com/dfuse-io/solana-go"
+	_ "github.com/dfuse-io/solana-go/programs/serum"
+	_ "github.com/dfuse-io/solana-go/programs/system"
+	_ "github.com/dfuse-io/solana-go/programs/token"
+	_ "github.com/dfuse-io/solana-go/programs/tokenregistry"
 	"github.com/dfuse-io/solana-go/rpc"
-	_ "github.com/dfuse-io/solana-go/serum"
-	_ "github.com/dfuse-io/solana-go/system"
-	_ "github.com/dfuse-io/solana-go/token"
+	"github.com/dfuse-io/solana-go/text"
 	"github.com/spf13/cobra"
 )
 

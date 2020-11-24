@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/dfuse-io/solana-go"
-	"github.com/dfuse-io/solana-go/token"
+	"github.com/dfuse-io/solana-go/programs/token"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 )

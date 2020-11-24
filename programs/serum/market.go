@@ -18,7 +18,7 @@ import (
 	"math/big"
 
 	"github.com/dfuse-io/solana-go"
-	"github.com/dfuse-io/solana-go/token"
+	"github.com/dfuse-io/solana-go/programs/token"
 )
 
 type MarketMeta struct {
@@ -63,7 +63,6 @@ func (m *MarketMeta) PriceNumberToLots(price *big.Int) *big.Float {
 type OpenOrdersMeta struct {
 	OpenOrdersV2 OpenOrdersV2
 }
-
 
 type Order struct {
 	Limit *big.Int   `json:"limit"`

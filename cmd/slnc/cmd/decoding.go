@@ -20,7 +20,7 @@ import (
 
 	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
-	"github.com/dfuse-io/solana-go/token"
+	"github.com/dfuse-io/solana-go/programs/token"
 )
 
 func decode(owner solana.PublicKey, data []byte) (interface{}, error) {

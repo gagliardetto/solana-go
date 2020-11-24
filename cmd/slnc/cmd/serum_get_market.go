@@ -21,8 +21,8 @@ import (
 	"strings"
 
 	"github.com/dfuse-io/solana-go"
+	"github.com/dfuse-io/solana-go/programs/serum"
 	"github.com/dfuse-io/solana-go/rpc"
-	"github.com/dfuse-io/solana-go/serum"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 )
