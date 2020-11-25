@@ -39,6 +39,7 @@ var getTokenMetaCmd = &cobra.Command{
 		errorCheck("public key", err)
 
 		accountInfo, err := client.GetAccountInfo(ctx, pubKey)
+		errorCheck("get account info", err)
 
 		var tm *tokenregistry.TokenMeta
 		err = bin.NewDecoder(accountInfo.Value.Data).Decode(&tm)
