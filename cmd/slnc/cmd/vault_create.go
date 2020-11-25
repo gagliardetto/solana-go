@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/dfuse-io/solana-go"
+
 	"github.com/dfuse-io/solana-go/cli"
 	"github.com/dfuse-io/solana-go/vault"
 	"github.com/spf13/cobra"
@@ -63,7 +65,7 @@ You can then use this vault for the different cmd operations.`,
 		v := vault.NewVault()
 		v.Comment = viper.GetString("vault-create-cmd-comment")
 
-		var newKeys []vault.PublicKey
+		var newKeys []solana.PublicKey
 
 		doImport := viper.GetBool("vault-create-cmd-import")
 		if doImport {

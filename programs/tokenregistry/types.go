@@ -13,11 +13,11 @@
 // limitations under the License.
 package tokenregistry
 
-import "github.com/dfuse-io/solana-go"
+import (
+	"fmt"
 
-type Logo [32]byte
-type Name [32]byte
-type Symbol [12]byte
+	"github.com/dfuse-io/solana-go"
+)
 
 type TokenMeta struct {
 	IsInitialized         bool
@@ -30,11 +30,47 @@ type TokenMeta struct {
 	Symbol                Symbol
 }
 
+type Logo [32]byte
+
+func LogoFromString(logo string) (Logo, error) {
+	data := []byte(logo)
+	if len(data) > 32 {
+		return Logo{}, fmt.Errorf("logo data to long expected 32 got %d", len(data))
+	}
+	l := Logo{}
+	copy(l[:], data)
+	return l, nil
+}
 func (l Logo) String() string {
 	return AsciiString(l[:])
 }
+
+type Name [32]byte
+
+func NameFromString(name string) (Name, error) {
+	data := []byte(name)
+	if len(data) > 32 {
+		return Name{}, fmt.Errorf("name data to long expected 32 got %d", len(data))
+	}
+	n := Name{}
+	copy(n[:], data)
+	return n, nil
+}
+
 func (n Name) String() string {
 	return AsciiString(n[:])
+}
+
+type Symbol [12]byte
+
+func SymbolFromString(symbol string) (Symbol, error) {
+	data := []byte(symbol)
+	if len(data) > 32 {
+		return Symbol{}, fmt.Errorf("symbol data to long expected 12 got %d", len(data))
+	}
+	s := Symbol{}
+	copy(s[:], data)
+	return s, nil
 }
 
 func (s Symbol) String() string {

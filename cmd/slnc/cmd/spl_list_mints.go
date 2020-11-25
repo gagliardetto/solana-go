@@ -33,7 +33,7 @@ var splListMintsCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("listing mints: %w", err)
 		}
-		out := []string{"Symbol | Mint address | Token name"}
+		out := []string{"Symbol | Token address | Token name"}
 
 		for _, m := range mints {
 			out = append(out, fmt.Sprintf("%s | %s | %s", m.TokenSymbol, m.MintAddress, m.TokenName))

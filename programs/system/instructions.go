@@ -92,7 +92,7 @@ func (i *CreateAccount) SetAccounts(accounts []*solana.AccountMeta, accountIndex
 	return nil
 }
 
-func NewCreateAccount(lamports bin.Uint64, space bin.Uint64, owner solana.PublicKey, programIdIndex uint8, accountIndex []uint8) (*solana.CompiledInstruction, error) {
+func NewCreateAccount(lamports bin.Uint64, space bin.Uint64, owner solana.PublicKey, programIdIndex uint8, newAccountIdx uint8, fromAccountIdx uint8) (*solana.CompiledInstruction, error) {
 	ca := &CreateAccount{
 		Lamports: lamports,
 		Space:    space,
@@ -106,9 +106,9 @@ func NewCreateAccount(lamports bin.Uint64, space bin.Uint64, owner solana.Public
 
 	return &solana.CompiledInstruction{
 		ProgramIDIndex: programIdIndex,
-		AccountCount:   bin.Varuint16(len(accountIndex)),
-		Accounts:       accountIndex,
-		DataLength:     0,
+		AccountCount:   2,
+		Accounts:       []uint8{newAccountIdx, fromAccountIdx},
+		DataLength:     bin.Varuint16(len(data)),
 		Data:           data,
 	}, nil
 }

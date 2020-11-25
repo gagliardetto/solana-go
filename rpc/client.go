@@ -149,3 +149,9 @@ func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.Public
 	err = c.rpcClient.CallFor(&out, "getProgramAccounts", params...)
 	return
 }
+
+func (c *Client) GetMinimumBalanceForRentExemption(ctx context.Context, dataSize int) (lamport int, err error) {
+	params := []interface{}{dataSize}
+	err = c.rpcClient.CallFor(&lamport, "getMinimumBalanceForRentExemption", params...)
+	return
+}

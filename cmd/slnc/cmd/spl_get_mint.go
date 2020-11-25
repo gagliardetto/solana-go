@@ -60,7 +60,7 @@ var splGetMintCmd = &cobra.Command{
 		out = append(out, fmt.Sprintf("Decimals | %d", mint.Decimals))
 
 		if mint.MintAuthorityOption != 0 {
-			out = append(out, fmt.Sprintf("Mint Authority | %s", mint.MintAuthority))
+			out = append(out, fmt.Sprintf("Token Authority | %s", mint.MintAuthority))
 		} else {
 			out = append(out, "No mint authority")
 		}

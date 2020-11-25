@@ -15,48 +15,73 @@
 package cmd
 
 import (
+	"context"
+
+	bin "github.com/dfuse-io/binary"
+
+	"github.com/dfuse-io/solana-go"
+	"github.com/dfuse-io/solana-go/programs/system"
+	"github.com/dfuse-io/solana-go/programs/tokenregistry"
 	"github.com/spf13/cobra"
 )
 
 var tokenRegisterCmd = &cobra.Command{
 	Use:   "token register {token} {name} {symbol} {logo}",
 	Short: "register meta data for a token",
-	Args:  cobra.ExactArgs(3),
+	Args:  cobra.ExactArgs(4),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		//client := getClient()
-		//ctx := context.Background()
+		client := getClient()
 
-		//keys := []*solana.PublicKey{}{
-		//	system.PROGRAM_ID,
-		//}
-		//
-		//instruction := []solana.CompiledInstruction{}
-		//metaDataAccountInstruction := &system.CreateAccount{
-		//	Lamports: 0,
-		//	Space:    0,
-		//	Owner:    solana.PublicKey{},
-		//	Accounts: nil,
-		//}
-		//
-		//solana.Transaction{
-		//	Signatures: nil,
-		//	Message: solana.Message{
-		//		Header:          solana.MessageHeader{},
-		//		AccountKeys:     nil,
-		//		RecentBlockhash: solana.PublicKey{},
-		//		Instructions:    nil,
-		//	},
-		//}
-		//
-		//from := args[0]
-		//to := args[1]
-		//amount := args[2]
-		//
-		//fmt.Println(from, to, amount)
-		//
-		//_ = client
-		//_ = ctx
-		//
+		logo, err := tokenregistry.LogoFromString(args[0])
+		errorCheck("invalid logo", err)
+		name, err := tokenregistry.NameFromString(args[1])
+		errorCheck("invalid name", err)
+		symbol, err := tokenregistry.SymbolFromString(args[2])
+		errorCheck("invalid symbol", err)
+
+		tokenAddress, err := solana.PublicKeyFromBase58(args[3])
+		errorCheck("invalid token address", err)
+
+		tokenMetaAccount := solana.NewAccount()
+
+		keys := []solana.PublicKey{
+			system.PROGRAM_ID,
+			tokenregistry.ProgramID(),
+			tokenMetaAccount.PublicKey(),
+			tokenAddress,
+		}
+
+		fromAddressIndex := uint8(1)
+		tokenMetaAddressIndex := uint8(2)
+		tokenAddressIndex := uint8(3)
+		size := 145
+
+		lamport, err := client.GetMinimumBalanceForRentExemption(context.Background(), size)
+		errorCheck("get minimum balance for rent exemption ", err)
+
+		metaDataAccountInstruction, err := system.NewCreateAccount(
+			bin.Uint64(lamport), bin.Uint64(size), system.PROGRAM_ID, 0, tokenMetaAddressIndex, fromAddressIndex,
+		)
+		errorCheck("new create account instruction", err)
+
+		registerToken, err := tokenregistry.NewRegisterToken(logo, name, symbol, 1, tokenMetaAddressIndex, tokenMetaAddressIndex, tokenAddressIndex)
+		errorCheck("new register token instruction", err)
+
+		instructions := []solana.CompiledInstruction{
+			*metaDataAccountInstruction,
+			*registerToken,
+		}
+
+		trx := solana.Transaction{
+			Signatures: nil,
+			Message: solana.Message{
+				Header:          solana.MessageHeader{},
+				AccountKeys:     keys,
+				RecentBlockhash: solana.PublicKey{},
+				Instructions:    instructions,
+			},
+		}
+		_ = trx
 		return nil
 	},
 }

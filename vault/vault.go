@@ -18,6 +18,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"github.com/dfuse-io/solana-go"
 )
 
 // Vault represents a `solana-go` wallet.  It contains the encrypted
@@ -31,7 +33,7 @@ type Vault struct {
 	SecretBoxWrap       string `json:"secretbox_wrap"`
 	SecretBoxCiphertext string `json:"secretbox_ciphertext"`
 
-	KeyBag []PrivateKey `json:"-"`
+	KeyBag []solana.PrivateKey `json:"-"`
 }
 
 // NewVaultFromWalletFile returns a new Vault instance from the
@@ -67,7 +69,7 @@ func NewVaultFromWalletFile(filename string) (*Vault, error) {
 // private key.
 func NewVaultFromSingleKey(privKey string) (*Vault, error) {
 	v := NewVault()
-	key, err := PrivateKeyFromBase58(privKey)
+	key, err := solana.PrivateKeyFromBase58(privKey)
 	if err != nil {
 		return nil, fmt.Errorf("import private key: %s", err)
 	}
@@ -86,8 +88,8 @@ func NewVault() *Vault {
 // NewKeyPair creates a new keypair, saves the private key in the
 // local wallet and returns the public key. It does NOT save the
 // wallet, you better do that soon after.
-func (v *Vault) NewKeyPair() (pub PublicKey, err error) {
-	pub, privKey, err := NewRandomPrivateKey()
+func (v *Vault) NewKeyPair() (pub solana.PublicKey, err error) {
+	pub, privKey, err := solana.NewRandomPrivateKey()
 	if err != nil {
 		return
 	}
@@ -98,10 +100,9 @@ func (v *Vault) NewKeyPair() (pub PublicKey, err error) {
 }
 
 // AddPrivateKey appends the provided private key into the Vault's KeyBag
-func (v *Vault) AddPrivateKey(privateKey PrivateKey) (pub PublicKey) {
+func (v *Vault) AddPrivateKey(privateKey solana.PrivateKey) solana.PublicKey {
 	v.KeyBag = append(v.KeyBag, privateKey)
-	pub = privateKey.PublicKey()
-	return
+	return privateKey.PublicKey()
 }
 
 // PrintPublicKeys prints a PublicKey corresponding to each PrivateKey in the Vault's

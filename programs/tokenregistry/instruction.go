@@ -1,6 +1,7 @@
 package tokenregistry
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/dfuse-io/solana-go/text"
@@ -64,14 +65,35 @@ func (i *Instruction) MarshalBinary(encoder *bin.Encoder) error {
 type RegisterTokenAccounts struct {
 	MintMeta *solana.AccountMeta `text:"linear,notype"`
 	Owner    *solana.AccountMeta `text:"linear,notype"`
-	Mint     *solana.AccountMeta `text:"linear,notype"`
+	Token    *solana.AccountMeta `text:"linear,notype"`
 }
 
 type RegisterToken struct {
-	Logo     [32]byte
-	Name     [32]byte
-	Symbol   [12]byte
+	Logo     Logo
+	Name     Name
+	Symbol   Symbol
 	Accounts *RegisterTokenAccounts `bin:"-"`
+}
+
+func NewRegisterToken(logo Logo, name Name, symbol Symbol, programIdIndex uint8, mintMetaIdx uint8, ownerIdx uint8, tokenIdx uint8) (*solana.CompiledInstruction, error) {
+	reg := &RegisterToken{
+		Logo:   logo,
+		Name:   name,
+		Symbol: symbol,
+	}
+	var data []byte
+	buf := bytes.NewBuffer(data)
+	if err := bin.NewEncoder(buf).Encode(reg); err != nil {
+		return nil, fmt.Errorf("new register token: encode: %w", err)
+	}
+	return &solana.CompiledInstruction{
+		ProgramIDIndex: programIdIndex,
+		AccountCount:   3,
+		Accounts:       []uint8{mintMetaIdx, ownerIdx, tokenIdx},
+		DataLength:     bin.Varuint16(len(data)),
+		Data:           data,
+	}, nil
+
 }
 
 func (i *RegisterToken) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
@@ -81,7 +103,7 @@ func (i *RegisterToken) SetAccounts(accounts []*solana.AccountMeta, instructionA
 	i.Accounts = &RegisterTokenAccounts{
 		MintMeta: accounts[instructionActIdx[0]],
 		Owner:    accounts[instructionActIdx[1]],
-		Mint:     accounts[instructionActIdx[2]],
+		Token:    accounts[instructionActIdx[2]],
 	}
 
 	return nil

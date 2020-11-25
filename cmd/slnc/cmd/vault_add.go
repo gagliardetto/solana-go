@@ -17,6 +17,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/dfuse-io/solana-go"
+
 	"github.com/dfuse-io/solana-go/cli"
 	"github.com/dfuse-io/solana-go/vault"
 	"github.com/spf13/cobra"
@@ -45,7 +47,7 @@ var vaultAddCmd = &cobra.Command{
 		privateKeys, err := capturePrivateKeys()
 		errorCheck("entering private keys", err)
 
-		var newKeys []vault.PublicKey
+		var newKeys []solana.PublicKey
 		for _, privateKey := range privateKeys {
 			v.AddPrivateKey(privateKey)
 			newKeys = append(newKeys, privateKey.PublicKey())
@@ -65,7 +67,7 @@ func init() {
 	vaultCmd.AddCommand(vaultAddCmd)
 }
 
-func capturePrivateKeys() (out []vault.PrivateKey, err error) {
+func capturePrivateKeys() (out []solana.PrivateKey, err error) {
 	fmt.Println("")
 	fmt.Println("PLEASE READ:")
 	fmt.Println("We are now going to ask you to paste your private keys, one at a time.")
@@ -88,7 +90,7 @@ func capturePrivateKeys() (out []vault.PrivateKey, err error) {
 	}
 }
 
-func capturePrivateKey(isFirst bool) (privateKey vault.PrivateKey, err error) {
+func capturePrivateKey(isFirst bool) (privateKey solana.PrivateKey, err error) {
 	prompt := "Paste your first private key: "
 	if !isFirst {
 		prompt = "Paste your next private key or hit ENTER if you are done: "
@@ -103,7 +105,7 @@ func capturePrivateKey(isFirst bool) (privateKey vault.PrivateKey, err error) {
 		return nil, nil
 	}
 
-	key, err := vault.PrivateKeyFromBase58(enteredKey)
+	key, err := solana.PrivateKeyFromBase58(enteredKey)
 	if err != nil {
 		return nil, fmt.Errorf("import private key: %s", err)
 	}
@@ -113,7 +115,7 @@ func capturePrivateKey(isFirst bool) (privateKey vault.PrivateKey, err error) {
 	return key, nil
 }
 
-func vaultWrittenReport(walletFile string, newKeys []vault.PublicKey, totalKeys int) {
+func vaultWrittenReport(walletFile string, newKeys []solana.PublicKey, totalKeys int) {
 	fmt.Println("")
 	fmt.Printf("Wallet file %q written to disk.\n", walletFile)
 	fmt.Println("Here are the keys that were ADDED during this operation (use `list` to see them all):")

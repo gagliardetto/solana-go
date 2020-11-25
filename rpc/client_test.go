@@ -75,3 +75,12 @@ func TestClient_GetConfirmedTransaction(t *testing.T) {
 	fmt.Println(string(d))
 
 }
+
+func TestClient_getMinimumBalanceForRentExemption(t *testing.T) {
+	zlog, _ = zap.NewDevelopment()
+	c := NewClient("http://api.mainnet-beta.solana.com:80/rpc")
+	c.Debug = true
+	lamport, err := c.GetMinimumBalanceForRentExemption(context.Background(), 100)
+	require.NoError(t, err)
+	require.Equal(t, 1586880, lamport)
+}
