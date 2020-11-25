@@ -15,7 +15,12 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"os"
+
+	"github.com/dfuse-io/solana-go/rpc"
 
 	bin "github.com/dfuse-io/binary"
 
@@ -28,43 +33,47 @@ import (
 var tokenRegisterCmd = &cobra.Command{
 	Use:   "token register {token} {name} {symbol} {logo}",
 	Short: "register meta data for a token",
-	Args:  cobra.ExactArgs(4),
+	Args:  cobra.ExactArgs(5),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client := getClient()
 
-		logo, err := tokenregistry.LogoFromString(args[0])
-		errorCheck("invalid logo", err)
-		name, err := tokenregistry.NameFromString(args[1])
-		errorCheck("invalid name", err)
-		symbol, err := tokenregistry.SymbolFromString(args[2])
-		errorCheck("invalid symbol", err)
-
-		tokenAddress, err := solana.PublicKeyFromBase58(args[3])
+		tokenAddress, err := solana.PublicKeyFromBase58(args[1])
 		errorCheck("invalid token address", err)
+
+		logo, err := tokenregistry.LogoFromString(args[2])
+		errorCheck("invalid logo", err)
+		name, err := tokenregistry.NameFromString(args[3])
+		errorCheck("invalid name", err)
+		symbol, err := tokenregistry.SymbolFromString(args[4])
+		errorCheck("invalid symbol", err)
 
 		tokenMetaAccount := solana.NewAccount()
 
+		programIDAddress := tokenregistry.ProgramID()
 		keys := []solana.PublicKey{
-			system.PROGRAM_ID,
-			tokenregistry.ProgramID(),
+			programIDAddress,
 			tokenMetaAccount.PublicKey(),
+			system.PROGRAM_ID,
 			tokenAddress,
 		}
 
-		fromAddressIndex := uint8(1)
-		tokenMetaAddressIndex := uint8(2)
+		programAccountIndex := uint8(0)
+		fromAddressIndex := uint8(0)
+		tokenMetaAddressIndex := uint8(1)
+		systemIDIndex := uint8(2)
 		tokenAddressIndex := uint8(3)
+
 		size := 145
 
 		lamport, err := client.GetMinimumBalanceForRentExemption(context.Background(), size)
 		errorCheck("get minimum balance for rent exemption ", err)
 
 		metaDataAccountInstruction, err := system.NewCreateAccount(
-			bin.Uint64(lamport), bin.Uint64(size), system.PROGRAM_ID, 0, tokenMetaAddressIndex, fromAddressIndex,
+			bin.Uint64(lamport), bin.Uint64(size), system.PROGRAM_ID, systemIDIndex, tokenMetaAddressIndex, fromAddressIndex,
 		)
 		errorCheck("new create account instruction", err)
 
-		registerToken, err := tokenregistry.NewRegisterToken(logo, name, symbol, 1, tokenMetaAddressIndex, tokenMetaAddressIndex, tokenAddressIndex)
+		registerToken, err := tokenregistry.NewRegisterToken(logo, name, symbol, programAccountIndex, tokenMetaAddressIndex, tokenMetaAddressIndex, tokenAddressIndex)
 		errorCheck("new register token instruction", err)
 
 		instructions := []solana.CompiledInstruction{
@@ -72,16 +81,48 @@ var tokenRegisterCmd = &cobra.Command{
 			*registerToken,
 		}
 
-		trx := solana.Transaction{
-			Signatures: nil,
-			Message: solana.Message{
-				Header:          solana.MessageHeader{},
-				AccountKeys:     keys,
-				RecentBlockhash: solana.PublicKey{},
-				Instructions:    instructions,
+		blockHashResult, err := client.GetRecentBlockhash(context.Background(), rpc.CommitmentRecent)
+		errorCheck("get block recent block hash", err)
+
+		message := solana.Message{
+			Header: solana.MessageHeader{
+				NumRequiredSignatures:       1,
+				NumReadonlySignedAccounts:   1,
+				NumReadonlyunsignedAccounts: 2,
 			},
+			AccountKeys:     keys,
+			RecentBlockhash: blockHashResult.Value.Blockhash,
+			Instructions:    instructions,
 		}
-		_ = trx
+
+		var dataToSign []byte
+		buf := bytes.NewBuffer(dataToSign)
+		err = bin.NewEncoder(buf).Encode(message)
+		errorCheck("message encoding", err)
+
+		v := mustGetWallet()
+		var signature solana.Signature
+		var signed bool
+		for _, privateKey := range v.KeyBag {
+			if privateKey.PublicKey() == programIDAddress {
+				signed = true
+				signature, err = privateKey.Sign(dataToSign)
+				errorCheck("signe message", err)
+			}
+		}
+
+		if !signed {
+			fmt.Errorf("unable to find matching private key for signing")
+			os.Exit(1)
+		}
+
+		trx := &solana.Transaction{
+			Signatures: []solana.Signature{signature},
+			Message:    message,
+		}
+
+		trxHash, err := client.SendTransaction(context.Background(), trx)
+		fmt.Println("sent transaction", trxHash, err)
 		return nil
 	},
 }

@@ -76,65 +76,6 @@ func (p Signature) String() string {
 }
 
 ///
-type PublicKey [32]byte
-
-func (p PublicKey) Equals(pb PublicKey) bool {
-	return p.String() == pb.String()
-}
-
-func MustPublicKeyFromBase58(in string) PublicKey {
-	out, err := PublicKeyFromBase58(in)
-	if err != nil {
-		panic(err)
-	}
-	return out
-}
-
-func PublicKeyFromBase58(in string) (out PublicKey, err error) {
-	val, err := base58.Decode(in)
-	if err != nil {
-		return
-	}
-
-	if len(val) != 32 {
-		err = fmt.Errorf("invalid length, expected 32, got %d", len(val))
-		return
-	}
-	copy(out[:], val)
-	return
-}
-
-func (p PublicKey) MarshalJSON() ([]byte, error) {
-	return json.Marshal(base58.Encode(p[:]))
-}
-
-func (p *PublicKey) UnmarshalJSON(data []byte) (err error) {
-	var s string
-	err = json.Unmarshal(data, &s)
-	if err != nil {
-		return
-	}
-
-	dat, err := base58.Decode(s)
-	if err != nil {
-		return err
-	}
-
-	if len(dat) != 32 {
-		return errors.New("invalid data length for public key")
-	}
-
-	target := PublicKey{}
-	copy(target[:], dat)
-	*p = target
-	return
-}
-
-func (p PublicKey) String() string {
-	return base58.Encode(p[:])
-}
-
-///
 type Base58 []byte
 
 func (t Base58) MarshalJSON() ([]byte, error) {

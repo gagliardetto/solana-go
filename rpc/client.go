@@ -15,8 +15,11 @@
 package rpc
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/http"
 
 	bin "github.com/dfuse-io/binary"
@@ -60,12 +63,15 @@ func (c *Client) GetBalance(ctx context.Context, publicKey string, commitment Co
 }
 
 func (c *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentType) (out *GetRecentBlockhashResult, err error) {
+	commit := map[string]string{
+		"commitment": string(commitment),
+	}
 	var params []interface{}
 	if commitment != "" {
-		params = append(params, string(commitment))
+		params = append(params, commit)
 	}
 
-	err = c.rpcClient.CallFor(&out, "getRecentBlockhash", params...)
+	err = c.rpcClient.CallFor(&out, "getRecentBlockhash", params)
 	return
 }
 
@@ -153,5 +159,33 @@ func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.Public
 func (c *Client) GetMinimumBalanceForRentExemption(ctx context.Context, dataSize int) (lamport int, err error) {
 	params := []interface{}{dataSize}
 	err = c.rpcClient.CallFor(&lamport, "getMinimumBalanceForRentExemption", params...)
+	return
+}
+
+type SimulateTransactionResponse struct {
+	Err  interface{}
+	Logs []string
+}
+
+func (c *Client) SendTransaction(ctx context.Context, transaction *solana.Transaction) (signature string, err error) {
+
+	var trxData []byte
+	buf := bytes.NewBuffer(trxData)
+	if err := bin.NewEncoder(buf).Encode(transaction); err != nil {
+		return "", fmt.Errorf("send transaction: encode transaction: %w", err)
+	}
+
+	obj := map[string]interface{}{
+		"encoding": "base64",
+	}
+
+	params := []interface{}{
+		base64.StdEncoding.EncodeToString(trxData),
+		obj,
+	}
+
+	if err := c.rpcClient.CallFor(&signature, "sendTransaction", params...); err != nil {
+		return "", fmt.Errorf("send transaction: rpc send: %w", err)
+	}
 	return
 }
