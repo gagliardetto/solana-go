@@ -21,5 +21,9 @@ import (
 // vaultCmd represents the vault command
 var vaultCmd = &cobra.Command{
 	Use:   "vault",
-	Short: "The solana-go Vault is a secure Solana key vault",
+	Short: "The slnc Vault is a secure Solana keys vault",
+}
+
+func init() {
+	RootCmd.AddCommand(vaultCmd)
 }
