@@ -27,7 +27,7 @@ import (
 )
 
 var getTokenMetaCmd = &cobra.Command{
-	Use:   "token-meta {account}",
+	Use:   "meta {account}",
 	Short: "Retrieve token meta for a specific account",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -53,5 +53,5 @@ var getTokenMetaCmd = &cobra.Command{
 }
 
 func init() {
-	getCmd.AddCommand(getTokenMetaCmd)
+	splGetCmd.AddCommand(getTokenMetaCmd)
 }
