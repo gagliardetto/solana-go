@@ -17,7 +17,7 @@ type TransactionInstruction interface {
 }
 
 type Options struct {
-	payer *PublicKey
+	Payer PublicKey
 }
 
 func TransactionWithInstructions(instructions []TransactionInstruction, opt *Options) (*Transaction, error) {
@@ -25,21 +25,21 @@ func TransactionWithInstructions(instructions []TransactionInstruction, opt *Opt
 		return nil, fmt.Errorf("requires at-least one instruction to create a transaction")
 	}
 
+	var feePayer PublicKey
 	if opt == nil {
-		opt = &Options{}
-	}
-
-	feePayer := opt.payer
-	if feePayer == nil {
+		found := false
 		for _, act := range instructions[0].Accounts() {
 			if act.IsSigner {
-				feePayer = &act.PublicKey
+				feePayer = act.PublicKey
+				found = true
 				break
 			}
 		}
-	}
-	if feePayer == nil {
-		return nil, fmt.Errorf("cannot determine fee payer. You can ether pass the fee payer vai the 'TransactionWithInstructions' option parameter or it fallback to the first instruction's first signer")
+		if !found {
+			return nil, fmt.Errorf("cannot determine fee payer. You can ether pass the fee payer vai the 'TransactionWithInstructions' option parameter or it fallback to the first instruction's first signer")
+		}
+	} else {
+		feePayer = opt.Payer
 	}
 
 	programIDs := map[string]bool{}
@@ -80,7 +80,7 @@ func TransactionWithInstructions(instructions []TransactionInstruction, opt *Opt
 	// Move fee payer to the front
 	feePayerIndex := -1
 	for idx, acc := range uniqAccounts {
-		if acc.PublicKey.Equals(*feePayer) {
+		if acc.PublicKey.Equals(feePayer) {
 			feePayerIndex = idx
 		}
 	}

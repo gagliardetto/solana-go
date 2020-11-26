@@ -26,25 +26,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var tokenRegisterCmd = &cobra.Command{
-	Use:   "token register {token} {name} {symbol} {logo}",
+var tokenRegistryRegisterCmd = &cobra.Command{
+	Use:   "register {token} {name} {symbol} {logo}",
 	Short: "register meta data for a token",
-	Args:  cobra.ExactArgs(5),
+	Args:  cobra.ExactArgs(4),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		vault := mustGetWallet()
 		client := getClient()
 
-		tokenAddress, err := solana.PublicKeyFromBase58(args[1])
+		tokenAddress, err := solana.PublicKeyFromBase58(args[0])
 		errorCheck("invalid token address", err)
 
-		logo, err := tokenregistry.LogoFromString(args[2])
+		logo, err := tokenregistry.LogoFromString(args[1])
 		errorCheck("invalid logo", err)
-		name, err := tokenregistry.NameFromString(args[3])
+		name, err := tokenregistry.NameFromString(args[2])
 		errorCheck("invalid name", err)
-		symbol, err := tokenregistry.SymbolFromString(args[4])
+		symbol, err := tokenregistry.SymbolFromString(args[3])
 		errorCheck("invalid symbol", err)
 
-		pkeyStr := viper.GetString("token-regiser-cmd-registrar")
+		pkeyStr := viper.GetString("token-registry-register-cmd-registrar")
 		if pkeyStr == "" {
 			fmt.Errorf("unable to continue without a specified registrar")
 		}
@@ -62,6 +62,8 @@ var tokenRegisterCmd = &cobra.Command{
 			return fmt.Errorf("registrar key must be present in the vault to register a token")
 		}
 
+		fmt.Println(registrarPubKey.String())
+
 		tokenMetaAccount := solana.NewAccount()
 
 		lamport, err := client.GetMinimumBalanceForRentExemption(context.Background(), tokenregistry.TOKEN_META_SIZE)
@@ -72,7 +74,9 @@ var tokenRegisterCmd = &cobra.Command{
 		createAccountInstruction := system.NewCreateAccountInstruction(uint64(lamport), tokenregistry.TOKEN_META_SIZE, tokenRegistryProgramID, registrarPubKey, tokenMetaAccount.PublicKey())
 		registerTokenInstruction := tokenregistry.NewRegisterTokenInstruction(logo, name, symbol, tokenMetaAccount.PublicKey(), registrarPubKey, tokenAddress)
 
-		trx, err := solana.TransactionWithInstructions([]solana.TransactionInstruction{createAccountInstruction, registerTokenInstruction}, nil)
+		trx, err := solana.TransactionWithInstructions([]solana.TransactionInstruction{createAccountInstruction, registerTokenInstruction}, &solana.Options{
+			Payer: registrarPubKey,
+		})
 		errorCheck("unable to craft transaction", err)
 
 		_, err = trx.Sign(func(key solana.PublicKey) *solana.PrivateKey {
@@ -94,6 +98,6 @@ var tokenRegisterCmd = &cobra.Command{
 }
 
 func init() {
-	tokenCmd.AddCommand(tokenRegisterCmd)
-	tokenRegisterCmd.PersistentFlags().String("registrar", "9hFtYBYmBJCVguRYs9pBTWKYAFoKfjYR7zBPpEkVsmD", "The public key that will register the token")
+	tokenRegistryCmd.AddCommand(tokenRegistryRegisterCmd)
+	tokenRegistryRegisterCmd.PersistentFlags().String("registrar", "9hFtYBYmBJCVguRYs9pBTWKYAFoKfjYR7zBPpEkVsmD", "The public key that will register the token")
 }
