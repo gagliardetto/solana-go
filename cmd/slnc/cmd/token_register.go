@@ -15,15 +15,10 @@
 package cmd
 
 import (
-	"bytes"
 	"context"
-	"encoding/hex"
 	"fmt"
-	"os"
 
-	"github.com/dfuse-io/solana-go/rpc"
-
-	bin "github.com/dfuse-io/binary"
+	"github.com/spf13/viper"
 
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/programs/system"
@@ -36,6 +31,7 @@ var tokenRegisterCmd = &cobra.Command{
 	Short: "register meta data for a token",
 	Args:  cobra.ExactArgs(5),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		vault := mustGetWallet()
 		client := getClient()
 
 		tokenAddress, err := solana.PublicKeyFromBase58(args[1])
@@ -48,120 +44,56 @@ var tokenRegisterCmd = &cobra.Command{
 		symbol, err := tokenregistry.SymbolFromString(args[4])
 		errorCheck("invalid symbol", err)
 
-		tokenMetaDataAccount := solana.NewAccount()
-
-		alexKey := solana.MustPublicKeyFromBase58("9hFtYBYmBJCVguRYs9pBTWKYAFoKfjYR7zBPpEkVsmD")
-
-		//todo: remove
-		airDrop, err := client.RequestAirdrop(context.Background(), &alexKey, 10_000_000_000, rpc.CommitmentMax)
-		errorCheck("air drop", err)
-		fmt.Println("air drop hash:", airDrop)
-
-		tokenRegistryProgramIDAddress := tokenregistry.ProgramID()
-		keys := []solana.PublicKey{
-			alexKey,
-			tokenMetaDataAccount.PublicKey(),
-			tokenRegistryProgramIDAddress,
-			tokenAddress,
-			system.PROGRAM_ID,
-		}
-		alexKeyIndex := uint8(0)
-		tokenMetaDataAddressIndex := uint8(1)
-		tokenRegistryProgramAccountIndex := uint8(2)
-		tokenAddressIndex := uint8(3)
-		systemIDIndex := uint8(4)
-
-		size := 145
-		lamport, err := client.GetMinimumBalanceForRentExemption(context.Background(), size)
-		errorCheck("get minimum balance for rent exemption ", err)
-
-		fmt.Println("minimum lamport for rent exemption:", lamport)
-
-		from := alexKeyIndex
-		to := tokenMetaDataAddressIndex
-		metaDataAccountCreationInstruction, err := system.NewCreateAccount(
-			bin.Uint64(lamport), bin.Uint64(size), tokenRegistryProgramIDAddress, systemIDIndex, from, to,
-		)
-		errorCheck("new create account instruction", err)
-
-		buf := new(bytes.Buffer)
-		if err := bin.NewEncoder(buf).Encode(metaDataAccountCreationInstruction); err != nil {
-			panic(err)
-		}
-		fmt.Println("create account instruction hex:", hex.EncodeToString(buf.Bytes()))
-
-		programIdIndex := tokenRegistryProgramAccountIndex
-		mintMetaIdx := tokenMetaDataAddressIndex
-		ownerIdx := alexKeyIndex
-		tokenIdx := tokenAddressIndex
-
-		/// 0. `[writable]` The register data's account to initialize
-		/// 1. `[signer]` The registry's owner
-		/// 2. `[]` The mint address to link with this registration
-		registerToken, err := tokenregistry.NewRegisterToken(logo, name, symbol, programIdIndex, mintMetaIdx, ownerIdx, tokenIdx)
-		errorCheck("new register token instruction", err)
-
-		_ = registerToken
-
-		instructions := []solana.CompiledInstruction{
-			*metaDataAccountCreationInstruction,
-			*registerToken,
+		pkeyStr := viper.GetString("token-regiser-cmd-registrar")
+		if pkeyStr == "" {
+			fmt.Errorf("unable to continue without a specified registrar")
 		}
 
-		blockHashResult, err := client.GetRecentBlockhash(context.Background(), rpc.CommitmentMax)
-		errorCheck("get block recent block hash", err)
+		registrarPubKey, err := solana.PublicKeyFromBase58(pkeyStr)
+		errorCheck(fmt.Sprintf("invalid registrar key %q", pkeyStr), err)
 
-		message := solana.Message{
-			Header: solana.MessageHeader{
-				NumRequiredSignatures:       2,
-				NumReadonlySignedAccounts:   0,
-				NumReadonlyunsignedAccounts: 2,
-			},
-			AccountKeys:     keys,
-			RecentBlockhash: blockHashResult.Value.Blockhash,
-			Instructions:    instructions,
-		}
-
-		buf = new(bytes.Buffer)
-		err = bin.NewEncoder(buf).Encode(message)
-		errorCheck("message encoding", err)
-		dataToSign := buf.Bytes()
-		fmt.Println("Data to sign:", buf)
-
-		v := mustGetWallet()
-		var signature solana.Signature
-		var signed bool
-		for _, privateKey := range v.KeyBag {
-			if privateKey.PublicKey() == alexKey {
-				signature, err = privateKey.Sign(dataToSign)
-				errorCheck("signe message", err)
-				signed = true
+		found := false
+		for _, privateKey := range vault.KeyBag {
+			if privateKey.PublicKey() == registrarPubKey {
+				found = true
 			}
 		}
-		fmt.Println("signing completed")
-
-		if !signed {
-			fmt.Println("unable to find matching private key for signing")
-			os.Exit(1)
+		if !found {
+			return fmt.Errorf("registrar key must be present in the vault to register a token")
 		}
 
-		fmt.Println("signature:", signature.String())
+		tokenMetaAccount := solana.NewAccount()
 
-		tokenMetaAccountSignature, err := tokenMetaDataAccount.PrivateKey.Sign(dataToSign)
-		errorCheck("tokenMetaAccountSignature", err)
+		lamport, err := client.GetMinimumBalanceForRentExemption(context.Background(), tokenregistry.TOKEN_META_SIZE)
+		errorCheck("get minimum balance for rent exemption ", err)
 
-		trx := &solana.Transaction{
-			Signatures: []solana.Signature{signature, tokenMetaAccountSignature},
-			Message:    message,
-		}
+		tokenRegistryProgramID := tokenregistry.ProgramID()
 
-		trxHash, err := client.SendTransaction(context.Background(), trx)
-		//trxHash, err := client.SimulateTransaction(context.Background(), trx)
+		createAccountInstruction := system.NewCreateAccountInstruction(uint64(lamport), tokenregistry.TOKEN_META_SIZE, tokenRegistryProgramID, registrarPubKey, tokenMetaAccount.PublicKey())
+		registerTokenInstruction := tokenregistry.NewRegisterTokenInstruction(logo, name, symbol, tokenMetaAccount.PublicKey(), registrarPubKey, tokenAddress)
+
+		trx, err := solana.TransactionWithInstructions([]solana.TransactionInstruction{createAccountInstruction, registerTokenInstruction}, nil)
+		errorCheck("unable to craft transaction", err)
+
+		_, err = trx.Sign(func(key solana.PublicKey) *solana.PrivateKey {
+			for _, k := range vault.KeyBag {
+				if k.PublicKey() == key {
+					return &k
+				}
+			}
+			return nil
+		})
+
+		errorCheck("unable to sign transaction", err)
+
+		trxHash, err := client.SendTransaction(cmd.Context(), trx)
+
 		fmt.Println("sent transaction hash:", trxHash, " error:", err)
 		return nil
 	},
 }
 
 func init() {
-	splCmd.AddCommand(tokenRegisterCmd)
+	tokenCmd.AddCommand(tokenRegisterCmd)
+	tokenRegisterCmd.PersistentFlags().String("registrar", "9hFtYBYmBJCVguRYs9pBTWKYAFoKfjYR7zBPpEkVsmD", "The public key that will register the token")
 }

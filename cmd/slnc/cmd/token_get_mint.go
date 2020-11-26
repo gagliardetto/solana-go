@@ -23,21 +23,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var splGetMintCmd = &cobra.Command{
+var tokenGetMintCmd = &cobra.Command{
 	Use:   "mint {mint_addr}",
 	Short: "Retrieves mint information",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
 
-		mintAddr, err := solana.PublicKeyFromBase58(args[0])
+		mintAddress, err := solana.PublicKeyFromBase58(args[0])
 		if err != nil {
 			return fmt.Errorf("decoding mint addr: %w", err)
 		}
 
 		client := getClient()
 
-		acct, err := client.GetAccountInfo(ctx, mintAddr)
+		acct, err := client.GetAccountInfo(ctx, mintAddress)
 		if err != nil {
 			return fmt.Errorf("couldn't get account data: %w", err)
 		}
@@ -53,8 +53,6 @@ var splGetMintCmd = &cobra.Command{
 		}
 
 		var out []string
-
-		//out = append(out, fmt.Sprintf("Data length | %d", len(acct.Value.Data)))
 
 		out = append(out, fmt.Sprintf("Supply | %d", mint.Supply))
 		out = append(out, fmt.Sprintf("Decimals | %d", mint.Decimals))
@@ -78,5 +76,5 @@ var splGetMintCmd = &cobra.Command{
 }
 
 func init() {
-	splGetCmd.AddCommand(splGetMintCmd)
+	tokenGetCmd.AddCommand(tokenGetMintCmd)
 }

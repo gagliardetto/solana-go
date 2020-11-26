@@ -37,6 +37,8 @@ type Multisig struct {
 	Signers       [11]solana.PublicKey
 }
 
+const MINT_SIZE = 82
+
 type Mint struct {
 	MintAuthorityOption   uint32
 	MintAuthority         solana.PublicKey
@@ -50,7 +52,7 @@ type Mint struct {
 func DecodeMint(in []byte) (*Mint, error) {
 	var m *Mint
 	decoder := bin.NewDecoder(in)
-	err := decoder.Decode(m)
+	err := decoder.Decode(&m)
 	if err != nil {
 		return nil, fmt.Errorf("unpack: %w", err)
 	}

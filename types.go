@@ -57,7 +57,7 @@ func (t *Transaction) IsWritable(account PublicKey) bool {
 	}
 	h := t.Message.Header
 	return (index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)) ||
-		((index >= int(h.NumRequiredSignatures)) && (index < len(t.Message.AccountKeys)-int(h.NumReadonlyunsignedAccounts)))
+		((index >= int(h.NumRequiredSignatures)) && (index < len(t.Message.AccountKeys)-int(h.NumReadonlyUnsignedAccounts)))
 }
 
 func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint8) (PublicKey, error) {
@@ -85,10 +85,14 @@ type Message struct {
 	Instructions    []CompiledInstruction `json:"instructions"`
 }
 
+func (m *Message) signerKeys() []PublicKey {
+	return m.AccountKeys[0:m.Header.NumRequiredSignatures]
+}
+
 type MessageHeader struct {
 	NumRequiredSignatures       uint8 `json:"numRequiredSignatures"`
 	NumReadonlySignedAccounts   uint8 `json:"numReadonlySignedAccounts"`
-	NumReadonlyunsignedAccounts uint8 `json:"numReadonlyUnsignedAccounts"`
+	NumReadonlyUnsignedAccounts uint8 `json:"numReadonlyUnsignedAccounts"`
 }
 
 type CompiledInstruction struct {
@@ -108,16 +112,3 @@ func TransactionFromData(in []byte) (*Transaction, error) {
 	}
 	return out, nil
 }
-
-type AccountMeta struct {
-	PublicKey  PublicKey
-	IsSigner   bool
-	IsWritable bool
-}
-
-//func (a *AccountMeta) String() string {
-//	if a == nil {
-//		return ""
-//	}
-//	return fmt.Sprintf("%s  Signer: %t Writable: %t", a.PublicKey.String(), a.IsSigner, a.IsWritable)
-//}

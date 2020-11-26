@@ -2,3 +2,5 @@
 dist/
 
 .DS_Store
+
+solana-vault.json

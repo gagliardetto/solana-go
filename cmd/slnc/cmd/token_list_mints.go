@@ -16,35 +16,44 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/dfuse-io/solana-go/programs/token"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 )
 
-var splListMintsCmd = &cobra.Command{
+var tokenListMintsCmd = &cobra.Command{
 	Use:   "mints",
 	Short: "Lists mints",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// TODO: implement a different network argument,
-		// later. Ultimately, get on chain. We have a database here!
+		rpcCli := getClient()
 
-		mints, err := token.KnownMints("mainnet")
+		mints, err := token.FetchMints(cmd.Context(), rpcCli)
 		if err != nil {
-			return fmt.Errorf("listing mints: %w", err)
+			return fmt.Errorf("unable to retrieve mints: %w", err)
 		}
-		out := []string{"Symbol | Token address | Token name"}
-
+		out := []string{"Supply | Decimals | Token Authority | Freeze Authority"}
 		for _, m := range mints {
-			out = append(out, fmt.Sprintf("%s | %s | %s", m.TokenSymbol, m.MintAddress, m.TokenName))
+			line := []string{fmt.Sprintf("%d", m.Supply), fmt.Sprintf("%d", m.Decimals)}
+			if m.MintAuthorityOption != 0 {
+				line = append(line, fmt.Sprintf("%s", m.MintAuthority))
+			} else {
+				line = append(line, "No mint authority")
+			}
+			if m.FreezeAuthorityOption != 0 {
+				line = append(line, fmt.Sprintf("%s", m.FreezeAuthority))
+			} else {
+				line = append(line, "No freeze authority")
+			}
+			out = append(out, strings.Join(line, " | "))
 		}
 
 		fmt.Println(columnize.Format(out, nil))
-
 		return nil
 	},
 }
 
 func init() {
-	splListCmd.AddCommand(splListMintsCmd)
+	tokenListCmd.AddCommand(tokenListMintsCmd)
 }

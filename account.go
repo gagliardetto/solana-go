@@ -31,3 +31,22 @@ func AccountFromPrivateKeyBase58(privateKey string) (*Account, error) {
 func (a *Account) PublicKey() PublicKey {
 	return a.PrivateKey.PublicKey()
 }
+
+type AccountMeta struct {
+	PublicKey  PublicKey
+	IsSigner   bool
+	IsWritable bool
+}
+
+func (a *AccountMeta) less(act *AccountMeta) bool {
+	if a.IsSigner && !act.IsSigner {
+		return true
+	} else if !a.IsSigner && act.IsSigner {
+		return false
+	}
+
+	if a.IsWritable {
+		return true
+	}
+	return false
+}

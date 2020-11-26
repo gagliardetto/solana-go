@@ -15,44 +15,43 @@
 package cmd
 
 import (
-	"context"
+	"fmt"
 	"os"
 
-	bin "github.com/dfuse-io/binary"
+	"github.com/dfuse-io/solana-go/rpc"
+
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/programs/tokenregistry"
-	_ "github.com/dfuse-io/solana-go/programs/tokenregistry"
 	"github.com/dfuse-io/solana-go/text"
 	"github.com/spf13/cobra"
 )
 
-var getTokenMetaCmd = &cobra.Command{
-	Use:   "meta {account}",
-	Short: "Retrieve token meta for a specific account",
+var tokenRegistryGetCmd = &cobra.Command{
+	Use:   "get {mint-address}",
+	Short: "Retrieve token meta for a specific token meta account",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client := getClient()
-		ctx := context.Background()
 
 		address := args[0]
 		pubKey, err := solana.PublicKeyFromBase58(address)
 		errorCheck("public key", err)
 
-		accountInfo, err := client.GetAccountInfo(ctx, pubKey)
-		errorCheck("get account info", err)
+		t, err := tokenregistry.GetTokenRegistryEntry(cmd.Context(), client, pubKey)
+		if err != nil {
+			if err == rpc.ErrNotFound {
+				fmt.Printf("No token registry entry found for given mint %q", pubKey.String())
+				return nil
+			}
+			return fmt.Errorf("unable to retrieve token registry entry for mint %q: %w", pubKey.String(), err)
+		}
 
-		var tm *tokenregistry.TokenMeta
-		err = bin.NewDecoder(accountInfo.Value.Data).Decode(&tm)
-		errorCheck("decode", err)
-
-		err = text.NewEncoder(os.Stdout).Encode(tm, nil)
+		err = text.NewEncoder(os.Stdout).Encode(t, nil)
 		errorCheck("textEncoding", err)
-
-		//fmt.Println("raw data", hex.EncodeToString(accountInfo.Value.Data))
 		return nil
 	},
 }
 
 func init() {
-	splGetCmd.AddCommand(getTokenMetaCmd)
+	tokenRegistryCmd.AddCommand(tokenRegistryGetCmd)
 }

@@ -27,6 +27,38 @@ import (
 
 //go:generate rice embed-go
 
+func FetchMints(ctx context.Context, rpcCli *rpc.Client) (out []*Mint, err error) {
+	resp, err := rpcCli.GetProgramAccounts(
+		ctx,
+		TOKEN_PROGRAM_ID,
+		&rpc.GetProgramAccountsOpts{
+			Filters: []rpc.RPCFilter{
+				{
+					DataSize: MINT_SIZE,
+				},
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil {
+		return nil, fmt.Errorf("resp empty... program account not found")
+	}
+
+	for _, keyedAcct := range resp {
+		acct := keyedAcct.Account
+
+		m, err := DecodeMint(acct.Data)
+		if err != nil {
+			return nil, fmt.Errorf("unable to decode mint %q: %w", acct.Owner.String(), err)
+		}
+		out = append(out, m)
+
+	}
+	return
+}
+
 func KnownMints(network string) ([]*MintMeta, error) {
 	box := rice.MustFindBox("mints-data").MustBytes(network + "-tokens.json")
 	if box == nil {

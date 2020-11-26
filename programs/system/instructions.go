@@ -54,8 +54,51 @@ func DecodeInstruction(accounts []*solana.AccountMeta, compiledInstruction *sola
 	return inst, nil
 }
 
+func NewCreateAccountInstruction(lamports uint64, space uint64, owner, from, to solana.PublicKey) *Instruction {
+	return &Instruction{
+		BaseVariant: bin.BaseVariant{
+			TypeID: 0,
+			Impl: &CreateAccount{
+				Lamports: bin.Uint64(lamports),
+				Space:    bin.Uint64(space),
+				Owner:    owner,
+				Accounts: &CreateAccountAccounts{
+					From: &solana.AccountMeta{PublicKey: from, IsSigner: true, IsWritable: true},
+					New:  &solana.AccountMeta{PublicKey: to, IsSigner: true, IsWritable: true},
+				},
+			},
+		},
+	}
+}
+
 type Instruction struct {
 	bin.BaseVariant
+}
+
+func (i *Instruction) Accounts() (out []*solana.AccountMeta) {
+	switch i.TypeID {
+	case 0:
+		accounts := i.Impl.(*CreateAccount).Accounts
+		out = []*solana.AccountMeta{accounts.From, accounts.New}
+	case 1:
+		// no account here
+	case 2:
+		accounts := i.Impl.(*Transfer).Accounts
+		out = []*solana.AccountMeta{accounts.From, accounts.To}
+	}
+	return
+}
+
+func (i *Instruction) ProgramID() solana.PublicKey {
+	return PROGRAM_ID
+}
+
+func (i *Instruction) Data() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	if err := bin.NewEncoder(buf).Encode(i); err != nil {
+		return nil, fmt.Errorf("unable to encode instruction: %w", err)
+	}
+	return buf.Bytes(), nil
 }
 
 func (i *Instruction) TextEncode(encoder *text.Encoder, option *text.Option) error {
@@ -98,32 +141,6 @@ func (i *CreateAccount) SetAccounts(accounts []*solana.AccountMeta, accountIndex
 		New:  accounts[accountIndex[1]],
 	}
 	return nil
-}
-
-func NewCreateAccount(lamports bin.Uint64, space bin.Uint64, owner solana.PublicKey, programIdIndex uint8, fromAccountIdx uint8, toAccountIdx uint8) (*solana.CompiledInstruction, error) {
-	instruction := &Instruction{
-		BaseVariant: bin.BaseVariant{
-			TypeID: 0,
-			Impl: &CreateAccount{
-				Lamports: lamports,
-				Space:    space,
-				Owner:    owner,
-			},
-		},
-	}
-	buf := new(bytes.Buffer)
-	if err := bin.NewEncoder(buf).Encode(instruction); err != nil {
-		return nil, fmt.Errorf("new create account: encode: %w", err)
-	}
-
-	data := buf.Bytes()
-	return &solana.CompiledInstruction{
-		ProgramIDIndex: programIdIndex,
-		AccountCount:   2,
-		Accounts:       []uint8{fromAccountIdx, toAccountIdx},
-		DataLength:     bin.Varuint16(len(data)),
-		Data:           data,
-	}, nil
 }
 
 type Assign struct {

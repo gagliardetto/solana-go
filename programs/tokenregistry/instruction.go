@@ -39,8 +39,47 @@ func DecodeInstruction(accounts []*solana.AccountMeta, compiledInstruction *sola
 	return &inst, nil
 }
 
+func NewRegisterTokenInstruction(logo Logo, name Name, symbol Symbol, tokenMetaKey, ownerKey, tokenKey solana.PublicKey) *Instruction {
+	return &Instruction{
+		BaseVariant: bin.BaseVariant{
+			TypeID: 0,
+			Impl: &RegisterToken{
+				Logo:   logo,
+				Name:   name,
+				Symbol: symbol,
+				Accounts: &RegisterTokenAccounts{
+					TokenMeta: &solana.AccountMeta{tokenMetaKey, false, true},
+					Owner:     &solana.AccountMeta{ownerKey, true, false},
+					Token:     &solana.AccountMeta{tokenKey, false, false},
+				},
+			},
+		},
+	}
+}
+
 type Instruction struct {
 	bin.BaseVariant
+}
+
+func (i *Instruction) Accounts() (out []*solana.AccountMeta) {
+	switch i.TypeID {
+	case 0:
+		accounts := i.Impl.(*RegisterToken).Accounts
+		out = []*solana.AccountMeta{accounts.TokenMeta, accounts.Owner, accounts.Token}
+	}
+	return
+}
+
+func (i *Instruction) ProgramID() solana.PublicKey {
+	return ProgramID()
+}
+
+func (i *Instruction) Data() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	if err := bin.NewEncoder(buf).Encode(i); err != nil {
+		return nil, fmt.Errorf("unable to encode instruction: %w", err)
+	}
+	return buf.Bytes(), nil
 }
 
 var InstructionDefVariant = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
@@ -64,9 +103,9 @@ func (i *Instruction) MarshalBinary(encoder *bin.Encoder) error {
 }
 
 type RegisterTokenAccounts struct {
-	MintMeta *solana.AccountMeta `text:"linear,notype"`
-	Owner    *solana.AccountMeta `text:"linear,notype"`
-	Token    *solana.AccountMeta `text:"linear,notype"`
+	TokenMeta *solana.AccountMeta `text:"linear,notype"`
+	Owner     *solana.AccountMeta `text:"linear,notype"`
+	Token     *solana.AccountMeta `text:"linear,notype"`
 }
 
 type RegisterToken struct {
@@ -76,46 +115,14 @@ type RegisterToken struct {
 	Accounts *RegisterTokenAccounts `bin:"-"`
 }
 
-func NewRegisterToken(logo Logo, name Name, symbol Symbol, programIdIndex uint8, mintMetaIdx uint8, ownerIdx uint8, tokenIdx uint8) (*solana.CompiledInstruction, error) {
-	instruction := &Instruction{
-		BaseVariant: bin.BaseVariant{
-			TypeID: 0,
-			Impl: &RegisterToken{
-				Logo:   logo,
-				Name:   name,
-				Symbol: symbol,
-			},
-		},
-	}
-
-	buf := new(bytes.Buffer)
-	if err := bin.NewEncoder(buf).Encode(instruction); err != nil {
-		return nil, fmt.Errorf("new register token: encode: %w", err)
-	}
-	data := buf.Bytes()
-
-	/// 0. `[writable]` The register data's account to initialize
-	/// 1. `[signer]` The registry's owner
-	/// 2. `[]` The mint address to link with this registration
-
-	return &solana.CompiledInstruction{
-		ProgramIDIndex: programIdIndex,
-		AccountCount:   3,
-		Accounts:       []uint8{mintMetaIdx, ownerIdx, tokenIdx},
-		DataLength:     bin.Varuint16(len(data)),
-		Data:           data,
-	}, nil
-
-}
-
 func (i *RegisterToken) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
 	if len(instructionActIdx) < 9 {
 		return fmt.Errorf("insuficient account")
 	}
 	i.Accounts = &RegisterTokenAccounts{
-		MintMeta: accounts[instructionActIdx[0]],
-		Owner:    accounts[instructionActIdx[1]],
-		Token:    accounts[instructionActIdx[2]],
+		TokenMeta: accounts[instructionActIdx[0]],
+		Owner:     accounts[instructionActIdx[1]],
+		Token:     accounts[instructionActIdx[2]],
 	}
 
 	return nil

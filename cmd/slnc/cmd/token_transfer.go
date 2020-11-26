@@ -14,13 +14,34 @@
 
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"context"
+	"fmt"
 
-var splCmd = &cobra.Command{
-	Use:   "spl",
-	Short: "SPL Tokens related Instructions",
+	"github.com/spf13/cobra"
+)
+
+var tokenTransferCmd = &cobra.Command{
+	Use:   "transfer {from} {to} {amount}",
+	Short: "Create and sign a token transfer transaction",
+	Args:  cobra.ExactArgs(3),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client := getClient()
+		ctx := context.Background()
+
+		from := args[0]
+		to := args[1]
+		amount := args[2]
+
+		fmt.Println(from, to, amount)
+
+		_ = client
+		_ = ctx
+
+		return nil
+	},
 }
 
 func init() {
-	RootCmd.AddCommand(splCmd)
+	tokenCmd.AddCommand(tokenTransferCmd)
 }

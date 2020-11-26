@@ -14,15 +14,13 @@
 
 package cmd
 
-import (
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
 
-var splListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "Retrieves SPL token objects",
+var tokenCmd = &cobra.Command{
+	Use:   "token",
+	Short: "Tokens related Instructions",
 }
 
 func init() {
-	splCmd.AddCommand(splListCmd)
+	RootCmd.AddCommand(tokenCmd)
 }

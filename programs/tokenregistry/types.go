@@ -16,8 +16,12 @@ package tokenregistry
 import (
 	"fmt"
 
+	bin "github.com/dfuse-io/binary"
+
 	"github.com/dfuse-io/solana-go"
 )
+
+const TOKEN_META_SIZE = 145
 
 type TokenMeta struct {
 	IsInitialized         bool
@@ -28,6 +32,16 @@ type TokenMeta struct {
 	Logo                  Logo
 	Name                  Name
 	Symbol                Symbol
+}
+
+func DecodeTokenMeta(in []byte) (*TokenMeta, error) {
+	var t *TokenMeta
+	decoder := bin.NewDecoder(in)
+	err := decoder.Decode(&t)
+	if err != nil {
+		return nil, fmt.Errorf("unpack: %w", err)
+	}
+	return t, nil
 }
 
 type Logo [32]byte
