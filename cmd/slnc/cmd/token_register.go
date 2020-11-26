@@ -17,6 +17,7 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"fmt"
 	"os"
 
@@ -47,47 +48,73 @@ var tokenRegisterCmd = &cobra.Command{
 		symbol, err := tokenregistry.SymbolFromString(args[4])
 		errorCheck("invalid symbol", err)
 
-		tokenMetaAccount := solana.NewAccount()
+		tokenMetaDataAccount := solana.NewAccount()
 
-		programIDAddress := tokenregistry.ProgramID()
+		alexKey := solana.MustPublicKeyFromBase58("9hFtYBYmBJCVguRYs9pBTWKYAFoKfjYR7zBPpEkVsmD")
+
+		//todo: remove
+		airDrop, err := client.RequestAirdrop(context.Background(), &alexKey, 10_000_000_000, rpc.CommitmentMax)
+		errorCheck("air drop", err)
+		fmt.Println("air drop hash:", airDrop)
+
+		tokenRegistryProgramIDAddress := tokenregistry.ProgramID()
 		keys := []solana.PublicKey{
-			programIDAddress,
-			tokenMetaAccount.PublicKey(),
-			system.PROGRAM_ID,
+			alexKey,
+			tokenMetaDataAccount.PublicKey(),
+			tokenRegistryProgramIDAddress,
 			tokenAddress,
+			system.PROGRAM_ID,
 		}
-
-		programAccountIndex := uint8(0)
-		fromAddressIndex := uint8(0)
-		tokenMetaAddressIndex := uint8(1)
-		systemIDIndex := uint8(2)
+		alexKeyIndex := uint8(0)
+		tokenMetaDataAddressIndex := uint8(1)
+		tokenRegistryProgramAccountIndex := uint8(2)
 		tokenAddressIndex := uint8(3)
+		systemIDIndex := uint8(4)
 
 		size := 145
-
 		lamport, err := client.GetMinimumBalanceForRentExemption(context.Background(), size)
 		errorCheck("get minimum balance for rent exemption ", err)
 
-		metaDataAccountInstruction, err := system.NewCreateAccount(
-			bin.Uint64(lamport), bin.Uint64(size), system.PROGRAM_ID, systemIDIndex, tokenMetaAddressIndex, fromAddressIndex,
+		fmt.Println("minimum lamport for rent exemption:", lamport)
+
+		from := alexKeyIndex
+		to := tokenMetaDataAddressIndex
+		metaDataAccountCreationInstruction, err := system.NewCreateAccount(
+			bin.Uint64(lamport), bin.Uint64(size), tokenRegistryProgramIDAddress, systemIDIndex, from, to,
 		)
 		errorCheck("new create account instruction", err)
 
-		registerToken, err := tokenregistry.NewRegisterToken(logo, name, symbol, programAccountIndex, tokenMetaAddressIndex, tokenMetaAddressIndex, tokenAddressIndex)
+		buf := new(bytes.Buffer)
+		if err := bin.NewEncoder(buf).Encode(metaDataAccountCreationInstruction); err != nil {
+			panic(err)
+		}
+		fmt.Println("create account instruction hex:", hex.EncodeToString(buf.Bytes()))
+
+		programIdIndex := tokenRegistryProgramAccountIndex
+		mintMetaIdx := tokenMetaDataAddressIndex
+		ownerIdx := alexKeyIndex
+		tokenIdx := tokenAddressIndex
+
+		/// 0. `[writable]` The register data's account to initialize
+		/// 1. `[signer]` The registry's owner
+		/// 2. `[]` The mint address to link with this registration
+		registerToken, err := tokenregistry.NewRegisterToken(logo, name, symbol, programIdIndex, mintMetaIdx, ownerIdx, tokenIdx)
 		errorCheck("new register token instruction", err)
 
+		_ = registerToken
+
 		instructions := []solana.CompiledInstruction{
-			*metaDataAccountInstruction,
+			*metaDataAccountCreationInstruction,
 			*registerToken,
 		}
 
-		blockHashResult, err := client.GetRecentBlockhash(context.Background(), rpc.CommitmentRecent)
+		blockHashResult, err := client.GetRecentBlockhash(context.Background(), rpc.CommitmentMax)
 		errorCheck("get block recent block hash", err)
 
 		message := solana.Message{
 			Header: solana.MessageHeader{
-				NumRequiredSignatures:       1,
-				NumReadonlySignedAccounts:   1,
+				NumRequiredSignatures:       2,
+				NumReadonlySignedAccounts:   0,
 				NumReadonlyunsignedAccounts: 2,
 			},
 			AccountKeys:     keys,
@@ -95,34 +122,42 @@ var tokenRegisterCmd = &cobra.Command{
 			Instructions:    instructions,
 		}
 
-		var dataToSign []byte
-		buf := bytes.NewBuffer(dataToSign)
+		buf = new(bytes.Buffer)
 		err = bin.NewEncoder(buf).Encode(message)
 		errorCheck("message encoding", err)
+		dataToSign := buf.Bytes()
+		fmt.Println("Data to sign:", buf)
 
 		v := mustGetWallet()
 		var signature solana.Signature
 		var signed bool
 		for _, privateKey := range v.KeyBag {
-			if privateKey.PublicKey() == programIDAddress {
-				signed = true
+			if privateKey.PublicKey() == alexKey {
 				signature, err = privateKey.Sign(dataToSign)
 				errorCheck("signe message", err)
+				signed = true
 			}
 		}
+		fmt.Println("signing completed")
 
 		if !signed {
-			fmt.Errorf("unable to find matching private key for signing")
+			fmt.Println("unable to find matching private key for signing")
 			os.Exit(1)
 		}
 
+		fmt.Println("signature:", signature.String())
+
+		tokenMetaAccountSignature, err := tokenMetaDataAccount.PrivateKey.Sign(dataToSign)
+		errorCheck("tokenMetaAccountSignature", err)
+
 		trx := &solana.Transaction{
-			Signatures: []solana.Signature{signature},
+			Signatures: []solana.Signature{signature, tokenMetaAccountSignature},
 			Message:    message,
 		}
 
 		trxHash, err := client.SendTransaction(context.Background(), trx)
-		fmt.Println("sent transaction", trxHash, err)
+		//trxHash, err := client.SimulateTransaction(context.Background(), trx)
+		fmt.Println("sent transaction hash:", trxHash, " error:", err)
 		return nil
 	},
 }

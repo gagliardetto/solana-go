@@ -2,6 +2,7 @@ package tokenregistry
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 
 	"github.com/dfuse-io/solana-go/text"
@@ -42,7 +43,7 @@ type Instruction struct {
 	bin.BaseVariant
 }
 
-var InstructionDefVariant = bin.NewVariantDefinition(bin.Uint8TypeIDEncoding, []bin.VariantType{
+var InstructionDefVariant = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
 	{"register_token", (*RegisterToken)(nil)},
 })
 
@@ -55,7 +56,7 @@ func (i *Instruction) UnmarshalBinary(decoder *bin.Decoder) (err error) {
 }
 
 func (i *Instruction) MarshalBinary(encoder *bin.Encoder) error {
-	err := encoder.WriteUint8(uint8(i.TypeID))
+	err := encoder.WriteUint32(i.TypeID, binary.LittleEndian)
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)
 	}
@@ -76,16 +77,27 @@ type RegisterToken struct {
 }
 
 func NewRegisterToken(logo Logo, name Name, symbol Symbol, programIdIndex uint8, mintMetaIdx uint8, ownerIdx uint8, tokenIdx uint8) (*solana.CompiledInstruction, error) {
-	reg := &RegisterToken{
-		Logo:   logo,
-		Name:   name,
-		Symbol: symbol,
+	instruction := &Instruction{
+		BaseVariant: bin.BaseVariant{
+			TypeID: 0,
+			Impl: &RegisterToken{
+				Logo:   logo,
+				Name:   name,
+				Symbol: symbol,
+			},
+		},
 	}
-	var data []byte
-	buf := bytes.NewBuffer(data)
-	if err := bin.NewEncoder(buf).Encode(reg); err != nil {
+
+	buf := new(bytes.Buffer)
+	if err := bin.NewEncoder(buf).Encode(instruction); err != nil {
 		return nil, fmt.Errorf("new register token: encode: %w", err)
 	}
+	data := buf.Bytes()
+
+	/// 0. `[writable]` The register data's account to initialize
+	/// 1. `[signer]` The registry's owner
+	/// 2. `[]` The mint address to link with this registration
+
 	return &solana.CompiledInstruction{
 		ProgramIDIndex: programIdIndex,
 		AccountCount:   3,

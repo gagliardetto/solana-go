@@ -16,6 +16,7 @@ package system
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 
 	bin "github.com/dfuse-io/binary"
@@ -71,13 +72,20 @@ func (i *Instruction) UnmarshalBinary(decoder *bin.Decoder) error {
 	return i.BaseVariant.UnmarshalBinaryVariant(decoder, InstructionImplDef)
 }
 
+func (i *Instruction) MarshalBinary(encoder *bin.Encoder) error {
+	err := encoder.WriteUint32(i.TypeID, binary.LittleEndian)
+	if err != nil {
+		return fmt.Errorf("unable to write variant type: %w", err)
+	}
+	return encoder.Encode(i.Impl)
+}
+
 type CreateAccountAccounts struct {
 	From *solana.AccountMeta `text:"linear,notype"`
 	New  *solana.AccountMeta `text:"linear,notype"`
 }
 
 type CreateAccount struct {
-	// prefixed with byte 0x00
 	Lamports bin.Uint64
 	Space    bin.Uint64
 	Owner    solana.PublicKey
@@ -92,22 +100,27 @@ func (i *CreateAccount) SetAccounts(accounts []*solana.AccountMeta, accountIndex
 	return nil
 }
 
-func NewCreateAccount(lamports bin.Uint64, space bin.Uint64, owner solana.PublicKey, programIdIndex uint8, newAccountIdx uint8, fromAccountIdx uint8) (*solana.CompiledInstruction, error) {
-	ca := &CreateAccount{
-		Lamports: lamports,
-		Space:    space,
-		Owner:    owner,
+func NewCreateAccount(lamports bin.Uint64, space bin.Uint64, owner solana.PublicKey, programIdIndex uint8, fromAccountIdx uint8, toAccountIdx uint8) (*solana.CompiledInstruction, error) {
+	instruction := &Instruction{
+		BaseVariant: bin.BaseVariant{
+			TypeID: 0,
+			Impl: &CreateAccount{
+				Lamports: lamports,
+				Space:    space,
+				Owner:    owner,
+			},
+		},
 	}
-	var data []byte
-	buf := bytes.NewBuffer(data)
-	if err := bin.NewEncoder(buf).Encode(ca); err != nil {
+	buf := new(bytes.Buffer)
+	if err := bin.NewEncoder(buf).Encode(instruction); err != nil {
 		return nil, fmt.Errorf("new create account: encode: %w", err)
 	}
 
+	data := buf.Bytes()
 	return &solana.CompiledInstruction{
 		ProgramIDIndex: programIdIndex,
 		AccountCount:   2,
-		Accounts:       []uint8{newAccountIdx, fromAccountIdx},
+		Accounts:       []uint8{fromAccountIdx, toAccountIdx},
 		DataLength:     bin.Varuint16(len(data)),
 		Data:           data,
 	}, nil
