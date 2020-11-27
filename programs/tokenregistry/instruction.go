@@ -111,6 +111,7 @@ type RegisterTokenAccounts struct {
 type RegisterToken struct {
 	Logo     Logo
 	Name     Name
+	Website  Website
 	Symbol   Symbol
 	Accounts *RegisterTokenAccounts `bin:"-"`
 }

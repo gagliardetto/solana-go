@@ -31,5 +31,13 @@ func TestSymbolFromString(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, "symb", l.String())
-	require.Equal(t, Symbol([12]byte{115, 121, 109, 98, 0, 0, 0, 0, 0, 0, 0, 0}), l)
+	require.Equal(t, Symbol([32]byte{115, 121, 109, 98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}), l)
+}
+
+func TestWebsiteFromString(t *testing.T) {
+	l, err := WebsiteFromString("webs")
+	require.NoError(t, err)
+
+	require.Equal(t, "webs", l.String())
+	require.Equal(t, Website([32]byte{119, 101, 98, 115, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}), l)
 }

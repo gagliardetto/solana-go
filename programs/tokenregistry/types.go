@@ -21,7 +21,7 @@ import (
 	"github.com/dfuse-io/solana-go"
 )
 
-const TOKEN_META_SIZE = 145
+const TOKEN_META_SIZE = 197
 
 type TokenMeta struct {
 	IsInitialized         bool
@@ -31,6 +31,7 @@ type TokenMeta struct {
 	RegistrationAuthority *solana.PublicKey
 	Logo                  Logo
 	Name                  Name
+	Website               Website
 	Symbol                Symbol
 }
 
@@ -75,7 +76,7 @@ func (n Name) String() string {
 	return AsciiString(n[:])
 }
 
-type Symbol [12]byte
+type Symbol [32]byte
 
 func SymbolFromString(symbol string) (Symbol, error) {
 	data := []byte(symbol)
@@ -88,6 +89,22 @@ func SymbolFromString(symbol string) (Symbol, error) {
 }
 
 func (s Symbol) String() string {
+	return AsciiString(s[:])
+}
+
+type Website [32]byte
+
+func WebsiteFromString(symbol string) (Website, error) {
+	data := []byte(symbol)
+	if len(data) > 32 {
+		return Website{}, fmt.Errorf("website data to long expected 32 got %d", len(data))
+	}
+	s := Website{}
+	copy(s[:], data)
+	return s, nil
+}
+
+func (s Website) String() string {
 	return AsciiString(s[:])
 }
 
