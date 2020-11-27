@@ -31,7 +31,7 @@ import (
 var tokenRegistryRegisterCmd = &cobra.Command{
 	Use:   "register {token-address} {name} {symbol} {logo} {website}",
 	Short: "register meta data for a token",
-	Args:  cobra.ExactArgs(4),
+	Args:  cobra.ExactArgs(5),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		vault := mustGetWallet()
 		client := getClient()
@@ -46,15 +46,18 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 		var symbol tokenregistry.Symbol
 		var website tokenregistry.Website
 
-		if logo, err = tokenregistry.LogoFromString(args[1]); err != nil {
-			return fmt.Errorf("invalid logo %q: %w", args[1], err)
+		if name, err = tokenregistry.NameFromString(args[1]); err != nil {
+			return fmt.Errorf("invalid name %q: %w", args[1], err)
 		}
-		if name, err = tokenregistry.NameFromString(args[2]); err != nil {
-			return fmt.Errorf("invalid name %q: %w", args[2], err)
+
+		if symbol, err = tokenregistry.SymbolFromString(args[2]); err != nil {
+			return fmt.Errorf("invalid symbol %q: %w", args[2], err)
 		}
-		if symbol, err = tokenregistry.SymbolFromString(args[3]); err != nil {
-			return fmt.Errorf("invalid symbol %q: %w", args[3], err)
+
+		if logo, err = tokenregistry.LogoFromString(args[3]); err != nil {
+			return fmt.Errorf("invalid logo %q: %w", args[3], err)
 		}
+
 		if website, err = tokenregistry.WebsiteFromString(args[4]); err != nil {
 			return fmt.Errorf("invalid website %q: %w", args[4], err)
 		}
