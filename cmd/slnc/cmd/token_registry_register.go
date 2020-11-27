@@ -57,7 +57,7 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 
 		pkeyStr := viper.GetString("token-registry-register-cmd-registrar")
 		if pkeyStr == "" {
-			fmt.Errorf("unable to continue without a specified registrar")
+			return fmt.Errorf("unable to continue without a specified registrar")
 		}
 
 		registrarPubKey, err := solana.PublicKeyFromBase58(pkeyStr)
@@ -71,6 +71,7 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 				found = true
 			}
 		}
+
 		if !found {
 			return fmt.Errorf("registrar key must be present in the vault to register a token")
 		}
@@ -100,6 +101,12 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 		}
 
 		_, err = trx.Sign(func(key solana.PublicKey) *solana.PrivateKey {
+			// create account need to be signed by the private key of the new account
+			// that is not in the vault and will be lost after the execution.
+			if key == tokenMetaAccount.PublicKey() {
+				return &tokenMetaAccount.PrivateKey
+			}
+
 			for _, k := range vault.KeyBag {
 				if k.PublicKey() == key {
 					return &k

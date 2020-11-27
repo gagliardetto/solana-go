@@ -64,7 +64,7 @@ func NewCreateAccountInstruction(lamports uint64, space uint64, owner, from, to 
 				Owner:    owner,
 				Accounts: &CreateAccountAccounts{
 					From: &solana.AccountMeta{PublicKey: from, IsSigner: true, IsWritable: true},
-					New:  &solana.AccountMeta{PublicKey: to, IsSigner: false, IsWritable: true},
+					New:  &solana.AccountMeta{PublicKey: to, IsSigner: true, IsWritable: true},
 				},
 			},
 		},
