@@ -29,7 +29,7 @@ import (
 )
 
 var tokenRegistryRegisterCmd = &cobra.Command{
-	Use:   "register {token-address} {name} {symbol} {logo}",
+	Use:   "register {token-address} {name} {symbol} {logo} {website}",
 	Short: "register meta data for a token",
 	Args:  cobra.ExactArgs(4),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -44,6 +44,7 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 		var logo tokenregistry.Logo
 		var name tokenregistry.Name
 		var symbol tokenregistry.Symbol
+		var website tokenregistry.Website
 
 		if logo, err = tokenregistry.LogoFromString(args[1]); err != nil {
 			return fmt.Errorf("invalid logo %q: %w", args[1], err)
@@ -53,6 +54,9 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 		}
 		if symbol, err = tokenregistry.SymbolFromString(args[3]); err != nil {
 			return fmt.Errorf("invalid symbol %q: %w", args[3], err)
+		}
+		if website, err = tokenregistry.WebsiteFromString(args[4]); err != nil {
+			return fmt.Errorf("invalid website %q: %w", args[4], err)
 		}
 
 		pkeyStr := viper.GetString("token-registry-register-cmd-registrar")
@@ -91,7 +95,7 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 		tokenRegistryProgramID := tokenregistry.ProgramID()
 
 		createAccountInstruction := system.NewCreateAccountInstruction(uint64(lamport), tokenregistry.TOKEN_META_SIZE, tokenRegistryProgramID, registrarPubKey, tokenMetaAccount.PublicKey())
-		registerTokenInstruction := tokenregistry.NewRegisterTokenInstruction(logo, name, symbol, tokenMetaAccount.PublicKey(), registrarPubKey, tokenAddress)
+		registerTokenInstruction := tokenregistry.NewRegisterTokenInstruction(logo, name, symbol, website, tokenMetaAccount.PublicKey(), registrarPubKey, tokenAddress)
 
 		trx, err := solana.TransactionWithInstructions([]solana.TransactionInstruction{createAccountInstruction, registerTokenInstruction}, blockHashResult.Value.Blockhash, &solana.Options{
 			Payer: registrarPubKey,

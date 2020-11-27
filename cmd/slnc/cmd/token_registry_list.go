@@ -37,7 +37,7 @@ var tokenRegistryListCmd = &cobra.Command{
 			return fmt.Errorf("unable to retrieve entries: %w", err)
 		}
 
-		out := []string{"Is Initialized | Mint Address | Registration Authority | Logo | Name | Symbol"}
+		out := []string{"Is Initialized | Mint Address | Registration Authority | Logo | Name | Symbol | Website"}
 
 		for _, e := range entries {
 			initalized := "false"
@@ -52,6 +52,7 @@ var tokenRegistryListCmd = &cobra.Command{
 				e.Logo.String(),
 				e.Name.String(),
 				e.Symbol.String(),
+				e.Website.String(),
 			}
 			out = append(out, strings.Join(line, " | "))
 		}

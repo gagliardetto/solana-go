@@ -39,14 +39,15 @@ func DecodeInstruction(accounts []*solana.AccountMeta, compiledInstruction *sola
 	return &inst, nil
 }
 
-func NewRegisterTokenInstruction(logo Logo, name Name, symbol Symbol, tokenMetaKey, ownerKey, tokenKey solana.PublicKey) *Instruction {
+func NewRegisterTokenInstruction(logo Logo, name Name, symbol Symbol, website Website, tokenMetaKey, ownerKey, tokenKey solana.PublicKey) *Instruction {
 	return &Instruction{
 		BaseVariant: bin.BaseVariant{
 			TypeID: 0,
 			Impl: &RegisterToken{
-				Logo:   logo,
-				Name:   name,
-				Symbol: symbol,
+				Logo:    logo,
+				Name:    name,
+				Website: website,
+				Symbol:  symbol,
 				Accounts: &RegisterTokenAccounts{
 					TokenMeta: &solana.AccountMeta{tokenMetaKey, false, true},
 					Owner:     &solana.AccountMeta{ownerKey, true, false},
