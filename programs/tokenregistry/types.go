@@ -21,7 +21,7 @@ import (
 	"github.com/dfuse-io/solana-go"
 )
 
-const TOKEN_META_SIZE = 197
+const TOKEN_META_SIZE = 229
 
 type TokenMeta struct {
 	IsInitialized         bool
@@ -45,12 +45,12 @@ func DecodeTokenMeta(in []byte) (*TokenMeta, error) {
 	return t, nil
 }
 
-type Logo [32]byte
+type Logo [64]byte
 
 func LogoFromString(logo string) (Logo, error) {
 	data := []byte(logo)
-	if len(data) > 32 {
-		return Logo{}, fmt.Errorf("logo data to long expected 32 got %d", len(data))
+	if len(data) > 64 {
+		return Logo{}, fmt.Errorf("logo data to long expected 64 got %d", len(data))
 	}
 	l := Logo{}
 	copy(l[:], data)

@@ -15,7 +15,7 @@ func TestLogoFromString(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, "logo", l.String())
-	require.Equal(t, Logo([32]byte{108, 111, 103, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}), l)
+	require.Equal(t, Logo([64]byte{108, 111, 103, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}), l)
 }
 
 func TestNameFromString(t *testing.T) {
