@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -27,9 +26,8 @@ var getBalanceCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client := getClient()
-		ctx := context.Background()
 
-		resp, err := client.GetBalance(ctx, args[0], "")
+		resp, err := client.GetBalance(cmd.Context(), args[0], "")
 		if err != nil {
 			return err
 		}

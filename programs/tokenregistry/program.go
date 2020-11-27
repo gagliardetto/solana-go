@@ -6,7 +6,7 @@ import (
 	"github.com/dfuse-io/solana-go"
 )
 
-var mainnetProgramID = solana.MustPublicKeyFromBase58("99999999999999999999999999999999999999999999")
+var mainnetProgramID = solana.MustPublicKeyFromBase58("CmPVzy88JSB4S223yCvFmBxTLobLya27KgEDeNPnqEub")
 var testnetProgramID = solana.MustPublicKeyFromBase58("99999999999999999999999999999999999999999999")
 var devnetProgramID = solana.MustPublicKeyFromBase58("99999999999999999999999999999999999999999999")
 
