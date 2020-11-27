@@ -18,6 +18,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+
+	"github.com/dfuse-io/solana-go/text"
 
 	"github.com/dfuse-io/solana-go"
 
@@ -43,7 +46,6 @@ var getProgramAccountsCmd = &cobra.Command{
 
 		for _, keyedAcct := range resp {
 			acct := keyedAcct.Account
-			//fmt.Println("Data len:", len(acct.Data), keyedAcct.Pubkey)
 
 			obj, err := decode(acct.Owner, acct.Data)
 			if err != nil {
@@ -56,6 +58,11 @@ var getProgramAccountsCmd = &cobra.Command{
 					return err
 				}
 				fmt.Printf("Data %T: %s\n", obj, string(cnt))
+				return nil
+			}
+
+			if err := text.NewEncoder(os.Stdout).Encode(acct, nil); err != nil {
+				return fmt.Errorf("unable to text encode account: %w", err)
 			}
 		}
 
