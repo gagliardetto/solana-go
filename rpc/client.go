@@ -33,8 +33,6 @@ type Client struct {
 	rpcURL    string
 	rpcClient jsonrpc.RPCClient
 	headers   http.Header
-
-	Debug bool
 }
 
 func NewClient(rpcURL string) *Client {

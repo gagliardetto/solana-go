@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -36,7 +35,7 @@ var getBalanceCmd = &cobra.Command{
 		}
 
 		if resp.Value == 0 {
-			errorCheck("not found", errors.New("account not found"))
+			return fmt.Errorf("account not found")
 		}
 
 		fmt.Println(resp.Value, "lamports")

@@ -20,7 +20,7 @@ type Options struct {
 	Payer PublicKey
 }
 
-func TransactionWithInstructions(instructions []TransactionInstruction, opt *Options) (*Transaction, error) {
+func TransactionWithInstructions(instructions []TransactionInstruction, blockHash PublicKey, opt *Options) (*Transaction, error) {
 	if len(instructions) == 0 {
 		return nil, fmt.Errorf("requires at-least one instruction to create a transaction")
 	}
@@ -106,12 +106,16 @@ func TransactionWithInstructions(instructions []TransactionInstruction, opt *Opt
 	}
 
 	message := Message{
-		AccountKeys:     nil,
-		RecentBlockhash: PublicKey{},
-		Instructions:    nil,
+		RecentBlockhash: blockHash,
 	}
 	accountKeyIndex := map[string]uint8{}
 	for idx, acc := range finalAccounts {
+
+		zlog.Debug("transaction account",
+			zap.Int("account_index", idx),
+			zap.Stringer("account_pub_key", acc.PublicKey),
+		)
+
 		message.AccountKeys = append(message.AccountKeys, acc.PublicKey)
 		accountKeyIndex[acc.PublicKey.String()] = uint8(idx)
 		if acc.IsSigner {
@@ -126,6 +130,11 @@ func TransactionWithInstructions(instructions []TransactionInstruction, opt *Opt
 			message.Header.NumReadonlyUnsignedAccounts++
 		}
 	}
+	zlog.Debug("message header compiled",
+		zap.Uint8("num_required_signatures", message.Header.NumRequiredSignatures),
+		zap.Uint8("num_readonly_signed_accounts", message.Header.NumReadonlySignedAccounts),
+		zap.Uint8("num_readonly_unsigned_accounts", message.Header.NumReadonlyUnsignedAccounts),
+	)
 
 	for trxIdx, instruction := range instructions {
 		accounts = instruction.Accounts()

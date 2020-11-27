@@ -18,6 +18,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/dfuse-io/solana-go/rpc"
+
 	"github.com/spf13/viper"
 
 	"github.com/dfuse-io/solana-go"
@@ -27,22 +29,31 @@ import (
 )
 
 var tokenRegistryRegisterCmd = &cobra.Command{
-	Use:   "register {token} {name} {symbol} {logo}",
+	Use:   "register {token-address} {name} {symbol} {logo}",
 	Short: "register meta data for a token",
 	Args:  cobra.ExactArgs(4),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		vault := mustGetWallet()
 		client := getClient()
 
-		tokenAddress, err := solana.PublicKeyFromBase58(args[0])
-		errorCheck("invalid token address", err)
+		var tokenAddress solana.PublicKey
+		if tokenAddress, err = solana.PublicKeyFromBase58(args[0]); err != nil {
+			return fmt.Errorf("invalid token address %q: %w", args[0], err)
+		}
 
-		logo, err := tokenregistry.LogoFromString(args[1])
-		errorCheck("invalid logo", err)
-		name, err := tokenregistry.NameFromString(args[2])
-		errorCheck("invalid name", err)
-		symbol, err := tokenregistry.SymbolFromString(args[3])
-		errorCheck("invalid symbol", err)
+		var logo tokenregistry.Logo
+		var name tokenregistry.Name
+		var symbol tokenregistry.Symbol
+
+		if logo, err = tokenregistry.LogoFromString(args[1]); err != nil {
+			return fmt.Errorf("invalid logo %q: %w", args[1], err)
+		}
+		if name, err = tokenregistry.NameFromString(args[2]); err != nil {
+			return fmt.Errorf("invalid name %q: %w", args[2], err)
+		}
+		if symbol, err = tokenregistry.SymbolFromString(args[3]); err != nil {
+			return fmt.Errorf("invalid symbol %q: %w", args[3], err)
+		}
 
 		pkeyStr := viper.GetString("token-registry-register-cmd-registrar")
 		if pkeyStr == "" {
@@ -50,7 +61,9 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 		}
 
 		registrarPubKey, err := solana.PublicKeyFromBase58(pkeyStr)
-		errorCheck(fmt.Sprintf("invalid registrar key %q", pkeyStr), err)
+		if err != nil {
+			return fmt.Errorf("invalid registrar key %q: %w", pkeyStr, err)
+		}
 
 		found := false
 		for _, privateKey := range vault.KeyBag {
@@ -62,22 +75,29 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 			return fmt.Errorf("registrar key must be present in the vault to register a token")
 		}
 
-		fmt.Println(registrarPubKey.String())
+		blockHashResult, err := client.GetRecentBlockhash(context.Background(), rpc.CommitmentMax)
+		if err != nil {
+			return fmt.Errorf("unable retrieve recent block hash: %w", err)
+		}
 
 		tokenMetaAccount := solana.NewAccount()
 
 		lamport, err := client.GetMinimumBalanceForRentExemption(context.Background(), tokenregistry.TOKEN_META_SIZE)
-		errorCheck("get minimum balance for rent exemption ", err)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve lapoint rent: %w", err)
+		}
 
 		tokenRegistryProgramID := tokenregistry.ProgramID()
 
 		createAccountInstruction := system.NewCreateAccountInstruction(uint64(lamport), tokenregistry.TOKEN_META_SIZE, tokenRegistryProgramID, registrarPubKey, tokenMetaAccount.PublicKey())
 		registerTokenInstruction := tokenregistry.NewRegisterTokenInstruction(logo, name, symbol, tokenMetaAccount.PublicKey(), registrarPubKey, tokenAddress)
 
-		trx, err := solana.TransactionWithInstructions([]solana.TransactionInstruction{createAccountInstruction, registerTokenInstruction}, &solana.Options{
+		trx, err := solana.TransactionWithInstructions([]solana.TransactionInstruction{createAccountInstruction, registerTokenInstruction}, blockHashResult.Value.Blockhash, &solana.Options{
 			Payer: registrarPubKey,
 		})
-		errorCheck("unable to craft transaction", err)
+		if err != nil {
+			return fmt.Errorf("unable to craft transaction: %w", err)
+		}
 
 		_, err = trx.Sign(func(key solana.PublicKey) *solana.PrivateKey {
 			for _, k := range vault.KeyBag {
@@ -87,12 +107,18 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 			}
 			return nil
 		})
-
-		errorCheck("unable to sign transaction", err)
+		if err != nil {
+			return fmt.Errorf("unable to sign transaction: %w", err)
+		}
 
 		trxHash, err := client.SendTransaction(cmd.Context(), trx)
+		if err != nil {
+			return fmt.Errorf("unable to send transaction: %w", err)
+		}
 
-		fmt.Println("sent transaction hash:", trxHash, " error:", err)
+		fmt.Printf("Token Register successfully, with transaction hash: %s\n", trxHash)
+		fmt.Printf("  Mint Address Registerd: %s\n", tokenAddress.String())
+		fmt.Printf("  Token Registry Meta Address: %s\n", tokenMetaAccount.PublicKey().String())
 		return nil
 	},
 }

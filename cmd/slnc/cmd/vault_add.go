@@ -34,18 +34,26 @@ var vaultAddCmd = &cobra.Command{
 
 		fmt.Println("Loading existing vault from file:", walletFile)
 		v, err := vault.NewVaultFromWalletFile(walletFile)
-		errorCheck("loading vault from file", err)
+		if err != nil {
+			fmt.Errorf("unable to load vault file: %w", err)
+		}
 
 		boxer, err := vault.SecretBoxerForType(v.SecretBoxWrap, viper.GetString("global-kms-gcp-keypath"))
-		errorCheck("missing parameters", err)
+		if err != nil {
+			fmt.Errorf("unable to intiate boxer: %w", err)
+		}
 
 		err = v.Open(boxer)
-		errorCheck("opening vault", err)
+		if err != nil {
+			fmt.Errorf("unable to open vault: %w", err)
+		}
 
 		v.PrintPublicKeys()
 
 		privateKeys, err := capturePrivateKeys()
-		errorCheck("entering private keys", err)
+		if err != nil {
+			fmt.Errorf("failed to enter private keys: %w", err)
+		}
 
 		var newKeys []solana.PublicKey
 		for _, privateKey := range privateKeys {
@@ -54,10 +62,14 @@ var vaultAddCmd = &cobra.Command{
 		}
 
 		err = v.Seal(boxer)
-		errorCheck("sealing vault", err)
+		if err != nil {
+			fmt.Errorf("failed to seal vault: %w", err)
+		}
 
 		err = v.WriteToFile(walletFile)
-		errorCheck("writing vault file", err)
+		if err != nil {
+			fmt.Errorf("failed to write vault file: %w", err)
+		}
 
 		vaultWrittenReport(walletFile, newKeys, len(v.KeyBag))
 	},

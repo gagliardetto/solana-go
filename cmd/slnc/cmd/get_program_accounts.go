@@ -17,7 +17,6 @@ package cmd
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/dfuse-io/solana-go"
@@ -39,7 +38,7 @@ var getProgramAccountsCmd = &cobra.Command{
 		}
 
 		if resp == nil {
-			errorCheck("not found", errors.New("program account not found"))
+			return fmt.Errorf("program account not found")
 		}
 
 		for _, keyedAcct := range resp {

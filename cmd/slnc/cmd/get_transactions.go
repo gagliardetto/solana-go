@@ -39,15 +39,18 @@ var getTransactionsCmd = &cobra.Command{
 
 		address := args[0]
 		pubKey, err := solana.PublicKeyFromBase58(address)
-		errorCheck("public key", err)
+		if err != nil {
+			return fmt.Errorf("invalid account address %q: %w", address, err)
+		}
 
 		csList, err := client.GetConfirmedSignaturesForAddress2(ctx, pubKey, &rpc.GetConfirmedSignaturesForAddress2Opts{
 			Limit:  1,
 			Before: "",
 			Until:  "",
 		})
-
-		errorCheck("getting confirm transaction:", err)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve confirmed transaction signatures for account: %w", err)
+		}
 
 		for _, cs := range csList {
 			fmt.Println("-----------------------------------------------------------------------------------------------")
@@ -60,19 +63,22 @@ var getTransactionsCmd = &cobra.Command{
 			fmt.Println(cs.Memo)
 
 			ct, err := client.GetConfirmedTransaction(ctx, cs.Signature)
-			errorCheck("confirm transaction", err)
+			if err != nil {
+				return fmt.Errorf("unable to get confirmed transaction with signature %q: %w", cs.Signature, err)
+			}
+
 			if ct.Meta.Err != nil {
-				fmt.Println("ERROR:", ct.Meta.Err)
-				//	for k, _ := range ct.Meta.Err
+				return fmt.Errorf("unable to get confirmed transaction with signature %q: %s", cs.Signature, ct.Meta.Err)
 			}
 
 			fmt.Print("\nInstructions:\n-------------\n\n")
 			for _, i := range ct.Transaction.Message.Instructions {
 
-				//Missing Initial account instruction ??????
-
 				id, err := ct.Transaction.ResolveProgramIDIndex(i.ProgramIDIndex)
-				errorCheck("resolving programID", err)
+				if err != nil {
+					return fmt.Errorf("unable to resolve program ID: %w", err)
+				}
+
 				decoder := solana.InstructionDecoderRegistry[id.String()]
 				if decoder == nil {
 					fmt.Println("raw instruction:")
@@ -88,9 +94,14 @@ var getTransactionsCmd = &cobra.Command{
 				}
 
 				decoded, err := decoder(ct.Transaction.AccountMetaList(), &i)
-				errorCheck("bin decode", err)
+				if err != nil {
+					return fmt.Errorf("unable to decode instruction: %w", err)
+				}
+
 				err = text.NewEncoder(os.Stdout).Encode(decoded, nil)
-				errorCheck("textEncoding", err)
+				if err != nil {
+					return fmt.Errorf("unable to text encoder instruction: %w", err)
+				}
 			}
 			text.EncoderColorCyan.Print("\n\nEnd of transaction\n\n")
 		}

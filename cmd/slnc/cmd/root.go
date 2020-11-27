@@ -46,19 +46,17 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	RootCmd.PersistentFlags().BoolP("debug", "", false, "Enables verbose API debug messages")
+	// Not implemnted
+	//RootCmd.PersistentFlags().BoolP("debug", "", false, "Enables verbose API debug messages")
 	RootCmd.PersistentFlags().StringP("vault-file", "", "./solana-vault.json", "Wallet file that contains encrypted key material")
 	RootCmd.PersistentFlags().StringP("rpc-url", "u", defaultRPCURL, "API endpoint of eos.io blockchain node")
 	RootCmd.PersistentFlags().StringSliceP("http-header", "H", []string{}, "HTTP header to add to JSON-RPC requests")
 	RootCmd.PersistentFlags().StringP("kms-gcp-keypath", "", "", "Path to the cryptoKeys within a keyRing on GCP")
-	// RootCmd.PersistentFlags().StringP("write-transaction", "", "", "Do not broadcast the transaction produced, but write it in json to the given filename instead.")
-	// RootCmd.PersistentFlags().StringP("offline-head-block", "", "", "Provide a recent block ID (long-form hex) for TaPoS. Use all --offline options to sign transactions offline.")
-	// RootCmd.PersistentFlags().StringP("offline-chain-id", "", "", "Chain ID to sign transaction with. Use all --offline- options to sign transactions offline.")
-	// RootCmd.PersistentFlags().StringSliceP("offline-sign-key", "", []string{}, "Public key to use to sign transaction. Must be in your vault or wallet. Use all --offline- options to sign transactions offline.")
-	// RootCmd.PersistentFlags().BoolP("skip-sign", "", false, "Do not sign the transaction. Use with --write-transaction.")
 
-	SetupLogger(viper.GetBool("global-debug"))
+	RootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		SetupLogger()
+		return nil
+	}
 }
 
 func initConfig() {
@@ -66,7 +64,6 @@ func initConfig() {
 	viper.AutomaticEnv()
 	replacer := strings.NewReplacer("-", "_")
 	viper.SetEnvKeyReplacer(replacer)
-
 	recurseViperCommands(RootCmd, nil)
 }
 

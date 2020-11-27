@@ -46,7 +46,7 @@ You can create a Google Cloud Platform KMS-wrapped vault with:
     cmd vault create --keys=2 --vault-type=kms-gcp --kms-gcp-keypath projects/.../locations/.../keyRings/.../cryptoKeys/name
 
 You can then use this vault for the different cmd operations.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		walletFile := viper.GetString("global-vault-file")
 
 		if _, err := os.Stat(walletFile); err == nil {
@@ -59,7 +59,7 @@ You can then use this vault for the different cmd operations.`,
 
 		kmsGCPKeypath := viper.GetString("global-kms-gcp-keypath")
 		if wrapType == "kms-gcp" && kmsGCPKeypath == "" {
-			errorCheck("missing parameter", fmt.Errorf("--kms-gcp-keypath is required with --vault-type=kms-gcp"))
+			return fmt.Errorf("missing parameter: --kms-gcp-keypath is required with --vault-type=kms-gcp")
 		}
 
 		v := vault.NewVault()
@@ -70,7 +70,9 @@ You can then use this vault for the different cmd operations.`,
 		doImport := viper.GetBool("vault-create-cmd-import")
 		if doImport {
 			privateKeys, err := capturePrivateKeys()
-			errorCheck("entering private key", err)
+			if err != nil {
+				return fmt.Errorf("failed enterign private key: %w", err)
+			}
 
 			for _, privateKey := range privateKeys {
 				v.AddPrivateKey(privateKey)
@@ -83,12 +85,14 @@ You can then use this vault for the different cmd operations.`,
 			numKeys := viper.GetInt("vault-create-cmd-keys")
 
 			if numKeys == 0 {
-				errorCheck("specify either --keys or --import", fmt.Errorf("create a vault with 0 keys?"))
+				return fmt.Errorf("specify either --keys or --import: create a vault with 0 keys?")
 			}
 
 			for i := 0; i < numKeys; i++ {
 				pubKey, err := v.NewKeyPair()
-				errorCheck("creating new keypair", err)
+				if err != nil {
+					return fmt.Errorf("unable ot create new keypair: %w", err)
+				}
 
 				newKeys = append(newKeys, pubKey)
 			}
@@ -109,7 +113,9 @@ You can then use this vault for the different cmd operations.`,
 				boxer = vault.NewPassphraseBoxer(envVal)
 			} else {
 				password, err := cli.GetEncryptPassphrase()
-				errorCheck("password input", err)
+				if err != nil {
+					return fmt.Errorf("failed to get password input: %w", err)
+				}
 
 				boxer = vault.NewPassphraseBoxer(password)
 			}
@@ -119,10 +125,16 @@ You can then use this vault for the different cmd operations.`,
 			os.Exit(1)
 		}
 
-		errorCheck("sealing vault", v.Seal(boxer))
-		errorCheck("writing wallet file", v.WriteToFile(walletFile))
+		if err = v.Seal(boxer); err != nil {
+			return fmt.Errorf("failed to seal the vault: %w", err)
+		}
+
+		if err = v.WriteToFile(walletFile); err != nil {
+			return fmt.Errorf("failed to write vault file: %w", err)
+		}
 
 		vaultWrittenReport(walletFile, newKeys, len(v.KeyBag))
+		return nil
 	},
 }
 

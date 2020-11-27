@@ -27,12 +27,14 @@ var getConfirmedBlockCmd = &cobra.Command{
 	Use:   "confirmed-block {block_num}",
 	Short: "Retrieve a confirmed block, with all of its transactions",
 	Args:  cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		client := getClient()
 		ctx := context.Background()
 
-		slot, err := strconv.ParseInt(args[0], 10, 64)
-		errorCheck("parsing slot number in first argument", err)
+		var slot int64
+		if slot, err = strconv.ParseInt(args[0], 10, 64); err != nil {
+			return fmt.Errorf("unable to parse provided slot number %q: %w", args[0], err)
+		}
 
 		resp, err := client.GetConfirmedBlock(ctx, uint64(slot), "")
 		if err != nil {
@@ -41,16 +43,6 @@ var getConfirmedBlockCmd = &cobra.Command{
 
 		cnt, _ := json.MarshalIndent(resp, "", "  ")
 		fmt.Println(string(cnt))
-
-		// for idx, trx := range resp.Transactions {
-		// 	unpacked, err := solana.TransactionFromData(trx.Transaction)
-		// 	if err != nil {
-		// 		return err
-		// 	}
-
-		// 	cnt, _ := json.MarshalIndent(unpacked, "", "  ")
-		// 	fmt.Println(idx, string(cnt))
-		// }
 
 		return nil
 	},

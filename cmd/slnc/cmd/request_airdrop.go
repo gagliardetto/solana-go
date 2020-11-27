@@ -26,14 +26,16 @@ import (
 
 var requestCmd = &cobra.Command{
 	Use:   "request-airdrop {address} {lamport}",
-	Short: "request lamport airdrop for an account",
+	Short: "Request lamport airdrop for an account",
 	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		client := getClient()
 
 		address, err := solana.PublicKeyFromBase58(args[0])
-		errorCheck("invalid token address", err)
+		if err != nil {
+			return fmt.Errorf("invalid account address %q: %w", args[0], err)
+		}
 
 		lamport, err := strconv.Atoi(args[1])
 		if err != nil {
@@ -41,9 +43,11 @@ var requestCmd = &cobra.Command{
 		}
 
 		airDrop, err := client.RequestAirdrop(context.Background(), &address, uint64(lamport), rpc.CommitmentMax)
-		errorCheck("air drop", err)
-		fmt.Println("air drop hash:", airDrop)
+		if err != nil {
+			return fmt.Errorf("airdrop request failed: %w", err)
+		}
 
+		fmt.Println("Air drop succeeded, transaction hash:", airDrop)
 		return nil
 	},
 }

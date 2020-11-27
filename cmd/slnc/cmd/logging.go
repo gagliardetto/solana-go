@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -32,19 +31,9 @@ func init() {
 	logging.Register("github.com/dfuse-io/solana-go/cmd/slnc/cmd", &zlog)
 }
 
-func SetupLogger(debug bool) {
-	fmt.Println("setting logger with debug:", debug)
-	if debug {
-		zlog, err := zap.NewDevelopment()
-		fmt.Println("setting logger1")
-		if err == nil {
-			fmt.Println("setting logger2")
-			logging.Set(zlog)
-		}
-		// Hijack standard Golang `log` and redirect it to our common logger
-		zap.RedirectStdLogAt(zlog, zap.DebugLevel)
-
-	}
+func SetupLogger() {
+	commonLogger := createLogger("cli", 1, zap.FatalLevel)
+	logging.Set(commonLogger)
 
 	// Fine-grain customization
 	//

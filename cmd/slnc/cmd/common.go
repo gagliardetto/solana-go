@@ -42,9 +42,6 @@ func getClient() *rpc.Client {
 		}
 		api.SetHeader(headerArray[0], headerArray[1])
 	}
-
-	api.Debug = viper.GetBool("global-debug")
-
 	return api
 }
 

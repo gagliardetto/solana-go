@@ -15,8 +15,6 @@
 package cmd
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -35,7 +33,7 @@ var getSPLTokenCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client := getClient()
-		ctx := context.Background()
+		ctx := cmd.Context()
 
 		resp, err := client.GetProgramAccounts(
 			ctx,
@@ -53,7 +51,7 @@ var getSPLTokenCmd = &cobra.Command{
 		}
 
 		if resp == nil {
-			errorCheck("not found", errors.New("program account not found"))
+			return fmt.Errorf("program account not found")
 		}
 
 		for _, keyedAcct := range resp {

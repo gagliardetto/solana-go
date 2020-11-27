@@ -47,7 +47,10 @@ func TestTransactionWithInstructions(t *testing.T) {
 		},
 	}
 
-	trx, err := TransactionWithInstructions(instructions, nil)
+	blockhash, err := PublicKeyFromBase58("A9QnpgfhCkmiBSjgBuWk76Wo3HxzxvDopUq9x6UUMmjn")
+	require.NoError(t, err)
+
+	trx, err := TransactionWithInstructions(instructions, blockhash, nil)
 	require.NoError(t, err)
 
 	assert.Equal(t, trx.Message.Header, MessageHeader{
@@ -55,6 +58,8 @@ func TestTransactionWithInstructions(t *testing.T) {
 		NumReadonlySignedAccounts:   1,
 		NumReadonlyUnsignedAccounts: 3,
 	})
+
+	assert.Equal(t, trx.Message.RecentBlockhash, blockhash)
 
 	assert.Equal(t, trx.Message.AccountKeys, []PublicKey{
 		MustPublicKeyFromBase58("A9QnpgfhCkmiBSjgBuWk76Wo3HxzxvDopUq9x6UUMmjn"),

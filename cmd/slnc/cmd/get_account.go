@@ -38,9 +38,10 @@ var getAccountCmd = &cobra.Command{
 		}
 
 		acct := resp.Value
-
-		data, err := json.MarshalIndent(acct, "", "  ")
-		errorCheck("json marshal", err)
+		var data []byte
+		if data, err = json.MarshalIndent(acct, "", "  "); err != nil {
+			return fmt.Errorf("unable to marshall account information: %w", err)
+		}
 
 		fmt.Println(string(data))
 

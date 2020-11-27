@@ -57,7 +57,6 @@ func TestClient_GetConfirmedSignaturesForAddress2(t *testing.T) {
 func TestClient_GetConfirmedTransaction(t *testing.T) {
 	zlog, _ = zap.NewDevelopment()
 	c := NewClient("http://api.mainnet-beta.solana.com:80/rpc")
-	c.Debug = true
 	signature := "53hoZ98EsCMA6L63GWM65M3Bd3WqA4LxD8bcJkbKoKWhbJFqX9M1WZ4fSjt8bYyZn21NwNnV2A25zirBni9Qk6LR"
 	trx, err := c.GetConfirmedTransaction(context.Background(), signature)
 	require.NoError(t, err)
@@ -79,7 +78,6 @@ func TestClient_GetConfirmedTransaction(t *testing.T) {
 func TestClient_getMinimumBalanceForRentExemption(t *testing.T) {
 	zlog, _ = zap.NewDevelopment()
 	c := NewClient("http://api.mainnet-beta.solana.com:80/rpc")
-	c.Debug = true
 	lamport, err := c.GetMinimumBalanceForRentExemption(context.Background(), 100)
 	require.NoError(t, err)
 	require.Equal(t, 1586880, lamport)

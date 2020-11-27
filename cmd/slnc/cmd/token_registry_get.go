@@ -35,7 +35,9 @@ var tokenRegistryGetCmd = &cobra.Command{
 
 		address := args[0]
 		pubKey, err := solana.PublicKeyFromBase58(address)
-		errorCheck("public key", err)
+		if err != nil {
+			return fmt.Errorf("invalid mint address %q: %w", address, err)
+		}
 
 		t, err := tokenregistry.GetTokenRegistryEntry(cmd.Context(), client, pubKey)
 		if err != nil {
@@ -47,7 +49,10 @@ var tokenRegistryGetCmd = &cobra.Command{
 		}
 
 		err = text.NewEncoder(os.Stdout).Encode(t, nil)
-		errorCheck("textEncoding", err)
+		if err != nil {
+			return fmt.Errorf("unable to text encode token registry entry: %w", err)
+		}
+
 		return nil
 	},
 }
