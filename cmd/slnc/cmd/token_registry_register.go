@@ -67,6 +67,8 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 			return fmt.Errorf("unable to continue without a specified registrar")
 		}
 
+		// TODO: we shoul check on chain if the symbol exists
+
 		registrarPubKey, err := solana.PublicKeyFromBase58(pkeyStr)
 		if err != nil {
 			return fmt.Errorf("invalid registrar key %q: %w", pkeyStr, err)
