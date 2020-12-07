@@ -17,7 +17,10 @@ package ws
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
+
+	"github.com/dfuse-io/solana-go/text"
 
 	"github.com/dfuse-io/solana-go"
 
@@ -42,7 +45,9 @@ func Test_AccountSubscribe(t *testing.T) {
 		fmt.Println("receive an error: ", err)
 		return
 	}
-	fmt.Println("data received: ", data.(*AccountResult).Value.Account.Owner)
+	text.NewEncoder(os.Stdout).Encode(data, nil)
+	fmt.Println("Owner: ", data.(*AccountResult).Value.Account.Owner)
+	fmt.Println("data: ", data.(*AccountResult).Value.Account.Data)
 	return
 
 }

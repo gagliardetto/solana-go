@@ -63,7 +63,7 @@ type AccountResult struct {
 		Slot uint64
 	} `json:"context"`
 	Value struct {
-		Account rpc.Account `json:"account"`
+		rpc.Account
 	} `json:"value"`
 }
 
