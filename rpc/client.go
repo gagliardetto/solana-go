@@ -73,7 +73,7 @@ func (c *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentTy
 	return
 }
 
-func (c *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out GetSlotResult, err error) {
+func (c *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out *GetSlotResult, err error) {
 	var params []interface{}
 	if commitment != "" {
 		params = append(params, string(commitment))

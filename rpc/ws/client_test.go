@@ -55,7 +55,9 @@ func Test_AccountSubscribe(t *testing.T) {
 func Test_ProgramSubscribe(t *testing.T) {
 	zlog, _ = zap.NewDevelopment()
 
-	c, err := Dial(context.Background(), "ws://api.mainnet-beta.solana.com:80/rpc")
+	fmt.Println("Dialing")
+	c, err := Dial(context.Background(), "wss://solana-api.projectserum.com")
+	fmt.Println("Hello?")
 	defer c.Close()
 	require.NoError(t, err)
 
@@ -63,13 +65,14 @@ func Test_ProgramSubscribe(t *testing.T) {
 	sub, err := c.ProgramSubscribe(programID, "")
 	require.NoError(t, err)
 
-	data, err := sub.Recv()
-	if err != nil {
-		fmt.Println("receive an error: ", err)
-		return
+	for {
+		data, err := sub.Recv()
+		if err != nil {
+			fmt.Println("receive an error: ", err)
+			return
+		}
+		fmt.Println("data received: ", data.(*ProgramResult).Value.PubKey)
 	}
-	fmt.Println("data received: ", data.(*ProgramResult).Value.Account.Owner)
-	return
 
 }
 func Test_SlotSubscribe(t *testing.T) {
