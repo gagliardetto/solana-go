@@ -26,7 +26,7 @@ import (
 var tokenListMintsCmd = &cobra.Command{
 	Use:   "mints",
 	Short: "Lists mints",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		rpcCli := getClient()
 
 		mints, err := token.FetchMints(cmd.Context(), rpcCli)
@@ -36,7 +36,7 @@ var tokenListMintsCmd = &cobra.Command{
 		out := []string{"Mint | Decimals | Supply | Token Authority | Freeze Authority"}
 		for _, m := range mints {
 			line := []string{
-				fmt.Sprintf("%d", m),
+				fmt.Sprintf("%d", m.MintAuthorityOption),
 				fmt.Sprintf("%d", m.Supply),
 				fmt.Sprintf("%d", m.Decimals),
 			}
