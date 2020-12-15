@@ -21,6 +21,7 @@ import (
 
 	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
+	"github.com/dfuse-io/solana-go/diff"
 	"go.uber.org/zap"
 )
 
@@ -104,11 +105,11 @@ func (o *Orderbook) Items(descending bool, f func(node *SlabLeafNode) error) err
 }
 
 var SlabFactoryImplDef = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
-	{"uninitialized", (*SlabUninitialized)(nil)},
-	{"inner_node", (*SlabInnerNode)(nil)},
-	{"leaf_node", (*SlabLeafNode)(nil)},
-	{"free_node", (*SlabFreeNode)(nil)},
-	{"last_free_node", (*SlabLastFreeNode)(nil)},
+	{Name: "uninitialized", Type: (*SlabUninitialized)(nil)},
+	{Name: "inner_node", Type: (*SlabInnerNode)(nil)},
+	{Name: "leaf_node", Type: (*SlabLeafNode)(nil)},
+	{Name: "free_node", Type: (*SlabFreeNode)(nil)},
+	{Name: "last_free_node", Type: (*SlabLastFreeNode)(nil)},
 })
 
 type Slab struct {
@@ -175,6 +176,43 @@ type EventQueueHeader struct {
 	SeqNum       uint64
 }
 
+// Diff implements diffing between two EventQueueHeader, at some point, I think I'll remove all this necessity
+// and code a reflection walker that check each struct element automatically.
+func (q *EventQueueHeader) Diff(rightRaw interface{}) (interface{}, interface{}) {
+	left := q
+	right := rightRaw.(*EventQueueHeader)
+
+	removed := &EventQueueHeader{}
+	added := &EventQueueHeader{}
+
+	if left.Serum != right.Serum {
+		removed.Serum = left.Serum
+		added.Serum = right.Serum
+	}
+
+	if left.AccountFlags != right.AccountFlags {
+		removed.AccountFlags = left.AccountFlags
+		added.AccountFlags = right.AccountFlags
+	}
+
+	if left.Head != right.Head {
+		removed.Head = left.Head
+		added.Head = right.Head
+	}
+
+	if left.Count != right.Count {
+		removed.Count = left.Count
+		added.Count = right.Count
+	}
+
+	if left.SeqNum != right.SeqNum {
+		removed.SeqNum = left.SeqNum
+		added.SeqNum = right.SeqNum
+	}
+
+	return removed, added
+}
+
 type EventFlag uint8
 
 const (
@@ -215,6 +253,67 @@ func (e *Event) Filled() bool {
 	return Has(uint8(e.Flag), uint8(EventFlagFill))
 }
 
+// Diff implements diffing between two Event, at some point, I think I'll remove all this necessity
+// and code a reflection walker that check each struct element automatically.
+func (q *Event) Diff(rightRaw interface{}) (interface{}, interface{}) {
+	left := q
+	right := rightRaw.(*Event)
+
+	removed := &Event{}
+	added := &Event{}
+	if left.Flag != right.Flag {
+		removed.Flag = left.Flag
+		added.Flag = right.Flag
+	}
+
+	if left.OwnerSlot != right.OwnerSlot {
+		removed.OwnerSlot = left.OwnerSlot
+		added.OwnerSlot = right.OwnerSlot
+	}
+
+	if left.FeeTier != right.FeeTier {
+		removed.FeeTier = left.FeeTier
+		added.FeeTier = right.FeeTier
+	}
+
+	if left.Padding != right.Padding {
+		removed.Padding = left.Padding
+		added.Padding = right.Padding
+	}
+
+	if left.NativeQtyReleased != right.NativeQtyReleased {
+		removed.NativeQtyReleased = left.NativeQtyReleased
+		added.NativeQtyReleased = right.NativeQtyReleased
+	}
+
+	if left.NativeQtyPaid != right.NativeQtyPaid {
+		removed.NativeQtyPaid = left.NativeQtyPaid
+		added.NativeQtyPaid = right.NativeQtyPaid
+	}
+
+	if left.NativeFeeOrRebate != right.NativeFeeOrRebate {
+		removed.NativeFeeOrRebate = left.NativeFeeOrRebate
+		added.NativeFeeOrRebate = right.NativeFeeOrRebate
+	}
+
+	if left.OrderID.Lo != right.OrderID.Lo || left.OrderID.Hi != right.OrderID.Hi {
+		removed.OrderID = left.OrderID
+		added.OrderID = right.OrderID
+	}
+
+	if left.Owner == right.Owner {
+		removed.Owner = left.Owner
+		added.Owner = right.Owner
+	}
+
+	if left.ClientOrderID != right.ClientOrderID {
+		removed.ClientOrderID = left.ClientOrderID
+		added.ClientOrderID = right.ClientOrderID
+	}
+
+	return removed, added
+}
+
 func Has(b, flag uint8) bool { return b&flag != 0 }
 
 type EventQueue struct {
@@ -249,6 +348,26 @@ func (q *EventQueue) Decode(data []byte) error {
 	}
 
 	return nil
+}
+
+// Diff implements diffing between two EventQueue, at some point, I think I'll remove all this necessity
+// and code a reflection walker that check each struct element automatically.
+func (q *EventQueue) Diff(rightRaw interface{}) (interface{}, interface{}) {
+	left := q
+	right := rightRaw.(*EventQueue)
+
+	removed := &EventQueue{}
+	added := &EventQueue{}
+
+	removedHeader, addedHeader := diff.Diff(left.Header, right.Header)
+	removed.Header = removedHeader.(*EventQueueHeader)
+	added.Header = addedHeader.(*EventQueueHeader)
+
+	removedEvents, addedEvents := diff.Diff(left.Events, right.Events)
+	removed.Events = removedEvents.([]*Event)
+	added.Events = addedEvents.([]*Event)
+
+	return removed, added
 }
 
 type OpenOrdersV2 struct {

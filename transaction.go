@@ -6,7 +6,6 @@ import (
 	"sort"
 
 	bin "github.com/dfuse-io/binary"
-
 	"go.uber.org/zap"
 )
 
@@ -52,9 +51,9 @@ func TransactionWithInstructions(instructions []TransactionInstruction, blockHas
 	}
 
 	// Add programID to the account list
-	for programId, _ := range programIDs {
+	for programID := range programIDs {
 		accounts = append(accounts, &AccountMeta{
-			PublicKey:  MustPublicKeyFromBase58(programId),
+			PublicKey:  MustPublicKeyFromBase58(programID),
 			IsSigner:   false,
 			IsWritable: false,
 		})

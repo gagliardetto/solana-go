@@ -8,7 +8,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"testing"
+	"time"
 
+	"github.com/davecgh/go-spew/spew"
+	"github.com/dfuse-io/solana-go/diff"
 	"github.com/dfuse-io/solana-go/rpc"
 
 	bin "github.com/dfuse-io/binary"
@@ -54,6 +57,37 @@ func TestDecoder_Event(t *testing.T) {
 	//	fmt.Println("event owner:", e.Owner)
 	//}
 
+}
+
+func TestDecoder_EventQueue_Diff(t *testing.T) {
+	client := rpc.NewClient("http://api.mainnet-beta.solana.com:80/rpc")
+
+	info, err := client.GetAccountInfo(context.Background(), solana.MustPublicKeyFromBase58("13iGJcA4w5hcJZDjJbJQor1zUiDLE4jv2rMW9HkD5Eo1"))
+	require.NoError(t, err)
+
+	q1 := &EventQueue{}
+	err = q1.Decode(info.Value.Data)
+	require.NoError(t, err)
+
+	time.Sleep(900 * time.Millisecond)
+
+	info, err = client.GetAccountInfo(context.Background(), solana.MustPublicKeyFromBase58("13iGJcA4w5hcJZDjJbJQor1zUiDLE4jv2rMW9HkD5Eo1"))
+	require.NoError(t, err)
+
+	q2 := &EventQueue{}
+	err = q2.Decode(info.Value.Data)
+	require.NoError(t, err)
+
+	fmt.Println("Diffing")
+	removed, added := diff.Diff(q1, q2)
+
+	fmt.Println("======== Removed ===========")
+	spew.Dump(removed)
+	fmt.Println("==========================")
+
+	fmt.Println("======== Added ===========")
+	spew.Dump(added)
+	fmt.Println("==========================")
 }
 
 func TestDecoder_Orderbook(t *testing.T) {
