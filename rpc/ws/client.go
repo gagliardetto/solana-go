@@ -137,7 +137,7 @@ func (c *Client) handleSubscriptionMessage(subID uint64, message []byte) {
 	sub, found := c.subscriptionByWSSubID[subID]
 	c.lock.RUnlock()
 	if !found {
-		zlog.Warn("unbale to find subscription for ws message", zap.Uint64("subscription_id", subID))
+		zlog.Warn("unable to find subscription for ws message", zap.Uint64("subscription_id", subID))
 		return
 	}
 
@@ -146,6 +146,7 @@ func (c *Client) handleSubscriptionMessage(subID uint64, message []byte) {
 	result := resultType.Interface()
 	err := decodeResponse(bytes.NewReader(message), &result)
 	if err != nil {
+		fmt.Println("*****************************")
 		c.closeSubscription(sub.req.ID, fmt.Errorf("unable to decode client response: %w", err))
 		return
 	}
@@ -153,6 +154,9 @@ func (c *Client) handleSubscriptionMessage(subID uint64, message []byte) {
 	// this cannot be blocking or else
 	// we  will no read any other message
 	if len(sub.stream) >= cap(sub.stream) {
+		zlog.Warn("closing ws client subscription... not consuming fast en ought",
+			zap.Uint64("request_id", sub.req.ID),
+		)
 		c.closeSubscription(sub.req.ID, fmt.Errorf("reached channel max capacity %d", len(sub.stream)))
 		return
 	}

@@ -14,7 +14,6 @@
 package serum
 
 import (
-	"encoding/base64"
 	"encoding/binary"
 	"fmt"
 	"math/big"
@@ -24,9 +23,47 @@ import (
 	"go.uber.org/zap"
 )
 
+type AccountFlag uint64
+
+const (
+	AccountFlagInitialized = AccountFlag(1 << iota)
+	AccountFlagMarket
+	AccountFlagOpenOrders
+	AccountFlagRequestQueue
+	AccountFlagEventQueue
+	AccountFlagBids
+	AccountFlagAsks
+	AccountFlagDisabled
+)
+
+func (a *AccountFlag) Is(flag AccountFlag) bool { return *a&flag != 0 }
+func (a *AccountFlag) String() string {
+	status := "unknown"
+	account_type := "unknown"
+	if a.Is(AccountFlagInitialized) {
+		status = "initialized"
+	} else if a.Is(AccountFlagDisabled) {
+		status = "disabled"
+	}
+	if a.Is(AccountFlagMarket) {
+		account_type = "market"
+	} else if a.Is(AccountFlagOpenOrders) {
+		account_type = "open orders"
+	} else if a.Is(AccountFlagRequestQueue) {
+		account_type = "request queue"
+	} else if a.Is(AccountFlagEventQueue) {
+		account_type = "event queue"
+	} else if a.Is(AccountFlagBids) {
+		account_type = "bids"
+	} else if a.Is(AccountFlagAsks) {
+		account_type = "asks"
+	}
+	return fmt.Sprintf("%s %s", status, account_type)
+}
+
 type MarketV2 struct {
 	SerumPadding           [5]byte `json:"-"`
-	AccountFlags           bin.Uint64
+	AccountFlags           AccountFlag
 	OwnAddress             solana.PublicKey
 	VaultSignerNonce       bin.Uint64
 	BaseMint               solana.PublicKey
@@ -60,7 +97,7 @@ func (m *MarketV2) Decode(in []byte) error {
 
 type Orderbook struct {
 	SerumPadding [5]byte `json:"-"`
-	AccountFlags uint64
+	AccountFlags AccountFlag
 	BumpIndex    uint32  `bin:"sizeof=Nodes"`
 	ZeroPaddingA [4]byte `json:"-"`
 	FreeListLen  uint32
@@ -167,97 +204,9 @@ func (s *SlabLeafNode) GetPrice() *big.Int {
 	return v
 }
 
-type EventQueueHeader struct {
-	Serum        [5]byte
-	AccountFlags uint64
-	Head         uint64
-	Count        uint64
-	SeqNum       uint64
-}
-
-type EventFlag uint8
-
-const (
-	EventFlagFill  EventFlag = 0x1
-	EventFlagOut   EventFlag = 0x2
-	EventFlagBid   EventFlag = 0x4
-	EventFlagMaker EventFlag = 0x8
-)
-
-type EventSide string
-
-const (
-	EventSideAsk EventSide = "ASK"
-	EventSideBid EventSide = "BID"
-)
-
-type Event struct {
-	Flag              EventFlag
-	OwnerSlot         uint8
-	FeeTier           uint8
-	Padding           [5]uint8
-	NativeQtyReleased uint64
-	NativeQtyPaid     uint64
-	NativeFeeOrRebate uint64
-	OrderID           bin.Uint128
-	Owner             solana.PublicKey
-	ClientOrderID     uint64
-}
-
-func (e *Event) Side() EventSide {
-	if Has(uint8(e.Flag), uint8(EventFlagBid)) {
-		return EventSideBid
-	}
-	return EventSideAsk
-}
-
-func (e *Event) Filled() bool {
-	return Has(uint8(e.Flag), uint8(EventFlagFill))
-}
-
-func (e *Event) Equal(other *Event) bool {
-	return e.OrderID.Hi == other.OrderID.Hi && e.OrderID.Lo == other.OrderID.Lo
-}
-
-func Has(b, flag uint8) bool { return b&flag != 0 }
-
-type EventQueue struct {
-	Header *EventQueueHeader
-	Events []*Event
-}
-
-func (q *EventQueue) DecodeFromBase64(b64 string) error {
-	data, err := base64.StdEncoding.DecodeString(b64)
-	if err != nil {
-		return fmt.Errorf("event queue: from base64: %w", err)
-	}
-
-	return q.Decode(data)
-}
-
-var EventDataLength = int(bin.MustByteCount(&Event{}))
-
-func (q *EventQueue) Decode(data []byte) error {
-	decoder := bin.NewDecoder(data)
-	err := decoder.Decode(&q.Header)
-	if err != nil {
-		return fmt.Errorf("event queue: decode header: %w", err)
-	}
-	for decoder.Remaining() >= EventDataLength {
-		var e *Event
-		err = decoder.Decode(&e)
-		if err != nil {
-			return fmt.Errorf("event queue: decode events: %w", err)
-		}
-		q.Events = append(q.Events, e)
-	}
-
-	return nil
-}
-
 type OpenOrdersV2 struct {
 	SerumPadding           [5]byte `json:"-"`
-	AccountFlags           bin.Uint64
+	AccountFlags           AccountFlag
 	Market                 solana.PublicKey
 	Owner                  solana.PublicKey
 	BaseTokenFree          bin.Uint64

@@ -1,133 +1,69 @@
 package serum
 
 import (
-	"context"
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"testing"
-	"time"
 
 	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
-	"github.com/dfuse-io/solana-go/diff"
-	"github.com/dfuse-io/solana-go/rpc"
-	"github.com/klauspost/compress/zstd"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestAccountFlag_Decoder(t *testing.T) {
+	hexStr := "0300000000000000"
+	data, err := hex.DecodeString(hexStr)
+	require.NoError(t, err)
+
+	var f *AccountFlag
+	err = bin.NewDecoder(data).Decode(&f)
+	require.NoError(t, err)
+
+	assert.Equal(t, f.Is(AccountFlagInitialized), true, "initialized")
+	assert.Equal(t, f.Is(AccountFlagMarket), true, "market")
+	assert.Equal(t, f.Is(AccountFlagOpenOrders), false, "openOrders")
+	assert.Equal(t, f.Is(AccountFlagRequestQueue), false, "requestQueue")
+	assert.Equal(t, f.Is(AccountFlagEventQueue), false, "eventQueue")
+	assert.Equal(t, f.Is(AccountFlagBids), false, "bids")
+	assert.Equal(t, f.Is(AccountFlagAsks), false, "asks")
+	assert.Equal(t, f.Is(AccountFlagDisabled), false, "disabled")
+
+	hexStr = "0900000000000000"
+	data, err = hex.DecodeString(hexStr)
+	require.NoError(t, err)
+
+	var f2 *AccountFlag
+	err = bin.NewDecoder(data).Decode(&f2)
+	require.NoError(t, err)
+
+	assert.Equal(t, f2.Is(AccountFlagInitialized), true, "initialized")
+	assert.Equal(t, f2.Is(AccountFlagMarket), false, "market")
+	assert.Equal(t, f2.Is(AccountFlagOpenOrders), false, "openOrders")
+	assert.Equal(t, f2.Is(AccountFlagRequestQueue), true, "requestQueue")
+	assert.Equal(t, f2.Is(AccountFlagEventQueue), false, "eventQueue")
+	assert.Equal(t, f2.Is(AccountFlagBids), false, "bids")
+	assert.Equal(t, f2.Is(AccountFlagAsks), false, "asks")
+	assert.Equal(t, f2.Is(AccountFlagDisabled), false, "disabled")
+}
 
 func TestDecoder_Market(t *testing.T) {
 	b64 := `c2VydW0DAAAAAAAAAF4kKlwSa8cc6xshYrDN0SrwrDDLBBUwemtddQHhfjgKAQAAAAAAAACL34duLBe2W5K3QFyI1rhNSESYe+cR/nc2UqvgE9x1VMb6evO+2606PWXzaqvJdDGxu+TC0vbg5HymAgNFL11habDAgiZH59TQw5/Y/52i1DhnPZFYOUB4C3G0hhSSXiRAZw8oAwAAAAAAAAAAAAAANvvq/rQwheCOf85MPshRgZEhXzDFAUh3IjalXs/zJ3I5cTmQBAAAABoqGA0AAAAAZAAAAAAAAACuBhNqk2KYdlbj/V5jbAGnnybh+XBss48/P00r053wbACx0Z1WrY+X9jL+huHdyUdpKzL/JScDimaQlNfzjpWANi1Nu6kEazO0bu0NkhnKFyQt2psF0SRCimAVpNimaOjou1Esrd0dKTtLbedHvt62Vi1bRJYveY74GEP6vkH/qBAnAAAAAAAACgAAAAAAAAAAAAAAAAAAAMsrAAAAAAAAcGFkZGluZw==`
 
 	data, err := base64.StdEncoding.DecodeString(b64)
 	require.NoError(t, err)
+	fmt.Println(hex.EncodeToString(data))
 
 	var m *MarketV2
 	err = bin.NewDecoder(data).Decode(&m)
 	require.NoError(t, err)
 
-	fmt.Println("market event queue:", m.EventQueue.String())
-
-}
-func TestDecoder_Event(t *testing.T) {
-
-	//b64 := `c2VydW0RAAAAAAAAAKMoAAAAAAAAAAAAAAAAAAAD+gUAAAAAAAYJAAAAAAAAP9MRAAAAAACwUAY6AAAAAAAAAAAAAAAA/Af4//////8aBQAAAAAAAJGeNN64UdRK+szEsGLeTBiPnrTkfJaOEzsacSpRiAYs6zimHOimKK8CAQAAAAAAAEC6CycAAAAAAAAAAAAAAAAAAAAAAAAAAP/3BwAAAAAAIAUAAAAAAACRnjTeuFHUSvrMxLBi3kwYj5605HyWjhM7GnEqUYgGLH2wFQ01ceby`
-
-	client := rpc.NewClient("http://api.mainnet-beta.solana.com:80/rpc")
-	info, err := client.GetAccountInfo(context.Background(), solana.MustPublicKeyFromBase58("13iGJcA4w5hcJZDjJbJQor1zUiDLE4jv2rMW9HkD5Eo1"))
-	require.NoError(t, err)
-
-	q := &EventQueue{}
-	err = q.Decode(info.Value.Data)
-	require.NoError(t, err)
-
-	fmt.Println("data length:", len(info.Value.Data))
-	fmt.Println("serum?:", string(q.Header.Serum[:]))
-	fmt.Println("count:", q.Header.Count)
-	fmt.Println("seq", q.Header.SeqNum)
-	fmt.Println("events", len(q.Events))
-	//for _, e := range q.Events {
-	//	fmt.Println("Type:", e.Flag)
-	//	fmt.Println("Side:", e.Side())
-	//	fmt.Println("Filled:", e.Filled())
-	//	fmt.Println("event owner:", e.Owner)
-	//}
-
-}
-
-func TestDecoder_EventQueue_Diff(t *testing.T) {
-	oldDataFile := "testdata/serum-event-queue-old.bin.zst"
-	newDataFile := "testdata/serum-event-queue-new.bin.zst"
-
-	// olDataJSONFile := strings.ReplaceAll(oldDataFile, ".bin.zst", ".json")
-	// newDataJSONFile := strings.ReplaceAll(newDataFile, ".bin.zst", ".json")
-
-	if os.Getenv("TESTDATA_UPDATE") == "true" {
-		client := rpc.NewClient("http://api.mainnet-beta.solana.com:80/rpc")
-		ctx := context.Background()
-		account := solana.MustPublicKeyFromBase58("13iGJcA4w5hcJZDjJbJQor1zUiDLE4jv2rMW9HkD5Eo1")
-
-		info, err := client.GetAccountInfo(ctx, account)
-		require.NoError(t, err)
-		writeCompressedFile(t, oldDataFile, info.Value.Data)
-
-		// oldQueue := &EventQueue{}
-		// require.NoError(t, oldQueue.Decode(info.Value.Data))
-		// writeJSONFile(t, olDataJSONFile, oldQueue)
-
-		time.Sleep(900 * time.Millisecond)
-
-		info, err = client.GetAccountInfo(ctx, account)
-		require.NoError(t, err)
-		writeCompressedFile(t, newDataFile, info.Value.Data)
-
-		// newQueue := &EventQueue{}
-		// require.NoError(t, newQueue.Decode(info.Value.Data))
-		// writeJSONFile(t, newDataJSONFile, newQueue)
-	}
-
-	oldQueue := &EventQueue{}
-	require.NoError(t, oldQueue.Decode(readCompressedFile(t, oldDataFile)))
-
-	newQueue := &EventQueue{}
-	require.NoError(t, newQueue.Decode(readCompressedFile(t, newDataFile)))
-
-	fmt.Println("==>> All diff(s)")
-	diff.Diff(oldQueue, newQueue, diff.OnEvent(func(event diff.Event) { fmt.Println("Event " + event.String()) }))
-}
-
-func TestDecoder_EventQueue_DiffManual(t *testing.T) {
-	oldQueue := &EventQueue{
-		Header: &EventQueueHeader{Head: 120, Count: 12, SeqNum: 24},
-		Events: []*Event{
-			{OrderID: bin.Uint128{Lo: 1}},
-			{OrderID: bin.Uint128{Lo: 2}},
-		},
-	}
-
-	newQueue := &EventQueue{
-		Header: &EventQueueHeader{Head: 120, Count: 13, SeqNum: 25},
-		Events: []*Event{
-			{OrderID: bin.Uint128{Lo: 1}},
-			{OrderID: bin.Uint128{Lo: 4}},
-			{OrderID: bin.Uint128{Lo: 5}},
-		},
-	}
-
-	fmt.Println("All diff lines")
-	diff.Diff(oldQueue, newQueue, diff.OnEvent(func(event diff.Event) { fmt.Println("Event " + event.String()) }))
-
-	fmt.Println("")
-	fmt.Println("Processed diff lines")
-	diff.Diff(oldQueue, newQueue, diff.OnEvent(func(event diff.Event) {
-		if match, _ := event.Match("Events[#]"); match {
-			fmt.Printf("Event %s => %v\n", event.Kind, event.Element())
-		}
-	}))
+	assert.Equal(t, true, m.AccountFlags.Is(AccountFlagInitialized))
+	assert.Equal(t, true, m.AccountFlags.Is(AccountFlagMarket))
+	assert.Equal(t, false, m.AccountFlags.Is(AccountFlagEventQueue))
+	assert.Equal(t, solana.MustPublicKeyFromBase58("13iGJcA4w5hcJZDjJbJQor1zUiDLE4jv2rMW9HkD5Eo1"), m.EventQueue)
 }
 
 func TestDecoder_Orderbook(t *testing.T) {
@@ -141,10 +77,6 @@ func TestDecoder_Orderbook(t *testing.T) {
 	var ob *Orderbook
 	err = decoder.Decode(&ob)
 	require.NoError(t, err)
-
-	jsonCnt, err := json.MarshalIndent(ob, "", " ")
-	require.NoError(t, err)
-	fmt.Println(string(jsonCnt))
 
 	assert.Equal(t, uint32(101), ob.BumpIndex)
 	assert.Equal(t, uint32(68), ob.FreeListLen)
@@ -206,6 +138,7 @@ func TestDecoder_Orderbook(t *testing.T) {
 	}, ob.Nodes[5])
 
 }
+
 func TestDecoder_Slabs(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -289,48 +222,5 @@ func pad(count uint) []byte {
 	for i := 0; i < int(count); i++ {
 		out[i] = 0x00
 	}
-	return out
-}
-
-var zstEncoder, _ = zstd.NewWriter(nil)
-var zstDecoder, _ = zstd.NewReader(nil)
-
-func writeFile(t *testing.T, filename string, data []byte) {
-	require.NoError(t, ioutil.WriteFile(filename, data, os.ModePerm), "unable to write file %s", filename)
-}
-
-func readFile(t *testing.T, file string) []byte {
-	data, err := ioutil.ReadFile(file)
-	require.NoError(t, err)
-
-	return data
-}
-
-func writeJSONFile(t *testing.T, filename string, v interface{}) {
-	out, err := json.MarshalIndent(v, "", "  ")
-	require.NoError(t, err)
-
-	require.NoError(t, ioutil.WriteFile(filename, out, os.ModePerm), "unable to write JSON file %s", filename)
-}
-
-func readJSONFile(t *testing.T, file string, v interface{}) {
-	data, err := ioutil.ReadFile(file)
-	require.NoError(t, err)
-
-	require.NoError(t, json.Unmarshal(data, v))
-	return
-}
-
-func writeCompressedFile(t *testing.T, filename string, data []byte) {
-	require.NoError(t, ioutil.WriteFile(filename, zstEncoder.EncodeAll(data, nil), os.ModePerm), "unable to write compressed file %s", filename)
-}
-
-func readCompressedFile(t *testing.T, file string) []byte {
-	data, err := ioutil.ReadFile(file)
-	require.NoError(t, err)
-
-	out, err := zstDecoder.DecodeAll(data, nil)
-	require.NoError(t, err)
-
 	return out
 }

@@ -64,6 +64,21 @@ var serumGetMarketCmd = &cobra.Command{
 		output = append(output, "------- | --------")
 		output = append(output, outputOrderBook(bids, totalSize, false)...)
 		output = append(output, "Bids")
+
+		fmt.Println(market.Name)
+
+		fmt.Println("Request RequestQueue: ", market.MarketV2.RequestQueue)
+		fmt.Println("Event RequestQueue: ", market.MarketV2.EventQueue)
+
+		fmt.Println("Base")
+		fmt.Println("base mint", market.MarketV2.BaseMint.String())
+		fmt.Println("base lot size", market.MarketV2.BaseLotSize)
+
+		fmt.Println("")
+		fmt.Println("Quote")
+		fmt.Println("quote mint", market.MarketV2.QuoteMint.String())
+		fmt.Println("quote lot size", market.MarketV2.QuoteLotSize)
+
 		fmt.Println(columnize.Format(output, nil))
 		return nil
 	},

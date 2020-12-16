@@ -2,8 +2,9 @@ package serum
 
 import (
 	"encoding/hex"
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	bin "github.com/dfuse-io/binary"
 	"github.com/stretchr/testify/require"
@@ -16,9 +17,5 @@ func TestDecodeInstruction(t *testing.T) {
 	var instruction *Instruction
 	err = bin.NewDecoder(data).Decode(&instruction)
 	require.NoError(t, err)
-	fmt.Println(instruction)
-}
-
-func TestString(t *testing.T) {
-
+	assert.Equal(t, instruction.Version, uint8(0))
 }

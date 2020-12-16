@@ -21,6 +21,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/dfuse-io/solana-go/rpc/ws"
+
 	"github.com/dfuse-io/solana-go/rpc"
 
 	"github.com/stretchr/testify/require"
@@ -31,9 +33,11 @@ import (
 func TestFetchMarket(t *testing.T) {
 	rpcURL := os.Getenv("RPC_URL")
 	if rpcURL == "" {
-		t.Skip("Setup 'RPC_URL' to run test")
+		t.Skip("Setup 'RPC_URL' to run test i.e. 'http://api.mainnet-beta.solana.com:80/rpc'")
 		return
 	}
+
+	//
 
 	client := rpc.NewClient(rpcURL)
 	ctx := context.Background()
@@ -45,7 +49,22 @@ func TestFetchMarket(t *testing.T) {
 	require.NoError(t, err)
 
 	cnt, err := json.MarshalIndent(openOrders.OpenOrdersV2, "", " ")
+
 	require.NoError(t, err)
 
 	fmt.Println(string(cnt))
+}
+
+func TestStreamOpenOrders(t *testing.T) {
+	rpcURL := os.Getenv("RPC_URL")
+	if rpcURL == "" {
+		t.Skip("Setup 'RPC_URL' to run test i.e. 'ws://api.mainnet-beta.solana.com:80/rpc'")
+		return
+	}
+	client, err := ws.Dial(context.Background(), rpcURL)
+	require.NoError(t, err)
+
+	err = StreamOpenOrders(client)
+	require.NoError(t, err)
+
 }

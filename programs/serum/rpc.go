@@ -21,8 +21,11 @@ import (
 	"fmt"
 
 	rice "github.com/GeertJohan/go.rice"
+	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
 	"github.com/dfuse-io/solana-go/rpc"
+	"github.com/dfuse-io/solana-go/rpc/ws"
+	"go.uber.org/zap"
 )
 
 //go:generate rice embed-go
@@ -94,4 +97,31 @@ func FetchMarket(ctx context.Context, rpcCli *rpc.Client, marketAddr solana.Publ
 	}
 
 	return meta, nil
+}
+
+func StreamOpenOrders(client *ws.Client) error {
+	sub, err := client.ProgramSubscribe(PROGRAM_ID, rpc.CommitmentSingleGossip)
+	if err != nil {
+		return fmt.Errorf("unable to subscribe to programID %q: %w", PROGRAM_ID, err)
+	}
+	count := 0
+	for {
+		d, err := sub.Recv()
+		if err != nil {
+			return fmt.Errorf("received error from programID subscription: %w", err)
+		}
+		res := d.(*ws.ProgramResult)
+
+		var f *AccountFlag
+		err = bin.NewDecoder(res.Value.Account.Data).Decode(&f)
+		if err != nil {
+			fmt.Println("***********************************", err)
+			zlog.Debug("unable to decoce account flag for account... skipping",
+				zap.Stringer("account_address", res.Value.PubKey),
+			)
+			continue
+		}
+		fmt.Printf("%d - %s\n", count, f.String())
+		count++
+	}
 }
