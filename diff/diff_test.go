@@ -1,9 +1,11 @@
 package diff
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDiff(t *testing.T) {
@@ -12,227 +14,200 @@ func TestDiff(t *testing.T) {
 		right interface{}
 	}
 
-	type expected struct {
-		removed interface{}
-		added   interface{}
-	}
-
 	tests := []struct {
-		name     string
-		in       pair
-		expected expected
+		name      string
+		in        pair
+		expecteds []string
 	}{
 		// Plain
-
 		{"plain - left nil, right nil",
 			pair{nil, nil},
-			expected{removed: nil, added: nil},
+			nil,
 		},
-
 		{"plain - left nil, right set",
 			pair{nil, &plainStruct{}},
-			expected{removed: (*plainStruct)(nil), added: &plainStruct{}},
+			[]string{"<nil> => &{0} (*diff.plainStruct) (added)"},
 		},
-
 		{"plain - left set, right nil",
 			pair{&plainStruct{}, nil},
-			expected{removed: &plainStruct{}, added: (*plainStruct)(nil)},
+			[]string{"&{0} (*diff.plainStruct) => <nil> (removed)"},
 		},
-
 		{"plain - equal",
 			pair{&plainStruct{}, &plainStruct{}},
-			expected{removed: (*plainStruct)(nil), added: (*plainStruct)(nil)},
+			nil,
 		},
-
 		{"plain - diff",
-			pair{&plainStruct{field: 1}, &plainStruct{field: 2}},
-			expected{removed: &plainStruct{field: 1}, added: &plainStruct{field: 2}},
+			pair{&plainStruct{Field: 1}, &plainStruct{Field: 2}},
+			[]string{"1 (int) => 2 (int) (changed @ Field)"},
 		},
 
 		// Slice
-
 		{"slice - equal both nil",
 			pair{[]string(nil), []string(nil)},
-			expected{
-				removed: []string(nil),
-				added:   []string(nil),
-			},
+			nil,
 		},
-
 		{"slice - equal both length 0",
 			pair{[]string{}, []string{}},
-			expected{
-				removed: []string(nil),
-				added:   []string(nil),
-			},
+			nil,
 		},
-
 		{"slice - diff both length 1",
 			pair{[]string{"a"}, []string{"b"}},
-			expected{
-				removed: []string{"a"},
-				added:   []string{"b"},
+			[]string{
+				"a (string) => <nil> (removed @ [0])",
+				"<nil> => b (string) (added @ [0])",
 			},
 		},
-
 		{"slice - diff both length 2 re-ordered",
 			pair{[]string{"a", "b"}, []string{"b", "a"}},
-			expected{
-				removed: []string{"a", "b"},
-				added:   []string{"b", "a"},
+			[]string{
+				"a (string) => <nil> (removed @ [0])",
+				"<nil> => b (string) (added @ [0])",
+				"b (string) => <nil> (removed @ [1])",
+				"<nil> => a (string) (added @ [1])",
 			},
 		},
-
 		{"slice - diff left is longer than right, all different",
 			pair{[]string{"a", "b"}, []string{"c"}},
-			expected{
-				removed: []string{"a", "b"},
-				added:   []string{"c"},
+			[]string{
+				"a (string) => <nil> (removed @ [0])",
+				"<nil> => c (string) (added @ [0])",
+				"b (string) => <nil> (removed @ [1->?])",
 			},
 		},
-
 		{"slice - diff left is longer than right, some equals",
 			pair{[]string{"a", "b"}, []string{"a"}},
-			expected{
-				removed: []string{"b"},
-				added:   []string(nil),
+			[]string{
+				"b (string) => <nil> (removed @ [1->?])",
 			},
 		},
-
 		{"slice - diff left is smaller than right, all different",
 			pair{[]string{"a"}, []string{"b", "c"}},
-			expected{
-				removed: []string{"a"},
-				added:   []string{"b", "c"},
+			[]string{
+				"a (string) => <nil> (removed @ [0])",
+				"<nil> => b (string) (added @ [0])",
+				"<nil> => c (string) (added @ [?->1])",
 			},
 		},
-
 		{"slice - diff left is smaller than right, some equals",
 			pair{[]string{"a"}, []string{"a", "b"}},
-			expected{
-				removed: []string(nil),
-				added:   []string{"b"},
+			[]string{
+				"<nil> => b (string) (added @ [?->1])",
 			},
 		},
 
 		// Full
-
 		{"full - everything diff",
 			pair{
 				&topStruct{
-					literal: "a",
-					pointer: &plainStruct{field: 1},
-					array:   []string{"a", "b"},
-					child:   &childStruct{literal: "1", pointer: &plainStruct{field: 10}, array: []string{"1", "2"}},
+					Literal: "x",
+					Pointer: &plainStruct{Field: 1},
+					Array:   []string{"a", "b"},
+					Child:   &childStruct{Literal: "1", Pointer: &plainStruct{Field: 10}, Array: []string{"1", "2"}},
 				},
 				&topStruct{
-					literal: "b",
-					pointer: &plainStruct{field: 2},
-					array:   []string{"b", "c"},
-					child:   &childStruct{literal: "2", pointer: &plainStruct{field: 20}, array: []string{"2"}},
+					Literal: "y",
+					Pointer: &plainStruct{Field: 2},
+					Array:   []string{"b", "c"},
+					Child:   &childStruct{Literal: "2", Pointer: &plainStruct{Field: 20}, Array: []string{"2"}},
 				},
 			},
-			expected{
-				removed: &topStruct{
-					literal: "a",
-					pointer: &plainStruct{field: 1},
-					array:   []string{"a", "b"},
-					child:   &childStruct{literal: "1", pointer: &plainStruct{field: 10}, array: []string{"1", "2"}},
-				},
-				added: &topStruct{
-					literal: "b",
-					pointer: &plainStruct{field: 2},
-					array:   []string{"b", "c"},
-					child:   &childStruct{literal: "2", pointer: &plainStruct{field: 20}, array: []string{"2"}},
-				},
+			[]string{
+				"x (string) => y (string) (changed @ Literal)",
+				"1 (int) => 2 (int) (changed @ Pointer.Field)",
+				"a (string) => <nil> (removed @ Array[0])",
+				"<nil> => b (string) (added @ Array[0])",
+				"b (string) => <nil> (removed @ Array[1])",
+				"<nil> => c (string) (added @ Array[1])",
+				"1 (string) => 2 (string) (changed @ Child.Literal)",
+				"10 (int) => 20 (int) (changed @ Child.Pointer.Field)",
+				"1 (string) => <nil> (removed @ Child.Array[0->?])",
 			},
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			removed, added := Diff(test.in.left, test.in.right)
-			assert.Equal(t, test.expected.removed, removed, "removed set is different")
-			assert.Equal(t, test.expected.added, added, "added set is different")
+			actuals := accumulateDiffStrings(test.in.left, test.in.right)
+			assert.Equal(t, test.expecteds, actuals)
 		})
 	}
 }
 
-type topStruct struct {
-	literal string
-	pointer *plainStruct
-	array   []string
-	child   *childStruct
-}
-
-func (s *topStruct) Diff(rightRaw interface{}) (interface{}, interface{}) {
-	left := s
-	right := rightRaw.(*topStruct)
-
-	removed := &topStruct{}
-	added := &topStruct{}
-	if left.literal != right.literal {
-		removed.literal = left.literal
-		added.literal = right.literal
+func eventToString(event *Event) string {
+	path := ""
+	if len(event.Path) > 1 {
+		path = " @ " + event.Path.String()
 	}
 
-	removedPointer, addedPointer := Diff(left.pointer, right.pointer)
-	removed.pointer = removedPointer.(*plainStruct)
-	added.pointer = addedPointer.(*plainStruct)
+	return fmt.Sprintf("%s => %s (%s%s)", reflectValueToString(event.Old), reflectValueToString(event.New), event.Kind, path)
+}
 
-	removedArray, addedArray := Diff(left.array, right.array)
-	removed.array = removedArray.([]string)
-	added.array = addedArray.([]string)
+func TestDiff_EventMatch(t *testing.T) {
+	tests := []struct {
+		name           string
+		left           interface{}
+		right          interface{}
+		pattern        string
+		expectedMatch  bool
+		expectedGroups []string
+	}{
+		{
+			"deep array added one",
+			&topStruct{Child: &childStruct{Array: []string{"1"}}},
+			&topStruct{Child: &childStruct{Array: []string{"1", "2"}}},
+			"Child.Array[#]",
+			true,
+			[]string{"?->1"},
+		},
+	}
 
-	removedChild, addedChild := Diff(left.child, right.child)
-	removed.child = removedChild.(*childStruct)
-	added.child = addedChild.(*childStruct)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			events := accumulateDiff(test.left, test.right)
+			require.Len(t, events, 1)
 
-	return removed, added
+			match, groups := events[0].Match(test.pattern)
+			if test.expectedMatch {
+				assert.True(t, match, "Expected pattern %q to match diff path %q", test.pattern, events[0].Path)
+				assert.Equal(t, test.expectedGroups, groups)
+			} else {
+				assert.False(t, match, "Expected pattern %q to NOT match diff path %q", test.pattern, events[0].Path)
+			}
+		})
+	}
+}
+
+// There is something inherently broken with this, the accumulation seems to broke leading to incorrect
+// results. I assume it's a Golang thing related to slice and struct as value versus pointers. It works
+// only single event but starts to act weirdly when there > 1, like the Event's Path is all wrong. It's
+// better to try to avoid it when possible.
+func accumulateDiff(left, right interface{}) (out []Event) {
+	Diff(left, right, OnEvent(func(event Event) {
+		out = append(out, event)
+	}))
+	return
+}
+
+func accumulateDiffStrings(left, right interface{}) (out []string) {
+	Diff(left, right, OnEvent(func(event Event) {
+		out = append(out, eventToString(&event))
+	}))
+	return
+}
+
+type topStruct struct {
+	Literal string
+	Pointer *plainStruct
+	Array   []string
+	Child   *childStruct
 }
 
 type childStruct struct {
-	literal string
-	pointer *plainStruct
-	array   []string
-}
-
-func (s *childStruct) Diff(rightRaw interface{}) (interface{}, interface{}) {
-	left := s
-	right := rightRaw.(*childStruct)
-
-	removed := &childStruct{}
-	added := &childStruct{}
-	if left.literal != right.literal {
-		removed.literal = left.literal
-		added.literal = right.literal
-	}
-
-	removedPointer, addedPointer := Diff(left.pointer, right.pointer)
-	removed.pointer = removedPointer.(*plainStruct)
-	added.pointer = addedPointer.(*plainStruct)
-
-	removedArray, addedArray := Diff(left.array, right.array)
-	removed.array = removedArray.([]string)
-	added.array = addedArray.([]string)
-
-	return removed, added
+	Literal string
+	Pointer *plainStruct
+	Array   []string
 }
 
 type plainStruct struct {
-	field int
-}
-
-func (s *plainStruct) Diff(rightRaw interface{}) (interface{}, interface{}) {
-	left := s
-	right := rightRaw.(*plainStruct)
-
-	removed := &plainStruct{}
-	added := &plainStruct{}
-	if left.field != right.field {
-		removed.field = left.field
-		added.field = right.field
-	}
-
-	return removed, added
+	Field int
 }

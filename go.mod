@@ -5,12 +5,13 @@ go 1.14
 require (
 	github.com/GeertJohan/go.rice v1.0.0
 	github.com/davecgh/go-spew v1.1.1
-	github.com/dfuse-io/binary v0.0.0-20201123150056-096380ef3e5d
+	github.com/dfuse-io/binary v0.0.0-20201216050955-b339f1d2cdbe
 	github.com/dfuse-io/logging v0.0.0-20201110202154-26697de88c79
 	github.com/fatih/color v1.7.0
-	github.com/google/go-cmp v0.4.1 // indirect
+	github.com/google/go-cmp v0.4.1
 	github.com/gorilla/rpc v1.2.0
 	github.com/gorilla/websocket v1.4.2
+	github.com/klauspost/compress v1.11.3
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/magiconair/properties v1.8.1
 	github.com/mr-tron/base58 v1.2.0
@@ -21,6 +22,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
+	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.6.3
 	github.com/ybbus/jsonrpc v2.1.2+incompatible
 	go.uber.org/zap v1.16.0

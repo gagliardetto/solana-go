@@ -97,7 +97,6 @@ func (t Base58) String() string {
 	return base58.Encode(t)
 }
 
-///
 type Data []byte
 
 func (t Data) MarshalJSON() ([]byte, error) {
@@ -117,14 +116,13 @@ func (t *Data) UnmarshalJSON(data []byte) (err error) {
 		return fmt.Errorf("invalid length for solana.Data, expected 2, found %d", len(in))
 	}
 
-	if in[1] == "base64" {
+	switch in[1] {
+	case "base64":
 		*t, err = base64.StdEncoding.DecodeString(in[0])
-		if err != nil {
-			return err
-		}
-		return nil
+	default:
+		return fmt.Errorf("unsupported encoding %s", in[1])
 	}
-	return fmt.Errorf("unsupported encoding %s", in[1])
+	return
 }
 
 func (t Data) String() string {

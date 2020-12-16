@@ -3,150 +3,252 @@ package diff
 import (
 	"fmt"
 	"reflect"
+	"regexp"
+	"strings"
 
+	"github.com/google/go-cmp/cmp"
 	"go.uber.org/zap"
 )
 
-var diffeableInterface = reflect.TypeOf((*Diffeable)(nil)).Elem()
-
-func Diff(left interface{}, right interface{}) (removed, added interface{}) {
-	if traceEnabled {
-		zlog.Debug("checking diff between elements", zap.Stringer("left", reflectType{left}), zap.Stringer("right", reflectType{right}))
-	}
-
-	if left == nil && right == nil {
-		if traceEnabled {
-			zlog.Debug("both end are == nil, returning them as-is")
-		}
-
-		// Hopefully types will be all right using straight received values
-		return left, right
-	}
-
-	if left == nil {
-		if traceEnabled {
-			zlog.Debug("nil -> right, returning no removed and right added")
-		}
-
-		return reflect.Zero(reflect.TypeOf(right)).Interface(), right
-	}
-
-	if right == nil {
-		if traceEnabled {
-			zlog.Debug("left -> nil, returning left removed and no added")
-		}
-
-		return left, reflect.Zero(reflect.TypeOf(left)).Interface()
-	}
-
-	leftValue := reflect.ValueOf(left)
-	leftType := leftValue.Type()
-
-	rightValue := reflect.ValueOf(right)
-	rightType := rightValue.Type()
-	if leftType != rightType {
-		panic(fmt.Errorf("type mistmatch, left != right (type %s != type %s)", leftType, rightType))
-	}
-
-	// This is costly because it means we deeply compare at each level of check. There is probably a much better
-	// way to do this. We should implement a full walking reflection based diff instead that walks the whole thing
-	// and allocate a removed/added struct and set the field as we go. Of course, will need to be public otherwise
-	// the caller implements Diffeable and peforms the job himself. Will see, probably a good start anyway.
-	if reflect.DeepEqual(left, right) {
-		if traceEnabled {
-			zlog.Debug("left == right, returning no removed and no added")
-		}
-
-		return reflect.Zero(leftType).Interface(), reflect.Zero(rightType).Interface()
-	}
-
-	// They are the same type, so we can check either left or right to ensure that both implements diff.Diffeable
-	if leftType.Implements(diffeableInterface) {
-		if traceEnabled {
-			zlog.Debug("delegating to Diffeable to perform its job on struct")
-		}
-
-		return left.(Diffeable).Diff(right)
-	}
-
-	if leftValue.Kind() == reflect.Slice {
-		if traceEnabled {
-			zlog.Debug("performing slice compare")
-		}
-
-		return diffSlice(left, leftValue, right, rightValue)
-	}
-
-	// We know at this point that left & right are not deeply equal, not a slice and does not implement Diffeable, simply return them
-	if leftType.Comparable() {
-		return left, right
-	}
-
-	panic(fmt.Errorf("type incomparable, type %s is not a slice, nor a comparable and does not implement diff.Diffeable", leftType))
-}
-
-func diffSlice(left interface{}, leftValue reflect.Value, right interface{}, rightValue reflect.Value) (interface{}, interface{}) {
-	leftLen := leftValue.Len()
-	rightLen := rightValue.Len()
-
-	if leftLen == 0 && rightLen == 0 {
-		return nil, nil
-	}
-
-	if leftLen == 0 {
-		return reflect.Zero(leftValue.Type()).Interface(), right
-	}
-
-	if rightLen == 0 {
-		return left, reflect.Zero(rightValue.Type()).Interface()
-	}
-
-	removed := reflect.Zero(rightValue.Type())
-	added := reflect.Zero(rightValue.Type())
-
-	for i := 0; i < leftLen; i++ {
-		if i < rightLen {
-			// Both set has the same value
-			leftAt := leftValue.Index(i).Interface()
-			rightAt := rightValue.Index(i).Interface()
-
-			// FIXME: Re-use Diff(...) logic that same element gives already nothing so we avoid this...
-			if !reflect.DeepEqual(leftAt, rightAt) {
-				removedAt, addedAt := Diff(leftAt, rightAt)
-
-				if traceEnabled {
-					zlog.Debug("slice elements at index different", zap.Int("index", i), zap.Stringer("removed", reflectType{removedAt}), zap.Stringer("added", reflectType{addedAt}))
-				}
-
-				removed = reflect.Append(removed, reflect.ValueOf(removedAt))
-				added = reflect.Append(added, reflect.ValueOf(addedAt))
-			}
-		} else {
-			// Left is bigger than right, every element here has been removed from left
-			removed = reflect.Append(removed, leftValue.Index(i))
-		}
-	}
-
-	// Right is bigger than left, every element after (left len - 1) has been added from right
-	if rightLen > leftLen {
-		for i := leftLen; i < rightLen; i++ {
-			added = reflect.Append(added, rightValue.Index(i))
-		}
-	}
-
-	return removed.Interface(), added.Interface()
-}
-
-// FIXME: We could most probably get rid of the Diffeable interface and diff everything ourself, should not be hard follwing
-//        reflect.DeepEqual rules, probably not worth it just yet.
 type Diffeable interface {
-	// Diff performs the structural difference between itself (i.e. the receiver implementing the interface) which
-	// we call the "left" and a "right" element returning two new structure of the same type that contains only the
-	// difference between left and right. The first is the "removed" set (i.e. ) The left (receiver), the right (parameter) and the out (result) will be all of
-	// the same type.
-	//
-	// The implementer is responsible of validating the "right" elment's type and returning the appropiate "out".
-	//
-	// For a given struct,
-	Diff(right interface{}) (removed, added interface{})
+	Diff(right interface{}, options ...Option)
+}
+
+type Option interface {
+	apply(o *options)
+}
+
+type optionFunc func(o *options)
+
+func (f optionFunc) apply(opts *options) {
+	f(opts)
+}
+
+func CmpOption(cmpOption cmp.Option) Option {
+	return optionFunc(func(opts *options) { opts.cmpOptions = append(opts.cmpOptions, cmpOption) })
+}
+
+func OnEvent(callback func(Event)) Option {
+	return optionFunc(func(opts *options) { opts.onEvent = callback })
+}
+
+type options struct {
+	cmpOptions []cmp.Option
+	onEvent    func(Event)
+}
+
+type Kind uint8
+
+const (
+	KindAdded Kind = iota
+	KindChanged
+	KindRemoved
+)
+
+func (k Kind) String() string {
+	switch k {
+	case KindAdded:
+		return "added"
+	case KindChanged:
+		return "changed"
+	case KindRemoved:
+		return "removed"
+	}
+
+	return "unknown"
+}
+
+type Path cmp.Path
+
+func (pa Path) String() string {
+	if len(pa) == 1 {
+		return ""
+	}
+
+	return strings.TrimPrefix(cmp.Path(pa[1:]).GoString(), ".")
+}
+
+type Event struct {
+	Path Path
+	Kind Kind
+	Old  reflect.Value
+	New  reflect.Value
+}
+
+// Match currently simply ensure that `pattern` parameter is the start of the path string
+// which represents the direct access from top-level to struct.
+func (p *Event) Match(pattern string) (match bool, matches []string) {
+	regexRaw := regexp.QuoteMeta(pattern)
+	regexRaw = strings.ReplaceAll("^"+regexRaw+"$", "#", `([0-9]+|.->[0-9]+|[0-9]+->.|[0-9]+->[0-9]+)`)
+
+	regex := regexp.MustCompile(regexRaw)
+	regexMatch := regex.FindAllStringSubmatch(p.Path.String(), 1)
+	if len(regexMatch) != 1 {
+		return false, nil
+	}
+
+	// For now we accept only array indices, will need to re-write logic if we ever need to check for keys also
+	subMatches := regexMatch[0][1:]
+	if len(subMatches) == 0 {
+		return true, nil
+	}
+
+	return true, subMatches
+}
+
+func (p *Event) AddedKind() bool {
+	return p.Kind == KindAdded
+}
+
+func (p *Event) ChangedKind() bool {
+	return p.Kind == KindChanged
+}
+
+func (p *Event) RemovedKind() bool {
+	return p.Kind == KindRemoved
+}
+
+// Element picks the element based on the Event's Kind, if it's removed, the element is the
+// "old" value, if it's added or changed, the element is the "new" value.
+func (p *Event) Element() reflect.Value {
+	if p.Kind == KindRemoved {
+		return p.Old
+	}
+
+	return p.New
+}
+
+func (p *Event) String() string {
+	path := ""
+	if len(p.Path) > 1 {
+		path = " @ " + p.Path.String()
+	}
+
+	return fmt.Sprintf("%s => %s (%s%s)", reflectValueToString(p.Old), reflectValueToString(p.New), p.Kind, path)
+}
+
+func reflectValueToString(value reflect.Value) string {
+	if !value.IsValid() {
+		return "<nil>"
+	}
+
+	if value.CanInterface() {
+		if reflectValueCanIsNil(value) && value.IsNil() {
+			return fmt.Sprintf("<nil> (%s)", value.Type())
+		}
+
+		v := value.Interface()
+		return fmt.Sprintf("%v (%T)", v, v)
+	}
+
+	return fmt.Sprintf("<type %T>", value.Type())
+}
+
+func reflectValueCanIsNil(value reflect.Value) bool {
+	switch value.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Ptr, reflect.UnsafePointer, reflect.Interface, reflect.Slice:
+		return true
+	default:
+		return false
+	}
+}
+
+func Diff(left interface{}, right interface{}, opts ...Option) {
+	options := options{}
+	for _, opt := range opts {
+		opt.apply(&options)
+	}
+
+	if options.onEvent == nil {
+		panic("the option diff.OnEvent(...) must always be defined")
+	}
+
+	reporter := &diffReporter{notify: options.onEvent}
+	cmp.Equal(left, right, append(
+		[]cmp.Option{cmp.Reporter(reporter)},
+		options.cmpOptions...,
+	)...)
+}
+
+type diffReporter struct {
+	notify func(event Event)
+	path   cmp.Path
+	diffs  []string
+}
+
+func (r *diffReporter) PushStep(ps cmp.PathStep) {
+	if traceEnabled {
+		zlog.Debug("pushing path step", zap.Stringer("step", ps))
+	}
+
+	r.path = append(r.path, ps)
+}
+
+func (r *diffReporter) Report(rs cmp.Result) {
+	if !rs.Equal() {
+		lastStep := r.path.Last()
+		vLeft, vRight := lastStep.Values()
+		if !vLeft.IsValid() {
+			if traceEnabled {
+				zlog.Debug("added event", zap.Stringer("path", r.path))
+			}
+
+			// Left is not set but right is, we have added "right"
+			r.notify(Event{Kind: KindAdded, Path: Path(r.path), New: vRight})
+			return
+		}
+
+		if !vRight.IsValid() {
+			if traceEnabled {
+				zlog.Debug("removed event", zap.Stringer("path", r.path))
+			}
+
+			// Left is set but right is not, we have removed "left"
+			r.notify(Event{Kind: KindRemoved, Path: Path(r.path), Old: vLeft})
+			return
+		}
+
+		if isArrayPathStep(lastStep) {
+			// We might want to do this only on certain circumstances?
+			if traceEnabled {
+				zlog.Debug("array changed event, splitting in removed, added", zap.Stringer("path", r.path))
+			}
+
+			r.notify(Event{Kind: KindRemoved, Path: Path(r.path), Old: vLeft})
+			r.notify(Event{Kind: KindAdded, Path: Path(r.path), New: vRight})
+			return
+		}
+
+		if traceEnabled {
+			zlog.Debug("changed event", zap.Stringer("path", r.path))
+		}
+
+		r.notify(Event{Kind: KindChanged, Path: Path(r.path), Old: vLeft, New: vRight})
+	}
+}
+
+func (r *diffReporter) PopStep() {
+	if traceEnabled {
+		zlog.Debug("popping path step", zap.Stringer("step", r.path[len(r.path)-1]))
+	}
+
+	r.path = r.path[:len(r.path)-1]
+}
+
+func isArrayPathStep(step cmp.PathStep) bool {
+	_, ok := step.(cmp.SliceIndex)
+	return ok
+}
+
+func copyPath(path cmp.Path) Path {
+	if len(path) == 0 {
+		return Path(path)
+	}
+
+	out := make([]cmp.PathStep, len(path))
+	for i, step := range path {
+		out[i] = step
+	}
+
+	return Path(cmp.Path(out))
 }
