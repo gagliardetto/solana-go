@@ -20,16 +20,15 @@ import (
 	"os"
 	"testing"
 
-	"github.com/dfuse-io/solana-go/text"
-
 	"github.com/dfuse-io/solana-go"
-
-	"go.uber.org/zap"
-
+	"github.com/dfuse-io/solana-go/text"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 func Test_AccountSubscribe(t *testing.T) {
+	t.Skip("Never ending test, revisit me to not depend on actual network calls, or hide between env flag")
+
 	zlog, _ = zap.NewDevelopment()
 
 	c, err := Dial(context.Background(), "ws://api.mainnet-beta.solana.com:80/rpc")
@@ -53,6 +52,8 @@ func Test_AccountSubscribe(t *testing.T) {
 }
 
 func Test_ProgramSubscribe(t *testing.T) {
+	t.Skip("Never ending test, revisit me to not depend on actual network calls, or hide between env flag")
+
 	zlog, _ = zap.NewDevelopment()
 
 	fmt.Println("Dialing")
@@ -76,6 +77,8 @@ func Test_ProgramSubscribe(t *testing.T) {
 
 }
 func Test_SlotSubscribe(t *testing.T) {
+	t.Skip("Never ending test, revisit me to not depend on actual network calls, or hide between env flag")
+
 	zlog, _ = zap.NewDevelopment()
 
 	c, err := Dial(context.Background(), "ws://api.mainnet-beta.solana.com:80/rpc")

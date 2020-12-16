@@ -126,6 +126,12 @@ func (p *PublicKey) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
+var zeroPublicKey = PublicKey{}
+
+func (p PublicKey) IsZero() bool {
+	return p == zeroPublicKey
+}
+
 func (p PublicKey) String() string {
 	return base58.Encode(p[:])
 }

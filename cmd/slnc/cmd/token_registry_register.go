@@ -102,9 +102,7 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 		createAccountInstruction := system.NewCreateAccountInstruction(uint64(lamport), tokenregistry.TOKEN_META_SIZE, tokenRegistryProgramID, registrarPubKey, tokenMetaAccount.PublicKey())
 		registerTokenInstruction := tokenregistry.NewRegisterTokenInstruction(logo, name, symbol, website, tokenMetaAccount.PublicKey(), registrarPubKey, tokenAddress)
 
-		trx, err := solana.TransactionWithInstructions([]solana.TransactionInstruction{createAccountInstruction, registerTokenInstruction}, blockHashResult.Value.Blockhash, &solana.Options{
-			Payer: registrarPubKey,
-		})
+		trx, err := solana.NewTransaction([]solana.Instruction{createAccountInstruction, registerTokenInstruction}, blockHashResult.Value.Blockhash, solana.TransactionPayer(registrarPubKey))
 		if err != nil {
 			return fmt.Errorf("unable to craft transaction: %w", err)
 		}

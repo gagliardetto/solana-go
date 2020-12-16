@@ -9,23 +9,42 @@ import (
 	"go.uber.org/zap"
 )
 
-type TransactionInstruction interface {
+type Instruction interface {
 	Accounts() []*AccountMeta // returns the list of accounts the instructions requires
 	ProgramID() PublicKey     // the programID the instruction acts on
 	Data() ([]byte, error)    // the binary encoded instructions
 }
 
-type Options struct {
-	Payer PublicKey
+type TransactionOption interface {
+	apply(opts *transactionOptions)
 }
 
-func TransactionWithInstructions(instructions []TransactionInstruction, blockHash PublicKey, opt *Options) (*Transaction, error) {
+type transactionOptions struct {
+	payer PublicKey
+}
+
+type transactionOptionFunc func(opts *transactionOptions)
+
+func (f transactionOptionFunc) apply(opts *transactionOptions) {
+	f(opts)
+}
+
+func TransactionPayer(payer PublicKey) TransactionOption {
+	return transactionOptionFunc(func(opts *transactionOptions) { opts.payer = payer })
+}
+
+func NewTransaction(instructions []Instruction, blockHash PublicKey, opts ...TransactionOption) (*Transaction, error) {
 	if len(instructions) == 0 {
 		return nil, fmt.Errorf("requires at-least one instruction to create a transaction")
 	}
 
-	var feePayer PublicKey
-	if opt == nil {
+	options := transactionOptions{}
+	for _, opt := range opts {
+		opt.apply(&options)
+	}
+
+	feePayer := options.payer
+	if feePayer.IsZero() {
 		found := false
 		for _, act := range instructions[0].Accounts() {
 			if act.IsSigner {
@@ -37,23 +56,21 @@ func TransactionWithInstructions(instructions []TransactionInstruction, blockHas
 		if !found {
 			return nil, fmt.Errorf("cannot determine fee payer. You can ether pass the fee payer vai the 'TransactionWithInstructions' option parameter or it fallback to the first instruction's first signer")
 		}
-	} else {
-		feePayer = opt.Payer
 	}
 
-	programIDs := map[string]bool{}
+	programIDs := map[PublicKey]bool{}
 	accounts := []*AccountMeta{}
 	for _, instruction := range instructions {
 		for _, key := range instruction.Accounts() {
 			accounts = append(accounts, key)
 		}
-		programIDs[instruction.ProgramID().String()] = true
+		programIDs[instruction.ProgramID()] = true
 	}
 
 	// Add programID to the account list
 	for programID := range programIDs {
 		accounts = append(accounts, &AccountMeta{
-			PublicKey:  MustPublicKeyFromBase58(programID),
+			PublicKey:  programID,
 			IsSigner:   false,
 			IsWritable: false,
 		})
@@ -64,15 +81,15 @@ func TransactionWithInstructions(instructions []TransactionInstruction, blockHas
 		return accounts[i].less(accounts[j])
 	})
 
-	uniqAccountsMap := map[string]uint64{}
+	uniqAccountsMap := map[PublicKey]uint64{}
 	uniqAccounts := []*AccountMeta{}
 	for _, acc := range accounts {
-		if index, found := uniqAccountsMap[acc.PublicKey.String()]; found {
+		if index, found := uniqAccountsMap[acc.PublicKey]; found {
 			uniqAccounts[index].IsWritable = uniqAccounts[index].IsWritable || acc.IsWritable
 			continue
 		}
 		uniqAccounts = append(uniqAccounts, acc)
-		uniqAccountsMap[acc.PublicKey.String()] = uint64(len(uniqAccounts) - 1)
+		uniqAccountsMap[acc.PublicKey] = uint64(len(uniqAccounts) - 1)
 	}
 
 	zlog.Debug("unique account sorted", zap.Int("account_count", len(uniqAccounts)))
@@ -157,7 +174,6 @@ func TransactionWithInstructions(instructions []TransactionInstruction, blockHas
 	return &Transaction{
 		Message: message,
 	}, nil
-
 }
 
 type privateKeyGetter func(key PublicKey) *PrivateKey

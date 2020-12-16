@@ -19,10 +19,12 @@ import (
 	"github.com/dfuse-io/solana-go"
 )
 
+type Context struct {
+	Slot bin.Uint64
+}
+
 type RPCContext struct {
-	Context struct {
-		Slot bin.Uint64
-	} `json:"context,omitempty"`
+	Context Context `json:"context,omitempty"`
 }
 
 type GetBalanceResult struct {

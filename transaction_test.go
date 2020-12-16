@@ -25,8 +25,8 @@ func (t *testTransactionInstructions) Data() ([]byte, error) {
 	return t.data, nil
 }
 
-func TestTransactionWithInstructions(t *testing.T) {
-	instructions := []TransactionInstruction{
+func TestNewTransaction(t *testing.T) {
+	instructions := []Instruction{
 		&testTransactionInstructions{
 			accounts: []*AccountMeta{
 				{PublicKey: MustPublicKeyFromBase58("A9QnpgfhCkmiBSjgBuWk76Wo3HxzxvDopUq9x6UUMmjn"), IsSigner: true, IsWritable: false},
@@ -50,7 +50,7 @@ func TestTransactionWithInstructions(t *testing.T) {
 	blockhash, err := PublicKeyFromBase58("A9QnpgfhCkmiBSjgBuWk76Wo3HxzxvDopUq9x6UUMmjn")
 	require.NoError(t, err)
 
-	trx, err := TransactionWithInstructions(instructions, blockhash, nil)
+	trx, err := NewTransaction(instructions, blockhash)
 	require.NoError(t, err)
 
 	assert.Equal(t, trx.Message.Header, MessageHeader{
