@@ -36,8 +36,19 @@ func (r *RequestQueue) Decode(data []byte) error {
 	return decoder.Decode(&r)
 }
 
+type RequestFlag uint8
+
+const (
+	RequestFlagNewOrder = AccountFlag(1 << iota)
+	RequestFlagCancelOrder
+	RequestFlagBid
+	RequestFlagPostOnly
+	RequestFlagImmediateOrCancel
+	RequestFlagDecrementTakeOnSelfTrade
+)
+
 type Request struct {
-	RequestFlags         uint8
+	RequestFlags         RequestFlag
 	OwnerSlot            uint8
 	FeeTier              uint8
 	SelfTradeBehavior    uint8
@@ -69,10 +80,10 @@ func (q *EventQueue) Decode(data []byte) error {
 type EventFlag uint8
 
 const (
-	EventFlagFill  EventFlag = 0x1
-	EventFlagOut   EventFlag = 0x2
-	EventFlagBid   EventFlag = 0x4
-	EventFlagMaker EventFlag = 0x8
+	EventFlagFill = RequestFlag(1 << iota)
+	EventFlagOut
+	EventFlagBid
+	EventFlagMaker
 )
 
 type EventSide string
