@@ -39,7 +39,7 @@ func (r *RequestQueue) Decode(data []byte) error {
 type RequestFlag uint8
 
 const (
-	RequestFlagNewOrder = AccountFlag(1 << iota)
+	RequestFlagNewOrder = RequestFlag(1 << iota)
 	RequestFlagCancelOrder
 	RequestFlagBid
 	RequestFlagPostOnly
