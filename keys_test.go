@@ -1,6 +1,7 @@
 package solana
 
 import (
+	"encoding/hex"
 	"errors"
 	"testing"
 
@@ -8,9 +9,46 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestPublicKeyFromBase58(t *testing.T) {
-	emptyKey := PublicKey{}
+func TestPublicKeyFromBytes(t *testing.T) {
+	tests := []struct {
+		name     string
+		inHex    string
+		expected PublicKey
+	}{
+		{
+			"empty",
+			"",
+			MustPublicKeyFromBase58("11111111111111111111111111111111"),
+		},
+		{
+			"smaller than required",
+			"010203040506",
+			MustPublicKeyFromBase58("4wBqpZM9k69W87zdYXT2bRtLViWqTiJV3i2Kn9q7S6j"),
+		},
+		{
+			"equal to 32 bytes",
+			"0102030405060102030405060102030405060102030405060102030405060101",
+			MustPublicKeyFromBase58("4wBqpZM9msxygzsdeLPq6Zw3LoiAxJk3GjtKPpqkcsi"),
+		},
+		{
+			"longer than required",
+			"0102030405060102030405060102030405060102030405060102030405060101FFFFFFFFFF",
+			MustPublicKeyFromBase58("4wBqpZM9msxygzsdeLPq6Zw3LoiAxJk3GjtKPpqkcsi"),
+		},
+	}
 
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			bytes, err := hex.DecodeString(test.inHex)
+			require.NoError(t, err)
+
+			actual := PublicKeyFromBytes(bytes)
+			assert.Equal(t, test.expected, actual, "%s != %s", test.expected, actual)
+		})
+	}
+}
+
+func TestPublicKeyFromBase58(t *testing.T) {
 	tests := []struct {
 		name        string
 		in          string
@@ -26,7 +64,7 @@ func TestPublicKeyFromBase58(t *testing.T) {
 		{
 			"hand crafted error",
 			"SerkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-			emptyKey,
+			zeroPublicKey,
 			errors.New("invalid length, expected 32, got 30"),
 		},
 	}

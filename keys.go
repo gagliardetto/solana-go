@@ -83,8 +83,19 @@ func (k PrivateKey) PublicKey() PublicKey {
 
 type PublicKey [32]byte
 
-func (p PublicKey) Equals(pb PublicKey) bool {
-	return p.String() == pb.String()
+func PublicKeyFromBytes(in []byte) (out PublicKey) {
+	byteCount := len(in)
+	if byteCount == 0 {
+		return
+	}
+
+	max := 32
+	if byteCount < max {
+		max = byteCount
+	}
+
+	copy(out[:], in[0:max])
+	return
 }
 
 func MustPublicKeyFromBase58(in string) PublicKey {
@@ -124,6 +135,10 @@ func (p *PublicKey) UnmarshalJSON(data []byte) (err error) {
 		return fmt.Errorf("invalid public key %q: %w", s, err)
 	}
 	return
+}
+
+func (p PublicKey) Equals(pb PublicKey) bool {
+	return p == pb
 }
 
 var zeroPublicKey = PublicKey{}
