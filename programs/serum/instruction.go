@@ -231,7 +231,7 @@ type CancelOrderAccounts struct {
 }
 
 type InstructionCancelOrder struct {
-	Side          uint32
+	Side          Side
 	OrderID       bin.Uint128
 	OpenOrders    solana.PublicKey
 	OpenOrderSlot uint8

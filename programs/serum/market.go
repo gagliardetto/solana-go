@@ -93,7 +93,7 @@ func (s SideLayout) getSide() SideLayoutType {
 type OrderType uint32
 
 const (
-	OrderTypeLimit = OrderType(0)
+	OrderTypeLimit = OrderType(iota)
 	OrderTypeImmediateOrCancel
 	OrderTypePostOnly
 )
