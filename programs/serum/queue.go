@@ -95,6 +95,14 @@ const (
 	EventFlagMaker
 )
 
+func (e EventFlag) IsFill() bool {
+	return Has(uint8(e), uint8(EventFlagFill))
+}
+
+func (e EventFlag) IsOut() bool {
+	return Has(uint8(e), uint8(EventFlagOut))
+}
+
 type Event struct {
 	Flag              EventFlag
 	OwnerSlot         uint8
