@@ -95,13 +95,6 @@ const (
 	EventFlagMaker
 )
 
-type EventSide string
-
-const (
-	EventSideAsk EventSide = "ASK"
-	EventSideBid EventSide = "BID"
-)
-
 type Event struct {
 	Flag              EventFlag
 	OwnerSlot         uint8
@@ -119,11 +112,11 @@ func (e *Event) Equal(other *Event) bool {
 	return e.OrderID.Hi == other.OrderID.Hi && e.OrderID.Lo == other.OrderID.Lo
 }
 
-func (e *Event) Side() EventSide {
+func (e *Event) Side() Side {
 	if Has(uint8(e.Flag), uint8(EventFlagBid)) {
-		return EventSideBid
+		return SideBid
 	}
-	return EventSideAsk
+	return SideAsk
 }
 
 func (e *Event) Filled() bool {
