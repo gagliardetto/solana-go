@@ -45,7 +45,7 @@ func Test_AccountSubscribe(t *testing.T) {
 		return
 	}
 	text.NewEncoder(os.Stdout).Encode(data, nil)
-	fmt.Println("Owner: ", data.(*AccountResult).Value.Account.Owner)
+	fmt.Println("OpenOrders: ", data.(*AccountResult).Value.Account.Owner)
 	fmt.Println("data: ", data.(*AccountResult).Value.Account.Data)
 	return
 

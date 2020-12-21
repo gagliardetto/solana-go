@@ -76,6 +76,9 @@ var InstructionDefVariant = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, [
 	{"cancel_order", (*InstructionCancelOrder)(nil)},
 	{"settle_funds", (*InstructionSettleFunds)(nil)},
 	{"cancel_order_by_client_id", (*InstructionCancelOrderByClientId)(nil)},
+	{"disable_market", (*InstructionDisableMarketAccounts)(nil)},
+	{"sweep_fees", (*InstructionSweepFees)(nil)},
+	{"new_order_v2", (*InstructionNewOrderV2)(nil)},
 })
 
 type InitializeMarketAccounts struct {
@@ -115,7 +118,7 @@ type NewOrderAccounts struct {
 	OpenOrders         *solana.AccountMeta `text:"linear,notype"`
 	RequestQueue       *solana.AccountMeta `text:"linear,notype"`
 	Payer              *solana.AccountMeta `text:"linear,notype"`
-	Owner              *solana.AccountMeta `text:"linear,notype"`
+	Owner              *solana.AccountMeta `text:"linear,notype"` // The owner of the open orders, i.e. the trader
 	CoinVault          *solana.AccountMeta `text:"linear,notype"`
 	PCVault            *solana.AccountMeta `text:"linear,notype"`
 	SPLTokenProgram    *solana.AccountMeta `text:"linear,notype"`
@@ -124,7 +127,7 @@ type NewOrderAccounts struct {
 }
 
 type InstructionNewOrder struct {
-	Side        uint32
+	Side        Side
 	LimitPrice  uint64
 	MaxQuantity uint64
 	OrderType   OrderType
@@ -300,7 +303,7 @@ type CancelOrderByClientIdAccounts struct {
 type InstructionCancelOrderByClientId struct {
 	ClientID uint64
 
-	Accounts *CancelOrderByClientIdAccounts
+	Accounts *CancelOrderByClientIdAccounts `bin:"-"`
 }
 
 func (i *InstructionCancelOrderByClientId) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
@@ -312,6 +315,110 @@ func (i *InstructionCancelOrderByClientId) SetAccounts(accounts []*solana.Accoun
 		OpenOrders:   accounts[instructionActIdx[1]],
 		RequestQueue: accounts[instructionActIdx[2]],
 		Owner:        accounts[instructionActIdx[3]],
+	}
+
+	return nil
+}
+
+type DisableMarketAccounts struct {
+	Market           *solana.AccountMeta `text:"linear,notype"`
+	DisableAuthority *solana.AccountMeta `text:"linear,notype"`
+}
+
+type InstructionDisableMarketAccounts struct {
+	Accounts *DisableMarketAccounts `bin:"-"`
+}
+
+func (i *InstructionDisableMarketAccounts) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
+	if len(instructionActIdx) < 2 {
+		return fmt.Errorf("insuficient account, Disable Market requires at-least 2 accounts not %d", len(accounts))
+	}
+
+	i.Accounts = &DisableMarketAccounts{
+		Market:           accounts[instructionActIdx[0]],
+		DisableAuthority: accounts[instructionActIdx[1]],
+	}
+
+	return nil
+}
+
+type SweepFeesAccounts struct {
+	Market               *solana.AccountMeta `text:"linear,notype"`
+	PCVault              *solana.AccountMeta `text:"linear,notype"`
+	FeeSweepingAuthority *solana.AccountMeta `text:"linear,notype"`
+	FeeReceivableAccount *solana.AccountMeta `text:"linear,notype"`
+	VaultSigner          *solana.AccountMeta `text:"linear,notype"`
+	SPLTokenProgram      *solana.AccountMeta `text:"linear,notype"`
+}
+
+type InstructionSweepFees struct {
+	Accounts *SweepFeesAccounts `bin:"-"`
+}
+
+func (i *InstructionSweepFees) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
+	if len(instructionActIdx) < 6 {
+		return fmt.Errorf("insuficient account, Sweep Fees requires at-least 6 accounts not %d", len(accounts))
+	}
+
+	i.Accounts = &SweepFeesAccounts{
+		Market:               accounts[instructionActIdx[0]],
+		PCVault:              accounts[instructionActIdx[1]],
+		FeeSweepingAuthority: accounts[instructionActIdx[2]],
+		FeeReceivableAccount: accounts[instructionActIdx[3]],
+		VaultSigner:          accounts[instructionActIdx[4]],
+		SPLTokenProgram:      accounts[instructionActIdx[5]],
+	}
+
+	return nil
+}
+
+type NewOrderV2Accounts struct {
+	Market          *solana.AccountMeta `text:"linear,notype"` // the market
+	OpenOrders      *solana.AccountMeta `text:"linear,notype"` // the OpenOrders account to use
+	RequestQueue    *solana.AccountMeta `text:"linear,notype"` // the request queue
+	Payer           *solana.AccountMeta `text:"linear,notype"` // the (coin or price currency) account paying for the order
+	Owner           *solana.AccountMeta `text:"linear,notype"` // owner of the OpenOrders account
+	CoinVault       *solana.AccountMeta `text:"linear,notype"` // coin vault
+	PCVault         *solana.AccountMeta `text:"linear,notype"` // pc vault
+	SPLTokenProgram *solana.AccountMeta `text:"linear,notype"` // spl token program
+	RentSysvar      *solana.AccountMeta `text:"linear,notype"` // the rent sysvar
+	FeeDiscount     *solana.AccountMeta `text:"linear,notype"` // (optional) the (M)SRM account used for fee discounts
+}
+
+type SelfTradeBehavior uint32
+
+const (
+	SelfTradeBehaviorDecrementTake = iota
+	SelfTradeBehaviorCancelProvide
+)
+
+type InstructionNewOrderV2 struct {
+	Side              Side
+	LimitPrice        uint64
+	MaxQuantity       uint64
+	OrderType         OrderType
+	ClientID          uint64
+	SelfTradeBehavior SelfTradeBehavior
+
+	Accounts *NewOrderV2Accounts `bin:"-"`
+}
+
+func (i *InstructionNewOrderV2) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
+	if len(instructionActIdx) < 10 {
+		return fmt.Errorf("insuficient account, New Order V2 requires at-least 10 accounts not %d", len(accounts))
+	}
+
+	i.Accounts = &NewOrderV2Accounts{
+		Market:          accounts[instructionActIdx[0]],
+		OpenOrders:      accounts[instructionActIdx[1]],
+		RequestQueue:    accounts[instructionActIdx[2]],
+		Payer:           accounts[instructionActIdx[3]],
+		Owner:           accounts[instructionActIdx[4]],
+		CoinVault:       accounts[instructionActIdx[5]],
+		PCVault:         accounts[instructionActIdx[6]],
+		SPLTokenProgram: accounts[instructionActIdx[7]],
+		RentSysvar:      accounts[instructionActIdx[8]],
+		FeeDiscount:     accounts[instructionActIdx[9]],
 	}
 
 	return nil

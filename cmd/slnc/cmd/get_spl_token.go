@@ -65,7 +65,7 @@ var getSPLTokenCmd = &cobra.Command{
 			text.EncoderColorCyan.Print("Address: ")
 			fmt.Println(keyedAcct.Pubkey.String())
 
-			text.EncoderColorCyan.Print("Owner: ")
+			text.EncoderColorCyan.Print("OpenOrders: ")
 			fmt.Println(keyedAcct.Account.Owner.String())
 
 			text.EncoderColorCyan.Print("Lamports: ")

@@ -55,9 +55,18 @@ type Request struct {
 	Padding              [4]byte `json:"-"`
 	MaxCoinQtyOrCancelId bin.Uint64
 	NativePCQtyLocked    bin.Uint64
-	OrderId              bin.Uint128
-	Owner                [4]bin.Uint64
+	OrderID              bin.Uint128
+	OpenOrders           [4]bin.Uint64 // this is the openOrder address
 	ClientOrderID        bin.Uint64
+}
+
+func (r *Request) Equal(other *Request) bool {
+	//return (r.OrderID.Hi == other.OrderID.Hi && r.OrderID.Lo == other.OrderID.Lo) &&
+	//	(r.MaxCoinQtyOrCancelId == other.MaxCoinQtyOrCancelId) &&
+	//	(r.NativePCQtyLocked == other.NativePCQtyLocked)
+	return (r.OrderID.Hi == other.OrderID.Hi && r.OrderID.Lo == other.OrderID.Lo) &&
+		(r.MaxCoinQtyOrCancelId == other.MaxCoinQtyOrCancelId) &&
+		(r.NativePCQtyLocked == other.NativePCQtyLocked)
 }
 
 type EventQueue struct {
@@ -80,7 +89,7 @@ func (q *EventQueue) Decode(data []byte) error {
 type EventFlag uint8
 
 const (
-	EventFlagFill = RequestFlag(1 << iota)
+	EventFlagFill = EventFlag(1 << iota)
 	EventFlagOut
 	EventFlagBid
 	EventFlagMaker
@@ -104,6 +113,10 @@ type Event struct {
 	OrderID           bin.Uint128
 	Owner             solana.PublicKey
 	ClientOrderID     uint64
+}
+
+func (e *Event) Equal(other *Event) bool {
+	return e.OrderID.Hi == other.OrderID.Hi && e.OrderID.Lo == other.OrderID.Lo
 }
 
 func (e *Event) Side() EventSide {

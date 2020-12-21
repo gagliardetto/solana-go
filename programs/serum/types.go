@@ -61,6 +61,13 @@ func (a *AccountFlag) String() string {
 	return fmt.Sprintf("%s %s", status, account_type)
 }
 
+type Side uint32
+
+const (
+	SideBid = iota
+	SideAsk
+)
+
 type MarketV2 struct {
 	SerumPadding           [5]byte `json:"-"`
 	AccountFlags           AccountFlag

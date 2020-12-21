@@ -90,25 +90,10 @@ func (s SideLayout) getSide() SideLayoutType {
 	return SideLayoutTypeUnknown
 }
 
-type OrderType string
+type OrderType uint32
 
 const (
-	OrderTypeUnknown           OrderType = "UNKNOWN"
-	OrderTypeLimit             OrderType = "LIMIT"
-	OrderTypeImmediateOrCancel OrderType = "IMMEDIATE_OR_CANCEL"
-	OrderTypePostOnly          OrderType = "POST_ONLY"
+	OrderTypeLimit = OrderType(0)
+	OrderTypeImmediateOrCancel
+	OrderTypePostOnly
 )
-
-type OrderTypeLayout uint32
-
-func (o OrderTypeLayout) getOrderType() OrderType {
-	switch o {
-	case 0:
-		return OrderTypeLimit
-	case 1:
-		return OrderTypeImmediateOrCancel
-	case 2:
-		return OrderTypePostOnly
-	}
-	return OrderTypeUnknown
-}
