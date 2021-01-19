@@ -75,7 +75,7 @@ type EventQueue struct {
 	SerumPadding [5]byte `json:"-"`
 
 	AccountFlags AccountFlag
-	Head         bin.Uint64
+	Head         bin.Uint64 `bin:"sliceoffsetof=Events,88"`
 	Count        bin.Uint64 `bin:"sizeof=Events"`
 	SeqNum       bin.Uint64
 	Events       []*Event
@@ -90,11 +90,17 @@ func (q *EventQueue) Decode(data []byte) error {
 
 type EventFlag uint8
 
+//enum EventFlag {
+//    Fill = 0x1,
+//    Out = 0x2,
+//    Bid = 0x4,
+//    Maker = 0x8,
+//}
 const (
-	EventFlagFill = EventFlag(1 << iota)
-	EventFlagOut
-	EventFlagBid
-	EventFlagMaker
+	EventFlagFill  = 0x1
+	EventFlagOut   = 0x2
+	EventFlagBid   = 0x4
+	EventFlagMaker = 0x8
 )
 
 func (e EventFlag) IsFill() bool {
@@ -159,4 +165,4 @@ func (e *Event) Filled() bool {
 	return Has(uint8(e.Flag), uint8(EventFlagFill))
 }
 
-func Has(b, flag uint8) bool { return b&flag != 0 }
+func Has(b, flag uint8) bool { return b&flag == flag }

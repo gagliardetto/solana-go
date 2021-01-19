@@ -38,6 +38,39 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestHas(t *testing.T) {
+
+	cases := []struct {
+		flag     uint8
+		name     string
+		expected string
+	}{
+		{
+			name:     "2",
+			flag:     uint8(2),
+			expected: "OUT",
+		},
+		{
+			name:     "1",
+			flag:     uint8(1),
+			expected: "FILL",
+		},
+		{
+			name:     "6",
+			flag:     uint8(6),
+			expected: "OUT | BID",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			f := EventFlag(c.flag)
+			require.Equal(t, f.String(), c.expected)
+		})
+	}
+
+}
+
 func TestRequestQueue_Decoder(t *testing.T) {
 	bas64 := "c2VydW0JAAAAAAAAAAMAAAAAAAAAAAAAAAAAAACVlZMAAAAAAA0DBgEAAAAAECcAAAAAAABYvqFvAAAAAG1qbP//////TwcAAAAAAABbQ4ijQxgyr1dCuGPiALjnM85FHycAbicj2RmLNjNV0Y799DoWgU4WDQYGAQAAAAC4CwAAAAAAAMx8hiEAAAAAbGps//////9RBwAAAAAAAFtDiKNDGDKvV0K4Y+IAuOczzkUfJwBuJyPZGYs2M1XR6LcKOxaBThYNBwYBAAAAAIgTAAAAAAAAQILYNwAAAABramz//////1AHAAAAAAAAW0OIo0MYMq9XQrhj4gC45zPORR8nAG4nI9kZizYzVdE84P86FoFOFgYDAAAAAAAAjpWTAAAAAAAAAAAAAAAAAHtqbP//////TQcAAAAAAABbQ4ijQxgyr1dCuGPiALjnM85FHycAbicj2RmLNjNV0ZgF0ywMgU4WBgYAAAAAAACPlZMAAAAAAAAAAAAAAAAAemps//////9OBwAAAAAAAFtDiKNDGDKvV0K4Y+IAuOczzkUfJwBuJyPZGYs2M1XRkdfdLAyBThYGBwAAAAAAAJCVkwAAAAAAAAAAAAAAAACBamz//////08HAAAAAAAAW0OIo0MYMq9XQrhj4gC45zPORR8nAG4nI9kZizYzVdGFpMuDCYFOFgkABgEAAAAAuAsAAAAAAAAAAAAAAAAAAJGVkwAAAAAAWwcAAAAAAABbQ4ijQxgyr1dCuGPiALjnM85FHycAbicj2RmLNjNV0WFf6ToWgU4WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcGFkZGluZw=="
 	data, err := base64.StdEncoding.DecodeString(bas64)
