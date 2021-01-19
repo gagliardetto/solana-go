@@ -15,6 +15,8 @@
 package serum
 
 import (
+	"strings"
+
 	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
 )
@@ -101,6 +103,32 @@ func (e EventFlag) IsFill() bool {
 
 func (e EventFlag) IsOut() bool {
 	return Has(uint8(e), uint8(EventFlagOut))
+}
+
+func (e EventFlag) IsBid() bool {
+	return Has(uint8(e), uint8(EventFlagBid))
+}
+
+func (e EventFlag) IsMaker() bool {
+	return Has(uint8(e), uint8(EventFlagMaker))
+}
+
+func (e EventFlag) String() string {
+	var flags []string
+	if e.IsFill() {
+		flags = append(flags, "FILL")
+	}
+	if e.IsOut() {
+		flags = append(flags, "OUT")
+	}
+	if e.IsBid() {
+		flags = append(flags, "BID")
+	}
+	if e.IsMaker() {
+		flags = append(flags, "MAKER")
+	}
+
+	return strings.Join(flags, " | ")
 }
 
 type Event struct {
