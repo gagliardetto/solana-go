@@ -146,7 +146,7 @@ type Event struct {
 	NativeQtyPaid     uint64
 	NativeFeeOrRebate uint64
 	OrderID           bin.Uint128
-	Owner             solana.PublicKey
+	Owner             solana.PublicKey // OpenOrder Account address NOT trader
 	ClientOrderID     uint64
 }
 
