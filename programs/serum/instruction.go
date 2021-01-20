@@ -14,22 +14,23 @@ func init() {
 	solana.RegisterInstructionDecoder(PROGRAM_ID, registryDecodeInstruction)
 }
 
-func registryDecodeInstruction(accounts []*solana.AccountMeta, rawInstruction *solana.CompiledInstruction) (interface{}, error) {
-	inst, err := DecodeInstruction(accounts, rawInstruction)
+func registryDecodeInstruction(accounts []*solana.AccountMeta, data []byte) (interface{}, error) {
+	inst, err := DecodeInstruction(accounts, data)
 	if err != nil {
 		return nil, err
 	}
 	return inst, nil
 }
 
-func DecodeInstruction(accounts []*solana.AccountMeta, compiledInstruction *solana.CompiledInstruction) (*Instruction, error) {
+func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instruction, error) {
+	// FIXME: can't we dedupe this in some ways? It's copied in all of the programs' folders.
 	var inst Instruction
-	if err := bin.NewDecoder(compiledInstruction.Data).Decode(&inst); err != nil {
+	if err := bin.NewDecoder(data).Decode(&inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
 
 	if v, ok := inst.Impl.(solana.AccountSettable); ok {
-		err := v.SetAccounts(accounts, compiledInstruction.Accounts)
+		err := v.SetAccounts(accounts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
 		}
@@ -136,24 +137,24 @@ type InstructionNewOrder struct {
 	Accounts *NewOrderAccounts `bin:"-"`
 }
 
-func (i *InstructionNewOrder) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
-	if len(instructionActIdx) < 9 {
+func (i *InstructionNewOrder) SetAccounts(accounts []*solana.AccountMeta) error {
+	if len(accounts) < 9 {
 		return fmt.Errorf("insuficient account, New Order requires at-least 10 accounts not %d", len(accounts))
 	}
 	i.Accounts = &NewOrderAccounts{
-		Market:          accounts[instructionActIdx[0]],
-		OpenOrders:      accounts[instructionActIdx[1]],
-		RequestQueue:    accounts[instructionActIdx[2]],
-		Payer:           accounts[instructionActIdx[3]],
-		Owner:           accounts[instructionActIdx[4]],
-		CoinVault:       accounts[instructionActIdx[5]],
-		PCVault:         accounts[instructionActIdx[6]],
-		SPLTokenProgram: accounts[instructionActIdx[7]],
-		Rent:            accounts[instructionActIdx[8]],
+		Market:          accounts[0],
+		OpenOrders:      accounts[1],
+		RequestQueue:    accounts[2],
+		Payer:           accounts[3],
+		Owner:           accounts[4],
+		CoinVault:       accounts[5],
+		PCVault:         accounts[6],
+		SPLTokenProgram: accounts[7],
+		Rent:            accounts[8],
 	}
 
-	if len(instructionActIdx) >= 10 {
-		i.Accounts.SRMDiscountAccount = accounts[instructionActIdx[9]]
+	if len(accounts) >= 10 {
+		i.Accounts.SRMDiscountAccount = accounts[9]
 	}
 
 	return nil

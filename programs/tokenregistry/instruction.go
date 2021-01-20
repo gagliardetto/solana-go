@@ -15,22 +15,22 @@ func init() {
 	solana.RegisterInstructionDecoder(ProgramID(), registryDecodeInstruction)
 }
 
-func registryDecodeInstruction(accounts []*solana.AccountMeta, rawInstruction *solana.CompiledInstruction) (interface{}, error) {
-	inst, err := DecodeInstruction(accounts, rawInstruction)
+func registryDecodeInstruction(accounts []*solana.AccountMeta, data []byte) (interface{}, error) {
+	inst, err := DecodeInstruction(accounts, data)
 	if err != nil {
 		return nil, err
 	}
 	return inst, nil
 }
 
-func DecodeInstruction(accounts []*solana.AccountMeta, compiledInstruction *solana.CompiledInstruction) (*Instruction, error) {
+func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instruction, error) {
 	var inst Instruction
-	if err := bin.NewDecoder(compiledInstruction.Data).Decode(&inst); err != nil {
+	if err := bin.NewDecoder(data).Decode(&inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
 
 	if v, ok := inst.Impl.(solana.AccountSettable); ok {
-		err := v.SetAccounts(accounts, compiledInstruction.Accounts)
+		err := v.SetAccounts(accounts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
 		}
@@ -117,14 +117,14 @@ type RegisterToken struct {
 	Accounts *RegisterTokenAccounts `bin:"-"`
 }
 
-func (i *RegisterToken) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
-	if len(instructionActIdx) < 9 {
+func (i *RegisterToken) SetAccounts(accounts []*solana.AccountMeta) error {
+	if len(accounts) < 9 {
 		return fmt.Errorf("insuficient account")
 	}
 	i.Accounts = &RegisterTokenAccounts{
-		TokenMeta: accounts[instructionActIdx[0]],
-		Owner:     accounts[instructionActIdx[1]],
-		Token:     accounts[instructionActIdx[2]],
+		TokenMeta: accounts[0],
+		Owner:     accounts[1],
+		Token:     accounts[2],
 	}
 
 	return nil
