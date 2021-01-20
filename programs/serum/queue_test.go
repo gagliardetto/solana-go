@@ -25,6 +25,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dfuse-io/solana-go/text"
+
 	"github.com/klauspost/compress/zstd"
 
 	"github.com/dfuse-io/solana-go"
@@ -38,36 +40,66 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestHas(t *testing.T) {
+func TestDecoder_ScanEvenQueue(t *testing.T) {
+	t.Skip("long running script")
+	dataFile := "testdata/sol_usdc_event_queue.hex"
 
-	cases := []struct {
-		flag     uint8
-		name     string
-		expected string
-	}{
-		{
-			name:     "2",
-			flag:     uint8(2),
-			expected: "OUT",
-		},
-		{
-			name:     "1",
-			flag:     uint8(1),
-			expected: "FILL",
-		},
-		{
-			name:     "6",
-			flag:     uint8(6),
-			expected: "OUT | BID",
-		},
+	data, err := ioutil.ReadFile(dataFile)
+	require.NoError(t, err)
+
+	byteData, err := hex.DecodeString(string(data))
+	require.NoError(t, err)
+
+	offset := 5 + 8 + 8 + 8 + 8
+
+	decoder := bin.NewDecoder(byteData[offset:])
+
+	i := 0
+	for {
+		e := &Event{}
+		err := decoder.Decode(e)
+		require.NoError(t, err)
+
+		fmt.Printf("Index: %d: Event: %s NativeQtyPaid: %d\n", i, e.Flag.String(), e.NativeQtyPaid)
+		i += 1
 	}
 
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			f := EventFlag(c.flag)
-			require.Equal(t, f.String(), c.expected)
-		})
-	}
+}
+
+func TestDecoder_EventQueue(t *testing.T) {
+	t.Skip("long running script")
+	oldDataFile := "testdata/eq-old.hex"
+	newDataFile := "testdata/eq-new.hex"
+
+	oldData, err := ioutil.ReadFile(oldDataFile)
+	require.NoError(t, err)
+
+	newData, err := ioutil.ReadFile(newDataFile)
+	require.NoError(t, err)
+
+	oldByteData, err := hex.DecodeString(string(oldData))
+	require.NoError(t, err)
+
+	newByteData, err := hex.DecodeString(string(newData))
+	require.NoError(t, err)
+
+	oldQueue := &EventQueue{}
+	err = bin.NewDecoder(oldByteData).Decode(&oldQueue)
+	require.NoError(t, err)
+
+	oldOut, err := os.Create("testdata/eq-old.log")
+	require.NoError(t, err)
+
+	text.NewEncoder(oldOut).Encode(oldQueue, nil)
+
+	newQueue := &EventQueue{}
+	err = bin.NewDecoder(newByteData).Decode(&newQueue)
+	require.NoError(t, err)
+
+	newOut, err := os.Create("testdata/eq-new.log")
+	require.NoError(t, err)
+
+	text.NewEncoder(newOut).Encode(newQueue, nil)
 
 }
 
@@ -128,6 +160,67 @@ func TestDecoder_EventQueue_Diff(t *testing.T) {
 
 	fmt.Println("==>> All diff(s)")
 	diff.Diff(oldQueue, newQueue, diff.OnEvent(func(event diff.Event) { fmt.Println("Event " + event.String()) }))
+}
+
+func Test_fill(t *testing.T) {
+	tests := []struct {
+		name          string
+		e             *Event
+		expectIsFill  bool
+		expectIsOut   bool
+		expectIsBid   bool
+		expectIsMaker bool
+	}{
+		{
+			name: "Is Fill",
+			e: &Event{
+				Flag: 0b00000001,
+			},
+			expectIsFill:  true,
+			expectIsOut:   false,
+			expectIsBid:   false,
+			expectIsMaker: false,
+		},
+		{
+			name: "Is Out",
+			e: &Event{
+				Flag: 0b00000010,
+			},
+			expectIsFill:  false,
+			expectIsOut:   true,
+			expectIsBid:   false,
+			expectIsMaker: false,
+		},
+		{
+			name: "Is Fill & bid",
+			e: &Event{
+				Flag: 0b00000101,
+			},
+			expectIsFill:  true,
+			expectIsOut:   false,
+			expectIsBid:   true,
+			expectIsMaker: false,
+		},
+		{
+			name: "Is Fill & bid & maker",
+			e: &Event{
+				Flag: 0b00001101,
+			},
+			expectIsFill:  true,
+			expectIsOut:   false,
+			expectIsBid:   true,
+			expectIsMaker: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.expectIsFill, test.e.Flag.IsFill())
+			assert.Equal(t, test.expectIsOut, test.e.Flag.IsOut())
+			assert.Equal(t, test.expectIsBid, test.e.Flag.IsBid())
+			assert.Equal(t, test.expectIsMaker, test.e.Flag.IsMaker())
+		})
+	}
 }
 
 func TestDecoder_EventQueue_DiffManual(t *testing.T) {

@@ -1,0 +1,39 @@
+
+ EventQueue
+ SerumPadding: 
+  [0] 115
+  [1] 101
+  [2] 114
+  [3] 117
+  [4] 109
+ AccountFlags: 17
+ Head: 6686
+ Count: 1
+ SeqNum: 2234792
+ Events: 
+  [0] 
+   Event
+   Flag: OUT | BID
+   OwnerSlot: 0
+   FeeTier: 0
+   Padding: 
+    [0] 0
+    [1] 0
+    [2] 0
+    [3] 0
+    [4] 0
+   NativeQtyReleased: 5450137600
+   NativeQtyPaid: 0
+   NativeFeeOrRebate: 0
+   OrderID: 0x2971cfffffffffff0004000000000000
+   Owner: H1ByNS27xiRyccKs9jhAUTV6VVJZMvbr6vmoF7DXgQmG
+   ClientOrderID: 11364630384502429335
+
+ EndPadding: 
+  [0] 6
+  [1] 1
+  [2] 0
+  [3] 0
+  [4] 0
+  [5] 0
+  [6] 0

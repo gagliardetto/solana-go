@@ -54,8 +54,8 @@ type Request struct {
 	OwnerSlot            uint8
 	FeeTier              uint8
 	SelfTradeBehavior    uint8
-	Padding              [4]byte `json:"-"`
-	MaxCoinQtyOrCancelId bin.Uint64
+	Padding              [4]byte    `json:"-"`
+	MaxCoinQtyOrCancelId bin.Uint64 //the max amount you wish to buy or sell
 	NativePCQtyLocked    bin.Uint64
 	OrderID              bin.Uint128
 	OpenOrders           [4]bin.Uint64 // this is the openOrder address
@@ -137,19 +137,27 @@ func (e EventFlag) String() string {
 	return strings.Join(flags, " | ")
 }
 
+// 88 bytes in length
 type Event struct {
 	Flag              EventFlag
 	OwnerSlot         uint8
 	FeeTier           uint8
 	Padding           [5]uint8
-	NativeQtyReleased uint64
-	NativeQtyPaid     uint64
-	NativeFeeOrRebate uint64
+	NativeQtyReleased uint64 // the amount you should lease (free to settle)
+	NativeQtyPaid     uint64 // The amout of out of your acount
+	NativeFeeOrRebate uint64 // maker etc...
 	OrderID           bin.Uint128
 	Owner             solana.PublicKey // OpenOrder Account address NOT trader
 	ClientOrderID     uint64
 }
 
+/* Fill Event*/
+// BID: Buying Coin paying in PC
+// NativeQtyPaid will deplete PC
+// NativeQtyReleased: (native_qty_received) amount of Coin you received
+//	will incremet natice_coin_total, native_coin_free
+
+// ASK: Buying PC paying in COIN
 func (e *Event) Equal(other *Event) bool {
 	return e.OrderID.Hi == other.OrderID.Hi && e.OrderID.Lo == other.OrderID.Lo
 }
