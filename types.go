@@ -25,8 +25,42 @@ type Transaction struct {
 	Message    Message     `json:"message"`
 }
 
-func (t *Transaction) TouchAccount(account PublicKey) bool {
-	for _, a := range t.Message.AccountKeys {
+func (t *Transaction) TouchAccount(account PublicKey) bool   { return t.Message.TouchAccount(account) }
+func (t *Transaction) IsSigner(account PublicKey) bool       { return t.Message.IsSigner(account) }
+func (t *Transaction) IsWritable(account PublicKey) bool     { return t.Message.IsWritable(account) }
+func (t *Transaction) AccountMetaList() (out []*AccountMeta) { return t.Message.AccountMetaList() }
+func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint8) (PublicKey, error) {
+	return t.Message.ResolveProgramIDIndex(programIDIndex)
+}
+
+type Message struct {
+	Header          MessageHeader `json:"header"`
+	AccountKeys     []PublicKey   `json:"accountKeys"`
+	RecentBlockhash PublicKey/* TODO: change to Hash */ `json:"recentBlockhash"`
+	Instructions    []CompiledInstruction `json:"instructions"`
+}
+
+func (m *Message) AccountMetaList() (out []*AccountMeta) {
+	return m.AccountMetaList()
+	for _, a := range m.AccountKeys {
+		out = append(out, &AccountMeta{
+			PublicKey:  a,
+			IsSigner:   m.IsSigner(a),
+			IsWritable: m.IsWritable(a),
+		})
+	}
+	return out
+}
+
+func (m *Message) ResolveProgramIDIndex(programIDIndex uint8) (PublicKey, error) {
+	if int(programIDIndex) < len(m.AccountKeys) {
+		return m.AccountKeys[programIDIndex], nil
+	}
+	return PublicKey{}, fmt.Errorf("programID index not found %d", programIDIndex)
+}
+
+func (m *Message) TouchAccount(account PublicKey) bool {
+	for _, a := range m.AccountKeys {
 		if a.Equals(account) {
 			return true
 		}
@@ -34,19 +68,19 @@ func (t *Transaction) TouchAccount(account PublicKey) bool {
 	return false
 }
 
-func (t *Transaction) IsSigner(account PublicKey) bool {
-	for idx, acc := range t.Message.AccountKeys {
+func (m *Message) IsSigner(account PublicKey) bool {
+	for idx, acc := range m.AccountKeys {
 		if acc.Equals(account) {
-			return idx < int(t.Message.Header.NumRequiredSignatures)
+			return idx < int(m.Header.NumRequiredSignatures)
 		}
 	}
 	return false
 }
 
-func (t *Transaction) IsWritable(account PublicKey) bool {
+func (m *Message) IsWritable(account PublicKey) bool {
 	index := 0
 	found := false
-	for idx, acc := range t.Message.AccountKeys {
+	for idx, acc := range m.AccountKeys {
 		if acc.Equals(account) {
 			found = true
 			index = idx
@@ -55,34 +89,9 @@ func (t *Transaction) IsWritable(account PublicKey) bool {
 	if !found {
 		return false
 	}
-	h := t.Message.Header
+	h := m.Header
 	return (index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)) ||
-		((index >= int(h.NumRequiredSignatures)) && (index < len(t.Message.AccountKeys)-int(h.NumReadonlyUnsignedAccounts)))
-}
-
-func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint8) (PublicKey, error) {
-	if int(programIDIndex) < len(t.Message.AccountKeys) {
-		return t.Message.AccountKeys[programIDIndex], nil
-	}
-	return PublicKey{}, fmt.Errorf("programID index not found %d", programIDIndex)
-}
-
-func (t *Transaction) AccountMetaList() (out []*AccountMeta) {
-	for _, a := range t.Message.AccountKeys {
-		out = append(out, &AccountMeta{
-			PublicKey:  a,
-			IsSigner:   t.IsSigner(a),
-			IsWritable: t.IsWritable(a),
-		})
-	}
-	return out
-}
-
-type Message struct {
-	Header          MessageHeader `json:"header"`
-	AccountKeys     []PublicKey   `json:"accountKeys"`
-	RecentBlockhash PublicKey/* TODO: change to Hash */ `json:"recentBlockhash"`
-	Instructions    []CompiledInstruction `json:"instructions"`
+		((index >= int(h.NumRequiredSignatures)) && (index < len(m.AccountKeys)-int(h.NumReadonlyUnsignedAccounts)))
 }
 
 func (m *Message) signerKeys() []PublicKey {
@@ -101,6 +110,14 @@ type CompiledInstruction struct {
 	Accounts       []uint8       `json:"accounts"`
 	DataLength     bin.Varuint16 `json:"-" bin:"sizeof=Data"`
 	Data           Base58        `json:"data"`
+}
+
+func (ci *CompiledInstruction) ResolveInstructionAccounts(message *Message) (out []*AccountMeta) {
+	metas := message.AccountMetaList()
+	for _, acct := range ci.Accounts {
+		out = append(out, metas[acct])
+	}
+	return
 }
 
 func TransactionFromData(in []byte) (*Transaction, error) {

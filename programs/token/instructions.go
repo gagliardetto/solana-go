@@ -29,22 +29,22 @@ func init() {
 	solana.RegisterInstructionDecoder(TOKEN_PROGRAM_ID, registryDecodeInstruction)
 }
 
-func registryDecodeInstruction(accounts []*solana.AccountMeta, rawInstruction *solana.CompiledInstruction) (interface{}, error) {
-	inst, err := DecodeInstruction(accounts, rawInstruction)
+func registryDecodeInstruction(accounts []*solana.AccountMeta, data []byte) (interface{}, error) {
+	inst, err := DecodeInstruction(accounts, data)
 	if err != nil {
 		return nil, err
 	}
 	return inst, nil
 }
 
-func DecodeInstruction(accounts []*solana.AccountMeta, compiledInstruction *solana.CompiledInstruction) (*Instruction, error) {
+func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instruction, error) {
 	var inst Instruction
-	if err := bin.NewDecoder(compiledInstruction.Data).Decode(&inst); err != nil {
+	if err := bin.NewDecoder(data).Decode(&inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
 
 	if v, ok := inst.Impl.(solana.AccountSettable); ok {
-		err := v.SetAccounts(accounts, compiledInstruction.Accounts)
+		err := v.SetAccounts(accounts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
 		}
@@ -192,12 +192,12 @@ type InitializeAccount struct {
 	Accounts *InitializeAccountAccounts `bin:"-"`
 }
 
-func (i *InitializeAccount) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
+func (i *InitializeAccount) SetAccounts(accounts []*solana.AccountMeta) error {
 	i.Accounts = &InitializeAccountAccounts{
-		Account:    accounts[instructionActIdx[0]],
-		Mint:       accounts[instructionActIdx[1]],
-		Owner:      accounts[instructionActIdx[2]],
-		RentSysvar: accounts[instructionActIdx[3]],
+		Account:    accounts[0],
+		Mint:       accounts[1],
+		Owner:      accounts[2],
+		RentSysvar: accounts[3],
 	}
 	return nil
 }

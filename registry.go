@@ -4,7 +4,10 @@ import (
 	"fmt"
 )
 
-type InstructionDecoder func([]*AccountMeta, *CompiledInstruction) (interface{}, error)
+// InstructionDecoder receives the AccountMeta FOR THAT INSTRUCTION,
+// and not the accounts of the *Message object. Resolve with
+// CompiledInstruction.ResolveInstructionAccounts(message) beforehand.
+type InstructionDecoder func(instructionAccounts []*AccountMeta, data []byte) (interface{}, error)
 
 var InstructionDecoderRegistry = map[string]InstructionDecoder{}
 
@@ -16,7 +19,7 @@ func RegisterInstructionDecoder(programID PublicKey, decoder InstructionDecoder)
 	InstructionDecoderRegistry[p] = decoder
 }
 
-func DecodeInstruction(programID PublicKey, accounts []*AccountMeta, inst *CompiledInstruction) (interface{}, error) {
+func DecodeInstruction(programID PublicKey, accounts []*AccountMeta, data []byte) (interface{}, error) {
 	p := programID.String()
 
 	decoder, found := InstructionDecoderRegistry[p]
@@ -24,5 +27,5 @@ func DecodeInstruction(programID PublicKey, accounts []*AccountMeta, inst *Compi
 		return nil, fmt.Errorf("unknown programID, cannot find any instruction decoder %q", p)
 	}
 
-	return decoder(accounts, inst)
+	return decoder(accounts, data)
 }

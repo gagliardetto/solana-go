@@ -93,7 +93,7 @@ var getTransactionsCmd = &cobra.Command{
 					continue
 				}
 
-				decoded, err := decoder(ct.Transaction.AccountMetaList(), &i)
+				decoded, err := decoder(ct.Transaction.AccountMetaList(), i.Data)
 				if err != nil {
 					return fmt.Errorf("unable to decode instruction: %w", err)
 				}
