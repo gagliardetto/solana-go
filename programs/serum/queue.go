@@ -25,10 +25,11 @@ type RequestQueue struct {
 	SerumPadding [5]byte `json:"-"`
 
 	AccountFlags AccountFlag
-	Head         bin.Uint64
-	Count        bin.Uint64 `bin:"sizeof=Requests"`
-	NextSeqNum   bin.Uint64
-	Requests     []*Request
+	Head         bin.Uint64 `bin:"sliceoffsetof=Requests,80"`
+
+	Count      bin.Uint64 `bin:"sizeof=Requests"`
+	NextSeqNum bin.Uint64
+	Requests   []*Request
 
 	EndPadding [7]byte `json:"-"`
 }
@@ -99,6 +100,7 @@ func (r RequestFlag) IsDecrementTakeOnSelfTrade() bool {
 	return Has(uint8(r), uint8(RequestFlagDecrementTakeOnSelfTrade))
 }
 
+// Size 80 byte
 type Request struct {
 	RequestFlags         RequestFlag
 	OwnerSlot            uint8
