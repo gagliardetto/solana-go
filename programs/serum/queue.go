@@ -49,6 +49,56 @@ const (
 	RequestFlagDecrementTakeOnSelfTrade
 )
 
+func (f RequestFlag) String() string {
+	var flags []string
+
+	if f.IsNewOrder() {
+		flags = append(flags, "NEW_ORDER")
+	}
+	if f.IsCancelOrder() {
+		flags = append(flags, "CANCEL_ORDER")
+	}
+	if f.IsBid() {
+		flags = append(flags, "BID")
+	} else {
+		flags = append(flags, "ASK")
+	}
+	if f.IsPostOnly() {
+		flags = append(flags, "POST_ONLY")
+	}
+	if f.IsImmediateOrCancel() {
+		flags = append(flags, "IMMEDIATE_OR_CANCEL")
+	}
+	if f.IsDecrementTakeOnSelfTrade() {
+		flags = append(flags, "DECR_TAKE_ON_SELF")
+	}
+	return strings.Join(flags, " | ")
+}
+
+func (r RequestFlag) IsNewOrder() bool {
+	return Has(uint8(r), uint8(RequestFlagNewOrder))
+}
+
+func (r RequestFlag) IsCancelOrder() bool {
+	return Has(uint8(r), uint8(RequestFlagCancelOrder))
+}
+
+func (r RequestFlag) IsBid() bool {
+	return Has(uint8(r), uint8(RequestFlagBid))
+}
+
+func (r RequestFlag) IsPostOnly() bool {
+	return Has(uint8(r), uint8(RequestFlagPostOnly))
+}
+
+func (r RequestFlag) IsImmediateOrCancel() bool {
+	return Has(uint8(r), uint8(RequestFlagImmediateOrCancel))
+}
+
+func (r RequestFlag) IsDecrementTakeOnSelfTrade() bool {
+	return Has(uint8(r), uint8(RequestFlagDecrementTakeOnSelfTrade))
+}
+
 type Request struct {
 	RequestFlags         RequestFlag
 	OwnerSlot            uint8
