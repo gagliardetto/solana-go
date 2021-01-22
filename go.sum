@@ -57,6 +57,8 @@ github.com/dfuse-io/binary v0.0.0-20201216050955-b339f1d2cdbe h1:ZeHLGT3cuFZSZ8i
 github.com/dfuse-io/binary v0.0.0-20201216050955-b339f1d2cdbe/go.mod h1:GDFX6qH3BQZPWTeYaA4ZW98T94zs2skRoG3oMz/0jw0=
 github.com/dfuse-io/binary v0.0.0-20210119182726-f245aa830ba8 h1:7/6ofivaY8iF8YWOxBG9ANq8mBgmEKKvmDjwpb9+7F0=
 github.com/dfuse-io/binary v0.0.0-20210119182726-f245aa830ba8/go.mod h1:GDFX6qH3BQZPWTeYaA4ZW98T94zs2skRoG3oMz/0jw0=
+github.com/dfuse-io/binary v0.0.0-20210122184003-f928bf9f54c1 h1:9S1eeJIJpVeVRt+TowP8FjynB6V9m0KhkqUK1IebPtI=
+github.com/dfuse-io/binary v0.0.0-20210122184003-f928bf9f54c1/go.mod h1:GDFX6qH3BQZPWTeYaA4ZW98T94zs2skRoG3oMz/0jw0=
 github.com/dfuse-io/logging v0.0.0-20201110202154-26697de88c79 h1:+HRtcJejUYA/2rnyTMbOaZ4g7f4aVuFduTV/03dbpLY=
 github.com/dfuse-io/logging v0.0.0-20201110202154-26697de88c79/go.mod h1:V+ED4kT/t/lKtH99JQmKIb0v9WL3VaYkJ36CfHlVECI=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=

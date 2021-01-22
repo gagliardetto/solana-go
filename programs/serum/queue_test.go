@@ -16,7 +16,6 @@ package serum
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -24,8 +23,6 @@ import (
 	"os"
 	"testing"
 	"time"
-
-	"github.com/dfuse-io/solana-go/text"
 
 	"github.com/klauspost/compress/zstd"
 
@@ -42,7 +39,7 @@ import (
 
 func TestDecoder_ScanEvenQueue(t *testing.T) {
 	t.Skip("long running script")
-	dataFile := "testdata/sol_usdc_event_queue.hex"
+	dataFile := "testdata/event-queue-rollover.log"
 
 	data, err := ioutil.ReadFile(dataFile)
 	require.NoError(t, err)
@@ -60,65 +57,26 @@ func TestDecoder_ScanEvenQueue(t *testing.T) {
 		err := decoder.Decode(e)
 		require.NoError(t, err)
 
-		fmt.Printf("Index: %d: Event: %s NativeQtyPaid: %d\n", i, e.Flag.String(), e.NativeQtyPaid)
+		fmt.Printf("Index: %d: Event: %s NativeQtyPaid: %d\n", i, e.Flag.String(), decoder.Remaining())
 		i += 1
 	}
-
 }
 
-func TestDecoder_EventQueue(t *testing.T) {
-	t.Skip("long running script")
-	oldDataFile := "testdata/eq-old.hex"
-	newDataFile := "testdata/eq-new.hex"
-
-	oldData, err := ioutil.ReadFile(oldDataFile)
+func TestEventQueue_Decoder_withRollOver(t *testing.T) {
+	eqCnt, err := ioutil.ReadFile("testdata/event-queue-rollover.log")
 	require.NoError(t, err)
 
-	newData, err := ioutil.ReadFile(newDataFile)
+	data, err := hex.DecodeString(string(eqCnt))
 	require.NoError(t, err)
 
-	oldByteData, err := hex.DecodeString(string(oldData))
-	require.NoError(t, err)
-
-	newByteData, err := hex.DecodeString(string(newData))
-	require.NoError(t, err)
-
-	oldQueue := &EventQueue{}
-	err = bin.NewDecoder(oldByteData).Decode(&oldQueue)
-	require.NoError(t, err)
-
-	oldOut, err := os.Create("testdata/eq-old.log")
-	require.NoError(t, err)
-
-	text.NewEncoder(oldOut).Encode(oldQueue, nil)
-
-	newQueue := &EventQueue{}
-	err = bin.NewDecoder(newByteData).Decode(&newQueue)
-	require.NoError(t, err)
-
-	newOut, err := os.Create("testdata/eq-new.log")
-	require.NoError(t, err)
-
-	text.NewEncoder(newOut).Encode(newQueue, nil)
-
-}
-
-func TestRequestQueue_Decoder(t *testing.T) {
-	bas64 := "c2VydW0JAAAAAAAAAAMAAAAAAAAAAAAAAAAAAACVlZMAAAAAAA0DBgEAAAAAECcAAAAAAABYvqFvAAAAAG1qbP//////TwcAAAAAAABbQ4ijQxgyr1dCuGPiALjnM85FHycAbicj2RmLNjNV0Y799DoWgU4WDQYGAQAAAAC4CwAAAAAAAMx8hiEAAAAAbGps//////9RBwAAAAAAAFtDiKNDGDKvV0K4Y+IAuOczzkUfJwBuJyPZGYs2M1XR6LcKOxaBThYNBwYBAAAAAIgTAAAAAAAAQILYNwAAAABramz//////1AHAAAAAAAAW0OIo0MYMq9XQrhj4gC45zPORR8nAG4nI9kZizYzVdE84P86FoFOFgYDAAAAAAAAjpWTAAAAAAAAAAAAAAAAAHtqbP//////TQcAAAAAAABbQ4ijQxgyr1dCuGPiALjnM85FHycAbicj2RmLNjNV0ZgF0ywMgU4WBgYAAAAAAACPlZMAAAAAAAAAAAAAAAAAemps//////9OBwAAAAAAAFtDiKNDGDKvV0K4Y+IAuOczzkUfJwBuJyPZGYs2M1XRkdfdLAyBThYGBwAAAAAAAJCVkwAAAAAAAAAAAAAAAACBamz//////08HAAAAAAAAW0OIo0MYMq9XQrhj4gC45zPORR8nAG4nI9kZizYzVdGFpMuDCYFOFgkABgEAAAAAuAsAAAAAAAAAAAAAAAAAAJGVkwAAAAAAWwcAAAAAAABbQ4ijQxgyr1dCuGPiALjnM85FHycAbicj2RmLNjNV0WFf6ToWgU4WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcGFkZGluZw=="
-	data, err := base64.StdEncoding.DecodeString(bas64)
-	require.NoError(t, err)
-
-	fmt.Println(hex.EncodeToString(data))
-
-	var q *RequestQueue
+	var q *EventQueue
 	err = bin.NewDecoder(data).Decode(&q)
 	require.NoError(t, err)
 
-	assert.Equal(t, true, q.AccountFlags.Is(AccountFlagRequestQueue))
-	assert.Equal(t, true, q.AccountFlags.Is(AccountFlagInitialized))
-	assert.Equal(t, bin.Uint64(3), q.Head)
-	assert.Equal(t, bin.Uint64(9672085), q.NextSeqNum)
-	assert.Equal(t, bin.Uint64(0), q.Count)
+	cnt, err := json.MarshalIndent(q, "", "  ")
+	require.NoError(t, err)
+
+	fmt.Println(string(cnt))
 }
 
 func TestDecoder_EventQueue_Diff(t *testing.T) {

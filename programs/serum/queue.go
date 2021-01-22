@@ -39,6 +39,52 @@ func (r *RequestQueue) Decode(data []byte) error {
 	return decoder.Decode(&r)
 }
 
+func (q *RequestQueue) UnmarshalBinary(decoder *bin.Decoder) (err error) {
+	if err = decoder.SkipBytes(5); err != nil {
+		return err
+	}
+
+	if err = decoder.Decode(&q.AccountFlags); err != nil {
+		return err
+	}
+	if err = decoder.Decode(&q.Head); err != nil {
+		return err
+	}
+
+	if err = decoder.Decode(&q.Count); err != nil {
+		return err
+	}
+
+	if err = decoder.Decode(&q.NextSeqNum); err != nil {
+		return err
+	}
+
+	ringbufStartByte := decoder.Position()
+	ringbufByteSize := uint(decoder.Remaining() - 7)
+	ringbugLength := ringbufByteSize / EVENT_BYTE_SIZE
+
+	q.Requests = make([]*Request, q.Count)
+
+	for i := uint(0); i < uint(q.Count); i++ {
+		itemIndex := ((uint(q.Head) + i) % ringbugLength)
+		offset := ringbufStartByte + (itemIndex * EVENT_BYTE_SIZE)
+		if err = decoder.SetPosition(offset); err != nil {
+			return err
+		}
+
+		if err = decoder.Decode(&q.Requests[i]); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// TODO: fill up later
+func (q *RequestQueue) MarshalBinary(encoder *bin.Encoder) error {
+	return nil
+}
+
 type RequestFlag uint8
 
 const (
@@ -123,6 +169,12 @@ func (r *Request) Equal(other *Request) bool {
 		(r.NativePCQtyLocked == other.NativePCQtyLocked)
 }
 
+// -> 262144 + 12 bytes
+// -> 12 bytes of serum padding -> 262144
+// -> 262144 = HEADER + RING-BUFFER
+// -> HEADER = 32 bytes
+// -> RING BUFF = (262144 - 32)  262112
+// -> ring buf (262144 - 32) -> 262112 -> max number of event
 type EventQueue struct {
 	SerumPadding [5]byte `json:"-"`
 
@@ -138,6 +190,52 @@ type EventQueue struct {
 func (q *EventQueue) Decode(data []byte) error {
 	decoder := bin.NewDecoder(data)
 	return decoder.Decode(&q)
+}
+
+func (q *EventQueue) UnmarshalBinary(decoder *bin.Decoder) (err error) {
+	if err = decoder.SkipBytes(5); err != nil {
+		return err
+	}
+
+	if err = decoder.Decode(&q.AccountFlags); err != nil {
+		return err
+	}
+	if err = decoder.Decode(&q.Head); err != nil {
+		return err
+	}
+
+	if err = decoder.Decode(&q.Count); err != nil {
+		return err
+	}
+
+	if err = decoder.Decode(&q.SeqNum); err != nil {
+		return err
+	}
+
+	ringbufStartByte := decoder.Position()
+	ringbufByteSize := uint(decoder.Remaining() - 7)
+	ringbugLength := ringbufByteSize / EVENT_BYTE_SIZE
+
+	q.Events = make([]*Event, q.Count)
+
+	for i := uint(0); i < uint(q.Count); i++ {
+		itemIndex := ((uint(q.Head) + i) % ringbugLength)
+		offset := ringbufStartByte + (itemIndex * EVENT_BYTE_SIZE)
+		if err = decoder.SetPosition(offset); err != nil {
+			return err
+		}
+
+		if err = decoder.Decode(&q.Events[i]); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// TODO: fill up later
+func (q *EventQueue) MarshalBinary(encoder *bin.Encoder) error {
+	return nil
 }
 
 type EventFlag uint8
@@ -189,7 +287,8 @@ func (e EventFlag) String() string {
 	return strings.Join(flags, " | ")
 }
 
-// 88 bytes in length
+const EVENT_BYTE_SIZE = uint(88)
+
 type Event struct {
 	Flag              EventFlag
 	OwnerSlot         uint8

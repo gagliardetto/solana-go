@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/GeertJohan/go.rice v1.0.0
-	github.com/dfuse-io/binary v0.0.0-20210119182726-f245aa830ba8
+	github.com/dfuse-io/binary v0.0.0-20210122184003-f928bf9f54c1
 	github.com/dfuse-io/logging v0.0.0-20201110202154-26697de88c79
 	github.com/fatih/color v1.7.0
 	github.com/google/go-cmp v0.4.1
