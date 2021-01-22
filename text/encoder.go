@@ -63,9 +63,9 @@ func (e *Encoder) encode(rv reflect.Value, option *Option) (err error) {
 		return enc.TextEncode(e, option)
 	}
 
-	if sr, ok := rv.Interface().(fmt.Stringer); ok {
-		return e.ToWriter(sr.String(), option.indent, option.fgColor)
-	}
+	//if sr, ok := rv.Interface().(fmt.Stringer); ok {
+	//	return e.ToWriter(sr.String(), option.indent, option.fgColor)
+	//}
 
 	switch rv.Kind() {
 	case reflect.String:

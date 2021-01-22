@@ -100,16 +100,16 @@ type InstructionInitializeMarket struct {
 	Accounts *InitializeMarketAccounts `bin:"-"`
 }
 
-func (i *InstructionInitializeMarket) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
-	if len(instructionActIdx) < 9 {
+func (i *InstructionInitializeMarket) SetAccounts(accounts []*solana.AccountMeta) error {
+	if len(accounts) < 9 {
 		return fmt.Errorf("insuficient account, Initialize Market requires at-least 8 accounts not %d", len(accounts))
 	}
 	i.Accounts = &InitializeMarketAccounts{
-		Market:        accounts[instructionActIdx[0]],
-		SPLCoinToken:  accounts[instructionActIdx[5]],
-		SPLPriceToken: accounts[instructionActIdx[6]],
-		CoinMint:      accounts[instructionActIdx[7]],
-		PriceMint:     accounts[instructionActIdx[8]],
+		Market:        accounts[0],
+		SPLCoinToken:  accounts[5],
+		SPLPriceToken: accounts[6],
+		CoinMint:      accounts[7],
+		PriceMint:     accounts[8],
 	}
 	return nil
 }
@@ -176,18 +176,18 @@ type InstructionMatchOrder struct {
 	Accounts *MatchOrderAccounts `bin:"-"`
 }
 
-func (i *InstructionMatchOrder) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
-	if len(instructionActIdx) < 7 {
+func (i *InstructionMatchOrder) SetAccounts(accounts []*solana.AccountMeta) error {
+	if len(accounts) < 7 {
 		return fmt.Errorf("insuficient account, Match Order requires at-least 7 accounts not %d\n", len(accounts))
 	}
 	i.Accounts = &MatchOrderAccounts{
-		Market:            accounts[instructionActIdx[0]],
-		RequestQueue:      accounts[instructionActIdx[1]],
-		EventQueue:        accounts[instructionActIdx[2]],
-		Bids:              accounts[instructionActIdx[3]],
-		Asks:              accounts[instructionActIdx[4]],
-		CoinFeeReceivable: accounts[instructionActIdx[5]],
-		PCFeeReceivable:   accounts[instructionActIdx[6]],
+		Market:            accounts[0],
+		RequestQueue:      accounts[1],
+		EventQueue:        accounts[2],
+		Bids:              accounts[3],
+		Asks:              accounts[4],
+		CoinFeeReceivable: accounts[5],
+		PCFeeReceivable:   accounts[6],
 	}
 	return nil
 }
@@ -206,19 +206,20 @@ type InstructionConsumeEvents struct {
 	Accounts *ConsumeEventsAccounts `bin:"-"`
 }
 
-func (i *InstructionConsumeEvents) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
-	if len(instructionActIdx) < 4 {
+func (i *InstructionConsumeEvents) SetAccounts(accounts []*solana.AccountMeta) error {
+	l := len(accounts)
+	if l < 4 {
 		return fmt.Errorf("insuficient account, Consume Events requires at-least 4 accounts not %d", len(accounts))
 	}
 	i.Accounts = &ConsumeEventsAccounts{
-		Market:            accounts[instructionActIdx[len(instructionActIdx)-4]],
-		EventQueue:        accounts[instructionActIdx[len(instructionActIdx)-3]],
-		CoinFeeReceivable: accounts[instructionActIdx[len(instructionActIdx)-2]],
-		PCFeeReceivable:   accounts[instructionActIdx[len(instructionActIdx)-1]],
+		Market:            accounts[l-4],
+		EventQueue:        accounts[l-3],
+		CoinFeeReceivable: accounts[l-2],
+		PCFeeReceivable:   accounts[l-1],
 	}
 
-	for itr := 0; itr < len(instructionActIdx)-4; itr++ {
-		i.Accounts.OpenOrders = append(i.Accounts.OpenOrders, accounts[instructionActIdx[itr]])
+	for idx := 0; idx < l-4; idx++ {
+		i.Accounts.OpenOrders = append(i.Accounts.OpenOrders, accounts[idx])
 	}
 
 	return nil
@@ -240,15 +241,15 @@ type InstructionCancelOrder struct {
 	Accounts *CancelOrderAccounts `bin:"-"`
 }
 
-func (i *InstructionCancelOrder) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
-	if len(instructionActIdx) < 4 {
+func (i *InstructionCancelOrder) SetAccounts(accounts []*solana.AccountMeta) error {
+	if len(accounts) < 4 {
 		return fmt.Errorf("insuficient account, Cancel Order requires at-least 4 accounts not %d\n", len(accounts))
 	}
 	i.Accounts = &CancelOrderAccounts{
-		Market:       accounts[instructionActIdx[0]],
-		OpenOrders:   accounts[instructionActIdx[1]],
-		RequestQueue: accounts[instructionActIdx[2]],
-		Owner:        accounts[instructionActIdx[3]],
+		Market:       accounts[0],
+		OpenOrders:   accounts[1],
+		RequestQueue: accounts[2],
+		Owner:        accounts[3],
 	}
 
 	return nil
@@ -271,24 +272,24 @@ type InstructionSettleFunds struct {
 	Accounts *SettleFundsAccounts `bin:"-"`
 }
 
-func (i *InstructionSettleFunds) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
-	if len(instructionActIdx) < 9 {
+func (i *InstructionSettleFunds) SetAccounts(accounts []*solana.AccountMeta) error {
+	if len(accounts) < 9 {
 		return fmt.Errorf("insuficient account, Settle Funds requires at-least 10 accounts not %d", len(accounts))
 	}
 	i.Accounts = &SettleFundsAccounts{
-		Market:          accounts[instructionActIdx[0]],
-		OpenOrders:      accounts[instructionActIdx[1]],
-		Owner:           accounts[instructionActIdx[2]],
-		CoinVault:       accounts[instructionActIdx[3]],
-		PCVault:         accounts[instructionActIdx[4]],
-		CoinWallet:      accounts[instructionActIdx[5]],
-		PCWallet:        accounts[instructionActIdx[6]],
-		Signer:          accounts[instructionActIdx[7]],
-		SPLTokenProgram: accounts[instructionActIdx[8]],
+		Market:          accounts[0],
+		OpenOrders:      accounts[1],
+		Owner:           accounts[2],
+		CoinVault:       accounts[3],
+		PCVault:         accounts[4],
+		CoinWallet:      accounts[5],
+		PCWallet:        accounts[6],
+		Signer:          accounts[7],
+		SPLTokenProgram: accounts[8],
 	}
 
-	if len(instructionActIdx) >= 10 {
-		i.Accounts.ReferrerPCWallet = accounts[instructionActIdx[9]]
+	if len(accounts) >= 10 {
+		i.Accounts.ReferrerPCWallet = accounts[9]
 	}
 
 	return nil
@@ -307,15 +308,15 @@ type InstructionCancelOrderByClientId struct {
 	Accounts *CancelOrderByClientIdAccounts `bin:"-"`
 }
 
-func (i *InstructionCancelOrderByClientId) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
-	if len(instructionActIdx) < 4 {
+func (i *InstructionCancelOrderByClientId) SetAccounts(accounts []*solana.AccountMeta) error {
+	if len(accounts) < 4 {
 		return fmt.Errorf("insuficient account, Cancel Order By Client Id requires at-least 4 accounts not %d", len(accounts))
 	}
 	i.Accounts = &CancelOrderByClientIdAccounts{
-		Market:       accounts[instructionActIdx[0]],
-		OpenOrders:   accounts[instructionActIdx[1]],
-		RequestQueue: accounts[instructionActIdx[2]],
-		Owner:        accounts[instructionActIdx[3]],
+		Market:       accounts[0],
+		OpenOrders:   accounts[1],
+		RequestQueue: accounts[2],
+		Owner:        accounts[3],
 	}
 
 	return nil
@@ -330,14 +331,14 @@ type InstructionDisableMarketAccounts struct {
 	Accounts *DisableMarketAccounts `bin:"-"`
 }
 
-func (i *InstructionDisableMarketAccounts) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
-	if len(instructionActIdx) < 2 {
+func (i *InstructionDisableMarketAccounts) SetAccounts(accounts []*solana.AccountMeta) error {
+	if len(accounts) < 2 {
 		return fmt.Errorf("insuficient account, Disable Market requires at-least 2 accounts not %d", len(accounts))
 	}
 
 	i.Accounts = &DisableMarketAccounts{
-		Market:           accounts[instructionActIdx[0]],
-		DisableAuthority: accounts[instructionActIdx[1]],
+		Market:           accounts[0],
+		DisableAuthority: accounts[1],
 	}
 
 	return nil
@@ -356,18 +357,18 @@ type InstructionSweepFees struct {
 	Accounts *SweepFeesAccounts `bin:"-"`
 }
 
-func (i *InstructionSweepFees) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
-	if len(instructionActIdx) < 6 {
+func (i *InstructionSweepFees) SetAccounts(accounts []*solana.AccountMeta) error {
+	if len(accounts) < 6 {
 		return fmt.Errorf("insuficient account, Sweep Fees requires at-least 6 accounts not %d", len(accounts))
 	}
 
 	i.Accounts = &SweepFeesAccounts{
-		Market:               accounts[instructionActIdx[0]],
-		PCVault:              accounts[instructionActIdx[1]],
-		FeeSweepingAuthority: accounts[instructionActIdx[2]],
-		FeeReceivableAccount: accounts[instructionActIdx[3]],
-		VaultSigner:          accounts[instructionActIdx[4]],
-		SPLTokenProgram:      accounts[instructionActIdx[5]],
+		Market:               accounts[0],
+		PCVault:              accounts[1],
+		FeeSweepingAuthority: accounts[2],
+		FeeReceivableAccount: accounts[3],
+		VaultSigner:          accounts[4],
+		SPLTokenProgram:      accounts[5],
 	}
 
 	return nil
@@ -404,22 +405,22 @@ type InstructionNewOrderV2 struct {
 	Accounts *NewOrderV2Accounts `bin:"-"`
 }
 
-func (i *InstructionNewOrderV2) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
-	if len(instructionActIdx) < 10 {
+func (i *InstructionNewOrderV2) SetAccounts(accounts []*solana.AccountMeta) error {
+	if len(accounts) < 10 {
 		return fmt.Errorf("insuficient account, New Order V2 requires at-least 10 accounts not %d", len(accounts))
 	}
 
 	i.Accounts = &NewOrderV2Accounts{
-		Market:          accounts[instructionActIdx[0]],
-		OpenOrders:      accounts[instructionActIdx[1]],
-		RequestQueue:    accounts[instructionActIdx[2]],
-		Payer:           accounts[instructionActIdx[3]],
-		Owner:           accounts[instructionActIdx[4]],
-		CoinVault:       accounts[instructionActIdx[5]],
-		PCVault:         accounts[instructionActIdx[6]],
-		SPLTokenProgram: accounts[instructionActIdx[7]],
-		RentSysvar:      accounts[instructionActIdx[8]],
-		FeeDiscount:     accounts[instructionActIdx[9]],
+		Market:          accounts[0],
+		OpenOrders:      accounts[1],
+		RequestQueue:    accounts[2],
+		Payer:           accounts[3],
+		Owner:           accounts[4],
+		CoinVault:       accounts[5],
+		PCVault:         accounts[6],
+		SPLTokenProgram: accounts[7],
+		RentSysvar:      accounts[8],
+		FeeDiscount:     accounts[9],
 	}
 
 	return nil

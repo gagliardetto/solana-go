@@ -159,10 +159,10 @@ type TransferAccounts struct {
 	To   *solana.AccountMeta `text:"linear,notype"`
 }
 
-func (i *Transfer) SetAccounts(accounts []*solana.AccountMeta, instructionActIdx []uint8) error {
+func (i *Transfer) SetAccounts(accounts []*solana.AccountMeta) error {
 	i.Accounts = &TransferAccounts{
-		From: accounts[instructionActIdx[0]],
-		To:   accounts[instructionActIdx[1]],
+		From: accounts[0],
+		To:   accounts[1],
 	}
 	return nil
 }
