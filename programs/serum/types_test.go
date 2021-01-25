@@ -89,8 +89,8 @@ func TestDecoder_Orderbook(t *testing.T) {
 			Impl: &SlabInnerNode{
 				PrefixLen: 57,
 				Key: bin.Uint128{
-					Lo: 18446744073702344907,
-					Hi: 1858,
+					Lo: 1858,
+					Hi: 18446744073702344907,
 				},
 				Children: [2]uint32{55, 56},
 				Padding: [40]byte{
@@ -127,8 +127,8 @@ func TestDecoder_Orderbook(t *testing.T) {
 				FeeTier:   5,
 				Padding:   [2]byte{0x00, 0x00},
 				Key: bin.Uint128{
-					Lo: 18446744073702358592,
-					Hi: 1820,
+					Lo: 1820,
+					Hi: 18446744073702358592,
 				},
 				Owner:         solana.MustPublicKeyFromBase58("77jtrBDbUvwsdNKeq1ERUBcg8kk2hNTzf5E4iRihNgTh"),
 				Quantity:      38918,
@@ -154,8 +154,8 @@ func TestDecoder_Slabs(t *testing.T) {
 					Impl: &SlabInnerNode{
 						PrefixLen: 53,
 						Key: bin.Uint128{
-							Lo: 18446744073703983873,
-							Hi: 1345,
+							Lo: 1345,
+							Hi: 18446744073703983873,
 						},
 						Children: [2]uint32{
 							64,
@@ -177,8 +177,8 @@ func TestDecoder_Slabs(t *testing.T) {
 						FeeTier:   6,
 						Padding:   [2]byte{0x00, 0x00},
 						Key: bin.Uint128{
-							Lo: 18446744073703640754,
-							Hi: 1827,
+							Lo: 1827,
+							Hi: 18446744073703640754,
 						},
 						Owner:         solana.MustPublicKeyFromBase58("77jtrBDbUvwsdNKeq1ERUBcg8kk2hNTzf5E4iRihNgTh"),
 						Quantity:      11494,

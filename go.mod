@@ -3,10 +3,12 @@ module github.com/dfuse-io/solana-go
 go 1.14
 
 require (
+	contrib.go.opencensus.io/exporter/stackdriver v0.13.4 // indirect
 	github.com/GeertJohan/go.rice v1.0.0
-	github.com/dfuse-io/binary v0.0.0-20210122184003-f928bf9f54c1
-	github.com/dfuse-io/logging v0.0.0-20201110202154-26697de88c79
+	github.com/dfuse-io/binary v0.0.0-20210125232659-d265783d8b7c
+	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70
 	github.com/fatih/color v1.7.0
+	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/google/go-cmp v0.4.1
 	github.com/gorilla/rpc v1.2.0
 	github.com/gorilla/websocket v1.4.2
@@ -21,11 +23,16 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
-	github.com/tidwall/gjson v1.6.3
+	github.com/teris-io/shortid v0.0.0-20201117134242-e59966efd125 // indirect
+	github.com/tidwall/gjson v1.6.7
 	github.com/ybbus/jsonrpc v2.1.2+incompatible
+	go.opencensus.io v0.22.5 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
-	golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
+	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
+	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
 	golang.org/x/tools v0.0.0-20200601175630-2caf76543d99 // indirect
 	google.golang.org/api v0.15.0
 )

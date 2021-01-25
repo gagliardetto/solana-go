@@ -39,9 +39,8 @@ import (
 
 func TestDecoder_ScanEvenQueue(t *testing.T) {
 	t.Skip("long running script")
-	dataFile := "testdata/event-queue-rollover.log"
 
-	data, err := ioutil.ReadFile(dataFile)
+	data, err := ioutil.ReadFile("./testdata/event-queue.hex")
 	require.NoError(t, err)
 
 	byteData, err := hex.DecodeString(string(data))
@@ -57,13 +56,13 @@ func TestDecoder_ScanEvenQueue(t *testing.T) {
 		err := decoder.Decode(e)
 		require.NoError(t, err)
 
-		fmt.Printf("Index: %d: Event: %s NativeQtyPaid: %d\n", i, e.Flag.String(), decoder.Remaining())
+		fmt.Printf("Index: %d: Event: %s OrderID: %s\n", i, e.Flag.String(), e.OrderID.String())
 		i += 1
 	}
 }
 
 func TestEventQueue_Decoder_withRollOver(t *testing.T) {
-	eqCnt, err := ioutil.ReadFile("testdata/event-queue-rollover.log")
+	eqCnt, err := ioutil.ReadFile("./testdata/event-queue-rollover.log")
 	require.NoError(t, err)
 
 	data, err := hex.DecodeString(string(eqCnt))
