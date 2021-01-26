@@ -67,6 +67,7 @@ func TestDecoder_Market(t *testing.T) {
 }
 
 func TestDecoder_Orderbook(t *testing.T) {
+	t.Skip("long running test")
 	cnt, err := ioutil.ReadFile("./testdata/orderbook.hex")
 	require.NoError(t, err)
 

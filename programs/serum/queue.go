@@ -294,8 +294,8 @@ type Event struct {
 	OwnerSlot         uint8
 	FeeTier           uint8
 	Padding           [5]uint8
-	NativeQtyReleased uint64 // the amount you should lease (free to settle)
-	NativeQtyPaid     uint64 // The amout of out of your acount
+	NativeQtyReleased uint64 // the amount you should release (free to settle)
+	NativeQtyPaid     uint64 // The amount out of your account
 	NativeFeeOrRebate uint64 // maker etc...
 	OrderID           bin.Uint128
 	Owner             solana.PublicKey // OpenOrder Account address NOT trader

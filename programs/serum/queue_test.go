@@ -16,6 +16,7 @@ package serum
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -38,9 +39,16 @@ import (
 )
 
 func TestDecoder_ScanEvenQueue(t *testing.T) {
-	t.Skip("long running script")
+	//t.Skip("long running script")
+	// market -> 7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932 (SOL/USDT)
+	// Base SOL -> So11111111111111111111111111111111111111112
+	baseLotSize := uint64(100000000)
+	baseDecimal := uint64(9)
+	// Quote USDT -> BQcdHdAQW1hczDbBi9hiegXAR7A98Q9jx3X3iBBBDiq4
+	quoteLotSize := uint64(100)
+	quoteDecimal := uint64(6)
 
-	data, err := ioutil.ReadFile("./testdata/event-queue.hex")
+	data, err := ioutil.ReadFile("./testdata/serum-sol-usdt-event-queue.hex")
 	require.NoError(t, err)
 
 	byteData, err := hex.DecodeString(string(data))
@@ -56,7 +64,17 @@ func TestDecoder_ScanEvenQueue(t *testing.T) {
 		err := decoder.Decode(e)
 		require.NoError(t, err)
 
-		fmt.Printf("Index: %d: Event: %s OrderID: %s\n", i, e.Flag.String(), e.OrderID.String())
+		if e.Flag.IsFill() {
+			orderID := make([]byte, 16)
+			binary.BigEndian.PutUint64(orderID[:], e.OrderID.Lo)
+			binary.BigEndian.PutUint64(orderID[8:], e.OrderID.Hi)
+
+			p, err := GetPrice(hex.EncodeToString(orderID))
+			require.NoError(t, err)
+
+			pf := PriceLotsToNumber(p, baseLotSize, quoteLotSize, baseDecimal, quoteDecimal)
+			fmt.Printf("Index: %d: Amount Released: %d, Amount Out: %d, Price: %d Price as num %s\n", i, e.NativeQtyReleased, e.NativeQtyPaid, p, pf.String())
+		}
 		i += 1
 	}
 }

@@ -42,8 +42,8 @@ var tokenGetMintCmd = &cobra.Command{
 			return fmt.Errorf("couldn't get account data: %w", err)
 		}
 
-		mint, err := token.DecodeMint(acct.Value.Data)
-		if err != nil {
+		mint := &token.Mint{}
+		if err := mint.Decode(acct.Value.Data); err != nil {
 			return fmt.Errorf("unable to retrieve int information: %w", err)
 		}
 

@@ -49,14 +49,13 @@ type Mint struct {
 	FreezeAuthority       solana.PublicKey
 }
 
-func DecodeMint(in []byte) (*Mint, error) {
-	var m *Mint
+func (m *Mint) Decode(in []byte) error {
 	decoder := bin.NewDecoder(in)
 	err := decoder.Decode(&m)
 	if err != nil {
-		return nil, fmt.Errorf("unpack: %w", err)
+		return fmt.Errorf("unpack: %w", err)
 	}
-	return m, nil
+	return nil
 }
 
 type MintMeta struct {
