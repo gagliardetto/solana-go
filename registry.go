@@ -16,6 +16,7 @@ func RegisterInstructionDecoder(programID PublicKey, decoder InstructionDecoder)
 	if _, found := InstructionDecoderRegistry[p]; found {
 		panic(fmt.Sprintf("unable to re-register instruction decoder for program %q", p))
 	}
+
 	InstructionDecoderRegistry[p] = decoder
 }
 

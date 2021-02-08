@@ -119,7 +119,7 @@ type RegisterToken struct {
 
 func (i *RegisterToken) SetAccounts(accounts []*solana.AccountMeta) error {
 	if len(accounts) < 9 {
-		return fmt.Errorf("insuficient account")
+		return fmt.Errorf("insufficient account")
 	}
 	i.Accounts = &RegisterTokenAccounts{
 		TokenMeta: accounts[0],
