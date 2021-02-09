@@ -132,6 +132,7 @@ type NewOrderAccounts struct {
 	SRMDiscountAccount *solana.AccountMeta `text:"linear,notype"`
 }
 
+// InstructionNewOrder seems to be unused after DEX v3 (unconfirmed claim)
 type InstructionNewOrder struct {
 	Side        Side
 	LimitPrice  uint64
@@ -175,6 +176,7 @@ type MatchOrderAccounts struct {
 	PCFeeReceivable   *solana.AccountMeta `text:"linear,notype"`
 }
 
+// InstructionMatchOrder seems to be unused after DEX v3 (unconfirmed claim)
 type InstructionMatchOrder struct {
 	Limit uint16
 
@@ -237,6 +239,7 @@ type CancelOrderAccounts struct {
 	Owner        *solana.AccountMeta `text:"linear,notype"`
 }
 
+// InstructionCancelOrder seems to be unused after DEX v3 (unconfirmed claim)
 type InstructionCancelOrder struct {
 	Side          Side
 	OrderID       bin.Uint128
@@ -307,6 +310,7 @@ type CancelOrderByClientIdAccounts struct {
 	Owner        *solana.AccountMeta `text:"linear,notype"`
 }
 
+// InstructionCancelOrderByClientId seems to be unused after DEX v3 (unconfirmed claim)
 type InstructionCancelOrderByClientId struct {
 	ClientID uint64
 
@@ -403,6 +407,7 @@ const (
 	SelfTradeBehaviorAbortTransaction
 )
 
+// InstructionNewOrderV2 seems to be unused after DEX v3 (unconfirmed claim)
 type InstructionNewOrderV2 struct {
 	Side              Side
 	LimitPrice        uint64

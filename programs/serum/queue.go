@@ -240,17 +240,15 @@ func (q *EventQueue) MarshalBinary(encoder *bin.Encoder) error {
 
 type EventFlag uint8
 
-//enum EventFlag {
-//    Fill = 0x1,
-//    Out = 0x2,
-//    Bid = 0x4,
-//    Maker = 0x8,
-//}
 const (
 	EventFlagFill  = 0x1
 	EventFlagOut   = 0x2
 	EventFlagBid   = 0x4
 	EventFlagMaker = 0x8
+
+	// Added in DEX v3
+
+	EventFlagReleaseFunds = 0x10
 )
 
 func (e EventFlag) IsFill() bool {
@@ -269,6 +267,10 @@ func (e EventFlag) IsMaker() bool {
 	return Has(uint8(e), uint8(EventFlagMaker))
 }
 
+func (e EventFlag) IsReleaseFunds() bool {
+	return Has(uint8(e), uint8(EventFlagReleaseFunds))
+}
+
 func (e EventFlag) String() string {
 	var flags []string
 	if e.IsFill() {
@@ -282,6 +284,9 @@ func (e EventFlag) String() string {
 	}
 	if e.IsMaker() {
 		flags = append(flags, "MAKER")
+	}
+	if e.IsReleaseFunds() {
+		flags = append(flags, "RELEASE_FUNDS")
 	}
 
 	return strings.Join(flags, " | ")
