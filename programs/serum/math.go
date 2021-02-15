@@ -52,19 +52,6 @@ func divideBnToNumber(numerator, denomiator *big.Float) *big.Float {
 	return F().Quo(numerator, denomiator)
 }
 
-func GetPrice(orderID string) (uint64, error) {
-	d, err := hex.DecodeString(orderID)
-	if err != nil {
-		return 0, fmt.Errorf("unable to decode order ID: %w", err)
-	}
-
-	if len(d) < 8 {
-		return 0, fmt.Errorf("order ID too short expecting at least 8 bytes got %d", len(d))
-	}
-
-	return binary.BigEndian.Uint64(d[:8]), nil
-}
-
 func GetSeqNum(orderId string, side Side) (uint64, error) {
 	d, err := hex.DecodeString(orderId)
 	if err != nil {

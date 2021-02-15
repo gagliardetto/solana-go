@@ -15,6 +15,7 @@ package serum
 
 import (
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 
@@ -211,24 +212,71 @@ func (s *SlabLeafNode) GetPrice() *big.Int {
 	return v
 }
 
-type OpenOrdersV2 struct {
+type OrderID bin.Uint128
+
+func NewOrderID(orderID string) (OrderID, error) {
+	d, err := hex.DecodeString(orderID)
+	if err != nil {
+		return OrderID(bin.Uint128{
+			Lo: 0,
+			Hi: 0,
+		}), fmt.Errorf("unable to decode order ID: %w", err)
+	}
+
+	if len(d) < 16 {
+		return OrderID(bin.Uint128{
+			Lo: 0,
+			Hi: 0,
+		}), fmt.Errorf("order ID too short expecting at least 16 bytes got %d", len(d))
+	}
+
+	return OrderID(bin.Uint128{
+		Lo: binary.BigEndian.Uint64(d[8:]),
+		Hi: binary.BigEndian.Uint64(d[:8]),
+	}), nil
+}
+
+func (o OrderID) Price() uint64 {
+	return o.Hi
+}
+
+func (o OrderID) HexString(withPrefix bool) string {
+	number := make([]byte, 16)
+	binary.BigEndian.PutUint64(number[:], o.Hi)  // old price
+	binary.BigEndian.PutUint64(number[8:], o.Lo) // old seq_number
+	str := hex.EncodeToString(number)
+	if withPrefix {
+		return "0x" + str
+	}
+	return str
+}
+
+func (o OrderID) SeqNum(side Side) uint64 {
+	if side == SideBid {
+		return ^o.Lo
+	}
+
+	return o.Lo
+}
+
+type OpenOrders struct {
 	SerumPadding           [5]byte `json:"-"`
 	AccountFlags           AccountFlag
 	Market                 solana.PublicKey
 	Owner                  solana.PublicKey
-	BaseTokenFree          bin.Uint64
-	BaseTokenTotal         bin.Uint64
-	QuoteTokenFree         bin.Uint64
-	QuoteTokenTotal        bin.Uint64
+	NativeBaseTokenFree    bin.Uint64
+	NativeBaseTokenTotal   bin.Uint64
+	NativeQuoteTokenFree   bin.Uint64
+	NativeQuoteTokenTotal  bin.Uint64
 	FreeSlotBits           bin.Uint128
 	IsBidBits              bin.Uint128
-	Orders                 [128]bin.Uint128
-	ClientIDs              [128]bin.Uint64
+	Orders                 [128]OrderID
+	ClientOrderIDs         [128]bin.Uint64
 	ReferrerRebatesAccrued bin.Uint64
 	EndPadding             [7]byte `json:"-"`
 }
 
-func (m *OpenOrdersV2) Decode(in []byte) error {
+func (m *OpenOrders) Decode(in []byte) error {
 	decoder := bin.NewDecoder(in)
 	err := decoder.Decode(&m)
 	if err != nil {

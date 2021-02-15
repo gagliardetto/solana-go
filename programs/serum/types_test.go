@@ -3,9 +3,13 @@ package serum
 import (
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"testing"
+
+	"github.com/dfuse-io/solana-go/diff"
 
 	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
@@ -155,8 +159,8 @@ func TestDecoder_Slabs(t *testing.T) {
 					Impl: &SlabInnerNode{
 						PrefixLen: 53,
 						Key: bin.Uint128{
-							Lo: 1345,
-							Hi: 18446744073703983873,
+							Lo: 18446744073703983873,
+							Hi: 1345,
 						},
 						Children: [2]uint32{
 							64,
@@ -178,8 +182,8 @@ func TestDecoder_Slabs(t *testing.T) {
 						FeeTier:   6,
 						Padding:   [2]byte{0x00, 0x00},
 						Key: bin.Uint128{
-							Lo: 1827,
-							Hi: 18446744073703640754,
+							Lo: 18446744073703640754,
+							Hi: 1827,
 						},
 						Owner:         solana.MustPublicKeyFromBase58("77jtrBDbUvwsdNKeq1ERUBcg8kk2hNTzf5E4iRihNgTh"),
 						Quantity:      11494,
@@ -218,10 +222,72 @@ func TestDecoder_Slabs(t *testing.T) {
 	}
 }
 
-func pad(count uint) []byte {
-	out := make([]byte, count)
-	for i := 0; i < int(count); i++ {
-		out[i] = 0x00
-	}
-	return out
+func TestOrderID(t *testing.T) {
+	orderID, err := NewOrderID("000000000000b868ffffffffff8ee7a0")
+	require.NoError(t, err)
+	assert.Equal(t, uint64(0xffffffffff8ee7a0), orderID.Lo)
+	assert.Equal(t, uint64(0xb868), orderID.Hi)
+
+	assert.Equal(t, uint64(47208), orderID.Price())
+	assert.Equal(t, uint64(7411807), orderID.SeqNum(SideBid))
+
+	assert.Equal(t, "000000000000b868ffffffffff8ee7a0", orderID.HexString(false))
+	assert.Equal(t, "0x000000000000b868ffffffffff8ee7a0", orderID.HexString(true))
+
+	orderID, err = NewOrderID("00000000000193c100000000000fbcc2")
+	require.NoError(t, err)
+	assert.Equal(t, uint64(0xfbcc2), orderID.Lo)
+	assert.Equal(t, uint64(0x193c1), orderID.Hi)
+
+	assert.Equal(t, uint64(103361), orderID.Price())
+	assert.Equal(t, uint64(1031362), orderID.SeqNum(SideAsk))
+
+	assert.Equal(t, "00000000000193c100000000000fbcc2", orderID.HexString(false))
+	assert.Equal(t, "0x00000000000193c100000000000fbcc2", orderID.HexString(true))
+
+}
+
+func Test_OpenOrderDiff(t *testing.T) {
+	oldDataFile := "testdata/serum-open-orders-old.hex"
+	newDataFile := "testdata/serum-open-orders-new.hex"
+	// is_free_slot diff => 0000f0d0ffffffffffffffffffffffff -> 0000e0d0ffffffffffffffffffffffff
+	// IsBidBits diff => d7a5032f000000000000000000000000 -> d6a5132f000000000000000000000000
+	// added orders[20] => 00000000000000000000000000000000 -> fddeacffffffffff4008000000000000 (price = 2112, seqNum = 5447938)
+
+	olDataJSONFile := strings.ReplaceAll(oldDataFile, ".hex", ".json")
+	newDataJSONFile := strings.ReplaceAll(newDataFile, ".hex", ".json")
+
+	oldOpenOrders := &OpenOrders{}
+	require.NoError(t, oldOpenOrders.Decode(readHexFile(t, oldDataFile)))
+
+	newOpenOrders := &OpenOrders{}
+	require.NoError(t, newOpenOrders.Decode(readHexFile(t, newDataFile)))
+
+	oldCnt, err := json.MarshalIndent(oldOpenOrders, "", " ")
+	require.NoError(t, err)
+	writeFile(t, olDataJSONFile, oldCnt)
+
+	newCnt, err := json.MarshalIndent(newOpenOrders, "", " ")
+	require.NoError(t, err)
+	writeFile(t, newDataJSONFile, newCnt)
+
+	fmt.Println("==>> All diff(s)")
+
+	diff.Diff(oldOpenOrders, newOpenOrders, diff.OnEvent(func(event diff.Event) {
+		fmt.Printf("Event: %s, path: %s\n",event.String(), event.Path.String())
+		if match, _ := event.Match("IsBidBits*"); match {
+			fmt.Println("is bid bits")
+		}
+		if match, _ := event.Match("Orders[#]"); match {
+			fmt.Println("order diff")
+
+			orderId := event.Element().Interface().(OrderID)
+			switch event.Kind {
+			case diff.KindAdded:
+				fmt.Println(orderId.Price())
+			}
+		}
+
+	}))
+
 }

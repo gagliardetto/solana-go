@@ -54,7 +54,7 @@ func FetchOpenOrders(ctx context.Context, rpcCli *rpc.Client, openOrdersAddr sol
 
 	openOrdersMeta := &OpenOrdersMeta{}
 
-	if err := openOrdersMeta.OpenOrdersV2.Decode(acctInfo.Value.Data); err != nil {
+	if err := openOrdersMeta.OpenOrders.Decode(acctInfo.Value.Data); err != nil {
 		return nil, fmt.Errorf("decoding market v2: %w", err)
 	}
 

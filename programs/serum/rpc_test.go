@@ -48,7 +48,7 @@ func TestFetchMarket(t *testing.T) {
 	openOrders, err := FetchOpenOrders(ctx, client, openOrderAdd)
 	require.NoError(t, err)
 
-	cnt, err := json.MarshalIndent(openOrders.OpenOrdersV2, "", " ")
+	cnt, err := json.MarshalIndent(openOrders.OpenOrders, "", " ")
 
 	require.NoError(t, err)
 

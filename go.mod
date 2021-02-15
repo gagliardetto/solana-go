@@ -5,11 +5,12 @@ go 1.14
 require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.4 // indirect
 	github.com/GeertJohan/go.rice v1.0.0
-	github.com/dfuse-io/binary v0.0.0-20210125232659-d265783d8b7c
+	github.com/dfuse-io/binary v0.0.0-20210215145406-f5ccab52bf49
+	github.com/dfuse-io/dfuse-solana v0.0.0-20210215142939-a2baa3503463 // indirect
 	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70
 	github.com/fatih/color v1.7.0
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
-	github.com/google/go-cmp v0.4.1
+	github.com/google/go-cmp v0.5.1
 	github.com/gorilla/rpc v1.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/klauspost/compress v1.11.3
@@ -33,6 +34,5 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
-	golang.org/x/tools v0.0.0-20200601175630-2caf76543d99 // indirect
-	google.golang.org/api v0.15.0
+	google.golang.org/api v0.29.0
 )

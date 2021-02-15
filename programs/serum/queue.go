@@ -302,7 +302,7 @@ type Event struct {
 	NativeQtyReleased uint64 // the amount you should release (free to settle)
 	NativeQtyPaid     uint64 // The amount out of your account
 	NativeFeeOrRebate uint64 // maker etc...
-	OrderID           bin.Uint128
+	OrderID           OrderID
 	Owner             solana.PublicKey // OpenOrder Account address NOT trader
 	ClientOrderID     uint64
 }

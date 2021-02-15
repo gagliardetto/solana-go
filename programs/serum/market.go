@@ -61,7 +61,7 @@ func (m *MarketMeta) PriceNumberToLots(price *big.Int) *big.Float {
 }
 
 type OpenOrdersMeta struct {
-	OpenOrdersV2 OpenOrdersV2
+	OpenOrders OpenOrders
 }
 
 type Order struct {
