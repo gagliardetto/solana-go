@@ -420,8 +420,8 @@ type InstructionNewOrderV2 struct {
 }
 
 func (i *InstructionNewOrderV2) SetAccounts(accounts []*solana.AccountMeta) error {
-	if len(accounts) < 10 {
-		return fmt.Errorf("insufficient account, New Order V2 requires at-least 10 accounts not %d", len(accounts))
+	if len(accounts) < 9 {
+		return fmt.Errorf("insufficient account, New Order V2 requires at-least 9 accounts + 1 optional not %d", len(accounts))
 	}
 
 	i.Accounts = &NewOrderV2Accounts{
@@ -434,7 +434,10 @@ func (i *InstructionNewOrderV2) SetAccounts(accounts []*solana.AccountMeta) erro
 		PCVault:         accounts[6],
 		SPLTokenProgram: accounts[7],
 		RentSysvar:      accounts[8],
-		FeeDiscount:     accounts[9],
+	}
+
+	if len(accounts) == 10 {
+		i.Accounts.FeeDiscount = accounts[9]
 	}
 
 	return nil
