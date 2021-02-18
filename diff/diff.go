@@ -81,7 +81,11 @@ func (p *Event) Match(pattern string) (match bool, matches []string) {
 	regexRaw := regexp.QuoteMeta(pattern)
 	regexRaw = strings.ReplaceAll("^"+regexRaw+"$", "#", `([0-9]+|.->[0-9]+|[0-9]+->.|[0-9]+->[0-9]+)`)
 
-	regex := regexp.MustCompile(regexRaw)
+	return p.RawMatch(regexRaw)
+}
+
+func (p *Event) RawMatch(rawPattern string) (match bool, matches []string) {
+	regex := regexp.MustCompile(rawPattern)
 	regexMatch := regex.FindAllStringSubmatch(p.Path.String(), 1)
 	if len(regexMatch) != 1 {
 		return false, nil

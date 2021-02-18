@@ -64,12 +64,6 @@ type OpenOrdersMeta struct {
 	OpenOrders OpenOrders
 }
 
-type Order struct {
-	Limit *big.Int   `json:"limit"`
-	Side  SideLayout `json:"side"`
-	Price *big.Int   `json:"price"`
-}
-
 type SideLayoutType string
 
 const (

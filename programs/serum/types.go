@@ -269,18 +269,52 @@ type OpenOrders struct {
 	NativeQuoteTokenFree   bin.Uint64
 	NativeQuoteTokenTotal  bin.Uint64
 	FreeSlotBits           bin.Uint128
-	IsBidBits              bin.Uint128
+	IsBidBits              bin.Uint128 // Bids is 1,  Ask is 0
 	Orders                 [128]OrderID
 	ClientOrderIDs         [128]bin.Uint64
 	ReferrerRebatesAccrued bin.Uint64
 	EndPadding             [7]byte `json:"-"`
 }
 
-func (m *OpenOrders) Decode(in []byte) error {
+type Order struct {
+	ID   OrderID
+	side Side
+}
+
+func (o *OpenOrders) GetOrder(index uint32) *Order {
+	order := &Order{
+		ID:   o.Orders[index],
+		side: SideBid,
+	}
+	isZero, err := IsBitZero(o.IsBidBits, index)
+	if err != nil {
+		panic("this should never happen")
+	}
+	if isZero {
+		order.side = SideAsk
+	}
+	return order
+}
+
+func (o *OpenOrders) Decode(in []byte) error {
 	decoder := bin.NewDecoder(in)
-	err := decoder.Decode(&m)
+	err := decoder.Decode(&o)
 	if err != nil {
 		return fmt.Errorf("unpack: %w", err)
 	}
 	return nil
+}
+
+func IsBitZero(v bin.Uint128, bitIndex uint32) (bool, error) {
+	if bitIndex > 127 {
+		return false, fmt.Errorf("bit index out of range")
+	}
+
+	if bitIndex > 63 {
+		bitIndex = bitIndex - 64
+		mask := uint64(1 << bitIndex)
+		return (v.Hi&mask == 0), nil
+	}
+	mask := uint64(1 << bitIndex)
+	return (v.Lo&mask == 0), nil
 }

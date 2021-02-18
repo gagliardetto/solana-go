@@ -274,9 +274,14 @@ func Test_OpenOrderDiff(t *testing.T) {
 	fmt.Println("==>> All diff(s)")
 
 	diff.Diff(oldOpenOrders, newOpenOrders, diff.OnEvent(func(event diff.Event) {
-		fmt.Printf("Event: %s, path: %s\n",event.String(), event.Path.String())
-		if match, _ := event.Match("IsBidBits*"); match {
+		fmt.Printf("Event: %s, path: %s\n", event.String(), event.Path.String())
+		if match, _ := event.RawMatch("^IsBidBits.*"); match {
+			isBid := event.Element().Interface().(uint64)
 			fmt.Println("is bid bits")
+			fmt.Println(isBid)
+			fmt.Println(newOpenOrders.IsBidBits.Hi)
+			fmt.Println(newOpenOrders.IsBidBits.Lo)
+			fmt.Println(oldOpenOrders.IsBidBits.Lo)
 		}
 		if match, _ := event.Match("Orders[#]"); match {
 			fmt.Println("order diff")
@@ -287,7 +292,123 @@ func Test_OpenOrderDiff(t *testing.T) {
 				fmt.Println(orderId.Price())
 			}
 		}
-
 	}))
 
+}
+
+func Test_OpenOrder_GetOrder(t *testing.T) {
+	openOrderData := "testdata/serum-open-orders-new.hex"
+
+	openOrders := &OpenOrders{}
+	require.NoError(t, openOrders.Decode(readHexFile(t, openOrderData)))
+	o := openOrders.GetOrder(20)
+	assert.Equal(t, &Order{
+		ID: OrderID{
+			Hi: 0x0000000000000840,
+			Lo: 0xffffffffffacdefd,
+		},
+		side: SideBid,
+	}, o)
+	assert.Equal(t, o.ID.SeqNum(o.side), uint64(5447938))
+	assert.Equal(t, o.ID.Price(), uint64(2112))
+}
+
+func TestIsBitZero(t *testing.T) {
+	tests := []struct {
+		name        string
+		value       bin.Uint128
+		index       uint32
+		expect      bool
+		expectError bool
+	}{
+		{
+			name: "Index 0, bit is 1",
+			value: bin.Uint128{
+				Hi: 0x0000000000000000,
+				Lo: 0x0000000000000001,
+			},
+			index:  0,
+			expect: false,
+		},
+		{
+			name: "Index 0, bit is 0",
+			value: bin.Uint128{
+				Hi: 0x0000000000000000,
+				Lo: 0x0000000000000000,
+			},
+			index:  0,
+			expect: true,
+		},
+		{
+			name: "Index less then 64, bit is 1",
+			value: bin.Uint128{
+				Hi: 0x0000000000000000,
+				Lo: 0x0000000000100000,
+			},
+			index:  20,
+			expect: false,
+		},
+		{
+			name: "Index less then 64, bit is 1",
+			value: bin.Uint128{
+				Hi: 0xffffffffffffffff,
+				Lo: 0xffffffffffefffff,
+			},
+			index:  20,
+			expect: true,
+		},
+		{
+			name: "Index 64, bit is 1",
+			value: bin.Uint128{
+				Hi: 0x0000000000000001,
+				Lo: 0x0000000000000000,
+			},
+			index:  64,
+			expect: false,
+		},
+		{
+			name: "Index 64, bit is 0",
+			value: bin.Uint128{
+				Hi: 0x0000000000000000,
+				Lo: 0x0000000000000000,
+			},
+			index:  64,
+			expect: true,
+		},
+		{
+			name: "Index greater 64, bit is 1",
+			value: bin.Uint128{
+				Hi: 0x0000002000000000,
+				Lo: 0x0000000000000000,
+			},
+			index:  101,
+			expect: false,
+		},
+		{
+			name: "Index greater 64, bit is 0",
+			value: bin.Uint128{
+				Hi: 0xffffffdfffffffff,
+				Lo: 0xffffffffffffffff,
+			},
+			index:  101,
+			expect: true,
+		},
+		{
+			name:        "Index 128",
+			value:       bin.Uint128{},
+			index:       128,
+			expectError: true,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			f, err := IsBitZero(test.value, test.index)
+			if test.expectError {
+				require.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, f, test.expect)
+			}
+		})
+	}
 }
