@@ -271,28 +271,32 @@ func Test_OpenOrderDiff(t *testing.T) {
 	require.NoError(t, err)
 	writeFile(t, newDataJSONFile, newCnt)
 
-	fmt.Println("==>> All diff(s)")
-
+	hasNewOrder := false
+	newOrderIndex := uint32(0)
 	diff.Diff(oldOpenOrders, newOpenOrders, diff.OnEvent(func(event diff.Event) {
-		fmt.Printf("Event: %s, path: %s\n", event.String(), event.Path.String())
-		if match, _ := event.RawMatch("^IsBidBits.*"); match {
-			isBid := event.Element().Interface().(uint64)
-			fmt.Println("is bid bits")
-			fmt.Println(isBid)
-			fmt.Println(newOpenOrders.IsBidBits.Hi)
-			fmt.Println(newOpenOrders.IsBidBits.Lo)
-			fmt.Println(oldOpenOrders.IsBidBits.Lo)
-		}
 		if match, _ := event.Match("Orders[#]"); match {
-			fmt.Println("order diff")
-
-			orderId := event.Element().Interface().(OrderID)
 			switch event.Kind {
 			case diff.KindAdded:
-				fmt.Println(orderId.Price())
+				if index, found := event.Path.SliceIndex(); found {
+					hasNewOrder = true
+					newOrderIndex = uint32(index)
+				}
 			}
 		}
 	}))
+
+	assert.Equal(t, hasNewOrder, true)
+	assert.Equal(t, newOrderIndex, uint32(20))
+	newOrder := newOpenOrders.GetOrder(newOrderIndex)
+	assert.Equal(t, &Order{
+		ID: OrderID{
+			Hi: 0x0000000000000840,
+			Lo: 0xffffffffffacdefd,
+		},
+		side: SideBid,
+	}, newOrder)
+	assert.Equal(t, newOrder.SeqNum(), uint64(5447938))
+	assert.Equal(t, newOrder.Price(), uint64(2112))
 
 }
 
@@ -309,8 +313,8 @@ func Test_OpenOrder_GetOrder(t *testing.T) {
 		},
 		side: SideBid,
 	}, o)
-	assert.Equal(t, o.ID.SeqNum(o.side), uint64(5447938))
-	assert.Equal(t, o.ID.Price(), uint64(2112))
+	assert.Equal(t, o.SeqNum(), uint64(5447938))
+	assert.Equal(t, o.Price(), uint64(2112))
 }
 
 func TestIsBitZero(t *testing.T) {

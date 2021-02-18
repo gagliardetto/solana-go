@@ -60,6 +60,27 @@ func (k Kind) String() string {
 
 type Path cmp.Path
 
+func (pa Path) SliceIndex() (int, bool) {
+	last := pa[len(pa)-1]
+	if slcIdx, ok := last.(cmp.SliceIndex); ok {
+		xkey, ykey := slcIdx.SplitKeys()
+		switch {
+		case xkey == ykey:
+			return xkey, true
+		case ykey == -1:
+			// [5->?] means "I don't know where X[5] went"
+			return xkey, true
+		case xkey == -1:
+			// [?->3] means "I don't know where Y[3] came from"
+			return ykey, true
+		default:
+			// [5->3] means "X[5] moved to Y[3]"
+			return ykey, true
+		}
+	}
+	return 0, false
+}
+
 func (pa Path) String() string {
 	if len(pa) == 1 {
 		return ""

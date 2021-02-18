@@ -281,6 +281,14 @@ type Order struct {
 	side Side
 }
 
+func (o *Order) SeqNum() uint64 {
+	return o.ID.SeqNum(o.side)
+}
+
+func (o *Order) Price() uint64 {
+	return o.ID.Price()
+}
+
 func (o *OpenOrders) GetOrder(index uint32) *Order {
 	order := &Order{
 		ID:   o.Orders[index],
