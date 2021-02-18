@@ -278,11 +278,11 @@ type OpenOrders struct {
 
 type Order struct {
 	ID   OrderID
-	side Side
+	Side Side
 }
 
 func (o *Order) SeqNum() uint64 {
-	return o.ID.SeqNum(o.side)
+	return o.ID.SeqNum(o.Side)
 }
 
 func (o *Order) Price() uint64 {
@@ -292,14 +292,14 @@ func (o *Order) Price() uint64 {
 func (o *OpenOrders) GetOrder(index uint32) *Order {
 	order := &Order{
 		ID:   o.Orders[index],
-		side: SideBid,
+		Side: SideBid,
 	}
 	isZero, err := IsBitZero(o.IsBidBits, index)
 	if err != nil {
 		panic("this should never happen")
 	}
 	if isZero {
-		order.side = SideAsk
+		order.Side = SideAsk
 	}
 	return order
 }

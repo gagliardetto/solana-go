@@ -293,7 +293,7 @@ func Test_OpenOrderDiff(t *testing.T) {
 			Hi: 0x0000000000000840,
 			Lo: 0xffffffffffacdefd,
 		},
-		side: SideBid,
+		Side: SideBid,
 	}, newOrder)
 	assert.Equal(t, newOrder.SeqNum(), uint64(5447938))
 	assert.Equal(t, newOrder.Price(), uint64(2112))
@@ -311,7 +311,7 @@ func Test_OpenOrder_GetOrder(t *testing.T) {
 			Hi: 0x0000000000000840,
 			Lo: 0xffffffffffacdefd,
 		},
-		side: SideBid,
+		Side: SideBid,
 	}, o)
 	assert.Equal(t, o.SeqNum(), uint64(5447938))
 	assert.Equal(t, o.Price(), uint64(2112))
