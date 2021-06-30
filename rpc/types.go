@@ -92,11 +92,11 @@ type GetAccountInfoResult struct {
 }
 
 type Account struct {
-	Lamports   bin.Uint64       `json:"lamports"`
-	Data       solana.Data      `json:"data"`
-	Owner      solana.PublicKey `json:"owner"`
-	Executable bool             `json:"executable"`
-	RentEpoch  bin.Uint64       `json:"rentEpoch"`
+	Lamports   bin.Uint64       `json:"lamports"`   // number of lamports assigned to this account
+	Owner      solana.PublicKey `json:"owner"`      // base-58 encoded Pubkey of the program this account has been assigned to
+	Data       solana.Data      `json:"data"`       // data associated with the account, either as encoded binary data or JSON format {<program>: <state>}, depending on encoding parameter
+	Executable bool             `json:"executable"` // boolean indicating if the account contains a program (and is strictly read-only)
+	RentEpoch  bin.Uint64       `json:"rentEpoch"`  // the epoch at which this account will next owe rent
 }
 
 type GetProgramAccountsOpts struct {

@@ -36,7 +36,11 @@ type Client struct {
 }
 
 func NewClient(rpcURL string) *Client {
-	rpcClient := jsonrpc.NewClient(rpcURL)
+	return NewClientWithOpts(rpcURL, nil)
+}
+
+func NewClientWithOpts(rpcURL string, opts *jsonrpc.RPCClientOpts) *Client {
+	rpcClient := jsonrpc.NewClientWithOpts(rpcURL, opts)
 	return &Client{
 		rpcURL:    rpcURL,
 		rpcClient: rpcClient,
@@ -89,12 +93,57 @@ func (c *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out Ge
 
 // GetAccountInfo returns all information associated with the account of provided publicKey.
 func (c *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) (out *GetAccountInfoResult, err error) {
-	obj := map[string]interface{}{
-		"encoding": "base64",
+	return c.GetAccountInfoWithOpts(
+		ctx,
+		account,
+		EncodingBase64,
+		nil,
+		nil,
+	)
+}
+
+type M map[string]interface{}
+
+type Encoding string
+
+const (
+	EncodingBase58     Encoding = "base58"      // limited to Account data of less than 129 bytes
+	EncodingBase64     Encoding = "base64"      // will return base64 encoded data for Account data of any size
+	EncodingBase64Zstd Encoding = "base64+zstd" // compresses the Account data using Zstandard and base64-encodes the result
+
+	// attempts to use program-specific state parsers to
+	// return more human-readable and explicit account state data.
+	// If "jsonParsed" is requested but a parser cannot be found,
+	// the field falls back to "base64" encoding, detectable when the data field is type <string>.
+	// Cannot be used if specifying dataSlice parameters (offset, length).
+	EncodingJSONParsed Encoding = "jsonParsed"
+)
+
+// GetAccountInfoWithOpts returns all information associated with the account of provided publicKey.
+// You can limit the returned account data with the offset and length parameters.
+func (cl *Client) GetAccountInfoWithOpts(
+	ctx context.Context,
+	account solana.PublicKey,
+	encoding Encoding,
+	offset *uint,
+	length *uint,
+) (out *GetAccountInfoResult, err error) {
+	obj := M{
+		"encoding": encoding,
+	}
+
+	if offset != nil && length != nil {
+		obj["dataSlice"] = M{
+			"offset": offset,
+			"length": length,
+		}
+		if encoding == EncodingJSONParsed {
+			return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
+		}
 	}
 	params := []interface{}{account, obj}
 
-	err = c.rpcClient.CallFor(&out, "getAccountInfo", params...)
+	err = cl.rpcClient.CallFor(&out, "getAccountInfo", params...)
 	if err != nil {
 		return nil, err
 	}
