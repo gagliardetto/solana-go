@@ -55,13 +55,18 @@ func (c *Client) SetHeader(k, v string) {
 }
 
 // GetBalance returns the balance of the account of provided publicKey.
-func (c *Client) GetBalance(ctx context.Context, publicKey string, commitment CommitmentType) (out *GetBalanceResult, err error) {
+func (cl *Client) GetBalance(
+	ctx context.Context,
+	publicKey string, // Pubkey of account to query, as base-58 encoded string
+	commitment CommitmentType,
+) (out *GetBalanceResult, err error) {
 	params := []interface{}{publicKey}
 	if commitment != "" {
 		params = append(params, string(commitment))
 	}
 
-	err = c.rpcClient.CallFor(&out, "getBalance", params...)
+	err = cl.rpcClient.CallFor(&out, "getBalance", params...)
+
 	return
 }
 
