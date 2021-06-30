@@ -11,7 +11,8 @@ require (
 	github.com/google/go-cmp v0.5.1
 	github.com/gorilla/rpc v1.2.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/klauspost/compress v1.11.3
+	github.com/klauspost/compress v1.13.1
+	github.com/kr/pretty v0.2.1 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/magiconair/properties v1.8.1
 	github.com/mr-tron/base58 v1.2.0
@@ -33,4 +34,5 @@ require (
 	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
 	google.golang.org/api v0.29.0
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
