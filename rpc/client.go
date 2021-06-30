@@ -97,6 +97,7 @@ func (c *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) (
 		ctx,
 		account,
 		EncodingBase64,
+		"",
 		nil,
 		nil,
 	)
@@ -104,34 +105,41 @@ func (c *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) (
 
 type M map[string]interface{}
 
-type Encoding string
+type EncodingType string
 
 const (
-	EncodingBase58     Encoding = "base58"      // limited to Account data of less than 129 bytes
-	EncodingBase64     Encoding = "base64"      // will return base64 encoded data for Account data of any size
-	EncodingBase64Zstd Encoding = "base64+zstd" // compresses the Account data using Zstandard and base64-encodes the result
+	EncodingBase58     EncodingType = "base58"      // limited to Account data of less than 129 bytes
+	EncodingBase64     EncodingType = "base64"      // will return base64 encoded data for Account data of any size
+	EncodingBase64Zstd EncodingType = "base64+zstd" // compresses the Account data using Zstandard and base64-encodes the result
 
 	// attempts to use program-specific state parsers to
 	// return more human-readable and explicit account state data.
 	// If "jsonParsed" is requested but a parser cannot be found,
 	// the field falls back to "base64" encoding, detectable when the data field is type <string>.
 	// Cannot be used if specifying dataSlice parameters (offset, length).
-	EncodingJSONParsed Encoding = "jsonParsed"
+	EncodingJSONParsed EncodingType = "jsonParsed"
 )
 
 // GetAccountInfoWithOpts returns all information associated with the account of provided publicKey.
 // You can limit the returned account data with the offset and length parameters.
+// You can specify the encoding of the returned data with the encoding parameter.
 func (cl *Client) GetAccountInfoWithOpts(
 	ctx context.Context,
 	account solana.PublicKey,
-	encoding Encoding,
+	encoding EncodingType,
+	commitment CommitmentType,
 	offset *uint,
 	length *uint,
 ) (out *GetAccountInfoResult, err error) {
-	obj := M{
-		"encoding": encoding,
-	}
 
+	obj := M{}
+
+	if encoding != "" {
+		obj["encoding"] = encoding
+	}
+	if commitment != "" {
+		obj["commitment"] = commitment
+	}
 	if offset != nil && length != nil {
 		obj["dataSlice"] = M{
 			"offset": offset,
@@ -141,6 +149,7 @@ func (cl *Client) GetAccountInfoWithOpts(
 			return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
 		}
 	}
+
 	params := []interface{}{account, obj}
 
 	err = cl.rpcClient.CallFor(&out, "getAccountInfo", params...)
