@@ -97,8 +97,8 @@ func (c *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out Ge
 }
 
 // GetAccountInfo returns all information associated with the account of provided publicKey.
-func (c *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) (out *GetAccountInfoResult, err error) {
-	return c.GetAccountInfoWithOpts(
+func (cl *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) (out *GetAccountInfoResult, err error) {
+	return cl.GetAccountInfoWithOpts(
 		ctx,
 		account,
 		EncodingBase64,
@@ -123,6 +123,8 @@ const (
 	// the field falls back to "base64" encoding, detectable when the data field is type <string>.
 	// Cannot be used if specifying dataSlice parameters (offset, length).
 	EncodingJSONParsed EncodingType = "jsonParsed"
+
+	EncodingJSON EncodingType = "json"
 )
 
 // GetAccountInfoWithOpts returns all information associated with the account of provided publicKey.

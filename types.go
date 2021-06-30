@@ -21,8 +21,14 @@ import (
 )
 
 type Transaction struct {
+	// A list of base-58 encoded signatures applied to the transaction.
+	// The list is always of length `message.header.numRequiredSignatures` and not empty.
+	// The signature at index `i` corresponds to the public key at index
+	// `i` in `message.account_keys`. The first one is used as the transaction id.
 	Signatures []Signature `json:"signatures"`
-	Message    Message     `json:"message"`
+
+	// Defines the content of the transaction.
+	Message Message `json:"message"`
 }
 
 func (t *Transaction) TouchAccount(account PublicKey) bool   { return t.Message.TouchAccount(account) }
@@ -34,10 +40,21 @@ func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint8) (PublicKey, er
 }
 
 type Message struct {
-	Header          MessageHeader `json:"header"`
-	AccountKeys     []PublicKey   `json:"accountKeys"`
-	RecentBlockhash PublicKey/* TODO: change to Hash */ `json:"recentBlockhash"`
-	Instructions    []CompiledInstruction `json:"instructions"`
+	// List of base-58 encoded public keys used by the transaction,
+	// including by the instructions and for signatures.
+	// The first `message.header.numRequiredSignatures` public keys must sign the transaction.
+	AccountKeys []PublicKey `json:"accountKeys"`
+
+	// Details the account types and signatures required by the transaction.
+	Header MessageHeader `json:"header"`
+
+	// A base-58 encoded hash of a recent block in the ledger used to
+	// prevent transaction duplication and to give transactions lifetimes.
+	RecentBlockhash Hash `json:"recentBlockhash"`
+
+	// List of program instructions that will be executed in sequence
+	// and committed in one atomic transaction if all succeed.
+	Instructions []CompiledInstruction `json:"instructions"`
 }
 
 func (m *Message) AccountMetaList() (out []*AccountMeta) {
@@ -99,17 +116,33 @@ func (m *Message) signerKeys() []PublicKey {
 }
 
 type MessageHeader struct {
-	NumRequiredSignatures       uint8 `json:"numRequiredSignatures"`
-	NumReadonlySignedAccounts   uint8 `json:"numReadonlySignedAccounts"`
+	// The total number of signatures required to make the transaction valid.
+	// The signatures must match the first `numRequiredSignatures` of `message.account_keys`.
+	NumRequiredSignatures uint8 `json:"numRequiredSignatures"`
+
+	// The last numReadonlySignedAccounts of the signed keys are read-only accounts.
+	// Programs may process multiple transactions that load read-only accounts within
+	// a single PoH entry, but are not permitted to credit or debit lamports or modify
+	// account data.
+	// Transactions targeting the same read-write account are evaluated sequentially.
+	NumReadonlySignedAccounts uint8 `json:"numReadonlySignedAccounts"`
+
+	// The last `numReadonlyUnsignedAccounts` of the unsigned keys are read-only accounts.
 	NumReadonlyUnsignedAccounts uint8 `json:"numReadonlyUnsignedAccounts"`
 }
 
 type CompiledInstruction struct {
-	ProgramIDIndex uint8         `json:"programIdIndex"`
-	AccountCount   bin.Varuint16 `json:"-" bin:"sizeof=Accounts"`
-	Accounts       []uint8       `json:"accounts"`
-	DataLength     bin.Varuint16 `json:"-" bin:"sizeof=Data"`
-	Data           Base58        `json:"data"`
+	// Index into the message.accountKeys array indicating the program account that executes this instruction.
+	ProgramIDIndex uint8 `json:"programIdIndex"`
+
+	AccountCount bin.Varuint16 `json:"-" bin:"sizeof=Accounts"`
+	DataLength   bin.Varuint16 `json:"-" bin:"sizeof=Data"`
+
+	// List of ordered indices into the message.accountKeys array indicating which accounts to pass to the program.
+	Accounts []uint8 `json:"accounts"`
+
+	// The program input data encoded in a base-58 string.
+	Data Base58 `json:"data"`
 }
 
 func (ci *CompiledInstruction) ResolveInstructionAccounts(message *Message) (out []*AccountMeta) {

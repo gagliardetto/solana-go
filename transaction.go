@@ -33,7 +33,7 @@ func TransactionPayer(payer PublicKey) TransactionOption {
 	return transactionOptionFunc(func(opts *transactionOptions) { opts.payer = payer })
 }
 
-func NewTransaction(instructions []Instruction, blockHash PublicKey, opts ...TransactionOption) (*Transaction, error) {
+func NewTransaction(instructions []Instruction, blockHash Hash, opts ...TransactionOption) (*Transaction, error) {
 	if len(instructions) == 0 {
 		return nil, fmt.Errorf("requires at-least one instruction to create a transaction")
 	}

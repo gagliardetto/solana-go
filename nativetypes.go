@@ -28,6 +28,38 @@ type Padding []byte
 
 type Hash PublicKey
 
+func (ha Hash) MarshalJSON() ([]byte, error) {
+	return json.Marshal(base58.Encode(ha[:]))
+}
+
+func (ha *Hash) UnmarshalJSON(data []byte) (err error) {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+
+	tmp, err := PublicKeyFromBase58(s)
+	if err != nil {
+		return fmt.Errorf("invalid public key %q: %w", s, err)
+	}
+	*ha = Hash(tmp)
+	return
+}
+
+func (ha Hash) Equals(pb Hash) bool {
+	return ha == pb
+}
+
+var zeroHash = Hash{}
+
+func (ha Hash) IsZero() bool {
+	return ha == zeroHash
+}
+
+func (ha Hash) String() string {
+	return base58.Encode(ha[:])
+}
+
 ///
 type Signature [64]byte
 

@@ -65,8 +65,8 @@ type BlockReward struct {
 }
 
 type TransactionWithMeta struct {
+	Meta        *TransactionMeta    `json:"meta,omitempty"` // transaction status metadata object
 	Transaction *solana.Transaction `json:"transaction"`
-	Meta        *TransactionMeta    `json:"meta,omitempty"`
 }
 
 type TransactionParsed struct {
@@ -74,11 +74,48 @@ type TransactionParsed struct {
 	Meta        *TransactionMeta   `json:"meta,omitempty"`
 }
 
+type TokenBalance struct {
+	// TODO: <number> == bin.Int64 ???
+	AccountIndex  uint8            `json:"accountIndex"` // Index of the account in which the token balance is provided for.
+	Mint          solana.PublicKey `json:"mint"`         // Pubkey of the token's mint.
+	UiTokenAmount *UiTokenAmount   `json:"uiTokenAmount"`
+}
+
+type UiTokenAmount struct {
+	Amount string `json:"amount"` // Raw amount of tokens as a string, ignoring decimals.
+	// TODO: <number> == bin.Int64 ???
+	Decimals       uint8            `json:"decimals"`       // Number of decimals configured for token's mint.
+	UiAmount       *bin.JSONFloat64 `json:"uiAmount"`       // Token amount as a float, accounting for decimals. DEPRECATED
+	UiAmountString string           `json:"uiAmountString"` // Token amount as a string, accounting for decimals.
+}
+
 type TransactionMeta struct {
-	Err          interface{}  `json:"err"`
-	Fee          bin.Uint64   `json:"fee"`
-	PreBalances  []bin.Uint64 `json:"preBalances"`
-	PostBalances []bin.Uint64 `json:"postBalances"`
+	Err               interface{}        `json:"err"`               // Error if transaction failed, null if transaction succeeded. https://github.com/solana-labs/solana/blob/master/sdk/src/transaction.rs#L24
+	Fee               bin.Uint64         `json:"fee"`               // fee this transaction was charged
+	PreBalances       []bin.Uint64       `json:"preBalances"`       //  array of u64 account balances from before the transaction was processed
+	PostBalances      []bin.Uint64       `json:"postBalances"`      // array of u64 account balances after the transaction was processed
+	InnerInstructions []InnerInstruction `json:"innerInstructions"` // List of inner instructions or omitted if inner instruction recording was not yet enabled during this transaction
+
+	PreTokenBalances  []TokenBalance `json:"preTokenBalances"`  // List of token balances from before the transaction was processed or omitted if token balance recording was not yet enabled during this transaction
+	PostTokenBalances []TokenBalance `json:"postTokenBalances"` // List of token balances from after the transaction was processed or omitted if token balance recording was not yet enabled during this transaction
+
+	LogMessages []string `json:"logMessages"` // array of string log messages or omitted if log message recording was not yet enabled during this transaction
+
+	Status DeprecatedTransactionMetaStatus `json:"status"` // Transaction status; DEPRECATED.
+
+	// TODO: not present in spec doc, but present in json.
+	// Rewards []BlockReward `json:"rewards"`
+}
+
+type InnerInstruction struct {
+	// TODO: <number> == bin.Int64 ???
+	Index        uint8                        `json:"index"`        // Index of the transaction instruction from which the inner instruction(s) originated
+	Instructions []solana.CompiledInstruction `json:"instructions"` // Ordered list of inner program instructions that were invoked during a single transaction instruction.
+}
+
+type DeprecatedTransactionMetaStatus struct {
+	Ok  interface{} `json:"Ok"`  // <null> Transaction was successful
+	Err interface{} `json:"Err"` // Transaction failed with TransactionError
 }
 
 type TransactionSignature struct {
