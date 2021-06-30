@@ -58,8 +58,10 @@ type GetConfirmedBlockResult struct {
 }
 
 type BlockReward struct {
-	Pubkey   solana.PublicKey `json:"pubkey"`
-	Lamports bin.Uint64       `json:"lamports"`
+	Pubkey      solana.PublicKey `json:"pubkey"`      // The public key, as base-58 encoded string, of the account that received the reward
+	Lamports    bin.Int64        `json:"lamports"`    // number of reward lamports credited or debited by the account, as a i64
+	PostBalance bin.Int64        `json:"postBalance"` // account balance in lamports after the reward was applied
+	RewardType  string           `json:"rewardType"`  // type of reward: "fee", "rent", "voting", "staking"
 }
 
 type TransactionWithMeta struct {
