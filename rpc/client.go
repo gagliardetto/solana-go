@@ -50,6 +50,7 @@ func (c *Client) SetHeader(k, v string) {
 	c.headers.Set(k, v)
 }
 
+// GetBalance returns the balance of the account of provided publicKey.
 func (c *Client) GetBalance(ctx context.Context, publicKey string, commitment CommitmentType) (out *GetBalanceResult, err error) {
 	params := []interface{}{publicKey}
 	if commitment != "" {
@@ -60,6 +61,8 @@ func (c *Client) GetBalance(ctx context.Context, publicKey string, commitment Co
 	return
 }
 
+// GetRecentBlockhash returns a recent block hash from the ledger,
+// and a fee schedule that can be used to compute the cost of submitting a transaction using it.
 func (c *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentType) (out *GetRecentBlockhashResult, err error) {
 	commit := map[string]string{
 		"commitment": string(commitment),
@@ -73,6 +76,7 @@ func (c *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentTy
 	return
 }
 
+// GetSlot returns the current slot the node is processing.
 func (c *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out GetSlotResult, err error) {
 	var params []interface{}
 	if commitment != "" {
@@ -83,6 +87,8 @@ func (c *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out Ge
 	return
 }
 
+// GetConfirmedBlock returns identity and transaction information about a confirmed block in the ledger.
+// NOTE: DEPRECATED
 func (c *Client) GetConfirmedBlock(ctx context.Context, slot uint64, encoding string) (out *GetConfirmedBlockResult, err error) {
 	if encoding == "" {
 		encoding = "json"
@@ -93,6 +99,7 @@ func (c *Client) GetConfirmedBlock(ctx context.Context, slot uint64, encoding st
 	return
 }
 
+// GetAccountInfo returns all information associated with the account of provided publicKey.
 func (c *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) (out *GetAccountInfoResult, err error) {
 	obj := map[string]interface{}{
 		"encoding": "base64",
@@ -111,6 +118,7 @@ func (c *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) (
 	return out, nil
 }
 
+// GetAccountInfo populates the provided `inVar` parameter with all information associated with the account of provided publicKey.
 func (c *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey, inVar interface{}) (err error) {
 	resp, err := c.GetAccountInfo(ctx, account)
 	if err != nil {
@@ -120,6 +128,8 @@ func (c *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey,
 	return bin.NewDecoder(resp.Value.Data).Decode(inVar)
 }
 
+// GetConfirmedTransaction returns transaction details for a confirmed transaction.
+// NOTE: DEPRECATED
 func (c *Client) GetConfirmedTransaction(ctx context.Context, signature string) (out TransactionWithMeta, err error) {
 	params := []interface{}{signature, "json"}
 
@@ -127,6 +137,9 @@ func (c *Client) GetConfirmedTransaction(ctx context.Context, signature string) 
 	return
 }
 
+// GetConfirmedSignaturesForAddress2 returns confirmed signatures for transactions involving an
+// address backwards in time from the provided signature or most recent confirmed block.
+// NOTE: DEPRECATED
 func (c *Client) GetConfirmedSignaturesForAddress2(ctx context.Context, address solana.PublicKey, opts *GetConfirmedSignaturesForAddress2Opts) (out GetConfirmedSignaturesForAddress2Result, err error) {
 
 	params := []interface{}{address.String(), opts}
@@ -135,6 +148,7 @@ func (c *Client) GetConfirmedSignaturesForAddress2(ctx context.Context, address 
 	return
 }
 
+// GetProgramAccounts returns all accounts owned by the provided program publicKey.
 func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.PublicKey, opts *GetProgramAccountsOpts) (out GetProgramAccountsResult, err error) {
 	obj := map[string]interface{}{
 		"encoding": "base64",
@@ -154,6 +168,7 @@ func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.Public
 	return
 }
 
+// GetMinimumBalanceForRentExemption returns minimum balance required to make account rent exempt.
 func (c *Client) GetMinimumBalanceForRentExemption(ctx context.Context, dataSize int) (lamport int, err error) {
 	params := []interface{}{dataSize}
 	err = c.rpcClient.CallFor(&lamport, "getMinimumBalanceForRentExemption", params...)
@@ -165,6 +180,7 @@ type SimulateTransactionResponse struct {
 	Logs []string
 }
 
+// SimulateTransaction simulates sending a transaction.
 func (c *Client) SimulateTransaction(ctx context.Context, transaction *solana.Transaction) (*SimulateTransactionResponse, error) {
 	buf := new(bytes.Buffer)
 	if err := bin.NewEncoder(buf).Encode(transaction); err != nil {
@@ -191,6 +207,7 @@ func (c *Client) SimulateTransaction(ctx context.Context, transaction *solana.Tr
 
 }
 
+// SendTransaction submits a signed transaction to the cluster for processing.
 func (c *Client) SendTransaction(ctx context.Context, transaction *solana.Transaction) (signature string, err error) {
 
 	buf := new(bytes.Buffer)
@@ -216,6 +233,7 @@ func (c *Client) SendTransaction(ctx context.Context, transaction *solana.Transa
 	return
 }
 
+// RequestAirdrop requests an airdrop of lamports to a publicKey.
 func (c *Client) RequestAirdrop(ctx context.Context, account *solana.PublicKey, lamport uint64, commitment CommitmentType) (signature string, err error) {
 
 	obj := map[string]interface{}{
