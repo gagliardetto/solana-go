@@ -40,8 +40,8 @@ type GetRecentBlockhashResult struct {
 }
 
 type BlockhashResult struct {
-	Blockhash     solana.PublicKey `json:"blockhash"` /* make this a `Hash` type, which is a copy of the PublicKey` type */
-	FeeCalculator FeeCalculator    `json:"feeCalculator"`
+	Blockhash     solana.Hash   `json:"blockhash"`
+	FeeCalculator FeeCalculator `json:"feeCalculator"`
 }
 
 type FeeCalculator struct {
@@ -49,8 +49,8 @@ type FeeCalculator struct {
 }
 
 type GetConfirmedBlockResult struct {
-	Blockhash         solana.PublicKey      `json:"blockhash"`
-	PreviousBlockhash solana.PublicKey      `json:"previousBlockhash"` // could be zeroes if ledger was clean-up and this is unavailable
+	Blockhash         solana.Hash           `json:"blockhash"`
+	PreviousBlockhash solana.Hash           `json:"previousBlockhash"` // could be zeroes if ledger was clean-up and this is unavailable
 	ParentSlot        bin.Uint64            `json:"parentSlot"`
 	Transactions      []TransactionWithMeta `json:"transactions"`
 	Rewards           []BlockReward         `json:"rewards"`
@@ -188,8 +188,8 @@ type ParsedTransaction struct {
 }
 
 type Message struct {
-	AccountKeys     []*AccountKey `json:"accountKeys"`
-	RecentBlockhash solana.PublicKey/* TODO: change to Hash */ `json:"recentBlockhash"`
+	AccountKeys     []*AccountKey       `json:"accountKeys"`
+	RecentBlockhash solana.Hash         `json:"recentBlockhash"`
 	Instructions    []ParsedInstruction `json:"instructions"`
 }
 

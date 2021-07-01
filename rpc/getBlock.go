@@ -63,12 +63,12 @@ func (cl *Client) GetBlockWithOpts(
 
 type GetBlockResult struct {
 	// The blockhash of this block, as base-58 encoded string.
-	Blockhash solana.PublicKey `json:"blockhash"`
+	Blockhash solana.Hash `json:"blockhash"`
 
 	// The blockhash of this block's parent, as base-58 encoded string;
 	// if the parent block is not available due to ledger cleanup,
 	// this field will return "11111111111111111111111111111111".
-	PreviousBlockhash solana.PublicKey `json:"previousBlockhash"` // could be zeroes if ledger was clean-up and this is unavailable
+	PreviousBlockhash solana.Hash `json:"previousBlockhash"` // could be zeroes if ledger was clean-up and this is unavailable
 
 	// The slot index of this block's parent.
 	ParentSlot bin.Uint64 `json:"parentSlot"`
