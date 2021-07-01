@@ -202,8 +202,15 @@ func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.Public
 }
 
 // GetMinimumBalanceForRentExemption returns minimum balance required to make account rent exempt.
-func (c *Client) GetMinimumBalanceForRentExemption(ctx context.Context, dataSize int) (lamport int, err error) {
+func (c *Client) GetMinimumBalanceForRentExemption(
+	ctx context.Context,
+	dataSize int,
+	commitment CommitmentType,
+) (lamport int, err error) {
 	params := []interface{}{dataSize}
+	if commitment != "" {
+		params = append(params, M{"commitment": commitment})
+	}
 	err = c.rpcClient.CallFor(&lamport, "getMinimumBalanceForRentExemption", params...)
 	return
 }
