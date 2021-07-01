@@ -83,7 +83,7 @@ type UiTokenAmount struct {
 	Amount string `json:"amount"` // Raw amount of tokens as a string, ignoring decimals.
 	// TODO: <number> == bin.Int64 ???
 	Decimals       uint8            `json:"decimals"`       // Number of decimals configured for token's mint.
-	UiAmount       *bin.JSONFloat64 `json:"uiAmount"`       // Token amount as a float, accounting for decimals. DEPRECATED
+	UiAmount       *bin.JSONFloat64 `json:"uiAmount"`       // DEPRECATED: Token amount as a float, accounting for decimals.
 	UiAmountString string           `json:"uiAmountString"` // Token amount as a string, accounting for decimals.
 }
 
