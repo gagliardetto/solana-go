@@ -35,7 +35,9 @@ func (cl *Client) GetLeaderSchedule(
 		params = append(params, obj)
 	}
 	err = cl.rpcClient.CallFor(&out, "getLeaderSchedule", params...)
-
+	if err != nil {
+		return nil, err
+	}
 	// TODO: check that this behaviour is implemented everywhere:
 	if out == nil {
 		return nil, ErrNotFound

@@ -157,7 +157,10 @@ func (cl *Client) GetAccountInfoWithOpts(
 		}
 	}
 
-	params := []interface{}{account, obj}
+	params := []interface{}{account}
+	if len(obj) > 0 {
+		params = append(params, obj)
+	}
 
 	err = cl.rpcClient.CallFor(&out, "getAccountInfo", params...)
 	if err != nil {
