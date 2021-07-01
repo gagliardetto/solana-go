@@ -28,6 +28,18 @@ type Padding []byte
 
 type Hash PublicKey
 
+func MustHashFromBase58(in string) Hash {
+	return Hash(MustPublicKeyFromBase58(in))
+}
+
+func HashFromBase58(in string) (Hash, error) {
+	tmp, err := PublicKeyFromBase58(in)
+	if err != nil {
+		return Hash{}, err
+	}
+	return Hash(tmp), nil
+}
+
 func (ha Hash) MarshalJSON() ([]byte, error) {
 	return json.Marshal(base58.Encode(ha[:]))
 }
