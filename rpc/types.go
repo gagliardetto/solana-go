@@ -113,18 +113,17 @@ type InnerInstruction struct {
 	Instructions []solana.CompiledInstruction `json:"instructions"` // Ordered list of inner program instructions that were invoked during a single transaction instruction.
 }
 
-type DeprecatedTransactionMetaStatus struct {
-	Ok  interface{} `json:"Ok"`  // <null> Transaction was successful
-	Err interface{} `json:"Err"` // Transaction failed with TransactionError
-}
+// 	Ok  interface{} `json:"Ok"`  // <null> Transaction was successful
+// 	Err interface{} `json:"Err"` // Transaction failed with TransactionError
+type DeprecatedTransactionMetaStatus M
 
 type TransactionSignature struct {
-	Err                interface{}      `json:"err,omitempty"`       // Error if transaction failed, null if transaction succeeded
-	Memo               string           `json:"memo,omitempty"`      // Memo associated with the transaction, null if no memo is present
-	Signature          solana.Signature `json:"signature"`           // transaction signature as base-58 encoded string
-	Slot               bin.Uint64       `json:"slot,omitempty"`      // The slot that contains the block with the transaction
-	BlockTime          bin.Int64        `json:"blockTime,omitempty"` // estimated production time, as Unix timestamp (seconds since the Unix epoch) of when transaction was processed. null if not available.
-	ConfirmationStatus string           `json:"confirmationStatus,omitempty"`
+	Err                interface{}            `json:"err,omitempty"`       // Error if transaction failed, null if transaction succeeded
+	Memo               string                 `json:"memo,omitempty"`      // Memo associated with the transaction, null if no memo is present
+	Signature          solana.Signature       `json:"signature"`           // transaction signature as base-58 encoded string
+	Slot               bin.Uint64             `json:"slot,omitempty"`      // The slot that contains the block with the transaction
+	BlockTime          bin.Int64              `json:"blockTime,omitempty"` // estimated production time, as Unix timestamp (seconds since the Unix epoch) of when transaction was processed. null if not available.
+	ConfirmationStatus ConfirmationStatusType `json:"confirmationStatus,omitempty"`
 }
 
 type GetAccountInfoResult struct {
