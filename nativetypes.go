@@ -75,6 +75,12 @@ func (ha Hash) String() string {
 ///
 type Signature [64]byte
 
+var zeroSignature = Signature{}
+
+func (sig Signature) IsZero() bool {
+	return sig == zeroSignature
+}
+
 func SignatureFromBase58(in string) (out Signature, err error) {
 	val, err := base58.Decode(in)
 	if err != nil {
