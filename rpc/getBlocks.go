@@ -6,7 +6,7 @@ import (
 	bin "github.com/dfuse-io/binary"
 )
 
-type GetBlocksResult []bin.Uint64
+type BlocksResult []bin.Uint64
 
 // GetBlocks returns a list of confirmed blocks between two slots.
 // NEW: This method is only available in solana-core v1.7 or newer.
@@ -19,7 +19,7 @@ func (cl *Client) GetBlocks(
 	startSlot uint64,
 	endSlot *uint64,
 	commitment CommitmentType,
-) (out *GetBlocksResult, err error) {
+) (out *BlocksResult, err error) {
 	params := []interface{}{startSlot}
 	if endSlot != nil {
 		params = append(params, endSlot)
