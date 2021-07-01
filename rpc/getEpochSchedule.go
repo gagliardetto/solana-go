@@ -16,7 +16,6 @@ type GetEpochScheduleResult struct {
 
 // GetEpochSchedule returns epoch schedule information from this cluster's genesis config.
 func (cl *Client) GetEpochSchedule(ctx context.Context) (out *GetEpochScheduleResult, err error) {
-	params := []interface{}{}
-	err = cl.rpcClient.CallFor(&out, "getEpochSchedule", params...)
+	err = cl.rpcClient.CallFor(&out, "getEpochSchedule")
 	return
 }

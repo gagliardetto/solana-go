@@ -23,7 +23,6 @@ type FeeRateGovernor struct {
 
 // GetFeeRateGovernor returns the fee rate governor information from the root bank.
 func (cl *Client) GetFeeRateGovernor(ctx context.Context) (out *GetFeeRateGovernorResult, err error) {
-	params := []interface{}{}
-	err = cl.rpcClient.CallFor(&out, "getFeeRateGovernor", params...)
+	err = cl.rpcClient.CallFor(&out, "getFeeRateGovernor")
 	return
 }
