@@ -15,6 +15,21 @@ type GetMultipleAccountsResult struct {
 // GetMultipleAccounts returns the account information for a list of Pubkeys.
 func (cl *Client) GetMultipleAccounts(
 	ctx context.Context,
+	accounts ...solana.PublicKey,
+) (out *GetMultipleAccountsResult, err error) {
+	return cl.GetMultipleAccountsWithOpts(
+		ctx,
+		accounts,
+		"",
+		"",
+		nil,
+		nil,
+	)
+}
+
+// GetMultipleAccountsWithOpts returns the account information for a list of Pubkeys.
+func (cl *Client) GetMultipleAccountsWithOpts(
+	ctx context.Context,
 	accounts []solana.PublicKey,
 	encoding EncodingType,
 	commitment CommitmentType,
