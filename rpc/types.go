@@ -138,11 +138,22 @@ type Account struct {
 	RentEpoch  bin.Uint64       `json:"rentEpoch"`  // the epoch at which this account will next owe rent
 }
 
+type DataSlice struct {
+	Offset *uint `json:"offset,omitempty"`
+	Length *uint `json:"length,omitempty"`
+}
 type GetProgramAccountsOpts struct {
 	Commitment CommitmentType `json:"commitment,omitempty"`
 
+	Encoding EncodingType `json:"encoding,omitempty"`
+
+	DataSlice *DataSlice `json:"dataSlice,omitempty"` // limit the returned account data
+
 	// Filter on accounts, implicit AND between filters
-	Filters []RPCFilter `json:"filters,omitempty"`
+	Filters []RPCFilter `json:"filters,omitempty"` // filter results using various filter objects; account must meet all filter criteria to be included in results
+
+	// TODO:
+	// WithContext *bool `json:"withContext,omitempty"` // wrap the result in an RpcResponse JSON object.
 }
 
 type GetProgramAccountsResult []*KeyedAccount

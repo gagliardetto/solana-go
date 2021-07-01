@@ -185,8 +185,12 @@ func (c *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey,
 }
 
 // GetProgramAccounts returns all accounts owned by the provided program publicKey.
-func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.PublicKey, opts *GetProgramAccountsOpts) (out GetProgramAccountsResult, err error) {
-	obj := map[string]interface{}{
+func (c *Client) GetProgramAccounts(
+	ctx context.Context,
+	publicKey solana.PublicKey,
+	opts *GetProgramAccountsOpts,
+) (out GetProgramAccountsResult, err error) {
+	obj := M{
 		"encoding": "base64",
 	}
 	if opts != nil {
@@ -195,6 +199,19 @@ func (c *Client) GetProgramAccounts(ctx context.Context, publicKey solana.Public
 		}
 		if len(opts.Filters) != 0 {
 			obj["filters"] = opts.Filters
+		}
+		if opts.Encoding != "" {
+			// TODO: remove option?
+			obj["encoding"] = opts.Encoding
+		}
+		// if opts.WithContext != nil {
+		// 	obj["withContext"] = opts.WithContext
+		// }
+		if opts.DataSlice != nil {
+			obj["dataSlice"] = M{
+				"offset": opts.DataSlice.Offset,
+				"length": opts.DataSlice.Length,
+			}
 		}
 	}
 
@@ -231,7 +248,7 @@ func (c *Client) SimulateTransaction(ctx context.Context, transaction *solana.Tr
 	}
 	trxData := buf.Bytes()
 
-	obj := map[string]interface{}{
+	obj := M{
 		"encoding": "base64",
 	}
 
@@ -261,7 +278,7 @@ func (c *Client) SendTransaction(ctx context.Context, transaction *solana.Transa
 
 	trxData := buf.Bytes()
 
-	obj := map[string]interface{}{
+	obj := M{
 		"encoding": "base64",
 	}
 
@@ -279,7 +296,7 @@ func (c *Client) SendTransaction(ctx context.Context, transaction *solana.Transa
 // RequestAirdrop requests an airdrop of lamports to a publicKey.
 func (c *Client) RequestAirdrop(ctx context.Context, account *solana.PublicKey, lamport uint64, commitment CommitmentType) (signature string, err error) {
 
-	obj := map[string]interface{}{
+	obj := M{
 		"commitment": commitment,
 	}
 
