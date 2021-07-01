@@ -95,6 +95,13 @@ func SignatureFromBase58(in string) (out Signature, err error) {
 	return
 }
 
+func MustSignatureFromBase58(in string) Signature {
+	out, err := SignatureFromBase58(in)
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
 func (p Signature) MarshalJSON() ([]byte, error) {
 	return json.Marshal(base58.Encode(p[:]))
 }
