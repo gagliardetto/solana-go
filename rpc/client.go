@@ -86,13 +86,13 @@ func (c *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentTy
 }
 
 // GetSlot returns the current slot the node is processing.
-func (c *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out GetSlotResult, err error) {
+func (c *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out bin.Uint64, err error) {
 	var params []interface{}
 	if commitment != "" {
-		params = append(params, string(commitment))
+		params = append(params, M{"commitment": commitment})
 	}
 
-	err = c.rpcClient.CallFor(&out, "getSlot", params...)
+	err = c.rpcClient.CallFor(&out, "getSlot", params)
 	return
 }
 

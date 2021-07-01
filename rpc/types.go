@@ -32,8 +32,6 @@ type GetBalanceResult struct {
 	Value bin.Uint64 `json:"value"`
 }
 
-type GetSlotResult bin.Uint64
-
 type GetRecentBlockhashResult struct {
 	RPCContext
 	Value BlockhashResult `json:"value"`
