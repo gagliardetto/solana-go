@@ -73,11 +73,11 @@ func (cl *Client) GetBalance(
 // GetRecentBlockhash returns a recent block hash from the ledger,
 // and a fee schedule that can be used to compute the cost of submitting a transaction using it.
 func (c *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentType) (out *GetRecentBlockhashResult, err error) {
-	commit := map[string]string{
-		"commitment": string(commitment),
-	}
 	var params []interface{}
 	if commitment != "" {
+		commit := map[string]string{
+			"commitment": string(commitment),
+		}
 		params = append(params, commit)
 	}
 
