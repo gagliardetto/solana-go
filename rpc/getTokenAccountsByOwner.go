@@ -7,37 +7,14 @@ import (
 	"github.com/dfuse-io/solana-go"
 )
 
-type GetTokenAccountsResult struct {
-	RPCContext
-	Value []*TokenAccountsResult `json:"value"`
-}
-type TokenAccountsResult struct {
-	Pubkey  solana.PublicKey `json:"pubkey"`  // the account Pubkey
-	Account solana.PublicKey `json:"account"` // the account
-}
-
-type GetTokenAccountsConfig struct {
-	Mint solana.PublicKey `json:"mint"` // Pubkey of the specific token Mint to limit accounts to
-	// OR:
-	ProgramId solana.PublicKey `json:"programId"` // Pubkey of the Token program ID that owns the accounts
-}
-
-type GetTokenAccountsOpts struct {
-	Commitment CommitmentType `json:"commitment,omitempty"`
-
-	Encoding EncodingType `json:"encoding,omitempty"`
-
-	DataSlice *DataSlice `json:"dataSlice,omitempty"`
-}
-
-// GetTokenAccountsByDelegate returns all SPL Token accounts by approved Delegate.
-func (cl *Client) GetTokenAccountsByDelegate(
+// GetTokenAccountsByOwner returns all SPL Token accounts by token owner.
+func (cl *Client) GetTokenAccountsByOwner(
 	ctx context.Context,
-	account solana.PublicKey, // Pubkey of account delegate to query
+	owner solana.PublicKey,
 	conf *GetTokenAccountsConfig,
 	opts *GetTokenAccountsOpts,
 ) (out *GetTokenAccountsResult, err error) {
-	params := []interface{}{account}
+	params := []interface{}{owner}
 	if conf == nil {
 		return nil, errors.New("conf is nil")
 	}
@@ -79,6 +56,6 @@ func (cl *Client) GetTokenAccountsByDelegate(
 		}
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getTokenAccountsByDelegate", params)
+	err = cl.rpcClient.CallFor(&out, "getTokenAccountsByOwner", params)
 	return
 }
