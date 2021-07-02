@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 
+	bin "github.com/dfuse-io/binary"
 	"github.com/dfuse-io/solana-go"
 
 	"github.com/dfuse-io/solana-go/rpc"
@@ -48,6 +49,26 @@ type params struct {
 	Subscription int              `json:"subscription"`
 }
 
+type AccountResult struct {
+	Context struct {
+		Slot uint64
+	} `json:"context"`
+	Value struct {
+		rpc.Account
+	} `json:"value"`
+}
+
+type LogResult struct {
+	Context struct {
+		Slot uint64
+	} `json:"context"`
+	Value struct {
+		Signature solana.Signature `json:"signature"`
+		Err       interface{}      `json:"err"`
+		Logs      []string         `json:"logs"`
+	} `json:"value"`
+}
+
 type ProgramResult struct {
 	Context struct {
 		Slot uint64
@@ -58,17 +79,26 @@ type ProgramResult struct {
 	} `json:"value"`
 }
 
-type AccountResult struct {
+type SignatureResult struct {
 	Context struct {
 		Slot uint64
 	} `json:"context"`
 	Value struct {
-		rpc.Account
+		Err interface{} `json:"err"`
 	} `json:"value"`
 }
 
 type SlotResult struct {
-	Parent uint64
-	Root   uint64
-	Slot   uint64
+	Parent uint64 `json:"parent"`
+	Root   uint64 `json:"root"`
+	Slot   uint64 `json:"slot"`
+}
+
+type RootResult bin.Uint64
+
+type VoteResult struct {
+	Hash  solana.Hash  `json:"hash"`
+	Slots []bin.Uint64 `json:"slots"`
+	// TODO:
+	// Timestamp interface{} `json:"timestamp"`
 }

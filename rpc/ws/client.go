@@ -20,11 +20,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"reflect"
 	"sync"
 	"time"
 
-	"github.com/dfuse-io/solana-go/rpc"
 	"github.com/gorilla/rpc/v2/json2"
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
@@ -49,7 +49,13 @@ func Dial(ctx context.Context, rpcURL string) (c *Client, err error) {
 		subscriptionByWSSubID:   map[uint64]*Subscription{},
 	}
 
-	c.conn, _, err = websocket.DefaultDialer.DialContext(ctx, rpcURL, nil)
+	dialer := &websocket.Dialer{
+		Proxy:             http.ProxyFromEnvironment,
+		HandshakeTimeout:  45 * time.Second,
+		EnableCompression: true,
+	}
+
+	c.conn, _, err = dialer.DialContext(ctx, rpcURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("new ws client: dial: %w", err)
 	}
@@ -213,12 +219,15 @@ func (c *Client) unsubscribe(subID uint64, method string) error {
 	return nil
 }
 
-func (c *Client) subscribe(params []interface{}, conf map[string]interface{}, subscriptionMethod, unsubscribeMethod string, commitment rpc.CommitmentType, resultType interface{}) (*Subscription, error) {
+func (c *Client) subscribe(
+	params []interface{},
+	conf map[string]interface{},
+	subscriptionMethod string,
+	unsubscribeMethod string,
+	resultType interface{},
+) (*Subscription, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	if commitment != "" {
-		conf["commitment"] = string(commitment)
-	}
 
 	req := newRequest(params, subscriptionMethod, conf)
 	data, err := req.encode()
