@@ -241,7 +241,27 @@ type SimulateTransactionResponse struct {
 }
 
 // SimulateTransaction simulates sending a transaction.
-func (c *Client) SimulateTransaction(ctx context.Context, transaction *solana.Transaction) (*SimulateTransactionResponse, error) {
+func (cl *Client) SimulateTransaction(
+	ctx context.Context,
+	transaction *solana.Transaction,
+) (out *SimulateTransactionResponse, err error) {
+	return cl.SimulateTransactionWithOpts(
+		ctx,
+		transaction,
+		false,
+		"",
+		false,
+	)
+}
+
+// SimulateTransaction simulates sending a transaction.
+func (cl *Client) SimulateTransactionWithOpts(
+	ctx context.Context,
+	transaction *solana.Transaction,
+	sigVerify bool, // if true the transaction signatures will be verified (default: false, conflicts with replaceRecentBlockhash)
+	commitment CommitmentType, // Commitment level to simulate the transaction at (default: "finalized").
+	replaceRecentBlockhash bool, // if true the transaction recent blockhash will be replaced with the most recent blockhash. (default: false, conflicts with sigVerify)
+) (out *SimulateTransactionResponse, err error) {
 	buf := new(bytes.Buffer)
 	if err := bin.NewEncoder(buf).Encode(transaction); err != nil {
 		return nil, fmt.Errorf("send transaction: encode transaction: %w", err)
@@ -251,6 +271,15 @@ func (c *Client) SimulateTransaction(ctx context.Context, transaction *solana.Tr
 	obj := M{
 		"encoding": "base64",
 	}
+	if sigVerify {
+		obj["sigVerify"] = sigVerify
+	}
+	if commitment != "" {
+		obj["commitment"] = commitment
+	}
+	if replaceRecentBlockhash {
+		obj["replaceRecentBlockhash"] = replaceRecentBlockhash
+	}
 
 	b64Data := base64.StdEncoding.EncodeToString(trxData)
 	params := []interface{}{
@@ -258,13 +287,21 @@ func (c *Client) SimulateTransaction(ctx context.Context, transaction *solana.Tr
 		obj,
 	}
 
-	var out *SimulateTransactionResponse
-	if err := c.rpcClient.CallFor(&out, "simulateTransaction", params); err != nil {
-		return nil, fmt.Errorf("send transaction: rpc send: %w", err)
-	}
+	err = cl.rpcClient.CallFor(&out, "simulateTransaction", params)
+	return
+}
 
-	return out, nil
-
+// SendTransaction submits a signed transaction to the cluster for processing.
+func (cl *Client) SendTransaction(
+	ctx context.Context,
+	transaction *solana.Transaction,
+) (signature string, err error) {
+	return cl.SendTransactionWithOpts(
+		ctx,
+		transaction,
+		false,
+		"",
+	)
 }
 
 // SendTransaction submits a signed transaction to the cluster for processing.
@@ -292,18 +329,6 @@ func (c *Client) SimulateTransaction(ctx context.Context, transaction *solana.Tr
 // The returned signature is the first signature in the transaction, which is
 // used to identify the transaction (transaction id). This identifier can be
 // easily extracted from the transaction data before submission.
-func (cl *Client) SendTransaction(
-	ctx context.Context,
-	transaction *solana.Transaction,
-) (signature string, err error) {
-	return cl.SendTransactionWithOpts(
-		ctx,
-		transaction,
-		false,
-		"",
-	)
-}
-
 func (cl *Client) SendTransactionWithOpts(
 	ctx context.Context,
 	transaction *solana.Transaction,
