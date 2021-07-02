@@ -72,7 +72,7 @@ func (cl *Client) GetBalance(
 
 // GetRecentBlockhash returns a recent block hash from the ledger,
 // and a fee schedule that can be used to compute the cost of submitting a transaction using it.
-func (c *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentType) (out *GetRecentBlockhashResult, err error) {
+func (cl *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentType) (out *GetRecentBlockhashResult, err error) {
 	var params []interface{}
 	if commitment != "" {
 		commit := map[string]string{
@@ -81,18 +81,18 @@ func (c *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentTy
 		params = append(params, commit)
 	}
 
-	err = c.rpcClient.CallFor(&out, "getRecentBlockhash", params)
+	err = cl.rpcClient.CallFor(&out, "getRecentBlockhash", params)
 	return
 }
 
 // GetSlot returns the current slot the node is processing.
-func (c *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out bin.Uint64, err error) {
+func (cl *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out bin.Uint64, err error) {
 	var params []interface{}
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}
 
-	err = c.rpcClient.CallFor(&out, "getSlot", params)
+	err = cl.rpcClient.CallFor(&out, "getSlot", params)
 	return
 }
 
@@ -175,8 +175,8 @@ func (cl *Client) GetAccountInfoWithOpts(
 }
 
 // GetAccountInfo populates the provided `inVar` parameter with all information associated with the account of provided publicKey.
-func (c *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey, inVar interface{}) (err error) {
-	resp, err := c.GetAccountInfo(ctx, account)
+func (cl *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey, inVar interface{}) (err error) {
+	resp, err := cl.GetAccountInfo(ctx, account)
 	if err != nil {
 		return err
 	}
@@ -185,7 +185,7 @@ func (c *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey,
 }
 
 // GetProgramAccounts returns all accounts owned by the provided program publicKey.
-func (c *Client) GetProgramAccounts(
+func (cl *Client) GetProgramAccounts(
 	ctx context.Context,
 	publicKey solana.PublicKey,
 	opts *GetProgramAccountsOpts,
@@ -217,12 +217,12 @@ func (c *Client) GetProgramAccounts(
 
 	params := []interface{}{publicKey, obj}
 
-	err = c.rpcClient.CallFor(&out, "getProgramAccounts", params)
+	err = cl.rpcClient.CallFor(&out, "getProgramAccounts", params)
 	return
 }
 
 // GetMinimumBalanceForRentExemption returns minimum balance required to make account rent exempt.
-func (c *Client) GetMinimumBalanceForRentExemption(
+func (cl *Client) GetMinimumBalanceForRentExemption(
 	ctx context.Context,
 	dataSize int,
 	commitment CommitmentType,
@@ -231,7 +231,7 @@ func (c *Client) GetMinimumBalanceForRentExemption(
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}
-	err = c.rpcClient.CallFor(&lamport, "getMinimumBalanceForRentExemption", params)
+	err = cl.rpcClient.CallFor(&lamport, "getMinimumBalanceForRentExemption", params)
 	return
 }
 
