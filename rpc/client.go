@@ -268,7 +268,48 @@ func (c *Client) SimulateTransaction(ctx context.Context, transaction *solana.Tr
 }
 
 // SendTransaction submits a signed transaction to the cluster for processing.
-func (c *Client) SendTransaction(ctx context.Context, transaction *solana.Transaction) (signature string, err error) {
+// This method does not alter the transaction in any way;
+// it relays the transaction created by clients to the node as-is.
+//
+// If the node's rpc service receives the transaction,
+// this method immediately succeeds, without waiting for any confirmations.
+// A successful response from this method does not guarantee the transaction
+// is processed or confirmed by the cluster.
+//
+// While the rpc service will reasonably retry to submit it, the transaction
+// could be rejected if transaction's recent_blockhash expires before it lands.
+//
+// Use getSignatureStatuses to ensure a transaction is processed and confirmed.
+//
+// Before submitting, the following preflight checks are performed:
+//
+// 	- The transaction signatures are verified
+//  - The transaction is simulated against the bank slot specified by the preflight
+//    commitment. On failure an error will be returned. Preflight checks may be
+//    disabled if desired. It is recommended to specify the same commitment and
+//    preflight commitment to avoid confusing behavior.
+//
+// The returned signature is the first signature in the transaction, which is
+// used to identify the transaction (transaction id). This identifier can be
+// easily extracted from the transaction data before submission.
+func (cl *Client) SendTransaction(
+	ctx context.Context,
+	transaction *solana.Transaction,
+) (signature string, err error) {
+	return cl.SendTransactionWithOpts(
+		ctx,
+		transaction,
+		false,
+		"",
+	)
+}
+
+func (cl *Client) SendTransactionWithOpts(
+	ctx context.Context,
+	transaction *solana.Transaction,
+	skipPreflight bool, // if true, skip the preflight transaction checks (default: false)
+	preflightCommitment CommitmentType, // Commitment level to use for preflight (default: "finalized").
+) (signature string, err error) {
 
 	buf := new(bytes.Buffer)
 
@@ -282,14 +323,19 @@ func (c *Client) SendTransaction(ctx context.Context, transaction *solana.Transa
 		"encoding": "base64",
 	}
 
+	if skipPreflight {
+		obj["skipPreflight"] = skipPreflight
+	}
+	if preflightCommitment != "" {
+		obj["preflightCommitment"] = preflightCommitment
+	}
+
 	params := []interface{}{
 		base64.StdEncoding.EncodeToString(trxData),
 		obj,
 	}
 
-	if err := c.rpcClient.CallFor(&signature, "sendTransaction", params); err != nil {
-		return "", fmt.Errorf("send transaction: rpc send: %w", err)
-	}
+	err = cl.rpcClient.CallFor(&signature, "sendTransaction", params)
 	return
 }
 
