@@ -58,9 +58,18 @@ type GetConfirmedBlockResult struct {
 type BlockReward struct {
 	Pubkey      solana.PublicKey `json:"pubkey"`      // The public key, as base-58 encoded string, of the account that received the reward
 	Lamports    bin.Int64        `json:"lamports"`    // number of reward lamports credited or debited by the account, as a i64
-	PostBalance bin.Int64        `json:"postBalance"` // account balance in lamports after the reward was applied
-	RewardType  string           `json:"rewardType"`  // type of reward: "fee", "rent", "voting", "staking"
+	PostBalance bin.Uint64       `json:"postBalance"` // account balance in lamports after the reward was applied
+	RewardType  RewardType       `json:"rewardType"`  // type of reward: "fee", "rent", "voting", "staking"
 }
+
+type RewardType string
+
+const (
+	RewardTypeFee     RewardType = "fee"
+	RewardTypeRent    RewardType = "rent"
+	RewardTypeVoting  RewardType = "voting"
+	RewardTypeStaking RewardType = "staking"
+)
 
 type TransactionWithMeta struct {
 	Meta        *TransactionMeta    `json:"meta,omitempty"` // transaction status metadata object
@@ -99,10 +108,9 @@ type TransactionMeta struct {
 
 	LogMessages []string `json:"logMessages"` // array of string log messages or omitted if log message recording was not yet enabled during this transaction
 
-	Status DeprecatedTransactionMetaStatus `json:"status"` // Transaction status; DEPRECATED.
+	Status DeprecatedTransactionMetaStatus `json:"status"` // DEPRECATED: Transaction status.
 
-	// TODO: not present in spec doc, but present in json.
-	// Rewards []BlockReward `json:"rewards"`
+	Rewards []BlockReward `json:"rewards,omitempty"`
 }
 
 type InnerInstruction struct {
@@ -198,9 +206,10 @@ type ParsedTransaction struct {
 }
 
 type Message struct {
-	AccountKeys     []*AccountKey       `json:"accountKeys"`
-	RecentBlockhash solana.Hash         `json:"recentBlockhash"`
-	Instructions    []ParsedInstruction `json:"instructions"`
+	AccountKeys     []solana.PublicKey   `json:"accountKeys"`
+	RecentBlockhash solana.Hash          `json:"recentBlockhash"`
+	Instructions    []ParsedInstruction  `json:"instructions"`
+	Header          solana.MessageHeader `json:"header"`
 }
 
 type AccountKey struct {
@@ -210,11 +219,11 @@ type AccountKey struct {
 }
 
 type ParsedInstruction struct {
-	Accounts  []solana.PublicKey `json:"accounts,omitempty"`
-	Data      solana.Base58      `json:"data,omitempty"`
-	Parsed    *InstructionInfo   `json:"parsed,omitempty"`
-	Program   string             `json:"program,omitempty"`
-	ProgramID solana.PublicKey   `json:"programId"`
+	Accounts       []bin.Int64      `json:"accounts,omitempty"`
+	Data           solana.Base58    `json:"data,omitempty"`
+	Parsed         *InstructionInfo `json:"parsed,omitempty"`
+	Program        string           `json:"program,omitempty"`
+	ProgramIDIndex bin.Int64        `json:"programIdIndex"`
 }
 
 type InstructionInfo struct {

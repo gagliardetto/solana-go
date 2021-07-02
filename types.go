@@ -162,3 +162,10 @@ func TransactionFromData(in []byte) (*Transaction, error) {
 	}
 	return out, nil
 }
+func MustTransactionFromData(in []byte) *Transaction {
+	out, err := TransactionFromData(in)
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
