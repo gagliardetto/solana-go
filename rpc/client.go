@@ -65,7 +65,7 @@ func (cl *Client) GetBalance(
 		params = append(params, string(commitment))
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getBalance", params...)
+	err = cl.rpcClient.CallFor(&out, "getBalance", params)
 
 	return
 }
@@ -162,7 +162,7 @@ func (cl *Client) GetAccountInfoWithOpts(
 		params = append(params, obj)
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getAccountInfo", params...)
+	err = cl.rpcClient.CallFor(&out, "getAccountInfo", params)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +217,7 @@ func (c *Client) GetProgramAccounts(
 
 	params := []interface{}{publicKey, obj}
 
-	err = c.rpcClient.CallFor(&out, "getProgramAccounts", params...)
+	err = c.rpcClient.CallFor(&out, "getProgramAccounts", params)
 	return
 }
 
@@ -231,7 +231,7 @@ func (c *Client) GetMinimumBalanceForRentExemption(
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}
-	err = c.rpcClient.CallFor(&lamport, "getMinimumBalanceForRentExemption", params...)
+	err = c.rpcClient.CallFor(&lamport, "getMinimumBalanceForRentExemption", params)
 	return
 }
 
@@ -259,7 +259,7 @@ func (c *Client) SimulateTransaction(ctx context.Context, transaction *solana.Tr
 	}
 
 	var out *SimulateTransactionResponse
-	if err := c.rpcClient.CallFor(&out, "simulateTransaction", params...); err != nil {
+	if err := c.rpcClient.CallFor(&out, "simulateTransaction", params); err != nil {
 		return nil, fmt.Errorf("send transaction: rpc send: %w", err)
 	}
 
@@ -287,27 +287,28 @@ func (c *Client) SendTransaction(ctx context.Context, transaction *solana.Transa
 		obj,
 	}
 
-	if err := c.rpcClient.CallFor(&signature, "sendTransaction", params...); err != nil {
+	if err := c.rpcClient.CallFor(&signature, "sendTransaction", params); err != nil {
 		return "", fmt.Errorf("send transaction: rpc send: %w", err)
 	}
 	return
 }
 
 // RequestAirdrop requests an airdrop of lamports to a publicKey.
-func (c *Client) RequestAirdrop(ctx context.Context, account *solana.PublicKey, lamport uint64, commitment CommitmentType) (signature string, err error) {
-
-	obj := M{
-		"commitment": commitment,
-	}
-
+func (cl *Client) RequestAirdrop(
+	ctx context.Context,
+	account solana.PublicKey,
+	lamport uint64,
+	commitment CommitmentType,
+) (signature solana.Signature, err error) {
 	params := []interface{}{
-		account.String(),
+		account,
 		lamport,
-		obj,
 	}
-
-	if err := c.rpcClient.CallFor(&signature, "requestAirdrop", params...); err != nil {
-		return "", fmt.Errorf("send transaction: rpc send: %w", err)
+	if commitment != "" {
+		params = append(params,
+			M{"commitment": commitment},
+		)
 	}
+	err = cl.rpcClient.CallFor(&signature, "requestAirdrop", params)
 	return
 }
