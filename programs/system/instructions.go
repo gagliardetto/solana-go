@@ -20,8 +20,8 @@ import (
 	"fmt"
 
 	bin "github.com/dfuse-io/binary"
-	solana "github.com/dfuse-io/solana-go"
-	"github.com/dfuse-io/solana-go/text"
+	solana "github.com/gagliardetto/solana-go"
+	"github.com/gagliardetto/solana-go/text"
 )
 
 var PROGRAM_ID = solana.MustPublicKeyFromBase58("11111111111111111111111111111111")

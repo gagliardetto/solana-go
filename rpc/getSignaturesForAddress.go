@@ -3,7 +3,7 @@ package rpc
 import (
 	"context"
 
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 )
 
 type GetSignaturesForAddressOpts struct {

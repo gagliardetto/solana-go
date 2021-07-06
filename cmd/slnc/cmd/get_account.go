@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 
 	"github.com/spf13/cobra"
 )

@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dfuse-io/solana-go/text"
+	"github.com/gagliardetto/solana-go/text"
 
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 
 	"github.com/spf13/cobra"
 )

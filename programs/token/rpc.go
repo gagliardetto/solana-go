@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dfuse-io/solana-go/rpc"
+	"github.com/gagliardetto/solana-go/rpc"
 )
 
 //go:generate rice embed-go

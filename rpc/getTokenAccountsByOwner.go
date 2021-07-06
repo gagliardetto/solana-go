@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 )
 
 // GetTokenAccountsByOwner returns all SPL Token accounts by token owner.

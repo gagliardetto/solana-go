@@ -7,7 +7,7 @@ Go library to interface with Solana nodes's JSON-RPC interface, Solana's SPL tok
 
 > :warning: `solana-go` works using SemVer but in 0 version, which means that the 'minor' will be changed when some broken changes are introduced into the application, and the 'patch' will be changed when a new feature with new changes is added or for bug fixing. As soon as v1.0.0 be released, `solana-go` will start to use SemVer as usual.
 
-1. Install from https://github.com/dfuse-io/solana-go/releases
+1. Install from https://github.com/gagliardetto/solana-go/releases
 
 **or**
 
@@ -19,7 +19,7 @@ $ brew install dfuse-io/tap/solana-go
 3. Build from source with:
 
 ```bash
-$ go get -u -v github.com/dfuse-io/solana-go/cmd/slnc
+$ go get -u -v github.com/gagliardetto/solana-go/cmd/slnc
 ```
 
 # Command-line
@@ -88,8 +88,8 @@ Loading an SPL mint
 
 ```golang
 
-import "github.com/dfuse-io/solana-go/rpc"
-import "github.com/dfuse-io/solana-go/token"
+import "github.com/gagliardetto/solana-go/rpc"
+import "github.com/gagliardetto/solana-go/token"
 
 	addr := solana.MustPublicKeyFromBase58("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
 	cli := rpc.NewClient("http://api.mainnet-beta.solana.com/rpc")
@@ -111,8 +111,8 @@ Getting any account's data:
 
 ```golang
 
-import "github.com/dfuse-io/solana-go/rpc"
-import "github.com/dfuse-io/solana-go/token"
+import "github.com/gagliardetto/solana-go/rpc"
+import "github.com/gagliardetto/solana-go/token"
 
 	addr := solana.MustPublicKeyFromBase58("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
 	cli := rpc.NewClient("http://api.mainnet-beta.solana.com/rpc")

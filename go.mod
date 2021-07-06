@@ -1,4 +1,4 @@
-module github.com/dfuse-io/solana-go
+module github.com/gagliardetto/solana-go
 
 go 1.14
 

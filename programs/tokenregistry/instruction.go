@@ -5,10 +5,10 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/dfuse-io/solana-go/text"
+	"github.com/gagliardetto/solana-go/text"
 
 	bin "github.com/dfuse-io/binary"
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 )
 
 func init() {

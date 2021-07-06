@@ -2,8 +2,8 @@ package ws
 
 import (
 	bin "github.com/dfuse-io/binary"
-	"github.com/dfuse-io/solana-go"
-	"github.com/dfuse-io/solana-go/rpc"
+	"github.com/gagliardetto/solana-go"
+	"github.com/gagliardetto/solana-go/rpc"
 )
 
 // AccountSubscribe subscribes to an account to receive notifications when the lamports or data for a given account public key changes.

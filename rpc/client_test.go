@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	bin "github.com/dfuse-io/binary"
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

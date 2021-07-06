@@ -8,11 +8,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var traceEnabled = logging.IsTraceEnabled("solana-go", "github.com/dfuse-io/solana-go/diff")
+var traceEnabled = logging.IsTraceEnabled("solana-go", "github.com/gagliardetto/solana-go/diff")
 var zlog = zap.NewNop()
 
 func init() {
-	logging.Register("github.com/dfuse-io/solana-go/diff", &zlog)
+	logging.Register("github.com/gagliardetto/solana-go/diff", &zlog)
 }
 
 type reflectType struct {

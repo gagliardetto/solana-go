@@ -20,7 +20,7 @@ import (
 	"math/big"
 
 	bin "github.com/dfuse-io/binary"
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 	"go.uber.org/zap"
 )
 

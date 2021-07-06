@@ -4,7 +4,7 @@ import (
 	"context"
 
 	bin "github.com/dfuse-io/binary"
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 )
 
 // GetBlock returns identity and transaction information about a confirmed block in the ledger.

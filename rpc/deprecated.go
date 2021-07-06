@@ -17,7 +17,7 @@ package rpc
 import (
 	"context"
 
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 )
 
 // DEPRECATED: GetConfirmedBlock returns identity and transaction information about a confirmed block in the ledger.

@@ -17,10 +17,10 @@ package token
 import (
 	"fmt"
 
-	"github.com/dfuse-io/solana-go/text"
+	"github.com/gagliardetto/solana-go/text"
 
 	bin "github.com/dfuse-io/binary"
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 )
 
 var TOKEN_PROGRAM_ID = solana.MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")

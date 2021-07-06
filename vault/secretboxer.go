@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dfuse-io/solana-go/cli"
+	"github.com/gagliardetto/solana-go/cli"
 	"github.com/pkg/errors"
 )
 

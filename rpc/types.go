@@ -16,7 +16,7 @@ package rpc
 
 import (
 	bin "github.com/dfuse-io/binary"
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 )
 
 type Context struct {

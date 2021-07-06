@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dfuse-io/solana-go/diff"
+	"github.com/gagliardetto/solana-go/diff"
 
 	bin "github.com/dfuse-io/binary"
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

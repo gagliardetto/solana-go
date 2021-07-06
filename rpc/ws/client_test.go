@@ -20,8 +20,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/dfuse-io/solana-go"
-	"github.com/dfuse-io/solana-go/text"
+	"github.com/gagliardetto/solana-go"
+	"github.com/gagliardetto/solana-go/text"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )

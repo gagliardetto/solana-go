@@ -3,7 +3,7 @@ package tokenregistry
 import (
 	"os"
 
-	"github.com/dfuse-io/solana-go"
+	"github.com/gagliardetto/solana-go"
 )
 
 var mainnetProgramID = solana.MustPublicKeyFromBase58("CmPVzy88JSB4S223yCvFmBxTLobLya27KgEDeNPnqEub")
