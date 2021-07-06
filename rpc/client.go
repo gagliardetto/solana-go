@@ -31,8 +31,12 @@ var ErrNotFound = errors.New("not found")
 
 type Client struct {
 	rpcURL    string
-	rpcClient jsonrpc.RPCClient
+	rpcClient CallForClientInterface
 	headers   http.Header
+}
+
+type CallForClientInterface interface {
+	CallFor(out interface{}, method string, params ...interface{}) error
 }
 
 func NewClient(rpcURL string) *Client {
@@ -43,6 +47,12 @@ func NewClientWithOpts(rpcURL string, opts *jsonrpc.RPCClientOpts) *Client {
 	rpcClient := jsonrpc.NewClientWithOpts(rpcURL, opts)
 	return &Client{
 		rpcURL:    rpcURL,
+		rpcClient: rpcClient,
+	}
+}
+
+func NewWithCustomRPCClient(rpcClient CallForClientInterface) *Client {
+	return &Client{
 		rpcClient: rpcClient,
 	}
 }
