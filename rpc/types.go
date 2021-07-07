@@ -20,7 +20,7 @@ import (
 )
 
 type Context struct {
-	Slot bin.Uint64
+	Slot bin.Uint64 `json:"slot"`
 }
 
 type RPCContext struct {
@@ -97,11 +97,11 @@ type UiTokenAmount struct {
 }
 
 type TransactionMeta struct {
-	Err               interface{}        `json:"err"`               // Error if transaction failed, null if transaction succeeded. https://github.com/solana-labs/solana/blob/master/sdk/src/transaction.rs#L24
-	Fee               bin.Uint64         `json:"fee"`               // fee this transaction was charged
-	PreBalances       []bin.Uint64       `json:"preBalances"`       //  array of u64 account balances from before the transaction was processed
-	PostBalances      []bin.Uint64       `json:"postBalances"`      // array of u64 account balances after the transaction was processed
-	InnerInstructions []InnerInstruction `json:"innerInstructions"` // List of inner instructions or omitted if inner instruction recording was not yet enabled during this transaction
+	Err               interface{}        `json:"err"`                         // Error if transaction failed, null if transaction succeeded. https://github.com/solana-labs/solana/blob/master/sdk/src/transaction.rs#L24
+	Fee               bin.Uint64         `json:"fee"`                         // fee this transaction was charged
+	PreBalances       []bin.Uint64       `json:"preBalances"`                 //  array of u64 account balances from before the transaction was processed
+	PostBalances      []bin.Uint64       `json:"postBalances"`                // array of u64 account balances after the transaction was processed
+	InnerInstructions []InnerInstruction `json:"innerInstructions,omitempty"` // List of inner instructions or omitted if inner instruction recording was not yet enabled during this transaction
 
 	PreTokenBalances  []TokenBalance `json:"preTokenBalances"`  // List of token balances from before the transaction was processed or omitted if token balance recording was not yet enabled during this transaction
 	PostTokenBalances []TokenBalance `json:"postTokenBalances"` // List of token balances from after the transaction was processed or omitted if token balance recording was not yet enabled during this transaction
@@ -234,3 +234,22 @@ type InstructionInfo struct {
 func (p *ParsedInstruction) IsParsed() bool {
 	return p.Parsed != nil
 }
+
+type M map[string]interface{}
+
+type EncodingType string
+
+const (
+	EncodingBase58     EncodingType = "base58"      // limited to Account data of less than 129 bytes
+	EncodingBase64     EncodingType = "base64"      // will return base64 encoded data for Account data of any size
+	EncodingBase64Zstd EncodingType = "base64+zstd" // compresses the Account data using Zstandard and base64-encodes the result
+
+	// attempts to use program-specific state parsers to
+	// return more human-readable and explicit account state data.
+	// If "jsonParsed" is requested but a parser cannot be found,
+	// the field falls back to "base64" encoding, detectable when the data field is type <string>.
+	// Cannot be used if specifying dataSlice parameters (offset, length).
+	EncodingJSONParsed EncodingType = "jsonParsed"
+
+	EncodingJSON EncodingType = "json"
+)
