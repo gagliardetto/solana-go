@@ -3,21 +3,21 @@ package rpc
 import (
 	"context"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
 type GetVoteAccountsResult struct {
-	Current    []VoteAccountsResult `json:"current,omitempty"`
-	Delinquent []VoteAccountsResult `json:"delinquent,omitempty"`
+	Current    []VoteAccountsResult `json:"current"`
+	Delinquent []VoteAccountsResult `json:"delinquent"`
 }
 type VoteAccountsResult struct {
 	VotePubkey       solana.PublicKey `json:"votePubkey,omitempty"`       // Vote account address
 	NodePubkey       solana.PublicKey `json:"nodePubkey,omitempty"`       // Validator identity
-	ActivatedStake   bin.Uint64       `json:"activatedStake,omitempty"`   // the stake, in lamports, delegated to this vote account and active in this epoch
+	ActivatedStake   uint64           `json:"activatedStake,omitempty"`   // the stake, in lamports, delegated to this vote account and active in this epoch
 	EpochVoteAccount bool             `json:"epochVoteAccount,omitempty"` // whether the vote account is staked for this epoch
 	Commission       uint8            `json:"commission,omitempty"`       // percentage (0-100) of rewards payout owed to the vote account
-	LastVote         bin.Uint64       `json:"lastVote,omitempty"`         // Most recent slot voted on by this vote account
+	LastVote         uint64           `json:"lastVote,omitempty"`         // Most recent slot voted on by this vote account
+	RootSlot         uint64           `json:"rootSlot,omitempty"`         //
 
 	// History of how many credits earned by the end of each epoch,
 	// as an array of arrays containing: [epoch, credits, previousCredits]

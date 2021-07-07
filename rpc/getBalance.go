@@ -29,6 +29,5 @@ func (cl *Client) GetBalance(
 	}
 
 	err = cl.rpcClient.CallFor(&out, "getBalance", params)
-
 	return
 }

@@ -73,10 +73,7 @@ type ProgramResult struct {
 	Context struct {
 		Slot uint64
 	} `json:"context"`
-	Value struct {
-		PubKey  solana.PublicKey `json:"pubkey"`
-		Account rpc.Account      `json:"account"`
-	} `json:"value"`
+	Value rpc.KeyedAccount `json:"value"`
 }
 
 type SignatureResult struct {

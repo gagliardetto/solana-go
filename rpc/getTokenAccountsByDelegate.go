@@ -9,11 +9,7 @@ import (
 
 type GetTokenAccountsResult struct {
 	RPCContext
-	Value []*TokenAccountsResult `json:"value"`
-}
-type TokenAccountsResult struct {
-	Pubkey  solana.PublicKey `json:"pubkey"`  // the account Pubkey
-	Account solana.PublicKey `json:"account"` // the account
+	Value []*KeyedAccount `json:"value"`
 }
 
 type GetTokenAccountsConfig struct {

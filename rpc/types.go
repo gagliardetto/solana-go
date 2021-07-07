@@ -65,10 +65,10 @@ type BlockReward struct {
 type RewardType string
 
 const (
-	RewardTypeFee     RewardType = "fee"
-	RewardTypeRent    RewardType = "rent"
-	RewardTypeVoting  RewardType = "voting"
-	RewardTypeStaking RewardType = "staking"
+	RewardTypeFee     RewardType = "Fee"
+	RewardTypeRent    RewardType = "Rent"
+	RewardTypeVoting  RewardType = "Voting"
+	RewardTypeStaking RewardType = "Staking"
 )
 
 type TransactionWithMeta struct {
@@ -124,8 +124,8 @@ type InnerInstruction struct {
 type DeprecatedTransactionMetaStatus M
 
 type TransactionSignature struct {
-	Err                interface{}            `json:"err,omitempty"`       // Error if transaction failed, null if transaction succeeded
-	Memo               string                 `json:"memo,omitempty"`      // Memo associated with the transaction, null if no memo is present
+	Err                interface{}            `json:"err"`                 // Error if transaction failed, null if transaction succeeded
+	Memo               *string                `json:"memo"`                // Memo associated with the transaction, null if no memo is present
 	Signature          solana.Signature       `json:"signature"`           // transaction signature as base-58 encoded string
 	Slot               bin.Uint64             `json:"slot,omitempty"`      // The slot that contains the block with the transaction
 	BlockTime          bin.Int64              `json:"blockTime,omitempty"` // estimated production time, as Unix timestamp (seconds since the Unix epoch) of when transaction was processed. null if not available.
