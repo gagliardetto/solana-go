@@ -2184,3 +2184,27 @@ func TestClient_RequestAirdrop(t *testing.T) {
 
 	assert.Equal(t, expected, got, "both deserialized values must be equal")
 }
+
+func TestClient_GetStakeActivation(t *testing.T) {
+	// TODO
+}
+
+func TestClient_GetTokenAccountBalance(t *testing.T) {
+	// TODO
+}
+
+func TestClient_GetTokenAccountsByDelegate(t *testing.T) {
+	// TODO
+}
+
+func TestClient_GetTokenAccountsByOwner(t *testing.T) {
+	// TODO
+}
+
+func TestClient_SendTransaction(t *testing.T) {
+	// TODO
+}
+
+func TestClient_SimulateTransaction(t *testing.T) {
+	// TODO
+}
