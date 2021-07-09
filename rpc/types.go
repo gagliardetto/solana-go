@@ -146,8 +146,8 @@ type Account struct {
 }
 
 type DataSlice struct {
-	Offset *uint `json:"offset,omitempty"`
-	Length *uint `json:"length,omitempty"`
+	Offset *int `json:"offset,omitempty"`
+	Length *int `json:"length,omitempty"`
 }
 type GetProgramAccountsOpts struct {
 	Commitment CommitmentType `json:"commitment,omitempty"`

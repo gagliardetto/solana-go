@@ -20,12 +20,9 @@ import (
 // GetRecentBlockhash returns a recent block hash from the ledger,
 // and a fee schedule that can be used to compute the cost of submitting a transaction using it.
 func (cl *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentType) (out *GetRecentBlockhashResult, err error) {
-	var params []interface{}
+	params := []interface{}{}
 	if commitment != "" {
-		commit := map[string]string{
-			"commitment": string(commitment),
-		}
-		params = append(params, commit)
+		params = append(params, M{"commitment": string(commitment)})
 	}
 
 	err = cl.rpcClient.CallFor(&out, "getRecentBlockhash", params)

@@ -21,7 +21,7 @@ import (
 
 // GetSlot returns the current slot the node is processing.
 func (cl *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out bin.Uint64, err error) {
-	var params []interface{}
+	params := []interface{}{}
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}

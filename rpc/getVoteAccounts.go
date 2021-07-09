@@ -42,7 +42,7 @@ func (cl *Client) GetVoteAccounts(
 			obj["commitment"] = string(opts.Commitment)
 		}
 		if !opts.VotePubkey.IsZero() {
-			obj["votePubkey"] = opts.VotePubkey
+			obj["votePubkey"] = opts.VotePubkey.String()
 		}
 		if len(obj) > 0 {
 			params = append(params, obj)

@@ -20,11 +20,10 @@ func (cl *Client) GetEpochInfo(
 	ctx context.Context,
 	commitment CommitmentType,
 ) (out *GetEpochInfoResult, err error) {
-	var params []interface{}
+	params := []interface{}{}
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}
-	// TODO: why `params)` and not `params...)` ??? (getting `-32602:`params` should be an array`)
 	err = cl.rpcClient.CallFor(&out, "getEpochInfo", params)
 	return
 }

@@ -12,29 +12,45 @@ import (
 // slot in the requested epoch)
 type GetLeaderScheduleResult map[string][]bin.Uint64
 
-// GetLeaderSchedule returns the leader schedule for an epoch.
+// GetLeaderSchedule returns the leader schedule for current epoch.
 func (cl *Client) GetLeaderSchedule(
 	ctx context.Context,
-	epoch *uint64, // Fetch the leader schedule for the epoch that corresponds to the provided slot. If unspecified, the leader schedule for the current epoch is fetched
-	commitment CommitmentType,
+) (out *GetLeaderScheduleResult, err error) {
+	return cl.GetLeaderScheduleWithOpts(
+		ctx,
+		nil,
+	)
+}
+
+type GetLeaderScheduleOpts struct {
+	Epoch      *int // Fetch the leader schedule for the epoch that corresponds to the provided slot. If unspecified, the leader schedule for the current epoch is fetched
+	Commitment CommitmentType
 	// TODO: is identity a pubkey?
-	identity string, // Only return results for this validator identity (base-58 encoded)
+	Identity string // Only return results for this validator identity (base-58 encoded)
+}
+
+// GetLeaderScheduleWithOpts returns the leader schedule for an epoch.
+func (cl *Client) GetLeaderScheduleWithOpts(
+	ctx context.Context,
+	opts *GetLeaderScheduleOpts,
 ) (out *GetLeaderScheduleResult, err error) {
 	params := []interface{}{}
-	if epoch != nil {
-		params = append(params, epoch)
+	if opts != nil {
+		if opts.Epoch != nil {
+			params = append(params, opts.Epoch)
+		}
+		obj := M{}
+		if opts.Commitment != "" {
+			obj["commitment"] = opts.Commitment
+		}
+		if opts.Identity != "" {
+			obj["identity"] = opts.Identity
+		}
+		if len(obj) > 0 {
+			params = append(params, obj)
+		}
 	}
-	obj := M{}
-	if commitment != "" {
-		obj["commitment"] = commitment
-	}
-	if identity != "" {
-		obj["identity"] = identity
-	}
-	if len(obj) > 0 {
-		params = append(params, obj)
-	}
-	err = cl.rpcClient.CallFor(&out, "getLeaderSchedule", params...)
+	err = cl.rpcClient.CallFor(&out, "getLeaderSchedule", params)
 	if err != nil {
 		return nil, err
 	}

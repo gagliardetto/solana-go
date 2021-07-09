@@ -11,14 +11,12 @@ import (
 // NEW: This method is only available in solana-core v1.7 or newer. Please use getConfirmedBlock for solana-core v1.6
 func (cl *Client) GetBlock(
 	ctx context.Context,
-	slot bin.Uint64,
+	slot int,
 ) (out *GetBlockResult, err error) {
 	return cl.GetBlockWithOpts(
 		ctx,
 		slot,
-		"",
 		nil,
-		"",
 	)
 }
 
@@ -30,34 +28,38 @@ const (
 	TransactionDetailsNone       TransactionDetailsType = "none"
 )
 
+type GetBlockOpts struct {
+	// TODO:
+	// encoding EncodingType,
+	TransactionDetails TransactionDetailsType // level of transaction detail to return. If parameter not provided, the default detail level is "full".
+	Rewards            *bool                  // whether to populate the rewards array. If parameter not provided, the default includes rewards.
+	Commitment         CommitmentType         // "processed" is not supported. If parameter not provided, the default is "finalized".
+}
+
 func (cl *Client) GetBlockWithOpts(
 	ctx context.Context,
-	slot bin.Uint64,
-	// encoding EncodingType,
-	transactionDetails TransactionDetailsType, // level of transaction detail to return. If parameter not provided, the default detail level is "full".
-	rewards *bool, // whether to populate the rewards array. If parameter not provided, the default includes rewards.
-	commitment CommitmentType, // "processed" is not supported. If parameter not provided, the default is "finalized".
+	slot int,
+	opts *GetBlockOpts,
 ) (out *GetBlockResult, err error) {
 	obj := M{
 		"encoding": EncodingJSON,
-		// transactionDetails: <string>
-		// rewards: bool
-		// commitment
 	}
 
-	if transactionDetails != "" {
-		obj["transactionDetails"] = transactionDetails
-	}
-	if rewards != nil {
-		obj["rewards"] = rewards
-	}
-	if commitment != "" {
-		obj["commitment"] = commitment
+	if opts != nil {
+		if opts.TransactionDetails != "" {
+			obj["transactionDetails"] = opts.TransactionDetails
+		}
+		if opts.Rewards != nil {
+			obj["rewards"] = opts.Rewards
+		}
+		if opts.Commitment != "" {
+			obj["commitment"] = opts.Commitment
+		}
 	}
 
 	params := []interface{}{slot, obj}
 
-	err = cl.rpcClient.CallFor(&out, "getBlock", params...)
+	err = cl.rpcClient.CallFor(&out, "getBlock", params)
 	return
 }
 

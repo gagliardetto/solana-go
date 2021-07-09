@@ -16,8 +16,8 @@ type BlocksResult []bin.Uint64
 // confirmed block, inclusive. Max range allowed is 500,000 slots.
 func (cl *Client) GetBlocks(
 	ctx context.Context,
-	startSlot uint64,
-	endSlot *uint64,
+	startSlot int,
+	endSlot *int,
 	commitment CommitmentType,
 ) (out *BlocksResult, err error) {
 	params := []interface{}{startSlot}
@@ -29,7 +29,7 @@ func (cl *Client) GetBlocks(
 			M{"commitment": commitment},
 		)
 	}
-	err = cl.rpcClient.CallFor(&out, "getBlocks", params...)
+	err = cl.rpcClient.CallFor(&out, "getBlocks", params)
 
 	return
 }

@@ -11,8 +11,8 @@ func (cl *Client) GetBlockHeight(
 ) (out uint64, err error) {
 	params := []interface{}{}
 	if commitment != "" {
-		params = append(params, commitment)
+		params = append(params, M{"commitment": commitment})
 	}
-	err = cl.rpcClient.CallFor(&out, "getBlockHeight", params...)
+	err = cl.rpcClient.CallFor(&out, "getBlockHeight", params)
 	return
 }

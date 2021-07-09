@@ -23,37 +23,54 @@ type SlotRangeResponse struct {
 	LastSlot  bin.Uint64 `json:"lastSlot"`  // last slot of block production information (inclusive)
 }
 type SlotRangeRequest struct {
-	FirstSlot bin.Uint64  `json:"firstSlot"`          // first slot to return block production information for (inclusive)
-	LastSlot  *bin.Uint64 `json:"lastSlot,omitempty"` // (optional) last slot to return block production information for (inclusive). If parameter not provided, defaults to the highest slot
-	Identity  *string     `json:"identity,omitempty"` // (optional) Only return results for this validator identity (base-58 encoded)
+	FirstSlot int     `json:"firstSlot"`          // first slot to return block production information for (inclusive)
+	LastSlot  *int    `json:"lastSlot,omitempty"` // (optional) last slot to return block production information for (inclusive). If parameter not provided, defaults to the highest slot
+	Identity  *string `json:"identity,omitempty"` // (optional) Only return results for this validator identity (base-58 encoded)
 }
 
 // GetBlockProduction returns recent block production information from the current or previous epoch.
 func (cl *Client) GetBlockProduction(
 	ctx context.Context,
-	commitment CommitmentType,
-	rng *SlotRangeRequest, // Slot range to return block production for. If parameter not provided, defaults to current epoch.
+) (out *GetBlockProductionResult, err error) {
+	return cl.GetBlockProductionWithOpts(
+		ctx,
+		nil,
+	)
+}
+
+type GetBlockProductionOpts struct {
+	Commitment CommitmentType
+	Range      *SlotRangeRequest // Slot range to return block production for. If parameter not provided, defaults to current epoch.
+}
+
+// GetBlockProduction returns recent block production information from the current or previous epoch.
+func (cl *Client) GetBlockProductionWithOpts(
+	ctx context.Context,
+	opts *GetBlockProductionOpts,
 ) (out *GetBlockProductionResult, err error) {
 	obj := M{}
-	if commitment != "" {
-		obj["commitment"] = commitment
-	}
-	if rng != nil {
-		rngObj := M{}
-		rngObj["firstSlot"] = rng.FirstSlot
-		if rng.LastSlot != nil {
-			rngObj["lastSlot"] = rng.LastSlot
+
+	if opts != nil {
+		if opts.Commitment != "" {
+			obj["commitment"] = opts.Commitment
 		}
-		if rng.Identity != nil {
-			rngObj["identity"] = rng.Identity
+		if opts.Range != nil {
+			rngObj := M{}
+			rngObj["firstSlot"] = opts.Range.FirstSlot
+			if opts.Range.LastSlot != nil {
+				rngObj["lastSlot"] = opts.Range.LastSlot
+			}
+			if opts.Range.Identity != nil {
+				rngObj["identity"] = opts.Range.Identity
+			}
+			obj["range"] = rngObj
 		}
-		obj["range"] = rngObj
 	}
-	var params []interface{}
+	params := []interface{}{}
 	if len(obj) != 0 {
 		params = append(params, obj)
 	}
-	err = cl.rpcClient.CallFor(&out, "getBlockProduction", params...)
+	err = cl.rpcClient.CallFor(&out, "getBlockProduction", params)
 
 	return
 }

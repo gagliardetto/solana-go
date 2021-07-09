@@ -26,10 +26,12 @@ func (cl *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) 
 	return cl.GetAccountInfoWithOpts(
 		ctx,
 		account,
-		EncodingBase64,
-		"",
-		nil,
-		nil,
+		&GetAccountInfoOpts{
+			Encoding:   EncodingBase64,
+			Commitment: "",
+			Offset:     nil,
+			Length:     nil,
+		},
 	)
 }
 
@@ -43,33 +45,39 @@ func (cl *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey
 	return bin.NewDecoder(resp.Value.Data).Decode(inVar)
 }
 
+type GetAccountInfoOpts struct {
+	Encoding   EncodingType
+	Commitment CommitmentType
+	Offset     *int
+	Length     *int
+}
+
 // GetAccountInfoWithOpts returns all information associated with the account of provided publicKey.
 // You can limit the returned account data with the offset and length parameters.
 // You can specify the encoding of the returned data with the encoding parameter.
 func (cl *Client) GetAccountInfoWithOpts(
 	ctx context.Context,
 	account solana.PublicKey,
-	encoding EncodingType,
-	commitment CommitmentType,
-	offset *uint,
-	length *uint,
+	opts *GetAccountInfoOpts,
 ) (out *GetAccountInfoResult, err error) {
 
 	obj := M{}
 
-	if encoding != "" {
-		obj["encoding"] = encoding
-	}
-	if commitment != "" {
-		obj["commitment"] = commitment
-	}
-	if offset != nil && length != nil {
-		obj["dataSlice"] = M{
-			"offset": offset,
-			"length": length,
+	if opts != nil {
+		if opts.Encoding != "" {
+			obj["encoding"] = opts.Encoding
 		}
-		if encoding == EncodingJSONParsed {
-			return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
+		if opts.Commitment != "" {
+			obj["commitment"] = opts.Commitment
+		}
+		if opts.Offset != nil && opts.Length != nil {
+			obj["dataSlice"] = M{
+				"offset": opts.Offset,
+				"length": opts.Length,
+			}
+			if opts.Encoding == EncodingJSONParsed {
+				return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
+			}
 		}
 	}
 

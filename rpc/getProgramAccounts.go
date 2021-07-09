@@ -23,6 +23,18 @@ import (
 func (cl *Client) GetProgramAccounts(
 	ctx context.Context,
 	publicKey solana.PublicKey,
+) (out GetProgramAccountsResult, err error) {
+	return cl.GetProgramAccountsWithOpts(
+		ctx,
+		publicKey,
+		nil,
+	)
+}
+
+// GetProgramAccountsWithOpts returns all accounts owned by the provided program publicKey.
+func (cl *Client) GetProgramAccountsWithOpts(
+	ctx context.Context,
+	publicKey solana.PublicKey,
 	opts *GetProgramAccountsOpts,
 ) (out GetProgramAccountsResult, err error) {
 	obj := M{
