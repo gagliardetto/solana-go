@@ -16,7 +16,7 @@ type GetInflationRewardResult struct {
 
 type GetInflationRewardOpts struct {
 	Commitment CommitmentType
-	Epoch      *int
+	Epoch      *uint64
 }
 
 // GetInflationReward returns the inflation reward for a list of addresses for an epoch.

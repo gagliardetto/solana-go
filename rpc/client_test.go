@@ -72,8 +72,8 @@ func TestClient_GetAccountInfoWithOpts(t *testing.T) {
 	defer closer()
 	client := NewClient(server.URL)
 
-	offset := 22
-	length := 33
+	offset := uint64(22)
+	length := uint64(33)
 
 	pubkeyString := "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
 	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
@@ -337,7 +337,7 @@ func TestClient_decode_GetBlock(t *testing.T) {
 	block := 33
 	out, err := client.GetBlock(
 		context.Background(),
-		block,
+		uint64(block),
 	)
 	require.NoError(t, err)
 
@@ -488,7 +488,7 @@ func TestClient_decode_GetBlockWithOpts(t *testing.T) {
 	rewards := true
 	_, err := client.GetBlockWithOpts(
 		context.Background(),
-		block,
+		uint64(block),
 		&GetBlockOpts{
 			TransactionDetails: TransactionDetailsSignatures,
 			Rewards:            &rewards,
@@ -589,8 +589,8 @@ func TestClient_decode_GetBlockProductionWithOpts(t *testing.T) {
 	client := NewClient(server.URL)
 
 	// NOTE: the parameters don't make a difference here because the response is already defined.
-	firstSlot := 2
-	lastSlot := 3
+	firstSlot := uint64(2)
+	lastSlot := uint64(3)
 	identity := "dummy"
 	_, err := client.GetBlockProductionWithOpts(
 		context.Background(),
@@ -635,7 +635,7 @@ func TestClient_decode_GetBlockCommitment(t *testing.T) {
 	// NOTE: the parameters don't make a difference here because the response is already defined.
 	out, err := client.GetBlockCommitment(
 		context.Background(),
-		block,
+		uint64(block),
 	)
 	require.NoError(t, err)
 
@@ -700,10 +700,10 @@ func TestClient_decode_GetBlocks(t *testing.T) {
 
 	// NOTE: the parameters don't make a difference here because the response is already defined.
 	startSlot := 1
-	endSlot := 33
+	endSlot := uint64(33)
 	out, err := client.GetBlocks(
 		context.Background(),
-		startSlot,
+		uint64(startSlot),
 		&endSlot,
 		CommitmentMax,
 	)
@@ -740,10 +740,10 @@ func TestClient_decode_GetBlocksWithLimit(t *testing.T) {
 
 	// NOTE: the parameters don't make a difference here because the response is already defined.
 	startSlot := 1
-	limit := 10
+	limit := uint64(10)
 	out, err := client.GetBlocksWithLimit(
 		context.Background(),
-		startSlot,
+		uint64(startSlot),
 		limit,
 		CommitmentMax,
 	)
@@ -782,7 +782,7 @@ func TestClient_decode_GetBlockTime(t *testing.T) {
 	block := 55
 	out, err := client.GetBlockTime(
 		context.Background(),
-		block,
+		uint64(block),
 	)
 	require.NoError(t, err)
 
@@ -1185,7 +1185,7 @@ func TestClient_decode_GetInflationReward(t *testing.T) {
 	keys := []solana.PublicKey{
 		pubKey,
 	}
-	epoch := 56
+	epoch := uint64(56)
 	opts := GetInflationRewardOpts{
 		Commitment: CommitmentMax,
 		Epoch:      &epoch,
@@ -1353,7 +1353,7 @@ func TestClient_decode_GetLeaderSchedule(t *testing.T) {
 	client := NewClient(server.URL)
 
 	// NOTE: the parameters don't make a difference here because the response is already defined.
-	epoch := 333
+	epoch := uint64(333)
 	identity := "TODO" // TODO: what is an identity ???
 	out, err := client.GetLeaderScheduleWithOpts(
 		context.Background(),
@@ -1538,8 +1538,8 @@ func TestClient_decode_GetProgramAccounts(t *testing.T) {
 	pubkeyString := "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
 	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
 
-	offset := 13
-	length := 30
+	offset := uint64(13)
+	length := uint64(30)
 	opts := GetProgramAccountsOpts{
 		Commitment: CommitmentMax,
 		Encoding:   EncodingBase58,
@@ -1837,8 +1837,8 @@ func TestClient_decode_GetSlotLeaders(t *testing.T) {
 	client := NewClient(server.URL)
 
 	// NOTE: the parameters don't make a difference here because the response is already defined.
-	start := 83220831
-	limit := 10
+	start := uint64(83220831)
+	limit := uint64(10)
 	out, err := client.GetSlotLeaders(
 		context.Background(),
 		start,
@@ -2220,7 +2220,7 @@ func TestClient_decode_RequestAirdrop(t *testing.T) {
 	pubkeyString := "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
 	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
 	// NOTE: the parameters don't make a difference here because the response is already defined.
-	lamports := 10000000
+	lamports := uint64(10000000)
 	out, err := client.RequestAirdrop(
 		context.Background(),
 		pubKey,

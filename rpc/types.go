@@ -146,8 +146,8 @@ type Account struct {
 }
 
 type DataSlice struct {
-	Offset *int `json:"offset,omitempty"`
-	Length *int `json:"length,omitempty"`
+	Offset *uint64 `json:"offset,omitempty"`
+	Length *uint64 `json:"length,omitempty"`
 }
 type GetProgramAccountsOpts struct {
 	Commitment CommitmentType `json:"commitment,omitempty"`
@@ -184,7 +184,7 @@ type RPCFilter struct {
 }
 
 type RPCFilterMemcmp struct {
-	Offset int           `json:"offset"`
+	Offset uint64        `json:"offset"`
 	Bytes  solana.Base58 `json:"bytes"`
 }
 

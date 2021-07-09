@@ -23,8 +23,8 @@ type SlotRangeResponse struct {
 	LastSlot  bin.Uint64 `json:"lastSlot"`  // last slot of block production information (inclusive)
 }
 type SlotRangeRequest struct {
-	FirstSlot int     `json:"firstSlot"`          // first slot to return block production information for (inclusive)
-	LastSlot  *int    `json:"lastSlot,omitempty"` // (optional) last slot to return block production information for (inclusive). If parameter not provided, defaults to the highest slot
+	FirstSlot uint64  `json:"firstSlot"`          // first slot to return block production information for (inclusive)
+	LastSlot  *uint64 `json:"lastSlot,omitempty"` // (optional) last slot to return block production information for (inclusive). If parameter not provided, defaults to the highest slot
 	Identity  *string `json:"identity,omitempty"` // (optional) Only return results for this validator identity (base-58 encoded)
 }
 

@@ -23,7 +23,7 @@ func (cl *Client) GetLeaderSchedule(
 }
 
 type GetLeaderScheduleOpts struct {
-	Epoch      *int // Fetch the leader schedule for the epoch that corresponds to the provided slot. If unspecified, the leader schedule for the current epoch is fetched
+	Epoch      *uint64 // Fetch the leader schedule for the epoch that corresponds to the provided slot. If unspecified, the leader schedule for the current epoch is fetched
 	Commitment CommitmentType
 	// TODO: is identity a pubkey?
 	Identity string // Only return results for this validator identity (base-58 encoded)

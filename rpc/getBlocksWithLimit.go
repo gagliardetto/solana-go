@@ -11,8 +11,8 @@ import (
 // confirmed blocks starting at startSlot for up to limit blocks, inclusive.
 func (cl *Client) GetBlocksWithLimit(
 	ctx context.Context,
-	startSlot int,
-	limit int,
+	startSlot uint64,
+	limit uint64,
 	commitment CommitmentType, // "processed" is not supported. If parameter not provided, the default is "finalized".
 ) (out *BlocksResult, err error) {
 	params := []interface{}{startSlot, limit}

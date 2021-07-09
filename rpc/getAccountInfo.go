@@ -48,8 +48,8 @@ func (cl *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey
 type GetAccountInfoOpts struct {
 	Encoding   EncodingType
 	Commitment CommitmentType
-	Offset     *int
-	Length     *int
+	Offset     *uint64
+	Length     *uint64
 }
 
 // GetAccountInfoWithOpts returns all information associated with the account of provided publicKey.

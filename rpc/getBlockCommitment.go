@@ -19,7 +19,7 @@ type GetBlockCommitmentResult struct {
 // GetBlockCommitment returns commitment for particular block.
 func (cl *Client) GetBlockCommitment(
 	ctx context.Context,
-	block int, // block, identified by Slot
+	block uint64, // block, identified by Slot
 ) (out *GetBlockCommitmentResult, err error) {
 	params := []interface{}{block}
 	err = cl.rpcClient.CallFor(&out, "getBlockCommitment", params)

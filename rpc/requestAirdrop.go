@@ -23,7 +23,7 @@ import (
 func (cl *Client) RequestAirdrop(
 	ctx context.Context,
 	account solana.PublicKey,
-	lamport int,
+	lamport uint64,
 	commitment CommitmentType,
 ) (signature solana.Signature, err error) {
 	params := []interface{}{

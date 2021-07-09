@@ -11,7 +11,7 @@ import (
 // NEW: This method is only available in solana-core v1.7 or newer. Please use getConfirmedBlock for solana-core v1.6
 func (cl *Client) GetBlock(
 	ctx context.Context,
-	slot int,
+	slot uint64,
 ) (out *GetBlockResult, err error) {
 	return cl.GetBlockWithOpts(
 		ctx,
@@ -38,7 +38,7 @@ type GetBlockOpts struct {
 
 func (cl *Client) GetBlockWithOpts(
 	ctx context.Context,
-	slot int,
+	slot uint64,
 	opts *GetBlockOpts,
 ) (out *GetBlockResult, err error) {
 	obj := M{

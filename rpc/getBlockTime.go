@@ -19,7 +19,7 @@ type GetBlockTimeResult int64
 // or nil if the timestamp is not available for this block.
 func (cl *Client) GetBlockTime(
 	ctx context.Context,
-	block int, // block, identified by Slot
+	block uint64, // block, identified by Slot
 ) (out *GetBlockTimeResult, err error) {
 	params := []interface{}{block}
 	err = cl.rpcClient.CallFor(&out, "getBlockTime", params)

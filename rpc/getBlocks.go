@@ -16,8 +16,8 @@ type BlocksResult []bin.Uint64
 // confirmed block, inclusive. Max range allowed is 500,000 slots.
 func (cl *Client) GetBlocks(
 	ctx context.Context,
-	startSlot int,
-	endSlot *int,
+	startSlot uint64,
+	endSlot *uint64,
 	commitment CommitmentType,
 ) (out *BlocksResult, err error) {
 	params := []interface{}{startSlot}
