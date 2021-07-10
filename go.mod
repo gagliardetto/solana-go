@@ -5,6 +5,7 @@ go 1.14
 require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.4 // indirect
 	github.com/GeertJohan/go.rice v1.0.0
+	github.com/davecgh/go-spew v1.1.1
 	github.com/dfuse-io/binary v0.0.0-20210216024852-4ae6830a495d
 	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70
 	github.com/fatih/color v1.7.0
@@ -29,10 +30,12 @@ require (
 	go.opencensus.io v0.22.5 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
-	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
+	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
+	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
+	golang.org/x/sys v0.0.0-20210514084401-e8d321eab015 // indirect
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
+	golang.org/x/tools v0.0.0-20200601175630-2caf76543d99 // indirect
 	google.golang.org/api v0.29.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
