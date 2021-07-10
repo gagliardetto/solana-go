@@ -175,7 +175,7 @@ func (env *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
 
 	if temp == nil {
 		// TODO: is this an error?
-		return fmt.Errorf("envelope is nil: %v", env)
+		return nil
 	}
 	// TODO: check if first character is `[` as the check.
 	// TODO: store raw bytes, and unmarshal on request.
