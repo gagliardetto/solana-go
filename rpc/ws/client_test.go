@@ -72,7 +72,7 @@ func Test_ProgramSubscribe(t *testing.T) {
 			fmt.Println("receive an error: ", err)
 			return
 		}
-		fmt.Println("data received: ", data.(*ProgramResult).Value.PubKey)
+		fmt.Println("data received: ", data.(*ProgramResult).Value.Pubkey)
 	}
 
 }

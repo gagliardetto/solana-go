@@ -117,7 +117,7 @@ func StreamOpenOrders(client *ws.Client) error {
 		if err != nil {
 			fmt.Println("***********************************", err)
 			zlog.Debug("unable to decoce account flag for account... skipping",
-				zap.Stringer("account_address", res.Value.PubKey),
+				zap.Stringer("account_address", res.Value.Pubkey),
 			)
 			continue
 		}

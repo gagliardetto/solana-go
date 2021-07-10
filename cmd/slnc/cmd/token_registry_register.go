@@ -92,7 +92,11 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 
 		tokenMetaAccount := solana.NewAccount()
 
-		lamport, err := client.GetMinimumBalanceForRentExemption(context.Background(), tokenregistry.TOKEN_META_SIZE)
+		lamport, err := client.GetMinimumBalanceForRentExemption(
+			context.Background(),
+			tokenregistry.TOKEN_META_SIZE,
+			rpc.CommitmentMax,
+		)
 		if err != nil {
 			return fmt.Errorf("unable to retrieve lapoint rent: %w", err)
 		}

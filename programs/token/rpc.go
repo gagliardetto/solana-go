@@ -24,7 +24,7 @@ import (
 //go:generate rice embed-go
 
 func FetchMints(ctx context.Context, rpcCli *rpc.Client) (out []*Mint, err error) {
-	resp, err := rpcCli.GetProgramAccounts(
+	resp, err := rpcCli.GetProgramAccountsWithOpts(
 		ctx,
 		TOKEN_PROGRAM_ID,
 		&rpc.GetProgramAccountsOpts{

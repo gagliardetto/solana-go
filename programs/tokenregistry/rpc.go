@@ -9,7 +9,7 @@ import (
 )
 
 func GetTokenRegistryEntry(ctx context.Context, rpcCli *rpc.Client, mintAddress solana.PublicKey) (*TokenMeta, error) {
-	resp, err := rpcCli.GetProgramAccounts(
+	resp, err := rpcCli.GetProgramAccountsWithOpts(
 		ctx,
 		ProgramID(),
 		&rpc.GetProgramAccountsOpts{
@@ -42,7 +42,7 @@ func GetTokenRegistryEntry(ctx context.Context, rpcCli *rpc.Client, mintAddress 
 }
 
 func GetEntries(ctx context.Context, rpcCli *rpc.Client) (out []*TokenMeta, err error) {
-	resp, err := rpcCli.GetProgramAccounts(
+	resp, err := rpcCli.GetProgramAccountsWithOpts(
 		ctx,
 		ProgramID(),
 		&rpc.GetProgramAccountsOpts{

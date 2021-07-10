@@ -35,7 +35,7 @@ var getSPLTokenCmd = &cobra.Command{
 		client := getClient()
 		ctx := cmd.Context()
 
-		resp, err := client.GetProgramAccounts(
+		resp, err := client.GetProgramAccountsWithOpts(
 			ctx,
 			solana.MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
 			&rpc.GetProgramAccountsOpts{

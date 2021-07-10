@@ -39,7 +39,7 @@ func (cl *Client) GetConfirmedBlock(
 // DEPRECATED: GetConfirmedTransaction returns transaction details for a confirmed transaction.
 func (cl *Client) GetConfirmedTransaction(
 	ctx context.Context,
-	signature string,
+	signature solana.Signature,
 ) (out TransactionWithMeta, err error) {
 	params := []interface{}{signature, "json"}
 
