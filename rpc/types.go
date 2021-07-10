@@ -15,8 +15,15 @@
 package rpc
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+
+	"github.com/davecgh/go-spew/spew"
 	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
+	"github.com/klauspost/compress/zstd"
+	"github.com/mr-tron/base58"
 )
 
 type Context struct {
@@ -140,9 +147,117 @@ type GetAccountInfoResult struct {
 type Account struct {
 	Lamports   bin.Uint64       `json:"lamports"`   // number of lamports assigned to this account
 	Owner      solana.PublicKey `json:"owner"`      // base-58 encoded Pubkey of the program this account has been assigned to
-	Data       solana.Data      `json:"data"`       // data associated with the account, either as encoded binary data or JSON format {<program>: <state>}, depending on encoding parameter
+	Data       *DataBytesOrJSON `json:"data"`       // data associated with the account, either as encoded binary data or JSON format {<program>: <state>}, depending on encoding parameter
 	Executable bool             `json:"executable"` // boolean indicating if the account contains a program (and is strictly read-only)
 	RentEpoch  bin.Uint64       `json:"rentEpoch"`  // the epoch at which this account will next owe rent
+}
+
+type DataBytesOrJSON struct {
+	rawDataEncoding EncodingType
+	asDecodedBytes  solana.Data
+	asJSON          interface{}
+}
+
+func (dt *DataBytesOrJSON) MarshalJSON() ([]byte, error) {
+	// TODO: invert check?
+	if dt.asDecodedBytes != nil {
+		return json.Marshal(dt.asDecodedBytes)
+	}
+	return json.Marshal(dt.asJSON)
+}
+
+func (env *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
+
+	var temp interface{}
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+
+	if temp == nil {
+		// TODO: is this an error?
+		return fmt.Errorf("envelope is nil: %v", env)
+	}
+	// TODO: check if first character is `[` as the check.
+	// TODO: store raw bytes, and unmarshal on request.
+	switch val := temp.(type) {
+	case []interface{}:
+		// It's base64 (or similar)
+		{
+			if len(val) == 2 {
+				firstString, ok1 := val[0].(string)
+				secondString, ok2 := val[1].(string)
+				// TODO: add support for other encodings.
+				// TODO: maybe don't attempt to parse them, and just keep the string? Lazy parsing.
+				if ok1 && ok2 && secondString == "base64" {
+					env.rawDataEncoding = EncodingType(secondString)
+
+					switch secondString {
+					case string(EncodingBase64):
+						var err error
+						env.asDecodedBytes, err = base64.StdEncoding.DecodeString(firstString)
+						if err != nil {
+							return err
+						}
+					case string(EncodingBase58):
+						var err error
+						env.asDecodedBytes, err = base58.Decode(firstString)
+						if err != nil {
+							return err
+						}
+					case string(EncodingBase64Zstd):
+						// TODO: use more readers; add lazy decoding.
+						rawBytes, err := base64.StdEncoding.DecodeString(firstString)
+						if err != nil {
+							return err
+						}
+						zstdDecoder, err := zstd.NewReader(nil)
+						if err != nil {
+							return err
+						}
+						defer zstdDecoder.Close()
+						_, err = zstdDecoder.DecodeAll(rawBytes, env.asDecodedBytes)
+						if err != nil {
+							return err
+						}
+					default:
+						return fmt.Errorf("unknown encoding: %s", secondString)
+					}
+					return nil
+				} else {
+					env.asJSON = temp
+					// TODO: what is then EncodingJSON???
+					env.rawDataEncoding = EncodingJSONParsed
+				}
+			} else {
+				env.asJSON = temp
+				env.rawDataEncoding = EncodingJSONParsed
+			}
+		}
+	case map[string]interface{}:
+		// It's JSON, most likely.
+		// TODO: is it always JSON???
+		{
+			env.asJSON = temp
+			env.rawDataEncoding = EncodingJSONParsed
+		}
+	default:
+		return fmt.Errorf("Unknown kind: %s", spew.Sdump(temp))
+	}
+
+	return nil
+}
+
+// GetBytes returns the decoded bytes if the encoding is
+// base64, etc.
+func (dt *DataBytesOrJSON) GetBytes() solana.Data {
+	return dt.asDecodedBytes
+}
+
+// GetJSON returns the JSON interface when the encoding is
+// jsonParsed.
+// TODO: what is EncodingJSON ???
+func (dt *DataBytesOrJSON) GetJSON() interface{} {
+	return dt.asJSON
 }
 
 type DataSlice struct {

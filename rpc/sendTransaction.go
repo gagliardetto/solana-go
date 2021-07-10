@@ -27,7 +27,7 @@ import (
 func (cl *Client) SendTransaction(
 	ctx context.Context,
 	transaction *solana.Transaction,
-) (signature string, err error) {
+) (signature solana.Signature, err error) {
 	return cl.SendTransactionWithOpts(
 		ctx,
 		transaction,
@@ -66,12 +66,12 @@ func (cl *Client) SendTransactionWithOpts(
 	transaction *solana.Transaction,
 	skipPreflight bool, // if true, skip the preflight transaction checks (default: false)
 	preflightCommitment CommitmentType, // Commitment level to use for preflight (default: "finalized").
-) (signature string, err error) {
+) (signature solana.Signature, err error) {
 
 	buf := new(bytes.Buffer)
 
 	if err := bin.NewEncoder(buf).Encode(transaction); err != nil {
-		return "", fmt.Errorf("send transaction: encode transaction: %w", err)
+		return solana.Signature{}, fmt.Errorf("send transaction: encode transaction: %w", err)
 	}
 
 	trxData := buf.Bytes()

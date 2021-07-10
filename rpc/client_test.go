@@ -57,9 +57,12 @@ func TestClient_GetAccountInfo(t *testing.T) {
 				Context{Slot: 83986105},
 			},
 			Value: &Account{
-				Lamports:   999999,
-				Owner:      solana.MustPublicKeyFromBase58("11111111111111111111111111111111"),
-				Data:       []byte{0x74, 0x65, 0x73, 0x74},
+				Lamports: 999999,
+				Owner:    solana.MustPublicKeyFromBase58("11111111111111111111111111111111"),
+				Data: &DataBytesOrJSON{
+					rawDataEncoding: EncodingBase64,
+					asDecodedBytes:  []byte{0x74, 0x65, 0x73, 0x74},
+				},
 				Executable: true,
 				RentEpoch:  207,
 			},
@@ -1465,9 +1468,12 @@ func TestClient_GetMultipleAccounts(t *testing.T) {
 		},
 		Value: []*Account{
 			{
-				Lamports:   19039980000,
-				Owner:      solana.MustPublicKeyFromBase58("11111111111111111111111111111111"),
-				Data:       solana.Data{},
+				Lamports: 19039980000,
+				Owner:    solana.MustPublicKeyFromBase58("11111111111111111111111111111111"),
+				Data: &DataBytesOrJSON{
+					asDecodedBytes:  []byte{},
+					rawDataEncoding: EncodingBase64,
+				},
 				Executable: true,
 				RentEpoch:  207,
 			},
@@ -1544,9 +1550,12 @@ func TestClient_GetProgramAccounts(t *testing.T) {
 		{
 			Pubkey: solana.MustPublicKeyFromBase58("7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"),
 			Account: &Account{
-				Lamports:   2039280,
-				Owner:      solana.MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
-				Data:       []byte{0x74, 0x65, 0x73, 0x74},
+				Lamports: 2039280,
+				Owner:    solana.MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+				Data: &DataBytesOrJSON{
+					asDecodedBytes:  []byte{0x74, 0x65, 0x73, 0x74},
+					rawDataEncoding: EncodingBase64,
+				},
 				Executable: true,
 				RentEpoch:  206,
 			},
@@ -2189,19 +2198,184 @@ func TestClient_RequestAirdrop(t *testing.T) {
 }
 
 func TestClient_GetStakeActivation(t *testing.T) {
-	// TODO
+	responseBody := `{"active":197717120,"inactive":0,"state":"active"}`
+	server, closer := mockJSONRPC(t, json.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+	client := NewClient(server.URL)
+
+	pubkeyString := "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
+	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
+
+	epoch := uint64(123)
+	out, err := client.GetStakeActivation(
+		context.Background(),
+		pubKey,
+		CommitmentMax,
+		&epoch,
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t,
+		map[string]interface{}{
+			"id":      float64(0),
+			"jsonrpc": "2.0",
+			"method":  "getStakeActivation",
+			"params": []interface{}{
+				pubkeyString,
+				map[string]interface{}{
+					"commitment": string(CommitmentMax),
+					"epoch":      float64(epoch),
+				},
+			},
+		},
+		server.RequestBody(t),
+	)
+
+	expected := mustJSONToInterface([]byte(responseBody))
+
+	got := mustJSONToInterface(mustAnyToJSON(out))
+
+	assert.Equal(t, expected, got, "both deserialized values must be equal")
 }
 
 func TestClient_GetTokenAccountBalance(t *testing.T) {
-	// TODO
+	responseBody := `{"context":{"slot":1114},"value":{"amount":"9864","decimals":2,"uiAmount":98.64,"uiAmountString":"98.64"}}`
+	server, closer := mockJSONRPC(t, json.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+	client := NewClient(server.URL)
+
+	pubkeyString := "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
+	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
+
+	out, err := client.GetTokenAccountBalance(
+		context.Background(),
+		pubKey,
+		CommitmentMax,
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t,
+		map[string]interface{}{
+			"id":      float64(0),
+			"jsonrpc": "2.0",
+			"method":  "getTokenAccountBalance",
+			"params": []interface{}{
+				pubkeyString,
+				map[string]interface{}{
+					"commitment": string(CommitmentMax),
+				},
+			},
+		},
+		server.RequestBody(t),
+	)
+
+	expected := mustJSONToInterface([]byte(responseBody))
+
+	got := mustJSONToInterface(mustAnyToJSON(out))
+
+	assert.Equal(t, expected, got, "both deserialized values must be equal")
 }
 
 func TestClient_GetTokenAccountsByDelegate(t *testing.T) {
-	// TODO
+	responseBody := `{"context":{"slot":1114},"value":[{"data":{"program":"spl-token","parsed":{"accountType":"account","info":{"tokenAmount":{"amount":"1","decimals":1,"uiAmount":0.1,"uiAmountString":"0.1"},"delegate":"4Nd1mBQtrMJVYVfKf2PJy9NZUZdTAsp7D4xWLs4gDB4T","delegatedAmount":1,"isInitialized":true,"isNative":false,"mint":"3wyAj7Rt1TWVPZVteFJPLa26JmLvdb1CAKEFZm3NY75E","owner":"CnPoSPKXu7wJqxe59Fs72tkBeALovhsCxYeFwPCQH9TD"}}},"executable":false,"lamports":1726080,"owner":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","rentEpoch":4}]}`
+	server, closer := mockJSONRPC(t, json.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+	client := NewClient(server.URL)
+
+	pubkeyString := "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
+	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
+
+	programIDString := "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+	programID := solana.MustPublicKeyFromBase58(programIDString)
+
+	out, err := client.GetTokenAccountsByDelegate(
+		context.Background(),
+		pubKey,
+		&GetTokenAccountsConfig{
+			ProgramId: programID,
+		},
+		&GetTokenAccountsOpts{
+			Commitment: CommitmentMax,
+			Encoding:   EncodingJSONParsed,
+		},
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t,
+		map[string]interface{}{
+			"id":      float64(0),
+			"jsonrpc": "2.0",
+			"method":  "getTokenAccountsByDelegate",
+			"params": []interface{}{
+				pubkeyString,
+				map[string]interface{}{
+					"programId": string(programIDString),
+				},
+				map[string]interface{}{
+					"commitment": string(CommitmentMax),
+					"encoding":   string(EncodingJSONParsed),
+				},
+			},
+		},
+		server.RequestBody(t),
+	)
+
+	expected := mustJSONToInterface([]byte(responseBody))
+
+	got := mustJSONToInterface(mustAnyToJSON(out))
+
+	assert.Equal(t, expected, got, "both deserialized values must be equal")
 }
 
 func TestClient_GetTokenAccountsByOwner(t *testing.T) {
-	// TODO
+	responseBody := `{"context":{"slot":1114},"value":[{"data":{"program":"spl-token","parsed":{"accountType":"account","info":{"tokenAmount":{"amount":"1","decimals":1,"uiAmount":0.1,"uiAmountString":"0.1"},"delegate":null,"delegatedAmount":1,"isInitialized":true,"isNative":false,"mint":"3wyAj7Rt1TWVPZVteFJPLa26JmLvdb1CAKEFZm3NY75E","owner":"4Qkev8aNZcqFNSRhQzwyLMFSsi94jHqE8WNVTJzTP99F"}}},"executable":false,"lamports":1726080,"owner":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","rentEpoch":4}]}`
+	server, closer := mockJSONRPC(t, json.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+	client := NewClient(server.URL)
+
+	pubkeyString := "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
+	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
+
+	programIDString := "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+	programID := solana.MustPublicKeyFromBase58(programIDString)
+
+	out, err := client.GetTokenAccountsByOwner(
+		context.Background(),
+		pubKey,
+		&GetTokenAccountsConfig{
+			ProgramId: programID,
+		},
+		&GetTokenAccountsOpts{
+			Commitment: CommitmentMax,
+			Encoding:   EncodingJSONParsed,
+		},
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t,
+		map[string]interface{}{
+			"id":      float64(0),
+			"jsonrpc": "2.0",
+			"method":  "getTokenAccountsByOwner",
+			"params": []interface{}{
+				pubkeyString,
+				map[string]interface{}{
+					"programId": string(programIDString),
+				},
+				map[string]interface{}{
+					"commitment": string(CommitmentMax),
+					"encoding":   string(EncodingJSONParsed),
+				},
+			},
+		},
+		server.RequestBody(t),
+	)
+
+	expected := mustJSONToInterface([]byte(responseBody))
+
+	got := mustJSONToInterface(mustAnyToJSON(out))
+
+	assert.Equal(t, expected, got, "both deserialized values must be equal")
 }
 
 func TestClient_SendTransaction(t *testing.T) {

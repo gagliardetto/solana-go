@@ -87,9 +87,9 @@ func TestData(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t,
-		map[string]interface{}{
-			"data":     val,
-			"encoding": "base64",
+		[]interface{}{
+			val,
+			"base64",
 		},
 		mustJSONToInterface(mustAnyToJSON(data)),
 	)

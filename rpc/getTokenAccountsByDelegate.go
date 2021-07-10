@@ -9,7 +9,7 @@ import (
 
 type GetTokenAccountsResult struct {
 	RPCContext
-	Value []*KeyedAccount `json:"value"`
+	Value []*Account `json:"value"`
 }
 
 type GetTokenAccountsConfig struct {

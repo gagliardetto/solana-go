@@ -27,7 +27,7 @@ func (cl *Client) GetStakeActivation(
 	ctx context.Context,
 	account solana.PublicKey, // Pubkey of stake account to query
 	commitment CommitmentType,
-	epoch *bin.Uint64, // epoch for which to calculate activation details. If parameter not provided, defaults to current epoch.
+	epoch *uint64, // epoch for which to calculate activation details. If parameter not provided, defaults to current epoch.
 ) (out *GetStakeActivationResult, err error) {
 	params := []interface{}{account}
 	obj := M{}

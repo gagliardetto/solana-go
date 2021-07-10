@@ -29,8 +29,7 @@ const (
 )
 
 type GetBlockOpts struct {
-	// TODO:
-	// encoding EncodingType,
+	Encoding           EncodingType
 	TransactionDetails TransactionDetailsType // level of transaction detail to return. If parameter not provided, the default detail level is "full".
 	Rewards            *bool                  // whether to populate the rewards array. If parameter not provided, the default includes rewards.
 	Commitment         CommitmentType         // "processed" is not supported. If parameter not provided, the default is "finalized".
@@ -54,6 +53,9 @@ func (cl *Client) GetBlockWithOpts(
 		}
 		if opts.Commitment != "" {
 			obj["commitment"] = opts.Commitment
+		}
+		if opts.Encoding != "" {
+			obj["encoding"] = opts.Encoding
 		}
 	}
 

@@ -160,9 +160,9 @@ func (t Base58) String() string {
 type Data []byte
 
 func (t Data) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"data":     []byte(t),
-		"encoding": "base64",
+	return json.Marshal([]interface{}{
+		[]byte(t),
+		"base64",
 	})
 }
 

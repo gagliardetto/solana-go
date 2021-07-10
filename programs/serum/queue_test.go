@@ -46,20 +46,20 @@ func TestDecoder_EventQueue_Diff(t *testing.T) {
 
 		info, err := client.GetAccountInfo(ctx, account)
 		require.NoError(t, err)
-		writeCompressedFile(t, oldDataFile, info.Value.Data)
+		writeCompressedFile(t, oldDataFile, info.Value.Data.GetBytes())
 
 		oldQueue := &EventQueue{}
-		require.NoError(t, oldQueue.Decode(info.Value.Data))
+		require.NoError(t, oldQueue.Decode(info.Value.Data.GetBytes()))
 		writeJSONFile(t, olDataJSONFile, oldQueue)
 
 		time.Sleep(900 * time.Millisecond)
 
 		info, err = client.GetAccountInfo(ctx, account)
 		require.NoError(t, err)
-		writeCompressedFile(t, newDataFile, info.Value.Data)
+		writeCompressedFile(t, newDataFile, info.Value.Data.GetBytes())
 
 		newQueue := &EventQueue{}
-		require.NoError(t, newQueue.Decode(info.Value.Data))
+		require.NoError(t, newQueue.Decode(info.Value.Data.GetBytes()))
 		writeJSONFile(t, newDataJSONFile, newQueue)
 	}
 
