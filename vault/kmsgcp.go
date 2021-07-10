@@ -130,7 +130,7 @@ func (k *KMSGCPManager) setupEncryption() error {
 		return nil
 	}
 
-	_, err := rand.Read(k.localDEK[:])
+	_, err := io.ReadFull(rand.Reader, k.localDEK[:])
 	if err != nil {
 		return err
 	}

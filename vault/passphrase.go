@@ -44,7 +44,7 @@ func (b *PassphraseBoxer) Seal(in []byte) (string, error) {
 	}
 
 	salt := make([]byte, saltLength)
-	if _, err := crypto_rand.Read(salt); err != nil {
+	if _, err := io.ReadFull(crypto_rand.Reader, salt); err != nil {
 		return "", err
 	}
 	secretKey := deriveKey(b.passphrase, salt)
