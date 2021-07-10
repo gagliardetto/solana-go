@@ -47,7 +47,7 @@ func TestNewTransaction(t *testing.T) {
 		},
 	}
 
-	blockhash, err := PublicKeyFromBase58("A9QnpgfhCkmiBSjgBuWk76Wo3HxzxvDopUq9x6UUMmjn")
+	blockhash, err := HashFromBase58("A9QnpgfhCkmiBSjgBuWk76Wo3HxzxvDopUq9x6UUMmjn")
 	require.NoError(t, err)
 
 	trx, err := NewTransaction(instructions, blockhash)

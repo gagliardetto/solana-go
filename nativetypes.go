@@ -80,6 +80,9 @@ var zeroSignature = Signature{}
 func (sig Signature) IsZero() bool {
 	return sig == zeroSignature
 }
+func (sig Signature) Equals(pb Signature) bool {
+	return sig == pb
+}
 
 func SignatureFromBase58(in string) (out Signature, err error) {
 	val, err := base58.Decode(in)
@@ -193,6 +196,8 @@ type ByteWrapper struct {
 
 func (w *ByteWrapper) ReadByte() (byte, error) {
 	var b [1]byte
-	_, err := w.Read(b[:])
+	// NOTE: w.Read() gives no guaranties about the number of bytes actually read.
+	// Using io.ReadFull reads exactly len(buf) bytes from r into buf.
+	_, err := io.ReadFull(w, b[:])
 	return b[0], err
 }
