@@ -188,8 +188,9 @@ func (env *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
 				secondString, ok2 := val[1].(string)
 				// TODO: add support for other encodings.
 				// TODO: maybe don't attempt to parse them, and just keep the string? Lazy parsing.
-				if ok1 && ok2 && secondString == "base64" {
+				if ok1 && ok2 {
 					env.rawDataEncoding = EncodingType(secondString)
+					// env.asDecodedBytes = make([]byte, 0)
 
 					switch secondString {
 					case string(EncodingBase64):
@@ -215,7 +216,7 @@ func (env *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
 							return err
 						}
 						defer zstdDecoder.Close()
-						_, err = zstdDecoder.DecodeAll(rawBytes, env.asDecodedBytes)
+						env.asDecodedBytes, err = zstdDecoder.DecodeAll(rawBytes, nil)
 						if err != nil {
 							return err
 						}
