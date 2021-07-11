@@ -45,10 +45,9 @@ func Test_AccountSubscribe(t *testing.T) {
 		return
 	}
 	text.NewEncoder(os.Stdout).Encode(data, nil)
-	fmt.Println("OpenOrders: ", data.(*AccountResult).Value.Account.Owner)
-	fmt.Println("data: ", data.(*AccountResult).Value.Account.Data)
+	fmt.Println("OpenOrders: ", data.Value.Account.Owner)
+	fmt.Println("data: ", data.Value.Account.Data)
 	return
-
 }
 
 func Test_ProgramSubscribe(t *testing.T) {
@@ -72,7 +71,7 @@ func Test_ProgramSubscribe(t *testing.T) {
 			fmt.Println("receive an error: ", err)
 			return
 		}
-		fmt.Println("data received: ", data.(*ProgramResult).Value.Pubkey)
+		fmt.Println("data received: ", data.Value.Pubkey)
 	}
 
 }
@@ -93,7 +92,6 @@ func Test_SlotSubscribe(t *testing.T) {
 		fmt.Println("receive an error: ", err)
 		return
 	}
-	fmt.Println("data received: ", data.(*SlotResult).Parent)
+	fmt.Println("data received: ", data.Parent)
 	return
-
 }

@@ -110,7 +110,7 @@ func StreamOpenOrders(client *ws.Client) error {
 		if err != nil {
 			return fmt.Errorf("received error from programID subscription: %w", err)
 		}
-		res := d.(*ws.ProgramResult)
+		res := d
 
 		var f *AccountFlag
 		err = bin.NewDecoder(res.Value.Account.Data.GetBytes()).Decode(&f)
