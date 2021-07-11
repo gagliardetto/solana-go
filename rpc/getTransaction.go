@@ -21,6 +21,7 @@ type GetTransactionOpts struct {
 }
 
 // GetTransaction returns transaction details for a confirmed transaction.
+//
 // NEW: This method is only available in solana-core v1.7 or newer.
 // Please use getConfirmedTransaction for solana-core v1.6
 func (cl *Client) GetTransaction(

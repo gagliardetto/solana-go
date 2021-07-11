@@ -22,7 +22,7 @@ import (
 func (cl *Client) GetRecentBlockhash(ctx context.Context, commitment CommitmentType) (out *GetRecentBlockhashResult, err error) {
 	params := []interface{}{}
 	if commitment != "" {
-		params = append(params, M{"commitment": string(commitment)})
+		params = append(params, M{"commitment": commitment})
 	}
 
 	err = cl.rpcClient.CallFor(&out, "getRecentBlockhash", params)

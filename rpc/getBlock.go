@@ -7,19 +7,6 @@ import (
 	"github.com/gagliardetto/solana-go"
 )
 
-// GetBlock returns identity and transaction information about a confirmed block in the ledger.
-// NEW: This method is only available in solana-core v1.7 or newer. Please use getConfirmedBlock for solana-core v1.6
-func (cl *Client) GetBlock(
-	ctx context.Context,
-	slot uint64,
-) (out *GetBlockResult, err error) {
-	return cl.GetBlockWithOpts(
-		ctx,
-		slot,
-		nil,
-	)
-}
-
 type TransactionDetailsType string
 
 const (
@@ -35,6 +22,21 @@ type GetBlockOpts struct {
 	Commitment         CommitmentType         // "processed" is not supported. If parameter not provided, the default is "finalized".
 }
 
+// GetBlock returns identity and transaction information about a confirmed block in the ledger.
+// NEW: This method is only available in solana-core v1.7 or newer. Please use getConfirmedBlock for solana-core v1.6
+func (cl *Client) GetBlock(
+	ctx context.Context,
+	slot uint64,
+) (out *GetBlockResult, err error) {
+	return cl.GetBlockWithOpts(
+		ctx,
+		slot,
+		nil,
+	)
+}
+
+// GetBlock returns identity and transaction information about a confirmed block in the ledger.
+// NEW: This method is only available in solana-core v1.7 or newer. Please use getConfirmedBlock for solana-core v1.6
 func (cl *Client) GetBlockWithOpts(
 	ctx context.Context,
 	slot uint64,

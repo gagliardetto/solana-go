@@ -16,6 +16,7 @@ type GetSignaturesForAddressOpts struct {
 // GetSignaturesForAddress returns confirmed signatures for transactions
 // involving an address backwards in time from the provided signature
 // or most recent confirmed block.
+//
 // NEW: This method is only available in solana-core v1.7 or newer.
 // Please use getConfirmedSignaturesForAddress2 for solana-core v1.6
 func (cl *Client) GetSignaturesForAddress(
