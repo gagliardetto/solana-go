@@ -15,13 +15,11 @@
 package ws
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"reflect"
 	"sync"
 	"time"
 
@@ -99,7 +97,6 @@ func (c *Client) handleMessage(message []byte) {
 	}
 
 	c.handleSubscriptionMessage(uint64(gjson.GetBytes(message, "params.subscription").Int()), message)
-
 }
 
 func (c *Client) handleNewSubscriptionMessage(requestID, subID uint64) {
@@ -147,10 +144,8 @@ func (c *Client) handleSubscriptionMessage(subID uint64, message []byte) {
 		return
 	}
 
-	//getting and instantiate the return type for the call back.
-	resultType := reflect.New(sub.reflectType)
-	result := resultType.Interface()
-	err := decodeResponse(bytes.NewReader(message), &result)
+	// Decode the message using the subscription-provided decoderFunc.
+	result, err := sub.decoderFunc(message)
 	if err != nil {
 		fmt.Println("*****************************")
 		c.closeSubscription(sub.req.ID, fmt.Errorf("unable to decode client response: %w", err))
@@ -224,7 +219,7 @@ func (c *Client) subscribe(
 	conf map[string]interface{},
 	subscriptionMethod string,
 	unsubscribeMethod string,
-	resultType interface{},
+	decoderFunc decoderFunc,
 ) (*Subscription, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -235,9 +230,14 @@ func (c *Client) subscribe(
 		return nil, fmt.Errorf("subscribe: unable to encode subsciption request: %w", err)
 	}
 
-	sub := newSubscription(req, reflect.TypeOf(resultType), func(err error) {
-		c.closeSubscription(req.ID, err)
-	}, unsubscribeMethod)
+	sub := newSubscription(
+		req,
+		func(err error) {
+			c.closeSubscription(req.ID, err)
+		},
+		unsubscribeMethod,
+		decoderFunc,
+	)
 
 	c.subscriptionByRequestID[req.ID] = sub
 	zlog.Info("added new subscription to websocket client", zap.Int("count", len(c.subscriptionByRequestID)))
@@ -254,6 +254,30 @@ func (c *Client) subscribe(
 func decodeResponse(r io.Reader, reply interface{}) (err error) {
 	var c *response
 	if err := json.NewDecoder(r).Decode(&c); err != nil {
+		return err
+	}
+
+	if c.Error != nil {
+		jsonErr := &json2.Error{}
+		if err := json.Unmarshal(*c.Error, jsonErr); err != nil {
+			return &json2.Error{
+				Code:    json2.E_SERVER,
+				Message: string(*c.Error),
+			}
+		}
+		return jsonErr
+	}
+
+	if c.Params == nil {
+		return json2.ErrNullResult
+	}
+
+	return json.Unmarshal(*c.Params.Result, &reply)
+}
+
+func decodeResponseFromMessage(r []byte, reply interface{}) (err error) {
+	var c *response
+	if err := json.Unmarshal(r, &c); err != nil {
 		return err
 	}
 

@@ -1,7 +1,6 @@
 package ws
 
 import (
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 )
@@ -10,7 +9,7 @@ import (
 func (cl *Client) AccountSubscribe(
 	account solana.PublicKey,
 	commitment rpc.CommitmentType,
-) (*Subscription, error) {
+) (*AccountSubscription, error) {
 	return cl.AccountSubscribeWithOpts(
 		account,
 		commitment,
@@ -23,7 +22,7 @@ func (cl *Client) AccountSubscribeWithOpts(
 	account solana.PublicKey,
 	commitment rpc.CommitmentType,
 	encoding rpc.EncodingType,
-) (*Subscription, error) {
+) (*AccountSubscription, error) {
 
 	params := []interface{}{account.String()}
 	conf := map[string]interface{}{
@@ -36,13 +35,40 @@ func (cl *Client) AccountSubscribeWithOpts(
 		conf["encoding"] = encoding
 	}
 
-	return cl.subscribe(
+	genSub, err := cl.subscribe(
 		params,
 		conf,
 		"accountSubscribe",
 		"accountUnsubscribe",
-		AccountResult{},
+		func(msg []byte) (interface{}, error) {
+			var res AccountResult
+			err := decodeResponseFromMessage(msg, &res)
+			return &res, err
+		},
 	)
+	if err != nil {
+		return nil, err
+	}
+	return &AccountSubscription{
+		sub: genSub,
+	}, nil
+}
+
+type AccountSubscription struct {
+	sub *Subscription
+}
+
+func (sw *AccountSubscription) Recv() (*AccountResult, error) {
+	select {
+	case d := <-sw.sub.stream:
+		return d.(*AccountResult), nil
+	case err := <-sw.sub.err:
+		return nil, err
+	}
+}
+
+func (sw *AccountSubscription) Unsubscribe() {
+	sw.sub.Unsubscribe()
 }
 
 type LogsSubscribeFilterType string
@@ -56,7 +82,7 @@ const (
 func (cl *Client) LogsSubscribe(
 	filter LogsSubscribeFilterType,
 	commitment rpc.CommitmentType,
-) (*Subscription, error) {
+) (*LogSubscription, error) {
 	return cl.logsSubscribe(
 		filter,
 		commitment,
@@ -67,7 +93,7 @@ func (cl *Client) LogsSubscribe(
 func (cl *Client) LogsSubscribeMentions(
 	mentions solana.PublicKey,
 	commitment rpc.CommitmentType,
-) (*Subscription, error) {
+) (*LogSubscription, error) {
 	return cl.logsSubscribe(
 		rpc.M{
 			"mentions": []string{mentions.String()},
@@ -80,7 +106,7 @@ func (cl *Client) LogsSubscribeMentions(
 func (cl *Client) logsSubscribe(
 	filter interface{},
 	commitment rpc.CommitmentType,
-) (*Subscription, error) {
+) (*LogSubscription, error) {
 
 	params := []interface{}{filter}
 	conf := map[string]interface{}{}
@@ -88,13 +114,40 @@ func (cl *Client) logsSubscribe(
 		conf["commitment"] = commitment
 	}
 
-	return cl.subscribe(
+	genSub, err := cl.subscribe(
 		params,
 		conf,
 		"logsSubscribe",
 		"logsUnsubscribe",
-		LogResult{},
+		func(msg []byte) (interface{}, error) {
+			var res LogResult
+			err := decodeResponseFromMessage(msg, &res)
+			return &res, err
+		},
 	)
+	if err != nil {
+		return nil, err
+	}
+	return &LogSubscription{
+		sub: genSub,
+	}, nil
+}
+
+type LogSubscription struct {
+	sub *Subscription
+}
+
+func (sw *LogSubscription) Recv() (*LogResult, error) {
+	select {
+	case d := <-sw.sub.stream:
+		return d.(*LogResult), nil
+	case err := <-sw.sub.err:
+		return nil, err
+	}
+}
+
+func (sw *LogSubscription) Unsubscribe() {
+	sw.sub.Unsubscribe()
 }
 
 // ProgramSubscribe subscribes to a program to receive notifications
@@ -102,7 +155,7 @@ func (cl *Client) logsSubscribe(
 func (cl *Client) ProgramSubscribe(
 	programID solana.PublicKey,
 	commitment rpc.CommitmentType,
-) (*Subscription, error) {
+) (*ProgramSubscription, error) {
 	return cl.ProgramSubscribeWithOpts(
 		programID,
 		commitment,
@@ -118,7 +171,7 @@ func (cl *Client) ProgramSubscribeWithOpts(
 	commitment rpc.CommitmentType,
 	encoding rpc.EncodingType,
 	filters []rpc.RPCFilter,
-) (*Subscription, error) {
+) (*ProgramSubscription, error) {
 
 	params := []interface{}{programID.String()}
 	conf := map[string]interface{}{
@@ -134,13 +187,40 @@ func (cl *Client) ProgramSubscribeWithOpts(
 		conf["filters"] = filters
 	}
 
-	return cl.subscribe(
+	genSub, err := cl.subscribe(
 		params,
 		conf,
 		"programSubscribe",
 		"programUnsubscribe",
-		ProgramResult{},
+		func(msg []byte) (interface{}, error) {
+			var res ProgramResult
+			err := decodeResponseFromMessage(msg, &res)
+			return &res, err
+		},
 	)
+	if err != nil {
+		return nil, err
+	}
+	return &ProgramSubscription{
+		sub: genSub,
+	}, nil
+}
+
+type ProgramSubscription struct {
+	sub *Subscription
+}
+
+func (sw *ProgramSubscription) Recv() (*ProgramResult, error) {
+	select {
+	case d := <-sw.sub.stream:
+		return d.(*ProgramResult), nil
+	case err := <-sw.sub.err:
+		return nil, err
+	}
+}
+
+func (sw *ProgramSubscription) Unsubscribe() {
+	sw.sub.Unsubscribe()
 }
 
 // SignatureSubscribe subscribes to a transaction signature to receive
@@ -149,7 +229,7 @@ func (cl *Client) ProgramSubscribeWithOpts(
 func (cl *Client) SignatureSubscribe(
 	signature solana.Signature,
 	commitment rpc.CommitmentType,
-) (*Subscription, error) {
+) (*SignatureSubscription, error) {
 
 	params := []interface{}{signature.String()}
 	conf := map[string]interface{}{}
@@ -157,36 +237,117 @@ func (cl *Client) SignatureSubscribe(
 		conf["commitment"] = commitment
 	}
 
-	return cl.subscribe(
+	genSub, err := cl.subscribe(
 		params,
 		conf,
 		"signatureSubscribe",
 		"signatureUnsubscribe",
-		SignatureResult{},
+		func(msg []byte) (interface{}, error) {
+			var res SignatureResult
+			err := decodeResponseFromMessage(msg, &res)
+			return &res, err
+		},
 	)
+	if err != nil {
+		return nil, err
+	}
+	return &SignatureSubscription{
+		sub: genSub,
+	}, nil
+}
+
+type SignatureSubscription struct {
+	sub *Subscription
+}
+
+func (sw *SignatureSubscription) Recv() (*SignatureResult, error) {
+	select {
+	case d := <-sw.sub.stream:
+		return d.(*SignatureResult), nil
+	case err := <-sw.sub.err:
+		return nil, err
+	}
+}
+
+func (sw *SignatureSubscription) Unsubscribe() {
+	sw.sub.Unsubscribe()
 }
 
 // SlotSubscribe subscribes to receive notification anytime a slot is processed by the validator.
-func (cl *Client) SlotSubscribe() (*Subscription, error) {
-	return cl.subscribe(
+func (cl *Client) SlotSubscribe() (*SlotSubscription, error) {
+	genSub, err := cl.subscribe(
 		nil,
 		nil,
 		"slotSubscribe",
 		"slotUnsubscribe",
-		SlotResult{},
+		func(msg []byte) (interface{}, error) {
+			var res SlotResult
+			err := decodeResponseFromMessage(msg, &res)
+			return &res, err
+		},
 	)
+	if err != nil {
+		return nil, err
+	}
+	return &SlotSubscription{
+		sub: genSub,
+	}, nil
+}
+
+type SlotSubscription struct {
+	sub *Subscription
+}
+
+func (sw *SlotSubscription) Recv() (*SlotResult, error) {
+	select {
+	case d := <-sw.sub.stream:
+		return d.(*SlotResult), nil
+	case err := <-sw.sub.err:
+		return nil, err
+	}
+}
+
+func (sw *SlotSubscription) Unsubscribe() {
+	sw.sub.Unsubscribe()
 }
 
 // SignatureSubscribe subscribes to receive notification
 // anytime a new root is set by the validator.
-func (cl *Client) RootSubscribe() (*Subscription, error) {
-	return cl.subscribe(
+func (cl *Client) RootSubscribe() (*RootSubscription, error) {
+	genSub, err := cl.subscribe(
 		nil,
 		nil,
 		"rootSubscribe",
 		"rootUnsubscribe",
-		RootResult(bin.Uint64(1)),
+		func(msg []byte) (interface{}, error) {
+			var res RootResult
+			err := decodeResponseFromMessage(msg, &res)
+			return &res, err
+		},
 	)
+	if err != nil {
+		return nil, err
+	}
+	return &RootSubscription{
+		sub: genSub,
+	}, nil
+}
+
+type RootSubscription struct {
+	sub *Subscription
+}
+
+func (sw *RootSubscription) Recv() (*RootResult, error) {
+	select {
+	case d := <-sw.sub.stream:
+		return d.(*RootResult), nil
+	case err := <-sw.sub.err:
+		return nil, err
+	}
+}
+
+func (sw *RootSubscription) Unsubscribe() {
+	sw.sub.Unsubscribe()
 }
 
 // VoteSubscribe (UNSTABLE) subscribes to receive notification anytime
@@ -197,12 +358,39 @@ func (cl *Client) RootSubscribe() (*Subscription, error) {
 // This subscription is unstable and only available if the validator
 // was started with the --rpc-pubsub-enable-vote-subscription flag.
 // The format of this subscription may change in the future.
-func (cl *Client) VoteSubscribe() (*Subscription, error) {
-	return cl.subscribe(
+func (cl *Client) VoteSubscribe() (*VoteSubscription, error) {
+	genSub, err := cl.subscribe(
 		nil,
 		nil,
 		"voteSubscribe",
 		"voteUnsubscribe",
-		VoteResult{},
+		func(msg []byte) (interface{}, error) {
+			var res VoteResult
+			err := decodeResponseFromMessage(msg, &res)
+			return &res, err
+		},
 	)
+	if err != nil {
+		return nil, err
+	}
+	return &VoteSubscription{
+		sub: genSub,
+	}, nil
+}
+
+type VoteSubscription struct {
+	sub *Subscription
+}
+
+func (sw *VoteSubscription) Recv() (*VoteResult, error) {
+	select {
+	case d := <-sw.sub.stream:
+		return d.(*VoteResult), nil
+	case err := <-sw.sub.err:
+		return nil, err
+	}
+}
+
+func (sw *VoteSubscription) Unsubscribe() {
+	sw.sub.Unsubscribe()
 }
