@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/klauspost/compress/zstd"
 	"github.com/mr-tron/base58"
 )
 
@@ -157,13 +158,17 @@ func (t Base58) String() string {
 	return base58.Encode(t)
 }
 
-type Data []byte
+type Data struct {
+	Content  []byte
+	Encoding EncodingType
+}
 
 func (t Data) MarshalJSON() ([]byte, error) {
-	return json.Marshal([]interface{}{
-		[]byte(t),
-		"base64",
-	})
+	return json.Marshal(
+		[]interface{}{
+			t.String(),
+			t.Encoding,
+		})
 }
 
 func (t *Data) UnmarshalJSON(data []byte) (err error) {
@@ -176,9 +181,35 @@ func (t *Data) UnmarshalJSON(data []byte) (err error) {
 		return fmt.Errorf("invalid length for solana.Data, expected 2, found %d", len(in))
 	}
 
-	switch in[1] {
-	case "base64":
-		*t, err = base64.StdEncoding.DecodeString(in[0])
+	t.Encoding = EncodingType(in[1])
+
+	switch t.Encoding {
+	case EncodingBase58:
+		var err error
+		t.Content, err = base58.Decode(in[0])
+		if err != nil {
+			return err
+		}
+	case EncodingBase64:
+		var err error
+		t.Content, err = base64.StdEncoding.DecodeString(in[0])
+		if err != nil {
+			return err
+		}
+	case EncodingBase64Zstd:
+		rawBytes, err := base64.StdEncoding.DecodeString(in[0])
+		if err != nil {
+			return err
+		}
+		zstdDecoder, err := zstd.NewReader(nil)
+		if err != nil {
+			return err
+		}
+		defer zstdDecoder.Close()
+		t.Content, err = zstdDecoder.DecodeAll(rawBytes, nil)
+		if err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("unsupported encoding %s", in[1])
 	}
@@ -186,7 +217,24 @@ func (t *Data) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (t Data) String() string {
-	return base64.StdEncoding.EncodeToString(t)
+	switch EncodingType(t.Encoding) {
+	case EncodingBase58:
+		return base58.Encode(t.Content)
+	case EncodingBase64:
+		return base64.StdEncoding.EncodeToString(t.Content)
+	case EncodingBase64Zstd:
+		zstdEncoder, err := zstd.NewWriter(nil)
+		if err == nil {
+			defer zstdEncoder.Close()
+			out := zstdEncoder.EncodeAll(t.Content, nil)
+			return base64.StdEncoding.EncodeToString(out)
+		}
+		// TODO: handle error?
+	default:
+		// TODO
+		return ""
+	}
+	return ""
 }
 
 ///
@@ -201,3 +249,20 @@ func (w *ByteWrapper) ReadByte() (byte, error) {
 	_, err := io.ReadFull(w, b[:])
 	return b[0], err
 }
+
+type EncodingType string
+
+const (
+	EncodingBase58     EncodingType = "base58"      // limited to Account data of less than 129 bytes
+	EncodingBase64     EncodingType = "base64"      // will return base64 encoded data for Account data of any size
+	EncodingBase64Zstd EncodingType = "base64+zstd" // compresses the Account data using Zstandard and base64-encodes the result
+
+	// attempts to use program-specific state parsers to
+	// return more human-readable and explicit account state data.
+	// If "jsonParsed" is requested but a parser cannot be found,
+	// the field falls back to "base64" encoding, detectable when the data field is type <string>.
+	// Cannot be used if specifying dataSlice parameters (offset, length).
+	EncodingJSONParsed EncodingType = "jsonParsed"
+
+	EncodingJSON EncodingType = "json" // NOTE: not usable in almost-all places.
+)

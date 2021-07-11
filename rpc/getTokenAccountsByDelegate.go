@@ -21,7 +21,7 @@ type GetTokenAccountsConfig struct {
 type GetTokenAccountsOpts struct {
 	Commitment CommitmentType `json:"commitment,omitempty"`
 
-	Encoding EncodingType `json:"encoding,omitempty"`
+	Encoding solana.EncodingType `json:"encoding,omitempty"`
 
 	DataSlice *DataSlice `json:"dataSlice,omitempty"`
 }

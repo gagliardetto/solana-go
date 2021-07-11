@@ -46,7 +46,7 @@ func FetchMints(ctx context.Context, rpcCli *rpc.Client) (out []*Mint, err error
 		acct := keyedAcct.Account
 
 		m := &Mint{}
-		if err := m.Decode(acct.Data.GetBytes()); err != nil {
+		if err := m.Decode(acct.Data.GetBytes().Content); err != nil {
 			return nil, fmt.Errorf("unable to decode mint %q: %w", acct.Owner.String(), err)
 		}
 		out = append(out, m)

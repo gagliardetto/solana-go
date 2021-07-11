@@ -31,7 +31,7 @@ func (cl *Client) GetMultipleAccounts(
 func (cl *Client) GetMultipleAccountsWithOpts(
 	ctx context.Context,
 	accounts []solana.PublicKey,
-	encoding EncodingType,
+	encoding solana.EncodingType,
 	commitment CommitmentType,
 	offset *uint,
 	length *uint,
@@ -49,7 +49,7 @@ func (cl *Client) GetMultipleAccountsWithOpts(
 			"offset": offset,
 			"length": length,
 		}
-		if encoding == EncodingJSONParsed {
+		if encoding == solana.EncodingJSONParsed {
 			return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
 		}
 	}

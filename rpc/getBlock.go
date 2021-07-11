@@ -16,7 +16,7 @@ const (
 )
 
 type GetBlockOpts struct {
-	Encoding           EncodingType
+	Encoding           solana.EncodingType
 	TransactionDetails TransactionDetailsType // level of transaction detail to return. If parameter not provided, the default detail level is "full".
 	Rewards            *bool                  // whether to populate the rewards array. If parameter not provided, the default includes rewards.
 	Commitment         CommitmentType         // "processed" is not supported. If parameter not provided, the default is "finalized".
@@ -43,7 +43,7 @@ func (cl *Client) GetBlockWithOpts(
 	opts *GetBlockOpts,
 ) (out *GetBlockResult, err error) {
 	obj := M{
-		"encoding": EncodingJSON,
+		"encoding": solana.EncodingJSON,
 	}
 
 	if opts != nil {

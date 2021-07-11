@@ -21,7 +21,7 @@ func (cl *Client) AccountSubscribe(
 func (cl *Client) AccountSubscribeWithOpts(
 	account solana.PublicKey,
 	commitment rpc.CommitmentType,
-	encoding rpc.EncodingType,
+	encoding solana.EncodingType,
 ) (*AccountSubscription, error) {
 
 	params := []interface{}{account.String()}
@@ -169,7 +169,7 @@ func (cl *Client) ProgramSubscribe(
 func (cl *Client) ProgramSubscribeWithOpts(
 	programID solana.PublicKey,
 	commitment rpc.CommitmentType,
-	encoding rpc.EncodingType,
+	encoding solana.EncodingType,
 	filters []rpc.RPCFilter,
 ) (*ProgramSubscription, error) {
 

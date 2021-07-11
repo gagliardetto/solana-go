@@ -60,8 +60,11 @@ func TestClient_GetAccountInfo(t *testing.T) {
 				Lamports: 999999,
 				Owner:    solana.MustPublicKeyFromBase58("11111111111111111111111111111111"),
 				Data: &DataBytesOrJSON{
-					rawDataEncoding: EncodingBase64,
-					asDecodedBytes:  []byte{0x74, 0x65, 0x73, 0x74},
+					rawDataEncoding: solana.EncodingBase64,
+					asDecodedBytes: solana.Data{
+						Content:  []byte{0x74, 0x65, 0x73, 0x74},
+						Encoding: solana.EncodingBase64,
+					},
 				},
 				Executable: true,
 				RentEpoch:  207,
@@ -82,7 +85,7 @@ func TestClient_GetAccountInfoWithOpts(t *testing.T) {
 	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
 
 	opts := &GetAccountInfoOpts{
-		Encoding:   EncodingJSON,
+		Encoding:   solana.EncodingJSON,
 		Commitment: CommitmentMax,
 		Offset:     &offset,
 		Length:     &length,
@@ -102,7 +105,7 @@ func TestClient_GetAccountInfoWithOpts(t *testing.T) {
 			"params": []interface{}{
 				pubkeyString,
 				map[string]interface{}{
-					"encoding":   string(EncodingJSON),
+					"encoding":   string(solana.EncodingJSON),
 					"commitment": string(CommitmentMax),
 					"dataSlice": map[string]interface{}{
 						"offset": float64(offset),
@@ -325,7 +328,7 @@ func TestClient_GetBlock(t *testing.T) {
 			"params": []interface{}{
 				float64(block),
 				map[string]interface{}{
-					"encoding": string(EncodingJSON),
+					"encoding": string(solana.EncodingJSON),
 				},
 			},
 		},
@@ -481,7 +484,7 @@ func TestClient_GetBlockWithOpts(t *testing.T) {
 			"params": []interface{}{
 				float64(block),
 				map[string]interface{}{
-					"encoding":           string(EncodingJSON),
+					"encoding":           string(solana.EncodingJSON),
 					"transactionDetails": string(TransactionDetailsSignatures),
 					"rewards":            rewards,
 					"commitment":         string(CommitmentMax),
@@ -1471,8 +1474,11 @@ func TestClient_GetMultipleAccounts(t *testing.T) {
 				Lamports: 19039980000,
 				Owner:    solana.MustPublicKeyFromBase58("11111111111111111111111111111111"),
 				Data: &DataBytesOrJSON{
-					asDecodedBytes:  []byte{},
-					rawDataEncoding: EncodingBase64,
+					asDecodedBytes: solana.Data{
+						Content:  []byte{},
+						Encoding: solana.EncodingBase64,
+					},
+					rawDataEncoding: solana.EncodingBase64,
 				},
 				Executable: true,
 				RentEpoch:  207,
@@ -1496,7 +1502,7 @@ func TestClient_GetProgramAccounts(t *testing.T) {
 	length := uint64(30)
 	opts := GetProgramAccountsOpts{
 		Commitment: CommitmentMax,
-		Encoding:   EncodingBase58,
+		Encoding:   solana.EncodingBase58,
 		DataSlice: &DataSlice{
 			Offset: &offset,
 			Length: &length,
@@ -1526,7 +1532,7 @@ func TestClient_GetProgramAccounts(t *testing.T) {
 			"params": []interface{}{
 				pubkeyString,
 				map[string]interface{}{
-					"encoding":   string(EncodingBase58),
+					"encoding":   string(solana.EncodingBase58),
 					"commitment": string(CommitmentMax),
 					"dataSlice": map[string]interface{}{
 						"offset": float64(offset),
@@ -1553,8 +1559,11 @@ func TestClient_GetProgramAccounts(t *testing.T) {
 				Lamports: 2039280,
 				Owner:    solana.MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
 				Data: &DataBytesOrJSON{
-					asDecodedBytes:  []byte{0x74, 0x65, 0x73, 0x74},
-					rawDataEncoding: EncodingBase64,
+					asDecodedBytes: solana.Data{
+						Content:  []byte{0x74, 0x65, 0x73, 0x74},
+						Encoding: solana.EncodingBase64,
+					},
+					rawDataEncoding: solana.EncodingBase64,
 				},
 				Executable: true,
 				RentEpoch:  206,
@@ -1934,7 +1943,7 @@ func TestClient_GetTransaction(t *testing.T) {
 	tx := "KBVcTWwgEhVzwywtunhAXRKjXYYEdPcSCpuEkg484tiE3dFGzHDu9LKKH23uBMdfYt3JCPHeaVeDTZWecboyTrd"
 
 	opts := GetTransactionOpts{
-		Encoding:   EncodingJSON,
+		Encoding:   solana.EncodingJSON,
 		Commitment: CommitmentMax,
 	}
 	out, err := client.GetTransaction(
@@ -1952,7 +1961,7 @@ func TestClient_GetTransaction(t *testing.T) {
 			"params": []interface{}{
 				tx,
 				map[string]interface{}{
-					"encoding":   string(EncodingJSON),
+					"encoding":   string(solana.EncodingJSON),
 					"commitment": string(CommitmentMax),
 				},
 			},
@@ -2296,7 +2305,7 @@ func TestClient_GetTokenAccountsByDelegate(t *testing.T) {
 		},
 		&GetTokenAccountsOpts{
 			Commitment: CommitmentMax,
-			Encoding:   EncodingJSONParsed,
+			Encoding:   solana.EncodingJSONParsed,
 		},
 	)
 	require.NoError(t, err)
@@ -2313,7 +2322,7 @@ func TestClient_GetTokenAccountsByDelegate(t *testing.T) {
 				},
 				map[string]interface{}{
 					"commitment": string(CommitmentMax),
-					"encoding":   string(EncodingJSONParsed),
+					"encoding":   string(solana.EncodingJSONParsed),
 				},
 			},
 		},
@@ -2347,7 +2356,7 @@ func TestClient_GetTokenAccountsByOwner(t *testing.T) {
 		},
 		&GetTokenAccountsOpts{
 			Commitment: CommitmentMax,
-			Encoding:   EncodingJSONParsed,
+			Encoding:   solana.EncodingJSONParsed,
 		},
 	)
 	require.NoError(t, err)
@@ -2364,7 +2373,7 @@ func TestClient_GetTokenAccountsByOwner(t *testing.T) {
 				},
 				map[string]interface{}{
 					"commitment": string(CommitmentMax),
-					"encoding":   string(EncodingJSONParsed),
+					"encoding":   string(solana.EncodingJSONParsed),
 				},
 			},
 		},

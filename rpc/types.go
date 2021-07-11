@@ -15,15 +15,11 @@
 package rpc
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 
-	"github.com/davecgh/go-spew/spew"
 	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
-	"github.com/klauspost/compress/zstd"
-	"github.com/mr-tron/base58"
 )
 
 type Context struct {
@@ -153,96 +149,49 @@ type Account struct {
 }
 
 type DataBytesOrJSON struct {
-	rawDataEncoding EncodingType
+	rawDataEncoding solana.EncodingType
 	asDecodedBytes  solana.Data
-	asJSON          interface{}
+	asJSON          json.RawMessage
 }
 
 func (dt *DataBytesOrJSON) MarshalJSON() ([]byte, error) {
 	// TODO: invert check?
-	if dt.asDecodedBytes != nil {
+	if dt.asDecodedBytes.Content != nil {
 		return json.Marshal(dt.asDecodedBytes)
 	}
 	return json.Marshal(dt.asJSON)
 }
 
-func (env *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
+func (wrap *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
 
-	var temp interface{}
-	if err := json.Unmarshal(data, &temp); err != nil {
-		return err
-	}
-
-	if temp == nil {
+	if len(data) == 0 || (len(data) == 4 && string(data) == "null") {
 		// TODO: is this an error?
 		return nil
 	}
-	// TODO: check if first character is `[` as the check.
-	// TODO: store raw bytes, and unmarshal on request.
-	switch val := temp.(type) {
-	case []interface{}:
+
+	firstChar := data[0]
+
+	switch firstChar {
+	// Check if first character is `[`, standing for a JSON array.
+	case '[':
 		// It's base64 (or similar)
 		{
-			if len(val) == 2 {
-				firstString, ok1 := val[0].(string)
-				secondString, ok2 := val[1].(string)
-				// TODO: add support for other encodings.
-				// TODO: maybe don't attempt to parse them, and just keep the string? Lazy parsing.
-				if ok1 && ok2 {
-					env.rawDataEncoding = EncodingType(secondString)
-					// env.asDecodedBytes = make([]byte, 0)
-
-					switch secondString {
-					case string(EncodingBase64):
-						var err error
-						env.asDecodedBytes, err = base64.StdEncoding.DecodeString(firstString)
-						if err != nil {
-							return err
-						}
-					case string(EncodingBase58):
-						var err error
-						env.asDecodedBytes, err = base58.Decode(firstString)
-						if err != nil {
-							return err
-						}
-					case string(EncodingBase64Zstd):
-						// TODO: use more readers; add lazy decoding.
-						rawBytes, err := base64.StdEncoding.DecodeString(firstString)
-						if err != nil {
-							return err
-						}
-						zstdDecoder, err := zstd.NewReader(nil)
-						if err != nil {
-							return err
-						}
-						defer zstdDecoder.Close()
-						env.asDecodedBytes, err = zstdDecoder.DecodeAll(rawBytes, nil)
-						if err != nil {
-							return err
-						}
-					default:
-						return fmt.Errorf("unknown encoding: %s", secondString)
-					}
-					return nil
-				} else {
-					env.asJSON = temp
-					// TODO: what is then EncodingJSON???
-					env.rawDataEncoding = EncodingJSONParsed
-				}
-			} else {
-				env.asJSON = temp
-				env.rawDataEncoding = EncodingJSONParsed
+			err := wrap.asDecodedBytes.UnmarshalJSON(data)
+			if err != nil {
+				return err
 			}
+			wrap.rawDataEncoding = wrap.asDecodedBytes.Encoding
 		}
-	case map[string]interface{}:
+	case '{':
 		// It's JSON, most likely.
 		// TODO: is it always JSON???
 		{
-			env.asJSON = temp
-			env.rawDataEncoding = EncodingJSONParsed
+			// Store raw bytes, and unmarshal on request.
+			wrap.asJSON = data
+			wrap.rawDataEncoding = solana.EncodingJSONParsed
 		}
 	default:
-		return fmt.Errorf("Unknown kind: %s", spew.Sdump(temp))
+		return fmt.Errorf("Unknown kind: %v", data)
 	}
 
 	return nil
@@ -254,10 +203,9 @@ func (dt *DataBytesOrJSON) GetBytes() solana.Data {
 	return dt.asDecodedBytes
 }
 
-// GetJSON returns the JSON interface when the encoding is
-// jsonParsed.
-// TODO: what is EncodingJSON ???
-func (dt *DataBytesOrJSON) GetJSON() interface{} {
+// GetRawJSON returns a json.RawMessage when the data
+// encoding is jsonParsed.
+func (dt *DataBytesOrJSON) GetRawJSON() json.RawMessage {
 	return dt.asJSON
 }
 
@@ -268,14 +216,14 @@ type DataSlice struct {
 type GetProgramAccountsOpts struct {
 	Commitment CommitmentType `json:"commitment,omitempty"`
 
-	Encoding EncodingType `json:"encoding,omitempty"`
+	Encoding solana.EncodingType `json:"encoding,omitempty"`
 
 	DataSlice *DataSlice `json:"dataSlice,omitempty"` // limit the returned account data
 
 	// Filter on accounts, implicit AND between filters
 	Filters []RPCFilter `json:"filters,omitempty"` // filter results using various filter objects; account must meet all filter criteria to be included in results
 
-	// TODO:
+	// TODO: this can't be used.
 	// WithContext *bool `json:"withContext,omitempty"` // wrap the result in an RpcResponse JSON object.
 }
 
@@ -352,20 +300,3 @@ func (p *ParsedInstruction) IsParsed() bool {
 }
 
 type M map[string]interface{}
-
-type EncodingType string
-
-const (
-	EncodingBase58     EncodingType = "base58"      // limited to Account data of less than 129 bytes
-	EncodingBase64     EncodingType = "base64"      // will return base64 encoded data for Account data of any size
-	EncodingBase64Zstd EncodingType = "base64+zstd" // compresses the Account data using Zstandard and base64-encodes the result
-
-	// attempts to use program-specific state parsers to
-	// return more human-readable and explicit account state data.
-	// If "jsonParsed" is requested but a parser cannot be found,
-	// the field falls back to "base64" encoding, detectable when the data field is type <string>.
-	// Cannot be used if specifying dataSlice parameters (offset, length).
-	EncodingJSONParsed EncodingType = "jsonParsed"
-
-	EncodingJSON EncodingType = "json"
-)

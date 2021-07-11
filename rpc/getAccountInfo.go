@@ -27,7 +27,7 @@ func (cl *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) 
 		ctx,
 		account,
 		&GetAccountInfoOpts{
-			Encoding:   EncodingBase64,
+			Encoding:   solana.EncodingBase64,
 			Commitment: "",
 			Offset:     nil,
 			Length:     nil,
@@ -42,11 +42,11 @@ func (cl *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey
 		return err
 	}
 
-	return bin.NewDecoder(resp.Value.Data.GetBytes()).Decode(inVar)
+	return bin.NewDecoder(resp.Value.Data.GetBytes().Content).Decode(inVar)
 }
 
 type GetAccountInfoOpts struct {
-	Encoding   EncodingType
+	Encoding   solana.EncodingType
 	Commitment CommitmentType
 	Offset     *uint64
 	Length     *uint64
@@ -75,7 +75,7 @@ func (cl *Client) GetAccountInfoWithOpts(
 				"offset": opts.Offset,
 				"length": opts.Length,
 			}
-			if opts.Encoding == EncodingJSONParsed {
+			if opts.Encoding == solana.EncodingJSONParsed {
 				return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
 			}
 		}

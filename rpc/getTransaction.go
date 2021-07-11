@@ -16,8 +16,8 @@ type GetTransactionResult struct {
 }
 
 type GetTransactionOpts struct {
-	Encoding   EncodingType   `json:"encoding,omitempty"`
-	Commitment CommitmentType `json:"commitment,omitempty"` // "processed" is not supported. If parameter not provided, the default is "finalized".
+	Encoding   solana.EncodingType `json:"encoding,omitempty"`
+	Commitment CommitmentType      `json:"commitment,omitempty"` // "processed" is not supported. If parameter not provided, the default is "finalized".
 }
 
 // GetTransaction returns transaction details for a confirmed transaction.
