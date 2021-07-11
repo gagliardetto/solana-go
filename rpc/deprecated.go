@@ -31,6 +31,7 @@ func (cl *Client) GetConfirmedBlock(
 		encoding = "json"
 	}
 	params := []interface{}{slot, encoding}
+	// TODO: provide commitment as string instead of object?
 
 	err = cl.rpcClient.CallFor(&out, "getConfirmedBlock", params)
 	return

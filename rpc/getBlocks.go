@@ -27,6 +27,7 @@ func (cl *Client) GetBlocks(
 	}
 	if commitment != "" {
 		params = append(params,
+			// TODO: provide commitment as string instead of object?
 			M{"commitment": commitment},
 		)
 	}

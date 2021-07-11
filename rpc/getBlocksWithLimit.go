@@ -18,6 +18,7 @@ func (cl *Client) GetBlocksWithLimit(
 	params := []interface{}{startSlot, limit}
 	if commitment != "" {
 		params = append(params,
+			// TODO: provide commitment as string instead of object?
 			M{"commitment": commitment},
 		)
 	}
