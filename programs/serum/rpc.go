@@ -54,7 +54,7 @@ func FetchOpenOrders(ctx context.Context, rpcCli *rpc.Client, openOrdersAddr sol
 
 	openOrdersMeta := &OpenOrdersMeta{}
 
-	if err := openOrdersMeta.OpenOrders.Decode(acctInfo.Value.Data.GetBytes().Content); err != nil {
+	if err := openOrdersMeta.OpenOrders.Decode(acctInfo.Value.Data.GetBinary()); err != nil {
 		return nil, fmt.Errorf("decoding market v2: %w", err)
 	}
 
@@ -71,7 +71,7 @@ func FetchMarket(ctx context.Context, rpcCli *rpc.Client, marketAddr solana.Publ
 		Address: marketAddr,
 	}
 
-	dataLen := len(acctInfo.Value.Data.GetBytes().Content)
+	dataLen := len(acctInfo.Value.Data.GetBinary())
 	switch dataLen {
 	// case 380:
 	// 	// if err := meta.MarketV1.Decode(acctInfo.Value.Data); err != nil {
@@ -80,7 +80,7 @@ func FetchMarket(ctx context.Context, rpcCli *rpc.Client, marketAddr solana.Publ
 	// 	return nil, fmt.Errorf("Unsupported market version, w/ data length of 380")
 
 	case 388:
-		if err := meta.MarketV2.Decode(acctInfo.Value.Data.GetBytes().Content); err != nil {
+		if err := meta.MarketV2.Decode(acctInfo.Value.Data.GetBinary()); err != nil {
 			return nil, fmt.Errorf("decoding market v2: %w", err)
 		}
 
@@ -113,7 +113,7 @@ func StreamOpenOrders(client *ws.Client) error {
 		res := d
 
 		var f *AccountFlag
-		err = bin.NewDecoder(res.Value.Account.Data.GetBytes().Content).Decode(&f)
+		err = bin.NewDecoder(res.Value.Account.Data.GetBinary()).Decode(&f)
 		if err != nil {
 			fmt.Println("***********************************", err)
 			zlog.Debug("unable to decoce account flag for account... skipping",

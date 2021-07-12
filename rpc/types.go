@@ -150,14 +150,14 @@ type Account struct {
 
 type DataBytesOrJSON struct {
 	rawDataEncoding solana.EncodingType
-	asDecodedBytes  solana.Data
+	asDecodedBinary solana.Data
 	asJSON          json.RawMessage
 }
 
 func (dt *DataBytesOrJSON) MarshalJSON() ([]byte, error) {
 	// TODO: invert check?
-	if dt.asDecodedBytes.Content != nil {
-		return json.Marshal(dt.asDecodedBytes)
+	if dt.asDecodedBinary.Content != nil {
+		return json.Marshal(dt.asDecodedBinary)
 	}
 	return json.Marshal(dt.asJSON)
 }
@@ -176,11 +176,11 @@ func (wrap *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
 	case '[':
 		// It's base64 (or similar)
 		{
-			err := wrap.asDecodedBytes.UnmarshalJSON(data)
+			err := wrap.asDecodedBinary.UnmarshalJSON(data)
 			if err != nil {
 				return err
 			}
-			wrap.rawDataEncoding = wrap.asDecodedBytes.Encoding
+			wrap.rawDataEncoding = wrap.asDecodedBinary.Encoding
 		}
 	case '{':
 		// It's JSON, most likely.
@@ -197,14 +197,17 @@ func (wrap *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// GetBytes returns the decoded bytes if the encoding is
-// base64, etc.
-func (dt *DataBytesOrJSON) GetBytes() solana.Data {
-	return dt.asDecodedBytes
+// GetBinary returns the decoded bytes if the encoding is
+// "base58", "base64", or "base64+zstd".
+func (dt *DataBytesOrJSON) GetBinary() []byte {
+	if dt.asDecodedBinary.Content == nil {
+		return nil
+	}
+	return dt.asDecodedBinary.Content
 }
 
 // GetRawJSON returns a json.RawMessage when the data
-// encoding is jsonParsed.
+// encoding is "jsonParsed".
 func (dt *DataBytesOrJSON) GetRawJSON() json.RawMessage {
 	return dt.asJSON
 }

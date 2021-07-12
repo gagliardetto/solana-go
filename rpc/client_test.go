@@ -61,7 +61,7 @@ func TestClient_GetAccountInfo(t *testing.T) {
 				Owner:    solana.MustPublicKeyFromBase58("11111111111111111111111111111111"),
 				Data: &DataBytesOrJSON{
 					rawDataEncoding: solana.EncodingBase64,
-					asDecodedBytes: solana.Data{
+					asDecodedBinary: solana.Data{
 						Content:  []byte{0x74, 0x65, 0x73, 0x74},
 						Encoding: solana.EncodingBase64,
 					},
@@ -1474,7 +1474,7 @@ func TestClient_GetMultipleAccounts(t *testing.T) {
 				Lamports: 19039980000,
 				Owner:    solana.MustPublicKeyFromBase58("11111111111111111111111111111111"),
 				Data: &DataBytesOrJSON{
-					asDecodedBytes: solana.Data{
+					asDecodedBinary: solana.Data{
 						Content:  []byte{},
 						Encoding: solana.EncodingBase64,
 					},
@@ -1559,7 +1559,7 @@ func TestClient_GetProgramAccounts(t *testing.T) {
 				Lamports: 2039280,
 				Owner:    solana.MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
 				Data: &DataBytesOrJSON{
-					asDecodedBytes: solana.Data{
+					asDecodedBinary: solana.Data{
 						Content:  []byte{0x74, 0x65, 0x73, 0x74},
 						Encoding: solana.EncodingBase64,
 					},

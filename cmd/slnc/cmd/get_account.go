@@ -45,7 +45,7 @@ var getAccountCmd = &cobra.Command{
 
 		fmt.Println(string(data))
 
-		obj, err := decode(acct.Owner, acct.Data.GetBytes().Content)
+		obj, err := decode(acct.Owner, acct.Data.GetBinary())
 		if err != nil {
 			return err
 		}

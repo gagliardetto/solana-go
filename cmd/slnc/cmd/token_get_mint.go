@@ -43,12 +43,12 @@ var tokenGetMintCmd = &cobra.Command{
 		}
 
 		mint := &token.Mint{}
-		if err := mint.Decode(acct.Value.Data.GetBytes().Content); err != nil {
+		if err := mint.Decode(acct.Value.Data.GetBinary()); err != nil {
 			return fmt.Errorf("unable to retrieve int information: %w", err)
 		}
 
 		if !mint.IsInitialized {
-			fmt.Println("Uninitialized mint. Data length", len(acct.Value.Data.GetBytes().Content))
+			fmt.Println("Uninitialized mint. Data length", len(acct.Value.Data.GetBinary()))
 			return nil
 		}
 

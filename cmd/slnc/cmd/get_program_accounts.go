@@ -48,7 +48,7 @@ var getProgramAccountsCmd = &cobra.Command{
 		for _, keyedAcct := range resp {
 			acct := keyedAcct.Account
 
-			obj, err := decode(acct.Owner, acct.Data.GetBytes().Content)
+			obj, err := decode(acct.Owner, acct.Data.GetBinary())
 			if err != nil {
 				return err
 			}
