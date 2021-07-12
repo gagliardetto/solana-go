@@ -2,6 +2,10 @@ module github.com/gagliardetto/solana-go
 
 go 1.14
 
+retract (
+    v1.0.0 // Published accidentally.
+)
+
 require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.4 // indirect
 	github.com/GeertJohan/go.rice v1.0.0
