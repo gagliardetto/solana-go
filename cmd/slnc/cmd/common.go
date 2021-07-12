@@ -48,9 +48,9 @@ func getClient() *rpc.Client {
 func sanitizeAPIURL(input string) string {
 	switch input {
 	case "devnet":
-		return "https://devnet.solana.com"
+		return "https://api.devnet.solana.com"
 	case "testnet":
-		return "https://testnet.solana.com"
+		return "https://api.testnet.solana.com"
 	case "mainnet":
 		return "https://api.mainnet-beta.solana.com"
 	}

@@ -28,7 +28,7 @@ import (
 var Version string
 
 //const defaultRPCURL = "http://localhost:8899"
-const defaultRPCURL = "http://api.mainnet-beta.solana.com/rpc"
+const defaultRPCURL = "http://api.mainnet-beta.solana.com"
 
 // RootCmd represents the eosc command
 var RootCmd = &cobra.Command{

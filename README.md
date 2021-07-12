@@ -92,7 +92,7 @@ import "github.com/gagliardetto/solana-go/rpc"
 import "github.com/gagliardetto/solana-go/token"
 
 	addr := solana.MustPublicKeyFromBase58("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
-	cli := rpc.NewClient("http://api.mainnet-beta.solana.com/rpc")
+	cli := rpc.NewClient("http://api.mainnet-beta.solana.com")
 
 	var m token.Mint
 	err := cli.GetAccountDataIn(context.Background(), addr, &m)
@@ -115,7 +115,7 @@ import "github.com/gagliardetto/solana-go/rpc"
 import "github.com/gagliardetto/solana-go/token"
 
 	addr := solana.MustPublicKeyFromBase58("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
-	cli := rpc.NewClient("http://api.mainnet-beta.solana.com/rpc")
+	cli := rpc.NewClient("http://api.mainnet-beta.solana.com")
 
 	acct, err := cli.GetAccountInfo(context.Background(), addr)
 	// handle `err`
