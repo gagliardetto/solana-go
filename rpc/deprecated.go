@@ -41,10 +41,16 @@ func (cl *Client) GetConfirmedBlock(
 func (cl *Client) GetConfirmedTransaction(
 	ctx context.Context,
 	signature solana.Signature,
-) (out TransactionWithMeta, err error) {
+) (out *TransactionWithMeta, err error) {
 	params := []interface{}{signature, "json"}
 
 	err = cl.rpcClient.CallFor(&out, "getConfirmedTransaction", params)
+	if err != nil {
+		return nil, err
+	}
+	if out == nil {
+		return nil, ErrNotFound
+	}
 	return
 }
 
