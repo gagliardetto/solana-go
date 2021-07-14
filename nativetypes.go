@@ -150,6 +150,11 @@ func (t *Base58) UnmarshalJSON(data []byte) (err error) {
 		return
 	}
 
+	if s == "" {
+		*t = []byte{}
+		return nil
+	}
+
 	*t, err = base58.Decode(s)
 	return
 }
@@ -181,23 +186,30 @@ func (t *Data) UnmarshalJSON(data []byte) (err error) {
 		return fmt.Errorf("invalid length for solana.Data, expected 2, found %d", len(in))
 	}
 
-	t.Encoding = EncodingType(in[1])
+	contentString := in[0]
+	encodingString := in[1]
+	t.Encoding = EncodingType(encodingString)
+
+	if contentString == "" {
+		t.Content = []byte{}
+		return nil
+	}
 
 	switch t.Encoding {
 	case EncodingBase58:
 		var err error
-		t.Content, err = base58.Decode(in[0])
+		t.Content, err = base58.Decode(contentString)
 		if err != nil {
 			return err
 		}
 	case EncodingBase64:
 		var err error
-		t.Content, err = base64.StdEncoding.DecodeString(in[0])
+		t.Content, err = base64.StdEncoding.DecodeString(contentString)
 		if err != nil {
 			return err
 		}
 	case EncodingBase64Zstd:
-		rawBytes, err := base64.StdEncoding.DecodeString(in[0])
+		rawBytes, err := base64.StdEncoding.DecodeString(contentString)
 		if err != nil {
 			return err
 		}
@@ -211,7 +223,7 @@ func (t *Data) UnmarshalJSON(data []byte) (err error) {
 			return err
 		}
 	default:
-		return fmt.Errorf("unsupported encoding %s", in[1])
+		return fmt.Errorf("unsupported encoding %s", encodingString)
 	}
 	return
 }
