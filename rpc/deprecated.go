@@ -56,7 +56,11 @@ func (cl *Client) GetConfirmedTransaction(
 
 // DEPRECATED: GetConfirmedSignaturesForAddress2 returns confirmed signatures for transactions involving an
 // address backwards in time from the provided signature or most recent confirmed block.
-func (cl *Client) GetConfirmedSignaturesForAddress2(ctx context.Context, address solana.PublicKey, opts *GetConfirmedSignaturesForAddress2Opts) (out GetConfirmedSignaturesForAddress2Result, err error) {
+func (cl *Client) GetConfirmedSignaturesForAddress2(
+	ctx context.Context,
+	address solana.PublicKey,
+	opts *GetConfirmedSignaturesForAddress2Opts,
+) (out GetConfirmedSignaturesForAddress2Result, err error) {
 
 	params := []interface{}{address.String(), opts}
 
