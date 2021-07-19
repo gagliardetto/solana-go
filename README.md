@@ -13,12 +13,7 @@ Go library to interface with Solana nodes's JSON-RPC interface, Solana's SPL tok
 
 **or**
 
-2. Install using Homebrew on macOS
-```bash
-$ brew install dfuse-io/tap/solana-go
-```
-
-3. Build from source with:
+2. Build from source with:
 
 ```bash
 $ go get -u -v github.com/gagliardetto/solana-go/cmd/slnc
