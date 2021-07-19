@@ -3,7 +3,7 @@
 Go library to interface with Solana nodes's JSON-RPC interface, Solana's SPL tokens and the
 [Serum DEX](https://dex.projectserum.com) instructions.  More contracts to come.
 
-![solana-gopher_small](https://user-images.githubusercontent.com/15271561/126140899-5f22d13d-99be-4165-8b3c-847fb4922ee4.png)
+![solana-gopher-2_small](https://user-images.githubusercontent.com/15271561/126141780-cbd92d2c-e160-4385-9606-9094729b54d4.png)
 
 ## Installation
 
