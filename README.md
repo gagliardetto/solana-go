@@ -1,7 +1,7 @@
 # Solana SDK library for Go
 
 [![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v0.3.1?tab=doc)
-[![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/gagliardetto/solana-go?include_prereleases&label=release-tag&style=flat-square)](https://github.com/gagliardetto/solana-go/releases)
+[![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/gagliardetto/solana-go?include_prereleases&label=release-tag)](https://github.com/gagliardetto/solana-go/releases)
 [![Build Status](https://github.com/gagliardetto/solana-go/workflows/tests/badge.svg?branch=main)](https://github.com/gagliardetto/solana-go/actions?query=branch%3Amain)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/gagliardetto/solana-go)](https://www.tickgit.com/browse?repo=github.com/gagliardetto/solana-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gagliardetto/solana-go)](https://goreportcard.com/report/github.com/gagliardetto/solana-go)
@@ -43,7 +43,7 @@ $ slnc get account EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
   "rentEpoch": 108
 }
 
-$ slnc spl get mint SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt
+$ slnc token get mint SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt
 Supply               9999647664800000
 Decimals             6
 No mint authority
