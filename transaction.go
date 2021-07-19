@@ -58,17 +58,17 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 		}
 	}
 
-	programIDs := map[PublicKey]bool{}
+	programIDs := make([]PublicKey, 0)
 	accounts := []*AccountMeta{}
 	for _, instruction := range instructions {
 		for _, key := range instruction.Accounts() {
 			accounts = append(accounts, key)
 		}
-		programIDs[instruction.ProgramID()] = true
+		programIDs = append(programIDs, instruction.ProgramID())
 	}
 
 	// Add programID to the account list
-	for programID := range programIDs {
+	for _, programID := range programIDs {
 		accounts = append(accounts, &AccountMeta{
 			PublicKey:  programID,
 			IsSigner:   false,
