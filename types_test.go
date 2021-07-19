@@ -29,7 +29,7 @@ func TestCompiledInstructions(t *testing.T) {
 	ci := &CompiledInstruction{
 		ProgramIDIndex: 5,
 		AccountCount:   3,
-		Accounts:       []uint8{2, 5, 8},
+		Accounts:       []uint16{2, 5, 8},
 		DataLength:     5,
 		Data:           Base58([]byte{1, 2, 3, 4, 5}),
 	}
@@ -37,5 +37,5 @@ func TestCompiledInstructions(t *testing.T) {
 	encoder := bin.NewEncoder(buf)
 	err := encoder.Encode(ci)
 	require.NoError(t, err)
-	assert.Equal(t, []byte{5, 3, 2, 5, 8, 5, 1, 2, 3, 4, 5}, buf.Bytes())
+	assert.Equal(t, []byte{0x5, 0x0, 0x3, 0x5, 0x2, 0x0, 0x5, 0x0, 0x8, 0x0, 0x1, 0x2, 0x3, 0x4, 0x5}, buf.Bytes())
 }

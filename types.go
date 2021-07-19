@@ -35,7 +35,7 @@ func (t *Transaction) TouchAccount(account PublicKey) bool   { return t.Message.
 func (t *Transaction) IsSigner(account PublicKey) bool       { return t.Message.IsSigner(account) }
 func (t *Transaction) IsWritable(account PublicKey) bool     { return t.Message.IsWritable(account) }
 func (t *Transaction) AccountMetaList() (out []*AccountMeta) { return t.Message.AccountMetaList() }
-func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint8) (PublicKey, error) {
+func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, error) {
 	return t.Message.ResolveProgramIDIndex(programIDIndex)
 }
 
@@ -69,7 +69,7 @@ func (m *Message) AccountMetaList() (out []*AccountMeta) {
 	return out
 }
 
-func (m *Message) ResolveProgramIDIndex(programIDIndex uint8) (PublicKey, error) {
+func (m *Message) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, error) {
 	if int(programIDIndex) < len(m.AccountKeys) {
 		return m.AccountKeys[programIDIndex], nil
 	}
@@ -133,13 +133,13 @@ type MessageHeader struct {
 
 type CompiledInstruction struct {
 	// Index into the message.accountKeys array indicating the program account that executes this instruction.
-	ProgramIDIndex uint8 `json:"programIdIndex"`
+	ProgramIDIndex uint16 `json:"programIdIndex"`
 
 	AccountCount bin.Varuint16 `json:"-" bin:"sizeof=Accounts"`
 	DataLength   bin.Varuint16 `json:"-" bin:"sizeof=Data"`
 
 	// List of ordered indices into the message.accountKeys array indicating which accounts to pass to the program.
-	Accounts []uint8 `json:"accounts"`
+	Accounts []uint16 `json:"accounts"`
 
 	// The program input data encoded in a base-58 string.
 	Data Base58 `json:"data"`

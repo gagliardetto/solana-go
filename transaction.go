@@ -124,7 +124,7 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 	message := Message{
 		RecentBlockhash: blockHash,
 	}
-	accountKeyIndex := map[string]uint8{}
+	accountKeyIndex := map[string]uint16{}
 	for idx, acc := range finalAccounts {
 
 		zlog.Debug("transaction account",
@@ -133,7 +133,7 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 		)
 
 		message.AccountKeys = append(message.AccountKeys, acc.PublicKey)
-		accountKeyIndex[acc.PublicKey.String()] = uint8(idx)
+		accountKeyIndex[acc.PublicKey.String()] = uint16(idx)
 		if acc.IsSigner {
 			message.Header.NumRequiredSignatures++
 			if !acc.IsWritable {
@@ -154,7 +154,7 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 
 	for trxIdx, instruction := range instructions {
 		accounts = instruction.Accounts()
-		accountIndex := make([]uint8, len(accounts))
+		accountIndex := make([]uint16, len(accounts))
 		for idx, acc := range accounts {
 			accountIndex[idx] = accountKeyIndex[acc.PublicKey.String()]
 		}

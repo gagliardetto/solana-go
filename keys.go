@@ -35,7 +35,7 @@ func PrivateKeyFromSolanaKeygenFile(file string) (PrivateKey, error) {
 		return nil, fmt.Errorf("read keygen file: %w", err)
 	}
 
-	var values []uint8
+	var values []byte
 	err = json.Unmarshal(content, &values)
 	if err != nil {
 		return nil, fmt.Errorf("decode keygen file: %w", err)

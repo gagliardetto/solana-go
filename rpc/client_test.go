@@ -180,7 +180,7 @@ func TestClient_GetConfirmedTransaction(t *testing.T) {
 				RecentBlockhash: solana.MustHashFromBase58("uoEAQCWCKjV9ecsBvngctJ7upNBZX7hpN4SfdR6TaUz"),
 				AccountKeys:     []solana.PublicKey{solana.MustPublicKeyFromBase58("GKu2xfGZopa8C9K11wduQWgP4W4H7EEcaNdsUb7mxhyr")},
 				Instructions: []solana.CompiledInstruction{
-					{Accounts: []uint8{1, 2, 3, 0}, Data: solana.Base58([]byte{0x74, 0x65, 0x73, 0x74}), ProgramIDIndex: 4},
+					{Accounts: []uint16{1, 2, 3, 0}, Data: solana.Base58([]byte{0x74, 0x65, 0x73, 0x74}), ProgramIDIndex: 4},
 				},
 			},
 			Signatures: []solana.Signature{signature},
@@ -391,7 +391,7 @@ func TestClient_GetBlock(t *testing.T) {
 							},
 							Instructions: []solana.CompiledInstruction{
 								{
-									Accounts:       []uint8{1, 2, 3, 0},
+									Accounts:       []uint16{1, 2, 3, 0},
 									Data:           solana.Base58([]byte{0x74, 0x65, 0x73, 0x74}),
 									ProgramIDIndex: 4,
 								},
@@ -440,7 +440,7 @@ func TestClient_GetBlock(t *testing.T) {
 							},
 							Instructions: []solana.CompiledInstruction{
 								{
-									Accounts:       []uint8{1, 2, 3, 0},
+									Accounts:       []uint16{1, 2, 3, 0},
 									Data:           solana.Base58([]byte{0x74, 0x65, 0x73, 0x74}),
 									ProgramIDIndex: 4,
 								},
