@@ -22,7 +22,11 @@ import (
 // GetBalance returns the balance of the account of provided publicKey.
 func (cl *Client) GetBalance(
 	ctx context.Context,
-	publicKey solana.PublicKey, // Pubkey of account to query
+
+	// Pubkey of account to query. Required.
+	publicKey solana.PublicKey,
+
+	// Commitment requirement. Optional.
 	commitment CommitmentType,
 ) (out *GetBalanceResult, err error) {
 	params := []interface{}{publicKey}

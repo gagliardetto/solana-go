@@ -7,8 +7,11 @@ import (
 )
 
 type GetVersionResult struct {
-	SolanaCore string    `json:"solana-core"` // software version of solana-core
-	FeatureSet bin.Int64 `json:"feature-set"` // unique identifier of the current software's feature set
+	// Software version of solana-core.
+	SolanaCore string `json:"solana-core"`
+
+	// Unique identifier of the current software's feature set.
+	FeatureSet bin.Int64 `json:"feature-set"`
 }
 
 // GetVersion returns the current solana versions running on the node.

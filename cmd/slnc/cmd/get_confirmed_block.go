@@ -36,7 +36,7 @@ var getConfirmedBlockCmd = &cobra.Command{
 			return fmt.Errorf("unable to parse provided slot number %q: %w", args[0], err)
 		}
 
-		resp, err := client.GetConfirmedBlock(ctx, uint64(slot), "")
+		resp, err := client.GetConfirmedBlock(ctx, uint64(slot))
 		if err != nil {
 			return err
 		}

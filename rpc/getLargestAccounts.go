@@ -7,16 +7,6 @@ import (
 	"github.com/gagliardetto/solana-go"
 )
 
-type GetLargestAccountsResult struct {
-	RPCContext
-	Value []LargestAccountsResult `json:"value"`
-}
-
-type LargestAccountsResult struct {
-	Address  solana.PublicKey `json:"address"`  // address of the account
-	Lamports bin.Uint64       `json:"lamports"` // number of lamports in the account
-}
-
 type LargestAccountsFilterType string
 
 const (
@@ -44,4 +34,17 @@ func (cl *Client) GetLargestAccounts(
 	}
 	err = cl.rpcClient.CallFor(&out, "getLargestAccounts", params)
 	return
+}
+
+type GetLargestAccountsResult struct {
+	RPCContext
+	Value []LargestAccountsResult `json:"value"`
+}
+
+type LargestAccountsResult struct {
+	// Address of the account.
+	Address solana.PublicKey `json:"address"`
+
+	// Number of lamports in the account.
+	Lamports bin.Uint64 `json:"lamports"`
 }

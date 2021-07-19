@@ -24,8 +24,16 @@ import (
 )
 
 type SimulateTransactionResponse struct {
-	Err  interface{} `json:"err,omitempty"`
-	Logs []string    `json:"logs,omitempty"`
+	// Error if transaction failed, null if transaction succeeded.
+	Err interface{} `json:"err,omitempty"`
+
+	// Array of log messages the transaction instructions output during execution,
+	// null if simulation failed before the transaction was able to execute
+	// (for example due to an invalid blockhash or signature verification failure)
+	Logs []string `json:"logs,omitempty"`
+
+	// Array of accounts with the same length as the accounts.addresses array in the request.
+	Accounts []*Account `json:"accounts"`
 }
 
 // SimulateTransaction simulates sending a transaction.
@@ -36,19 +44,45 @@ func (cl *Client) SimulateTransaction(
 	return cl.SimulateTransactionWithOpts(
 		ctx,
 		transaction,
-		false,
-		"",
-		false,
+		nil,
 	)
+}
+
+type SimulateTransactionOpts struct {
+	// If true the transaction signatures will be verified
+	// (default: false, conflicts with ReplaceRecentBlockhash)
+	SigVerify bool
+
+	// Commitment level to simulate the transaction at.
+	// (default: "finalized").
+	Commitment CommitmentType
+
+	// If true the transaction recent blockhash will be replaced with the most recent blockhash.
+	// (default: false, conflicts with SigVerify)
+	ReplaceRecentBlockhash bool
+
+	Accounts *SimulateTransactionAccountsOpts
+}
+
+type SimulateTransactionAccountsOpts struct {
+	// (optional) Encoding for returned Account data,
+	// either "base64" (default), "base64+zstd" or "jsonParsed".
+	// - "jsonParsed" encoding attempts to use program-specific state parsers
+	//   to return more human-readable and explicit account state data.
+	//   If "jsonParsed" is requested but a parser cannot be found,
+	//   the field falls back to binary encoding, detectable when
+	//   the data field is type <string>.
+	Encoding solana.EncodingType
+
+	// An array of accounts to return.
+	Addresses []solana.PublicKey
 }
 
 // SimulateTransaction simulates sending a transaction.
 func (cl *Client) SimulateTransactionWithOpts(
 	ctx context.Context,
 	transaction *solana.Transaction,
-	sigVerify bool, // if true the transaction signatures will be verified (default: false, conflicts with replaceRecentBlockhash)
-	commitment CommitmentType, // Commitment level to simulate the transaction at (default: "finalized").
-	replaceRecentBlockhash bool, // if true the transaction recent blockhash will be replaced with the most recent blockhash. (default: false, conflicts with sigVerify)
+	opts *SimulateTransactionOpts,
 ) (out *SimulateTransactionResponse, err error) {
 	buf := new(bytes.Buffer)
 	if err := bin.NewEncoder(buf).Encode(transaction); err != nil {
@@ -59,14 +93,22 @@ func (cl *Client) SimulateTransactionWithOpts(
 	obj := M{
 		"encoding": "base64",
 	}
-	if sigVerify {
-		obj["sigVerify"] = sigVerify
-	}
-	if commitment != "" {
-		obj["commitment"] = commitment
-	}
-	if replaceRecentBlockhash {
-		obj["replaceRecentBlockhash"] = replaceRecentBlockhash
+	if opts != nil {
+		if opts.SigVerify {
+			obj["sigVerify"] = opts.SigVerify
+		}
+		if opts.Commitment != "" {
+			obj["commitment"] = opts.Commitment
+		}
+		if opts.ReplaceRecentBlockhash {
+			obj["replaceRecentBlockhash"] = opts.ReplaceRecentBlockhash
+		}
+		if opts.Accounts != nil {
+			obj["accounts"] = M{
+				"encoding":  opts.Accounts.Encoding,
+				"addresses": opts.Accounts.Addresses,
+			}
+		}
 	}
 
 	b64Data := base64.StdEncoding.EncodeToString(trxData)

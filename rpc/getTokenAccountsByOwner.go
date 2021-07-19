@@ -23,35 +23,37 @@ func (cl *Client) GetTokenAccountsByOwner(
 	}
 
 	{
-		obj := M{}
+		confObj := M{}
 		if !conf.Mint.IsZero() {
-			obj["mint"] = conf.Mint
+			confObj["mint"] = conf.Mint
 		}
 		if !conf.ProgramId.IsZero() {
-			obj["programId"] = conf.ProgramId
+			confObj["programId"] = conf.ProgramId
 		}
-		if len(obj) > 0 {
-			params = append(params, obj)
+		if len(confObj) > 0 {
+			params = append(params, confObj)
 		}
 	}
 	{
-		obj := M{}
+		optsObj := M{}
 		if opts != nil {
 			if opts.Commitment != "" {
-				obj["commitment"] = opts.Commitment
+				optsObj["commitment"] = opts.Commitment
 			}
 			if opts.Encoding != "" {
-				// TODO: remove option?
-				obj["encoding"] = opts.Encoding
+				optsObj["encoding"] = opts.Encoding
 			}
 			if opts.DataSlice != nil {
-				obj["dataSlice"] = M{
+				optsObj["dataSlice"] = M{
 					"offset": opts.DataSlice.Offset,
 					"length": opts.DataSlice.Length,
 				}
+				if opts.Encoding == solana.EncodingJSONParsed {
+					return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
+				}
 			}
-			if len(obj) > 0 {
-				params = append(params, obj)
+			if len(optsObj) > 0 {
+				params = append(params, optsObj)
 			}
 		}
 	}

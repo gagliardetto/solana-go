@@ -4,10 +4,8 @@ import (
 	"context"
 )
 
-// Estimated production time, as Unix timestamp (seconds since the Unix epoch)
-type GetBlockTimeResult int64
-
 // GetBlockTime returns the estimated production time of a block.
+//
 // Each validator reports their UTC time to the ledger on a regular
 // interval by intermittently adding a timestamp to a Vote for a
 // particular block. A requested block's time is calculated from
@@ -20,7 +18,7 @@ type GetBlockTimeResult int64
 func (cl *Client) GetBlockTime(
 	ctx context.Context,
 	block uint64, // block, identified by Slot
-) (out *GetBlockTimeResult, err error) {
+) (out *UnixTimeSeconds, err error) {
 	params := []interface{}{block}
 	err = cl.rpcClient.CallFor(&out, "getBlockTime", params)
 	return

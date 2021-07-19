@@ -6,19 +6,10 @@ import (
 	bin "github.com/dfuse-io/binary"
 )
 
-type GetEpochInfoResult struct {
-	AbsoluteSlot     bin.Uint64 `json:"absoluteSlot"` // the current slot
-	BlockHeight      bin.Uint64 `json:"blockHeight"`  // the current block height
-	Epoch            bin.Uint64 `json:"epoch"`        // the current epoch
-	SlotIndex        bin.Uint64 `json:"slotIndex"`    // the current slot relative to the start of the current epoch
-	SlotsInEpoch     bin.Uint64 `json:"slotsInEpoch"` // the number of slots in this epoch
-	TransactionCount bin.Uint64 `json:"transactionCount"`
-}
-
 // GetEpochInfo returns information about the current epoch.
 func (cl *Client) GetEpochInfo(
 	ctx context.Context,
-	commitment CommitmentType,
+	commitment CommitmentType, // optional
 ) (out *GetEpochInfoResult, err error) {
 	params := []interface{}{}
 	if commitment != "" {
@@ -26,4 +17,23 @@ func (cl *Client) GetEpochInfo(
 	}
 	err = cl.rpcClient.CallFor(&out, "getEpochInfo", params)
 	return
+}
+
+type GetEpochInfoResult struct {
+	// The current slot.
+	AbsoluteSlot bin.Uint64 `json:"absoluteSlot"`
+
+	// The current block height.
+	BlockHeight bin.Uint64 `json:"blockHeight"`
+
+	// The current epoch.
+	Epoch bin.Uint64 `json:"epoch"`
+
+	// The current slot relative to the start of the current epoch.
+	SlotIndex bin.Uint64 `json:"slotIndex"`
+
+	// The number of slots in this epoch.
+	SlotsInEpoch bin.Uint64 `json:"slotsInEpoch"`
+
+	TransactionCount bin.Uint64 `json:"transactionCount"`
 }

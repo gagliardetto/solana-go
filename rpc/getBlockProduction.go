@@ -4,6 +4,7 @@ import (
 	"context"
 
 	bin "github.com/dfuse-io/binary"
+	"github.com/gagliardetto/solana-go"
 )
 
 type GetBlockProductionResult struct {
@@ -11,21 +12,32 @@ type GetBlockProductionResult struct {
 	Value BlockProductionResult `json:"value"`
 }
 
-type IdentityToSlotsBlocks map[string][2]int64
+type GetBlockProductionOpts struct {
+	//
+	// This parameter is optional.
+	Commitment CommitmentType
 
-type BlockProductionResult struct {
-	ByIdentity IdentityToSlotsBlocks `json:"byIdentity"` //  a dictionary of validator identities, as base-58 encoded strings. Value is a two element array containing the number of leader slots and the number of blocks produced.
-	Range      SlotRangeResponse     `json:"range"`
+	// Slot range to return block production for.
+	// If parameter not provided, defaults to current epoch.
+	//
+	// This parameter is optional.
+	Range *SlotRangeRequest
 }
 
-type SlotRangeResponse struct {
-	FirstSlot bin.Uint64 `json:"firstSlot"` // first slot of the block production information (inclusive)
-	LastSlot  bin.Uint64 `json:"lastSlot"`  // last slot of block production information (inclusive)
-}
 type SlotRangeRequest struct {
-	FirstSlot uint64  `json:"firstSlot"`          // first slot to return block production information for (inclusive)
-	LastSlot  *uint64 `json:"lastSlot,omitempty"` // (optional) last slot to return block production information for (inclusive). If parameter not provided, defaults to the highest slot
-	Identity  *string `json:"identity,omitempty"` // (optional) Only return results for this validator identity (base-58 encoded)
+	// First slot to return block production information for (inclusive)
+	FirstSlot uint64 `json:"firstSlot"`
+
+	// Last slot to return block production information for (inclusive).
+	// If parameter not provided, defaults to the highest slot
+	//
+	// This parameter is optional.
+	LastSlot *uint64 `json:"lastSlot,omitempty"`
+
+	// Only return results for this validator identity.
+	//
+	// This parameter is optional.
+	Identity *solana.PublicKey `json:"identity,omitempty"`
 }
 
 // GetBlockProduction returns recent block production information from the current or previous epoch.
@@ -38,19 +50,15 @@ func (cl *Client) GetBlockProduction(
 	)
 }
 
-type GetBlockProductionOpts struct {
-	Commitment CommitmentType
-	Range      *SlotRangeRequest // Slot range to return block production for. If parameter not provided, defaults to current epoch.
-}
-
 // GetBlockProduction returns recent block production information from the current or previous epoch.
 func (cl *Client) GetBlockProductionWithOpts(
 	ctx context.Context,
 	opts *GetBlockProductionOpts,
 ) (out *GetBlockProductionResult, err error) {
-	obj := M{}
+	params := []interface{}{}
 
 	if opts != nil {
+		obj := M{}
 		if opts.Commitment != "" {
 			obj["commitment"] = opts.Commitment
 		}
@@ -65,12 +73,30 @@ func (cl *Client) GetBlockProductionWithOpts(
 			}
 			obj["range"] = rngObj
 		}
-	}
-	params := []interface{}{}
-	if len(obj) != 0 {
-		params = append(params, obj)
+		if len(obj) != 0 {
+			params = append(params, obj)
+		}
 	}
 	err = cl.rpcClient.CallFor(&out, "getBlockProduction", params)
 
 	return
+}
+
+type BlockProductionResult struct {
+	// A dictionary of validator identities, as base-58 encoded strings.
+	// Value is a two element array containing the number of leader slots
+	// and the number of blocks produced.
+	ByIdentity IdentityToSlotsBlocks `json:"byIdentity"`
+
+	Range SlotRangeResponse `json:"range"`
+}
+
+type IdentityToSlotsBlocks map[string][2]int64
+
+type SlotRangeResponse struct {
+	// First slot of the block production information (inclusive)
+	FirstSlot bin.Uint64 `json:"firstSlot"`
+
+	// Last slot of block production information (inclusive)
+	LastSlot bin.Uint64 `json:"lastSlot"`
 }

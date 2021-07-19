@@ -7,7 +7,7 @@ import (
 // GetTransactionCount returns the current Transaction count from the ledger.
 func (cl *Client) GetTransactionCount(
 	ctx context.Context,
-	commitment CommitmentType,
+	commitment CommitmentType, // optional
 ) (out uint64, err error) {
 	params := []interface{}{}
 	if commitment != "" {

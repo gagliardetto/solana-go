@@ -20,11 +20,12 @@ import (
 )
 
 // RequestAirdrop requests an airdrop of lamports to a publicKey.
+// Returns transaction signature of airdrop.
 func (cl *Client) RequestAirdrop(
 	ctx context.Context,
 	account solana.PublicKey,
 	lamport uint64,
-	commitment CommitmentType,
+	commitment CommitmentType, // optional; used for retrieving blockhash and verifying airdrop success.
 ) (signature solana.Signature, err error) {
 	params := []interface{}{
 		account,

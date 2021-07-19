@@ -6,15 +6,22 @@ import (
 	bin "github.com/dfuse-io/binary"
 )
 
-type GetInflationRateResult struct {
-	Total      bin.JSONFloat64 `json:"total"`      // total inflation
-	Validator  bin.JSONFloat64 `json:"validator"`  // inflation allocated to validators
-	Foundation bin.JSONFloat64 `json:"foundation"` // inflation allocated to the foundation
-	Epoch      bin.JSONFloat64 `json:"epoch"`      // epoch for which these values are valid
-}
-
 // GetInflationRate returns the specific inflation values for the current epoch.
 func (cl *Client) GetInflationRate(ctx context.Context) (out *GetInflationRateResult, err error) {
 	err = cl.rpcClient.CallFor(&out, "getInflationRate")
 	return
+}
+
+type GetInflationRateResult struct {
+	// Total inflation.
+	Total bin.JSONFloat64 `json:"total"`
+
+	// Inflation allocated to validators.
+	Validator bin.JSONFloat64 `json:"validator"`
+
+	// Inflation allocated to the foundation.
+	Foundation bin.JSONFloat64 `json:"foundation"`
+
+	// Epoch for which these values are valid.
+	Epoch bin.JSONFloat64 `json:"epoch"`
 }

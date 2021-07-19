@@ -4,13 +4,8 @@ import (
 	"context"
 
 	bin "github.com/dfuse-io/binary"
+	"github.com/gagliardetto/solana-go"
 )
-
-// the result field will be a dictionary of validator identities,
-// as base-58 encoded strings, and their corresponding leader
-// slot indices as values (indices are relative to the first
-// slot in the requested epoch)
-type GetLeaderScheduleResult map[string][]bin.Uint64
 
 // GetLeaderSchedule returns the leader schedule for current epoch.
 func (cl *Client) GetLeaderSchedule(
@@ -23,10 +18,15 @@ func (cl *Client) GetLeaderSchedule(
 }
 
 type GetLeaderScheduleOpts struct {
-	Epoch      *uint64 // Fetch the leader schedule for the epoch that corresponds to the provided slot. If unspecified, the leader schedule for the current epoch is fetched
 	Commitment CommitmentType
+
+	// Fetch the leader schedule for the epoch that corresponds
+	// to the provided slot.
+	// If unspecified, the leader schedule for the current epoch is fetched
+	Epoch *uint64
+
 	// TODO: is identity a pubkey?
-	Identity string // Only return results for this validator identity (base-58 encoded)
+	Identity *solana.PublicKey // Only return results for this validator identity
 }
 
 // GetLeaderScheduleWithOpts returns the leader schedule for an epoch.
@@ -43,7 +43,7 @@ func (cl *Client) GetLeaderScheduleWithOpts(
 		if opts.Commitment != "" {
 			obj["commitment"] = opts.Commitment
 		}
-		if opts.Identity != "" {
+		if opts.Identity != nil {
 			obj["identity"] = opts.Identity
 		}
 		if len(obj) > 0 {
@@ -60,3 +60,9 @@ func (cl *Client) GetLeaderScheduleWithOpts(
 	}
 	return
 }
+
+// The result field will be a dictionary of validator identities,
+// as base-58 encoded strings, and their corresponding leader
+// slot indices as values (indices are relative to the first
+// slot in the requested epoch)
+type GetLeaderScheduleResult map[string][]bin.Uint64

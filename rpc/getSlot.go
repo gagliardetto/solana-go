@@ -15,12 +15,13 @@ package rpc
 
 import (
 	"context"
-
-	bin "github.com/dfuse-io/binary"
 )
 
 // GetSlot returns the current slot the node is processing.
-func (cl *Client) GetSlot(ctx context.Context, commitment CommitmentType) (out bin.Uint64, err error) {
+func (cl *Client) GetSlot(
+	ctx context.Context,
+	commitment CommitmentType, // optional
+) (out uint64, err error) {
 	params := []interface{}{}
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})

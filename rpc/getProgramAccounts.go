@@ -48,12 +48,8 @@ func (cl *Client) GetProgramAccountsWithOpts(
 			obj["filters"] = opts.Filters
 		}
 		if opts.Encoding != "" {
-			// TODO: remove option?
 			obj["encoding"] = opts.Encoding
 		}
-		// if opts.WithContext != nil {
-		// 	obj["withContext"] = opts.WithContext
-		// }
 		if opts.DataSlice != nil {
 			obj["dataSlice"] = M{
 				"offset": opts.DataSlice.Offset,

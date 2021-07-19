@@ -9,7 +9,7 @@ import (
 // GetSlotLeader returns the current slot leader.
 func (cl *Client) GetSlotLeader(
 	ctx context.Context,
-	commitment CommitmentType,
+	commitment CommitmentType, // optional
 ) (out solana.PublicKey, err error) {
 	params := []interface{}{}
 	if commitment != "" {

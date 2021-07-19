@@ -15,14 +15,11 @@ type GetMultipleAccountsResult struct {
 // GetMultipleAccounts returns the account information for a list of Pubkeys.
 func (cl *Client) GetMultipleAccounts(
 	ctx context.Context,
-	accounts ...solana.PublicKey,
+	accounts ...solana.PublicKey, // An array of Pubkeys to query
 ) (out *GetMultipleAccountsResult, err error) {
 	return cl.GetMultipleAccountsWithOpts(
 		ctx,
 		accounts,
-		"",
-		"",
-		nil,
 		nil,
 	)
 }
@@ -31,33 +28,32 @@ func (cl *Client) GetMultipleAccounts(
 func (cl *Client) GetMultipleAccountsWithOpts(
 	ctx context.Context,
 	accounts []solana.PublicKey,
-	encoding solana.EncodingType,
-	commitment CommitmentType,
-	offset *uint,
-	length *uint,
+	opts *GetAccountInfoOpts,
 ) (out *GetMultipleAccountsResult, err error) {
-	obj := M{}
-
-	if encoding != "" {
-		obj["encoding"] = encoding
-	}
-	if commitment != "" {
-		obj["commitment"] = commitment
-	}
-	if offset != nil && length != nil {
-		obj["dataSlice"] = M{
-			"offset": offset,
-			"length": length,
-		}
-		if encoding == solana.EncodingJSONParsed {
-			return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
-		}
-	}
-
 	params := []interface{}{accounts}
-	if len(obj) > 0 {
-		params = append(params, obj)
+
+	if opts != nil {
+		obj := M{}
+		if opts.Encoding != "" {
+			obj["encoding"] = opts.Encoding
+		}
+		if opts.Commitment != "" {
+			obj["commitment"] = opts.Commitment
+		}
+		if opts.DataSlice != nil {
+			obj["dataSlice"] = M{
+				"offset": opts.DataSlice.Offset,
+				"length": opts.DataSlice.Length,
+			}
+			if opts.Encoding == solana.EncodingJSONParsed {
+				return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
+			}
+		}
+		if len(obj) > 0 {
+			params = append(params, obj)
+		}
 	}
+
 	err = cl.rpcClient.CallFor(&out, "getMultipleAccounts", params)
 	if err != nil {
 		return nil, err

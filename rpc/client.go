@@ -22,6 +22,7 @@ import (
 )
 
 var ErrNotFound = errors.New("not found")
+var ErrNotConfirmed = errors.New("not confirmed")
 
 type Client struct {
 	rpcURL    string

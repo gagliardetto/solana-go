@@ -7,15 +7,14 @@ import (
 	"github.com/gagliardetto/solana-go"
 )
 
-type GetTokenAccountsResult struct {
-	RPCContext
-	Value []*Account `json:"value"`
-}
-
 type GetTokenAccountsConfig struct {
-	Mint solana.PublicKey `json:"mint"` // Pubkey of the specific token Mint to limit accounts to
+	// Pubkey of the specific token Mint to limit accounts to.
+	Mint solana.PublicKey `json:"mint"`
+
 	// OR:
-	ProgramId solana.PublicKey `json:"programId"` // Pubkey of the Token program ID that owns the accounts
+
+	// Pubkey of the Token program ID that owns the accounts.
+	ProgramId solana.PublicKey `json:"programId"`
 }
 
 type GetTokenAccountsOpts struct {
@@ -42,39 +41,43 @@ func (cl *Client) GetTokenAccountsByDelegate(
 	}
 
 	{
-		obj := M{}
+		confObj := M{}
 		if !conf.Mint.IsZero() {
-			obj["mint"] = conf.Mint
+			confObj["mint"] = conf.Mint
 		}
 		if !conf.ProgramId.IsZero() {
-			obj["programId"] = conf.ProgramId
+			confObj["programId"] = conf.ProgramId
 		}
-		if len(obj) > 0 {
-			params = append(params, obj)
+		if len(confObj) > 0 {
+			params = append(params, confObj)
 		}
 	}
 	{
-		obj := M{}
+		optsObj := M{}
 		if opts != nil {
 			if opts.Commitment != "" {
-				obj["commitment"] = opts.Commitment
+				optsObj["commitment"] = opts.Commitment
 			}
 			if opts.Encoding != "" {
-				// TODO: remove option?
-				obj["encoding"] = opts.Encoding
+				optsObj["encoding"] = opts.Encoding
 			}
 			if opts.DataSlice != nil {
-				obj["dataSlice"] = M{
+				optsObj["dataSlice"] = M{
 					"offset": opts.DataSlice.Offset,
 					"length": opts.DataSlice.Length,
 				}
 			}
-			if len(obj) > 0 {
-				params = append(params, obj)
+			if len(optsObj) > 0 {
+				params = append(params, optsObj)
 			}
 		}
 	}
 
 	err = cl.rpcClient.CallFor(&out, "getTokenAccountsByDelegate", params)
 	return
+}
+
+type GetTokenAccountsResult struct {
+	RPCContext
+	Value []*Account `json:"value"`
 }

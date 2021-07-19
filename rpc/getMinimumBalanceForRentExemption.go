@@ -20,8 +20,8 @@ import (
 // GetMinimumBalanceForRentExemption returns minimum balance required to make account rent exempt.
 func (cl *Client) GetMinimumBalanceForRentExemption(
 	ctx context.Context,
-	dataSize int,
-	commitment CommitmentType,
+	dataSize uint64,
+	commitment CommitmentType, // optional
 ) (lamport int, err error) {
 	params := []interface{}{dataSize}
 	if commitment != "" {

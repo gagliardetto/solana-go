@@ -65,7 +65,7 @@ func (cl *Client) SendTransactionWithOpts(
 	ctx context.Context,
 	transaction *solana.Transaction,
 	skipPreflight bool, // if true, skip the preflight transaction checks (default: false)
-	preflightCommitment CommitmentType, // Commitment level to use for preflight (default: "finalized").
+	preflightCommitment CommitmentType, // optional; Commitment level to use for preflight (default: "finalized").
 ) (signature solana.Signature, err error) {
 
 	buf := new(bytes.Buffer)

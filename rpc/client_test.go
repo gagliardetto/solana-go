@@ -87,8 +87,10 @@ func TestClient_GetAccountInfoWithOpts(t *testing.T) {
 	opts := &GetAccountInfoOpts{
 		Encoding:   solana.EncodingJSON,
 		Commitment: CommitmentMax,
-		Offset:     &offset,
-		Length:     &length,
+		DataSlice: &DataSlice{
+			Offset: &offset,
+			Length: &length,
+		},
 	}
 	_, err := client.GetAccountInfoWithOpts(
 		context.Background(),
@@ -567,7 +569,9 @@ func TestClient_GetBlockProductionWithOpts(t *testing.T) {
 
 	firstSlot := uint64(2)
 	lastSlot := uint64(3)
-	identity := "dummy"
+	pubkeyString := "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
+	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
+	identity := pubKey
 	_, err := client.GetBlockProductionWithOpts(
 		context.Background(),
 		&GetBlockProductionOpts{
@@ -592,7 +596,7 @@ func TestClient_GetBlockProductionWithOpts(t *testing.T) {
 					"range": map[string]interface{}{
 						"firstSlot": float64(firstSlot),
 						"lastSlot":  float64(lastSlot),
-						"identity":  string(identity),
+						"identity":  string(identity.String()),
 					},
 				},
 			},
@@ -1313,13 +1317,16 @@ func TestClient_GetLeaderSchedule(t *testing.T) {
 	client := NewClient(server.URL)
 
 	epoch := uint64(333)
-	identity := "TODO" // TODO: what is an identity ???
+	pubkeyString := "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
+	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
+	identity := pubKey
+
 	out, err := client.GetLeaderScheduleWithOpts(
 		context.Background(),
 		&GetLeaderScheduleOpts{
 			Epoch:      &epoch,
 			Commitment: CommitmentMax,
-			Identity:   identity,
+			Identity:   &identity,
 		},
 	)
 	require.NoError(t, err)
@@ -1333,7 +1340,7 @@ func TestClient_GetLeaderSchedule(t *testing.T) {
 				float64(epoch),
 				map[string]interface{}{
 					"commitment": string(CommitmentMax),
-					"identity":   string(identity),
+					"identity":   string(identity.String()),
 				},
 			},
 		},
@@ -1407,7 +1414,7 @@ func TestClient_GetMinimumBalanceForRentExemption(t *testing.T) {
 	defer closer()
 	client := NewClient(server.URL)
 
-	dataSize := 1000
+	dataSize := uint64(1000)
 	out, err := client.GetMinimumBalanceForRentExemption(
 		context.Background(),
 		dataSize,
@@ -1969,9 +1976,11 @@ func TestClient_GetTransaction(t *testing.T) {
 		server.RequestBody(t),
 	)
 
+	blockTimeSeconds := int64(1624821990)
+	blockTime := UnixTimeSeconds(blockTimeSeconds)
 	expected := &GetTransactionResult{
 		Slot:      83311386,
-		BlockTime: 1624821990,
+		BlockTime: &blockTime,
 		Transaction: &ParsedTransaction{
 			Signatures: []solana.Signature{
 				solana.MustSignatureFromBase58("QPzWhnwHnCwk3nj1zVCcjz1VP7EcAKouPg9Joietje3GnQTVQ5XyWxyPC3zHby8K5ahSn9SbQupauDbVRvv5DuL"),

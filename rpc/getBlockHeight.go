@@ -7,7 +7,7 @@ import (
 // GetBlockHeight returns the current block height of the node.
 func (cl *Client) GetBlockHeight(
 	ctx context.Context,
-	commitment CommitmentType,
+	commitment CommitmentType, // optional
 ) (out uint64, err error) {
 	params := []interface{}{}
 	if commitment != "" {
