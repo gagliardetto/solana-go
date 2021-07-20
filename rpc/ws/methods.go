@@ -350,8 +350,8 @@ func (sw *RootSubscription) Unsubscribe() {
 	sw.sub.Unsubscribe()
 }
 
-// VoteSubscribe (UNSTABLE) subscribes to receive notification anytime
-// a new vote is observed in gossip.
+// VoteSubscribe (UNSTABLE, disabled by default) subscribes
+// to receive notification anytime a new vote is observed in gossip.
 // These votes are pre-consensus therefore there is
 // no guarantee these votes will enter the ledger.
 //
@@ -392,5 +392,47 @@ func (sw *VoteSubscription) Recv() (*VoteResult, error) {
 }
 
 func (sw *VoteSubscription) Unsubscribe() {
+	sw.sub.Unsubscribe()
+}
+
+// SlotsUpdatesSubscribe (UNSTABLE) subscribes to receive a notification
+// from the validator on a variety of updates on every slot.
+//
+// This subscription is unstable; the format of this subscription
+// may change in the future and it may not always be supported.
+func (cl *Client) SlotsUpdatesSubscribe() (*SlotsUpdatesSubscription, error) {
+	genSub, err := cl.subscribe(
+		nil,
+		nil,
+		"slotsUpdatesSubscribe",
+		"slotsUpdatesUnsubscribe",
+		func(msg []byte) (interface{}, error) {
+			var res SlotsUpdatesResult
+			err := decodeResponseFromMessage(msg, &res)
+			return &res, err
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &SlotsUpdatesSubscription{
+		sub: genSub,
+	}, nil
+}
+
+type SlotsUpdatesSubscription struct {
+	sub *Subscription
+}
+
+func (sw *SlotsUpdatesSubscription) Recv() (*SlotsUpdatesResult, error) {
+	select {
+	case d := <-sw.sub.stream:
+		return d.(*SlotsUpdatesResult), nil
+	case err := <-sw.sub.err:
+		return nil, err
+	}
+}
+
+func (sw *SlotsUpdatesSubscription) Unsubscribe() {
 	sw.sub.Unsubscribe()
 }

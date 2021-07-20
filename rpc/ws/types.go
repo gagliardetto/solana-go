@@ -100,8 +100,33 @@ type SlotResult struct {
 type RootResult bin.Uint64
 
 type VoteResult struct {
-	Hash  solana.Hash  `json:"hash"`
+	// The vote hash.
+	Hash solana.Hash `json:"hash"`
+	// The slots covered by the vote.
 	Slots []bin.Uint64 `json:"slots"`
-	// TODO:
-	// Timestamp interface{} `json:"timestamp"`
+	// The timestamp of the vote.
+	Timestamp *rpc.UnixTimeSeconds `json:"timestamp,omitempty"`
 }
+
+type SlotsUpdatesResult struct {
+	// The parent slot.
+	Parent uint64 `json:"parent"`
+	// The newly updated slot.
+	Slot uint64 `json:"slot"`
+	// The Unix timestamp of the update.
+	Timestamp *rpc.UnixTimeSeconds `json:"timestamp"`
+	// The update type.
+	Type SlotsUpdatesType `json:"type"`
+}
+
+type SlotsUpdatesType string
+
+const (
+	SlotsUpdatesFirstShredReceived     SlotsUpdatesType = "firstShredReceived"
+	SlotsUpdatesCompleted              SlotsUpdatesType = "completed"
+	SlotsUpdatesCreatedBank            SlotsUpdatesType = "createdBank"
+	SlotsUpdatesFrozen                 SlotsUpdatesType = "frozen"
+	SlotsUpdatesDead                   SlotsUpdatesType = "dead"
+	SlotsUpdatesOptimisticConfirmation SlotsUpdatesType = "optimisticConfirmation"
+	SlotsUpdatesRoot                   SlotsUpdatesType = "root"
+)
