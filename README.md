@@ -19,11 +19,11 @@ Go library to interface with Solana nodes's JSON-RPC interface, Solana's SPL tok
 $ go get github.com/gagliardetto/solana-go
 ```
 
-# Current development status
+## Current development status
 
 The SDK is actively developed and latest is an `alpha` release.
 
-# Features
+## Features
 
 - [x] Full JSON RPC API
 - [x] Full WebSocket JSON streaming API
@@ -32,18 +32,18 @@ The SDK is actively developed and latest is an `alpha` release.
 - [ ] Clients for Solana Program Library
 - [ ] Client for Serum
 
-# RPC usage
+## RPC usage
 
 TODO
 
-# Contributing
+## Contributing
 
 Any contributions are welcome, use your standard GitHub-fu to pitch in and improve.
 
-# License
+## License
 
 [Apache 2.0](LICENSE)
 
-# Credits
+## Credits
 
 - Gopher logo was originally created by Takuya Ueda (https://twitter.com/tenntenn). Licensed under the Creative Commons 3.0 Attributions license.
