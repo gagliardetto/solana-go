@@ -9,9 +9,9 @@
 Go library to interface with Solana nodes's JSON-RPC interface, Solana's SPL tokens and the
 [Serum DEX](https://dex.projectserum.com) instructions.  More contracts to come.
 
-<p align="center">
+<div align="center">
     <img src="https://user-images.githubusercontent.com/15271561/126141780-cbd92d2c-e160-4385-9606-9094729b54d4.png" margin="auto" height="175"/>
-</p>
+</div>
 
 ## Installation
 
