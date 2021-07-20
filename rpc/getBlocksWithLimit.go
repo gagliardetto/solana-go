@@ -23,6 +23,6 @@ func (cl *Client) GetBlocksWithLimit(
 			M{"commitment": commitment},
 		)
 	}
-	err = cl.rpcClient.CallFor(&out, "getBlocksWithLimit", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getBlocksWithLimit", params)
 	return
 }

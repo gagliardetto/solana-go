@@ -39,7 +39,7 @@ func (cl *Client) GetInflationReward(
 		}
 	}
 	// TODO: check
-	err = cl.rpcClient.CallFor(&out, "getInflationReward", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getInflationReward", params)
 	return
 }
 

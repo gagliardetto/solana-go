@@ -18,7 +18,7 @@ func (cl *Client) GetTokenLargestAccounts(
 			M{"commitment": commitment},
 		)
 	}
-	err = cl.rpcClient.CallFor(&out, "getTokenLargestAccounts", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getTokenLargestAccounts", params)
 	return
 }
 

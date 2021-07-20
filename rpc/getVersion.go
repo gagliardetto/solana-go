@@ -8,7 +8,7 @@ import (
 
 // GetVersion returns the current solana versions running on the node.
 func (cl *Client) GetVersion(ctx context.Context) (out *GetVersionResult, err error) {
-	err = cl.rpcClient.CallFor(&out, "getVersion")
+	err = cl.rpcClient.CallForInto(ctx, &out, "getVersion", nil)
 	return
 }
 

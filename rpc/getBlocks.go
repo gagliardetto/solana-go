@@ -29,7 +29,7 @@ func (cl *Client) GetBlocks(
 			M{"commitment": commitment},
 		)
 	}
-	err = cl.rpcClient.CallFor(&out, "getBlocks", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getBlocks", params)
 
 	return
 }

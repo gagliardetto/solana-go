@@ -15,6 +15,6 @@ func (cl *Client) GetSlotLeader(
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}
-	err = cl.rpcClient.CallFor(&out, "getSlotLeader", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getSlotLeader", params)
 	return
 }

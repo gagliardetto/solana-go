@@ -90,7 +90,7 @@ func (cl *Client) GetBlockWithOpts(
 
 	params := []interface{}{slot, obj}
 
-	err = cl.rpcClient.CallFor(&out, "getBlock", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getBlock", params)
 
 	if err != nil {
 		return nil, err

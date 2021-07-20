@@ -9,7 +9,7 @@ import (
 
 // GetClusterNodes returns information about all the nodes participating in the cluster.
 func (cl *Client) GetClusterNodes(ctx context.Context) (out []*GetClusterNodesResult, err error) {
-	err = cl.rpcClient.CallFor(&out, "getClusterNodes")
+	err = cl.rpcClient.CallForInto(ctx, &out, "getClusterNodes", nil)
 	return
 }
 

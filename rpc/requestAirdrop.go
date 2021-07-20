@@ -36,6 +36,6 @@ func (cl *Client) RequestAirdrop(
 			M{"commitment": commitment},
 		)
 	}
-	err = cl.rpcClient.CallFor(&signature, "requestAirdrop", params)
+	err = cl.rpcClient.CallForInto(ctx, &signature, "requestAirdrop", params)
 	return
 }

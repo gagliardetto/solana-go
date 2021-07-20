@@ -32,7 +32,7 @@ func (cl *Client) GetStakeActivation(
 			params = append(params, obj)
 		}
 	}
-	err = cl.rpcClient.CallFor(&out, "getStakeActivation", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getStakeActivation", params)
 	return
 }
 

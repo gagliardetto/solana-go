@@ -60,6 +60,6 @@ func (cl *Client) GetProgramAccountsWithOpts(
 
 	params := []interface{}{publicKey, obj}
 
-	err = cl.rpcClient.CallFor(&out, "getProgramAccounts", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getProgramAccounts", params)
 	return
 }

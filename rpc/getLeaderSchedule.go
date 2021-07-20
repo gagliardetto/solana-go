@@ -50,7 +50,7 @@ func (cl *Client) GetLeaderScheduleWithOpts(
 			params = append(params, obj)
 		}
 	}
-	err = cl.rpcClient.CallFor(&out, "getLeaderSchedule", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getLeaderSchedule", params)
 	if err != nil {
 		return nil, err
 	}

@@ -34,6 +34,6 @@ func (cl *Client) GetBalance(
 		params = append(params, M{"commitment": string(commitment)})
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getBalance", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getBalance", params)
 	return
 }

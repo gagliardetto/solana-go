@@ -40,9 +40,10 @@ type Client struct {
 	reconnectOnErr          bool
 }
 
-func Dial(ctx context.Context, rpcURL string) (c *Client, err error) {
+// Connect creates a new websocket client connecting to the provided endpoint.
+func Connect(ctx context.Context, rpcEndpoint string) (c *Client, err error) {
 	c = &Client{
-		rpcURL:                  rpcURL,
+		rpcURL:                  rpcEndpoint,
 		subscriptionByRequestID: map[uint64]*Subscription{},
 		subscriptionByWSSubID:   map[uint64]*Subscription{},
 	}
@@ -53,7 +54,7 @@ func Dial(ctx context.Context, rpcURL string) (c *Client, err error) {
 		EnableCompression: true,
 	}
 
-	c.conn, _, err = dialer.DialContext(ctx, rpcURL, nil)
+	c.conn, _, err = dialer.DialContext(ctx, rpcEndpoint, nil)
 	if err != nil {
 		return nil, fmt.Errorf("new ws client: dial: %w", err)
 	}

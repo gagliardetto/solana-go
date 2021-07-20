@@ -25,7 +25,7 @@ func (cl *Client) GetSignatureStatuses(
 	if searchTransactionHistory {
 		params = append(params, M{"searchTransactionHistory": searchTransactionHistory})
 	}
-	err = cl.rpcClient.CallFor(&out, "getSignatureStatuses", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getSignatureStatuses", params)
 	if err != nil {
 		return nil, err
 	}

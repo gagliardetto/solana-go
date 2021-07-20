@@ -40,7 +40,7 @@ func TestDecoder_EventQueue_Diff(t *testing.T) {
 	newDataJSONFile := strings.ReplaceAll(newDataFile, ".bin.zst", ".json")
 
 	if os.Getenv("TESTDATA_UPDATE") == "true" {
-		client := rpc.NewClient("http://api.mainnet-beta.solana.com:80/rpc")
+		client := rpc.New("http://api.mainnet-beta.solana.com:80/rpc")
 		ctx := context.Background()
 		account := solana.MustPublicKeyFromBase58("13iGJcA4w5hcJZDjJbJQor1zUiDLE4jv2rMW9HkD5Eo1")
 

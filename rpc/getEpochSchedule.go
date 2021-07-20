@@ -8,7 +8,7 @@ import (
 
 // GetEpochSchedule returns epoch schedule information from this cluster's genesis config.
 func (cl *Client) GetEpochSchedule(ctx context.Context) (out *GetEpochScheduleResult, err error) {
-	err = cl.rpcClient.CallFor(&out, "getEpochSchedule")
+	err = cl.rpcClient.CallForInto(ctx, &out, "getEpochSchedule", nil)
 	return
 }
 

@@ -17,7 +17,7 @@ func (cl *Client) GetSupply(
 			M{"commitment": commitment},
 		)
 	}
-	err = cl.rpcClient.CallFor(&out, "getSupply", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getSupply", params)
 	return
 }
 

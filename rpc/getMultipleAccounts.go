@@ -54,7 +54,7 @@ func (cl *Client) GetMultipleAccountsWithOpts(
 		}
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getMultipleAccounts", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getMultipleAccounts", params)
 	if err != nil {
 		return nil, err
 	}

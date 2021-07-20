@@ -8,7 +8,7 @@ import (
 
 // GetInflationRate returns the specific inflation values for the current epoch.
 func (cl *Client) GetInflationRate(ctx context.Context) (out *GetInflationRateResult, err error) {
-	err = cl.rpcClient.CallFor(&out, "getInflationRate")
+	err = cl.rpcClient.CallForInto(ctx, &out, "getInflationRate", nil)
 	return
 }
 

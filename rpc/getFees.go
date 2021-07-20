@@ -19,7 +19,7 @@ func (cl *Client) GetFees(
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}
-	err = cl.rpcClient.CallFor(&out, "getFees", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getFees", params)
 	return
 }
 

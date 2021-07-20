@@ -120,6 +120,6 @@ func (cl *Client) SimulateTransactionWithOpts(
 		obj,
 	}
 
-	err = cl.rpcClient.CallFor(&out, "simulateTransaction", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "simulateTransaction", params)
 	return
 }

@@ -105,7 +105,7 @@ func (cl *Client) GetAccountInfoWithOpts(
 		params = append(params, obj)
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getAccountInfo", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getAccountInfo", params)
 	if err != nil {
 		return nil, err
 	}

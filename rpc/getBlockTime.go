@@ -20,6 +20,6 @@ func (cl *Client) GetBlockTime(
 	block uint64, // block, identified by Slot
 ) (out *UnixTimeSeconds, err error) {
 	params := []interface{}{block}
-	err = cl.rpcClient.CallFor(&out, "getBlockTime", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getBlockTime", params)
 	return
 }

@@ -15,6 +15,6 @@ func (cl *Client) GetTransactionCount(
 			M{"commitment": commitment},
 		)
 	}
-	err = cl.rpcClient.CallFor(&out, "getTransactionCount", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getTransactionCount", params)
 	return
 }

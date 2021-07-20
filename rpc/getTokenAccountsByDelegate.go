@@ -73,7 +73,7 @@ func (cl *Client) GetTokenAccountsByDelegate(
 		}
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getTokenAccountsByDelegate", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getTokenAccountsByDelegate", params)
 	return
 }
 

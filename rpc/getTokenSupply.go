@@ -18,7 +18,7 @@ func (cl *Client) GetTokenSupply(
 			M{"commitment": commitment},
 		)
 	}
-	err = cl.rpcClient.CallFor(&out, "getTokenSupply", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getTokenSupply", params)
 	return
 }
 

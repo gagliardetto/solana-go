@@ -27,6 +27,6 @@ func (cl *Client) GetSlot(
 		params = append(params, M{"commitment": commitment})
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getSlot", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getSlot", params)
 	return
 }

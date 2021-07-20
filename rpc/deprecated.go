@@ -79,7 +79,7 @@ func (cl *Client) GetConfirmedBlockWithOpts(
 		}
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getConfirmedBlock", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getConfirmedBlock", params)
 	return
 }
 
@@ -106,7 +106,7 @@ func (cl *Client) GetConfirmedBlocks(
 		params = append(params, M{"commitment": string(commitment)})
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getConfirmedBlocks", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getConfirmedBlocks", params)
 	return
 }
 
@@ -126,7 +126,7 @@ func (cl *Client) GetConfirmedBlocksWithLimit(
 		params = append(params, M{"commitment": string(commitment)})
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getConfirmedBlocksWithLimit", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getConfirmedBlocksWithLimit", params)
 	return
 }
 
@@ -143,7 +143,7 @@ func (cl *Client) GetConfirmedSignaturesForAddress2(
 
 	params := []interface{}{address, opts}
 
-	err = cl.rpcClient.CallFor(&out, "getConfirmedSignaturesForAddress2", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getConfirmedSignaturesForAddress2", params)
 	return
 }
 
@@ -154,7 +154,7 @@ func (cl *Client) GetConfirmedTransaction(
 ) (out *TransactionWithMeta, err error) {
 	params := []interface{}{signature, "json"}
 
-	err = cl.rpcClient.CallFor(&out, "getConfirmedTransaction", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getConfirmedTransaction", params)
 	if err != nil {
 		return nil, err
 	}

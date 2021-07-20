@@ -70,6 +70,6 @@ func (cl *Client) GetSignaturesForAddressWithOpts(
 		}
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getSignaturesForAddress", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getSignaturesForAddress", params)
 	return
 }

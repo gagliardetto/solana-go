@@ -28,6 +28,6 @@ func (cl *Client) GetRecentBlockhash(
 		params = append(params, M{"commitment": commitment})
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getRecentBlockhash", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getRecentBlockhash", params)
 	return
 }

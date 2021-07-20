@@ -8,7 +8,7 @@ import (
 
 // GetFeeRateGovernor returns the fee rate governor information from the root bank.
 func (cl *Client) GetFeeRateGovernor(ctx context.Context) (out *GetFeeRateGovernorResult, err error) {
-	err = cl.rpcClient.CallFor(&out, "getFeeRateGovernor")
+	err = cl.rpcClient.CallForInto(ctx, &out, "getFeeRateGovernor", nil)
 	return
 }
 

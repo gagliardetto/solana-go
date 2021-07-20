@@ -15,7 +15,7 @@ import (
 // - If the node is unhealthy, a JSON RPC error response is returned.
 //   The specifics of the error response are UNSTABLE and may change in the future.
 func (cl *Client) GetHealth(ctx context.Context) (out string, err error) {
-	err = cl.rpcClient.CallFor(&out, "getHealth")
+	err = cl.rpcClient.CallForInto(ctx, &out, "getHealth", nil)
 	return
 }
 

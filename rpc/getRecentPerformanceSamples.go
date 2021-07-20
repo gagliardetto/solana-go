@@ -14,7 +14,7 @@ func (cl *Client) GetRecentPerformanceSamples(ctx context.Context, limit *int) (
 	if limit != nil {
 		params = append(params, limit)
 	}
-	err = cl.rpcClient.CallFor(&out, "getRecentPerformanceSamples", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getRecentPerformanceSamples", params)
 	return
 }
 

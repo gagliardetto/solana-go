@@ -15,7 +15,7 @@ func (cl *Client) GetEpochInfo(
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}
-	err = cl.rpcClient.CallFor(&out, "getEpochInfo", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getEpochInfo", params)
 	return
 }
 

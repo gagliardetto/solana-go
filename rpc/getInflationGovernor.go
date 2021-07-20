@@ -17,7 +17,7 @@ func (cl *Client) GetInflationGovernor(
 			M{"commitment": commitment},
 		)
 	}
-	err = cl.rpcClient.CallFor(&out, "getInflationGovernor", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getInflationGovernor", params)
 	return
 }
 

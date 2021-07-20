@@ -77,7 +77,7 @@ func (cl *Client) GetBlockProductionWithOpts(
 			params = append(params, obj)
 		}
 	}
-	err = cl.rpcClient.CallFor(&out, "getBlockProduction", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getBlockProduction", params)
 
 	return
 }

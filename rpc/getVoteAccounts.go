@@ -47,7 +47,7 @@ func (cl *Client) GetVoteAccounts(
 			params = append(params, obj)
 		}
 	}
-	err = cl.rpcClient.CallFor(&out, "getVoteAccounts", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getVoteAccounts", params)
 	return
 }
 

@@ -32,7 +32,7 @@ func (cl *Client) GetLargestAccounts(
 	if len(obj) > 0 {
 		params = append(params, obj)
 	}
-	err = cl.rpcClient.CallFor(&out, "getLargestAccounts", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getLargestAccounts", params)
 	return
 }
 

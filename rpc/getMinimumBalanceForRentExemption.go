@@ -27,6 +27,6 @@ func (cl *Client) GetMinimumBalanceForRentExemption(
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}
-	err = cl.rpcClient.CallFor(&lamport, "getMinimumBalanceForRentExemption", params)
+	err = cl.rpcClient.CallForInto(ctx, &lamport, "getMinimumBalanceForRentExemption", params)
 	return
 }

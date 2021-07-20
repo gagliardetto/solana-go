@@ -36,7 +36,7 @@ func (cl *Client) GetTransaction(
 			params = append(params, obj)
 		}
 	}
-	err = cl.rpcClient.CallFor(&out, "getTransaction", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getTransaction", params)
 	if err != nil {
 		return nil, err
 	}

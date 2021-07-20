@@ -31,7 +31,7 @@ func Test_AccountSubscribe(t *testing.T) {
 
 	zlog, _ = zap.NewDevelopment()
 
-	c, err := Dial(context.Background(), "ws://api.mainnet-beta.solana.com:80")
+	c, err := Connect(context.Background(), "ws://api.mainnet-beta.solana.com:80")
 	defer c.Close()
 	require.NoError(t, err)
 
@@ -56,7 +56,7 @@ func Test_ProgramSubscribe(t *testing.T) {
 	zlog, _ = zap.NewDevelopment()
 
 	fmt.Println("Dialing")
-	c, err := Dial(context.Background(), "wss://solana-api.projectserum.com")
+	c, err := Connect(context.Background(), "wss://solana-api.projectserum.com")
 	fmt.Println("Hello?")
 	defer c.Close()
 	require.NoError(t, err)
@@ -80,7 +80,7 @@ func Test_SlotSubscribe(t *testing.T) {
 
 	zlog, _ = zap.NewDevelopment()
 
-	c, err := Dial(context.Background(), "ws://api.mainnet-beta.solana.com:80")
+	c, err := Connect(context.Background(), "ws://api.mainnet-beta.solana.com:80")
 	defer c.Close()
 	require.NoError(t, err)
 

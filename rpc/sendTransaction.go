@@ -92,6 +92,6 @@ func (cl *Client) SendTransactionWithOpts(
 		obj,
 	}
 
-	err = cl.rpcClient.CallFor(&signature, "sendTransaction", params)
+	err = cl.rpcClient.CallForInto(ctx, &signature, "sendTransaction", params)
 	return
 }

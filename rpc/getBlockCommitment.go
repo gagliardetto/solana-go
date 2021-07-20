@@ -12,7 +12,7 @@ func (cl *Client) GetBlockCommitment(
 	block uint64, // block, identified by Slot
 ) (out *GetBlockCommitmentResult, err error) {
 	params := []interface{}{block}
-	err = cl.rpcClient.CallFor(&out, "getBlockCommitment", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getBlockCommitment", params)
 	return
 }
 

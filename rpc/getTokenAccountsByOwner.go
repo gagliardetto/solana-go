@@ -58,6 +58,6 @@ func (cl *Client) GetTokenAccountsByOwner(
 		}
 	}
 
-	err = cl.rpcClient.CallFor(&out, "getTokenAccountsByOwner", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getTokenAccountsByOwner", params)
 	return
 }

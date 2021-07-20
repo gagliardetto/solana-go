@@ -17,7 +17,7 @@ func (cl *Client) GetFeeCalculatorForBlockhash(
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}
-	err = cl.rpcClient.CallFor(&out, "getFeeCalculatorForBlockhash", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getFeeCalculatorForBlockhash", params)
 	return
 }
 

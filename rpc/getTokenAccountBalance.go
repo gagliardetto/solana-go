@@ -18,7 +18,7 @@ func (cl *Client) GetTokenAccountBalance(
 			M{"commitment": commitment},
 		)
 	}
-	err = cl.rpcClient.CallFor(&out, "getTokenAccountBalance", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getTokenAccountBalance", params)
 	return
 }
 
