@@ -7,26 +7,6 @@ import (
 	"github.com/gagliardetto/solana-go"
 )
 
-type GetStakeActivationResult struct {
-	// The stake account's activation state, one of: active, inactive, activating, deactivating.
-	State ActivationStateType `json:"state"`
-
-	// Stake active during the epoch.
-	Active bin.Uint64 `json:"active"`
-
-	// Stake inactive during the epoch.
-	Inactive bin.Uint64 `json:"inactive"`
-}
-
-type ActivationStateType string
-
-const (
-	ActivationStateActive       ActivationStateType = "active"
-	ActivationStateInactive     ActivationStateType = "inactive"
-	ActivationStateActivating   ActivationStateType = "activating"
-	ActivationStateDeactivating ActivationStateType = "deactivating"
-)
-
 // GetStakeActivation returns epoch activation information for a stake account.
 func (cl *Client) GetStakeActivation(
 	ctx context.Context,
@@ -55,3 +35,23 @@ func (cl *Client) GetStakeActivation(
 	err = cl.rpcClient.CallFor(&out, "getStakeActivation", params)
 	return
 }
+
+type GetStakeActivationResult struct {
+	// The stake account's activation state, one of: active, inactive, activating, deactivating.
+	State ActivationStateType `json:"state"`
+
+	// Stake active during the epoch.
+	Active bin.Uint64 `json:"active"`
+
+	// Stake inactive during the epoch.
+	Inactive bin.Uint64 `json:"inactive"`
+}
+
+type ActivationStateType string
+
+const (
+	ActivationStateActive       ActivationStateType = "active"
+	ActivationStateInactive     ActivationStateType = "inactive"
+	ActivationStateActivating   ActivationStateType = "activating"
+	ActivationStateDeactivating ActivationStateType = "deactivating"
+)
