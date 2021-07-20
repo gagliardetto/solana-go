@@ -26,6 +26,8 @@ func (t *testTransactionInstructions) Data() ([]byte, error) {
 }
 
 func TestNewTransaction(t *testing.T) {
+	debugNewTransaction = true
+
 	instructions := []Instruction{
 		&testTransactionInstructions{
 			accounts: []*AccountMeta{

@@ -33,6 +33,34 @@ func TransactionPayer(payer PublicKey) TransactionOption {
 	return transactionOptionFunc(func(opts *transactionOptions) { opts.payer = payer })
 }
 
+type pubkeySlice []PublicKey
+
+// uniqueAppend appends the provided pubkey only if it is not
+// already present in the slice.
+// Returns true when the provided pubkey wasn't already present.
+func (slice *pubkeySlice) uniqueAppend(pubkey PublicKey) bool {
+	if !slice.has(pubkey) {
+		slice.append(pubkey)
+		return true
+	}
+	return false
+}
+
+func (slice *pubkeySlice) append(pubkey PublicKey) {
+	*slice = append(*slice, pubkey)
+}
+
+func (slice *pubkeySlice) has(pubkey PublicKey) bool {
+	for _, key := range *slice {
+		if key.Equals(pubkey) {
+			return true
+		}
+	}
+	return false
+}
+
+var debugNewTransaction = false
+
 func NewTransaction(instructions []Instruction, blockHash Hash, opts ...TransactionOption) (*Transaction, error) {
 	if len(instructions) == 0 {
 		return nil, fmt.Errorf("requires at-least one instruction to create a transaction")
@@ -58,13 +86,13 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 		}
 	}
 
-	programIDs := make([]PublicKey, 0)
+	programIDs := make(pubkeySlice, 0)
 	accounts := []*AccountMeta{}
 	for _, instruction := range instructions {
 		for _, key := range instruction.Accounts() {
 			accounts = append(accounts, key)
 		}
-		programIDs = append(programIDs, instruction.ProgramID())
+		programIDs.uniqueAppend(instruction.ProgramID())
 	}
 
 	// Add programID to the account list
@@ -92,7 +120,9 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 		uniqAccountsMap[acc.PublicKey] = uint64(len(uniqAccounts) - 1)
 	}
 
-	zlog.Debug("unique account sorted", zap.Int("account_count", len(uniqAccounts)))
+	if debugNewTransaction {
+		zlog.Debug("unique account sorted", zap.Int("account_count", len(uniqAccounts)))
+	}
 	// Move fee payer to the front
 	feePayerIndex := -1
 	for idx, acc := range uniqAccounts {
@@ -100,7 +130,9 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 			feePayerIndex = idx
 		}
 	}
-	zlog.Debug("current fee payer index", zap.Int("fee_payer_index", feePayerIndex))
+	if debugNewTransaction {
+		zlog.Debug("current fee payer index", zap.Int("fee_payer_index", feePayerIndex))
+	}
 
 	accountCount := len(uniqAccounts)
 	if feePayerIndex < 0 {
@@ -127,10 +159,12 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 	accountKeyIndex := map[string]uint16{}
 	for idx, acc := range finalAccounts {
 
-		zlog.Debug("transaction account",
-			zap.Int("account_index", idx),
-			zap.Stringer("account_pub_key", acc.PublicKey),
-		)
+		if debugNewTransaction {
+			zlog.Debug("transaction account",
+				zap.Int("account_index", idx),
+				zap.Stringer("account_pub_key", acc.PublicKey),
+			)
+		}
 
 		message.AccountKeys = append(message.AccountKeys, acc.PublicKey)
 		accountKeyIndex[acc.PublicKey.String()] = uint16(idx)
@@ -146,11 +180,13 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 			message.Header.NumReadonlyUnsignedAccounts++
 		}
 	}
-	zlog.Debug("message header compiled",
-		zap.Uint8("num_required_signatures", message.Header.NumRequiredSignatures),
-		zap.Uint8("num_readonly_signed_accounts", message.Header.NumReadonlySignedAccounts),
-		zap.Uint8("num_readonly_unsigned_accounts", message.Header.NumReadonlyUnsignedAccounts),
-	)
+	if debugNewTransaction {
+		zlog.Debug("message header compiled",
+			zap.Uint8("num_required_signatures", message.Header.NumRequiredSignatures),
+			zap.Uint8("num_readonly_signed_accounts", message.Header.NumReadonlySignedAccounts),
+			zap.Uint8("num_readonly_unsigned_accounts", message.Header.NumReadonlyUnsignedAccounts),
+		)
+	}
 
 	for trxIdx, instruction := range instructions {
 		accounts = instruction.Accounts()
