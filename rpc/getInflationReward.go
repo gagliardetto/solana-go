@@ -23,6 +23,7 @@ func (cl *Client) GetInflationReward(
 	addresses []solana.PublicKey,
 
 	opts *GetInflationRewardOpts,
+
 ) (out []*GetInflationRewardResult, err error) {
 	params := []interface{}{addresses}
 	if opts != nil {
@@ -54,4 +55,7 @@ type GetInflationRewardResult struct {
 
 	// Post balance of the account in lamports.
 	PostBalance bin.Uint64 `json:"postBalance"`
+
+	// Vote account commission when the reward was credited.
+	Commission *uint8 `json:"commission,omitempty"`
 }

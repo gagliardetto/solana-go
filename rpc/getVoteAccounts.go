@@ -11,6 +11,15 @@ type GetVoteAccountsOpts struct {
 
 	// (optional) Only return results for this validator vote address.
 	VotePubkey solana.PublicKey `json:"votePubkey,omitempty"`
+
+	// (optional) Do not filter out delinquent validators with no stake.
+	KeepUnstakedDelinquents *bool `json:"keepUnstakedDelinquents,omitempty"`
+
+	// (optional) Specify the number of slots behind the tip that
+	// a validator must fall to be considered delinquent.
+	// NOTE: For the sake of consistency between ecosystem products,
+	// it is not recommended that this argument be specified.
+	DelinquentSlotDistance *uint64 `json:"delinquentSlotDistance,omitempty"`
 }
 
 // GetVoteAccounts returns the account info and associated
@@ -27,6 +36,12 @@ func (cl *Client) GetVoteAccounts(
 		}
 		if !opts.VotePubkey.IsZero() {
 			obj["votePubkey"] = opts.VotePubkey.String()
+		}
+		if opts.KeepUnstakedDelinquents != nil {
+			obj["keepUnstakedDelinquents"] = opts.KeepUnstakedDelinquents
+		}
+		if opts.DelinquentSlotDistance != nil {
+			obj["delinquentSlotDistance"] = opts.DelinquentSlotDistance
 		}
 		if len(obj) > 0 {
 			params = append(params, obj)

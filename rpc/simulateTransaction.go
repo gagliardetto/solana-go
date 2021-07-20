@@ -34,6 +34,9 @@ type SimulateTransactionResponse struct {
 
 	// Array of accounts with the same length as the accounts.addresses array in the request.
 	Accounts []*Account `json:"accounts"`
+
+	// The number of compute budget units consumed during the processing of this transaction.
+	UnitsConsumed *uint64 `json:"unitsConsumed,omitempty"`
 }
 
 // SimulateTransaction simulates sending a transaction.

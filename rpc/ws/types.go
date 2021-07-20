@@ -63,9 +63,15 @@ type LogResult struct {
 		Slot uint64
 	} `json:"context"`
 	Value struct {
+		// The transaction signature.
 		Signature solana.Signature `json:"signature"`
-		Err       interface{}      `json:"err"`
-		Logs      []string         `json:"logs"`
+		// Error if transaction failed, null if transaction succeeded.
+		Err interface{} `json:"err"`
+		// Array of log messages the transaction instructions output
+		// during execution, null if simulation failed before the transaction
+		// was able to execute (for example due to an invalid blockhash
+		// or signature verification failure)
+		Logs []string `json:"logs"`
 	} `json:"value"`
 }
 
