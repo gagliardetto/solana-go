@@ -264,9 +264,6 @@ func (wrap *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
 // GetBinary returns the decoded bytes if the encoding is
 // "base58", "base64", or "base64+zstd".
 func (dt *DataBytesOrJSON) GetBinary() []byte {
-	if dt.asDecodedBinary.Content == nil {
-		return nil
-	}
 	return dt.asDecodedBinary.Content
 }
 
@@ -367,7 +364,7 @@ func (p *ParsedInstruction) IsParsed() bool {
 
 type M map[string]interface{}
 
-// Estimated production time, as Unix timestamp (seconds since the Unix epoch)
+// Unix timestamp (seconds since the Unix epoch)
 type UnixTimeSeconds int64
 
 func (res UnixTimeSeconds) Time() time.Time {
