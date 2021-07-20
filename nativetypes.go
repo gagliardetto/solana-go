@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/klauspost/compress/zstd"
 	"github.com/mr-tron/base58"
@@ -176,6 +177,28 @@ func (t Data) MarshalJSON() ([]byte, error) {
 		})
 }
 
+var zstdReaderPool *sync.Pool
+
+func init() {
+	zstdReaderPool = &sync.Pool{
+		New: func() interface{} {
+			reader, _ := zstd.NewReader(nil)
+			return reader
+		},
+	}
+}
+
+var zstdWriterPool *sync.Pool
+
+func init() {
+	zstdWriterPool = &sync.Pool{
+		New: func() interface{} {
+			writer, _ := zstd.NewWriter(nil)
+			return writer
+		},
+	}
+}
+
 func (t *Data) UnmarshalJSON(data []byte) (err error) {
 	var in []string
 	if err := json.Unmarshal(data, &in); err != nil {
@@ -213,11 +236,11 @@ func (t *Data) UnmarshalJSON(data []byte) (err error) {
 		if err != nil {
 			return err
 		}
-		zstdDecoder, err := zstd.NewReader(nil)
-		if err != nil {
-			return err
-		}
-		defer zstdDecoder.Close()
+		zstdDecoder := zstdReaderPool.Get().(*zstd.Decoder)
+		zstdDecoder.Reset(nil)
+		defer func() {
+			zstdReaderPool.Put(zstdDecoder)
+		}()
 		t.Content, err = zstdDecoder.DecodeAll(rawBytes, nil)
 		if err != nil {
 			return err
@@ -235,13 +258,14 @@ func (t Data) String() string {
 	case EncodingBase64:
 		return base64.StdEncoding.EncodeToString(t.Content)
 	case EncodingBase64Zstd:
-		zstdEncoder, err := zstd.NewWriter(nil)
-		if err == nil {
-			defer zstdEncoder.Close()
-			out := zstdEncoder.EncodeAll(t.Content, nil)
-			return base64.StdEncoding.EncodeToString(out)
-		}
-		// TODO: handle error?
+		zstdEncoder := zstdWriterPool.Get().(*zstd.Encoder)
+		zstdEncoder.Reset(nil)
+		defer func() {
+			zstdEncoder.Close()
+			zstdWriterPool.Put(zstdEncoder)
+		}()
+		out := zstdEncoder.EncodeAll(t.Content, nil)
+		return base64.StdEncoding.EncodeToString(out)
 	default:
 		// TODO
 		return ""
