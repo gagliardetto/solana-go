@@ -4,11 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-
-	bin "github.com/dfuse-io/binary"
-	"github.com/gagliardetto/solana-go"
-
-	"github.com/gagliardetto/solana-go/rpc"
 )
 
 type request struct {
@@ -48,85 +43,3 @@ type params struct {
 	Result       *json.RawMessage `json:"result"`
 	Subscription int              `json:"subscription"`
 }
-
-type AccountResult struct {
-	Context struct {
-		Slot uint64
-	} `json:"context"`
-	Value struct {
-		rpc.Account
-	} `json:"value"`
-}
-
-type LogResult struct {
-	Context struct {
-		Slot uint64
-	} `json:"context"`
-	Value struct {
-		// The transaction signature.
-		Signature solana.Signature `json:"signature"`
-		// Error if transaction failed, null if transaction succeeded.
-		Err interface{} `json:"err"`
-		// Array of log messages the transaction instructions output
-		// during execution, null if simulation failed before the transaction
-		// was able to execute (for example due to an invalid blockhash
-		// or signature verification failure)
-		Logs []string `json:"logs"`
-	} `json:"value"`
-}
-
-type ProgramResult struct {
-	Context struct {
-		Slot uint64
-	} `json:"context"`
-	Value rpc.KeyedAccount `json:"value"`
-}
-
-type SignatureResult struct {
-	Context struct {
-		Slot uint64
-	} `json:"context"`
-	Value struct {
-		Err interface{} `json:"err"`
-	} `json:"value"`
-}
-
-type SlotResult struct {
-	Parent uint64 `json:"parent"`
-	Root   uint64 `json:"root"`
-	Slot   uint64 `json:"slot"`
-}
-
-type RootResult bin.Uint64
-
-type VoteResult struct {
-	// The vote hash.
-	Hash solana.Hash `json:"hash"`
-	// The slots covered by the vote.
-	Slots []bin.Uint64 `json:"slots"`
-	// The timestamp of the vote.
-	Timestamp *rpc.UnixTimeSeconds `json:"timestamp,omitempty"`
-}
-
-type SlotsUpdatesResult struct {
-	// The parent slot.
-	Parent uint64 `json:"parent"`
-	// The newly updated slot.
-	Slot uint64 `json:"slot"`
-	// The Unix timestamp of the update.
-	Timestamp *rpc.UnixTimeSeconds `json:"timestamp"`
-	// The update type.
-	Type SlotsUpdatesType `json:"type"`
-}
-
-type SlotsUpdatesType string
-
-const (
-	SlotsUpdatesFirstShredReceived     SlotsUpdatesType = "firstShredReceived"
-	SlotsUpdatesCompleted              SlotsUpdatesType = "completed"
-	SlotsUpdatesCreatedBank            SlotsUpdatesType = "createdBank"
-	SlotsUpdatesFrozen                 SlotsUpdatesType = "frozen"
-	SlotsUpdatesDead                   SlotsUpdatesType = "dead"
-	SlotsUpdatesOptimisticConfirmation SlotsUpdatesType = "optimisticConfirmation"
-	SlotsUpdatesRoot                   SlotsUpdatesType = "root"
-)
