@@ -25,8 +25,8 @@ The SDK is actively developed and latest is an `alpha` release.
 
 # Features
 
-- [x] JSON RPC API
-- [x] Websocket JSON streaming API
+- [x] Full JSON RPC API
+- [x] Full WebSocket JSON streaming API
 - [ ] Wallet, account, and keys management
 - [ ] Clients for native programs
 - [ ] Clients for Solana Program Library
