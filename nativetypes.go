@@ -74,7 +74,6 @@ func (ha Hash) String() string {
 	return base58.Encode(ha[:])
 }
 
-///
 type Signature [64]byte
 
 var zeroSignature = Signature{}
@@ -137,7 +136,6 @@ func (p Signature) String() string {
 	return base58.Encode(p[:])
 }
 
-///
 type Base58 []byte
 
 func (t Base58) MarshalJSON() ([]byte, error) {
@@ -273,7 +271,6 @@ func (t Data) String() string {
 	return ""
 }
 
-///
 type ByteWrapper struct {
 	io.Reader
 }

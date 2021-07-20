@@ -78,7 +78,7 @@ func TestBase58(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestData(t *testing.T) {
+func TestData_base64(t *testing.T) {
 	val := "dGVzdA=="
 	in := `["` + val + `", "base64"]`
 
@@ -87,9 +87,153 @@ func TestData(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t,
+		[]byte("test"),
+		data.Content,
+	)
+
+	assert.Equal(t,
+		EncodingBase64,
+		data.Encoding,
+	)
+
+	assert.Equal(t,
 		[]interface{}{
 			val,
 			"base64",
+		},
+		mustJSONToInterface(mustAnyToJSON(data)),
+	)
+}
+
+func TestData_base64_empty(t *testing.T) {
+	val := ""
+	in := `["", "base64"]`
+
+	var data Data
+	err := data.UnmarshalJSON([]byte(in))
+	assert.NoError(t, err)
+
+	assert.Equal(t,
+		[]byte(""),
+		data.Content,
+	)
+
+	assert.Equal(t,
+		EncodingBase64,
+		data.Encoding,
+	)
+
+	assert.Equal(t,
+		[]interface{}{
+			val,
+			"base64",
+		},
+		mustJSONToInterface(mustAnyToJSON(data)),
+	)
+}
+
+func TestData_base64_zstd(t *testing.T) {
+	val := "KLUv/QQAWQAAaGVsbG8td29ybGTcLcaB"
+	in := `["` + val + `", "base64+zstd"]`
+
+	var data Data
+	err := data.UnmarshalJSON([]byte(in))
+	assert.NoError(t, err)
+
+	assert.Equal(t,
+		[]byte("hello-world"),
+		data.Content,
+	)
+
+	assert.Equal(t,
+		EncodingBase64Zstd,
+		data.Encoding,
+	)
+
+	assert.Equal(t,
+		[]interface{}{
+			val,
+			"base64+zstd",
+		},
+		mustJSONToInterface(mustAnyToJSON(data)),
+	)
+}
+
+func TestData_base64_zstd_empty(t *testing.T) {
+	in := `["", "base64+zstd"]`
+
+	var data Data
+	err := data.UnmarshalJSON([]byte(in))
+	assert.NoError(t, err)
+
+	assert.Equal(t,
+		[]byte(""),
+		data.Content,
+	)
+
+	assert.Equal(t,
+		EncodingBase64Zstd,
+		data.Encoding,
+	)
+
+	assert.Equal(t,
+		[]interface{}{
+			"",
+			"base64+zstd",
+		},
+		mustJSONToInterface(mustAnyToJSON(data)),
+	)
+}
+
+func TestData_base58(t *testing.T) {
+	val := "3yZe7d"
+	in := `["` + val + `", "base58"]`
+
+	var data Data
+	err := data.UnmarshalJSON([]byte(in))
+	assert.NoError(t, err)
+
+	assert.Equal(t,
+		[]byte("test"),
+		data.Content,
+	)
+
+	assert.Equal(t,
+		EncodingBase58,
+		data.Encoding,
+	)
+
+	assert.Equal(t,
+		[]interface{}{
+			val,
+			"base58",
+		},
+		mustJSONToInterface(mustAnyToJSON(data)),
+	)
+}
+
+func TestData_base58_empty(t *testing.T) {
+	val := ""
+	in := `["", "base58"]`
+
+	var data Data
+	err := data.UnmarshalJSON([]byte(in))
+	assert.NoError(t, err)
+
+	assert.Equal(t,
+		[]byte(""),
+		data.Content,
+	)
+
+	assert.Equal(t,
+		EncodingBase58,
+		data.Encoding,
+	)
+
+	assert.Equal(t,
+		[]interface{}{
+			val,
+			"base58",
 		},
 		mustJSONToInterface(mustAnyToJSON(data)),
 	)

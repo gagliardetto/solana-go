@@ -222,12 +222,11 @@ type DataBytesOrJSON struct {
 	asJSON          json.RawMessage
 }
 
-func (dt *DataBytesOrJSON) MarshalJSON() ([]byte, error) {
-	// TODO: invert check?
-	if dt.asDecodedBinary.Content != nil {
-		return json.Marshal(dt.asDecodedBinary)
+func (dt DataBytesOrJSON) MarshalJSON() ([]byte, error) {
+	if dt.rawDataEncoding == solana.EncodingJSONParsed || dt.rawDataEncoding == solana.EncodingJSON {
+		return json.Marshal(dt.asJSON)
 	}
-	return json.Marshal(dt.asJSON)
+	return json.Marshal(dt.asDecodedBinary)
 }
 
 func (wrap *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
