@@ -14,7 +14,8 @@ type AccountResult struct {
 	} `json:"value"`
 }
 
-// AccountSubscribe subscribes to an account to receive notifications when the lamports or data for a given account public key changes.
+// AccountSubscribe subscribes to an account to receive notifications
+// when the lamports or data for a given account public key changes.
 func (cl *Client) AccountSubscribe(
 	account solana.PublicKey,
 	commitment rpc.CommitmentType,
@@ -26,7 +27,8 @@ func (cl *Client) AccountSubscribe(
 	)
 }
 
-// AccountSubscribe subscribes to an account to receive notifications when the lamports or data for a given account public key changes.
+// AccountSubscribe subscribes to an account to receive notifications
+// when the lamports or data for a given account public key changes.
 func (cl *Client) AccountSubscribeWithOpts(
 	account solana.PublicKey,
 	commitment rpc.CommitmentType,

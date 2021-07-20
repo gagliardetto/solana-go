@@ -25,14 +25,17 @@ type LogResult struct {
 type LogsSubscribeFilterType string
 
 const (
-	LogsSubscribeFilterAll          LogsSubscribeFilterType = "all"          // subscribe to all transactions except for simple vote transactions
-	LogsSubscribeFilterAllWithVotes LogsSubscribeFilterType = "allWithVotes" // subscribe to all transactions including simple vote transactions
+	// Subscribe to all transactions except for simple vote transactions.
+	LogsSubscribeFilterAll LogsSubscribeFilterType = "all"
+	// Subscribe to all transactions including simple vote transactions.
+	LogsSubscribeFilterAllWithVotes LogsSubscribeFilterType = "allWithVotes"
 )
 
 // LogsSubscribe subscribes to transaction logging.
 func (cl *Client) LogsSubscribe(
+	// Filter criteria for the logs to receive results by account type.
 	filter LogsSubscribeFilterType,
-	commitment rpc.CommitmentType,
+	commitment rpc.CommitmentType, // (optional)
 ) (*LogSubscription, error) {
 	return cl.logsSubscribe(
 		filter,
@@ -42,7 +45,9 @@ func (cl *Client) LogsSubscribe(
 
 // LogsSubscribe subscribes to all transactions that mention the provided Pubkey.
 func (cl *Client) LogsSubscribeMentions(
+	// Subscribe to all transactions that mention the provided Pubkey.
 	mentions solana.PublicKey,
+	// (optional)
 	commitment rpc.CommitmentType,
 ) (*LogSubscription, error) {
 	return cl.logsSubscribe(

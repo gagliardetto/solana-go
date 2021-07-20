@@ -18,8 +18,8 @@ type SignatureResult struct {
 // notification when the transaction is confirmed On signatureNotification,
 // the subscription is automatically cancelled
 func (cl *Client) SignatureSubscribe(
-	signature solana.Signature,
-	commitment rpc.CommitmentType,
+	signature solana.Signature, // Transaction Signature.
+	commitment rpc.CommitmentType, // (optional)
 ) (*SignatureSubscription, error) {
 
 	params := []interface{}{signature.String()}
