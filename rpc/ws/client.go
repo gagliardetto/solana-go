@@ -20,12 +20,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/gorilla/rpc/v2/json2"
 	"github.com/gorilla/websocket"
-	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 )
 
@@ -87,17 +88,40 @@ func (c *Client) receiveMessages() {
 	}
 }
 
+// GetUint64 returns the value retrieved by `Get`, cast to a uint64 if possible.
+// If key data type do not match, it will return an error.
+func getUint64(data []byte, keys ...string) (val uint64, err error) {
+	v, t, _, e := jsonparser.Get(data, keys...)
+	if e != nil {
+		return 0, e
+	}
+	if t != jsonparser.Number {
+		return 0, fmt.Errorf("Value is not a number: %s", string(v))
+	}
+	return strconv.ParseUint(string(v), 10, 64)
+}
+
+func getUint64WithOk(data []byte, path ...string) (uint64, bool) {
+	val, err := getUint64(data, path...)
+	if err == nil {
+		return val, true
+	}
+	return 0, false
+}
+
 func (c *Client) handleMessage(message []byte) {
 	// when receiving message with id. the result will be a subscription number.
 	// that number will be associated to all future message destine to this request
-	if gjson.GetBytes(message, "id").Exists() {
-		requestID := uint64(gjson.GetBytes(message, "id").Int())
-		subID := uint64(gjson.GetBytes(message, "result").Int())
+
+	requestID, ok := getUint64WithOk(message, "id")
+	if ok {
+		subID, _ := getUint64WithOk(message, "result")
 		c.handleNewSubscriptionMessage(requestID, subID)
 		return
 	}
 
-	c.handleSubscriptionMessage(uint64(gjson.GetBytes(message, "params.subscription").Int()), message)
+	subID, _ := getUint64WithOk(message, "params", "subscription")
+	c.handleSubscriptionMessage(subID, message)
 }
 
 func (c *Client) handleNewSubscriptionMessage(requestID, subID uint64) {
