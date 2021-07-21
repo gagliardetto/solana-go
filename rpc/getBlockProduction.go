@@ -91,7 +91,7 @@ type BlockProductionResult struct {
 	Range SlotRangeResponse `json:"range"`
 }
 
-type IdentityToSlotsBlocks map[string][2]int64
+type IdentityToSlotsBlocks map[solana.PublicKey][2]int64
 
 type SlotRangeResponse struct {
 	// First slot of the block production information (inclusive)

@@ -65,4 +65,4 @@ func (cl *Client) GetLeaderScheduleWithOpts(
 // as base-58 encoded strings, and their corresponding leader
 // slot indices as values (indices are relative to the first
 // slot in the requested epoch)
-type GetLeaderScheduleResult map[string][]bin.Uint64
+type GetLeaderScheduleResult map[solana.PublicKey][]bin.Uint64

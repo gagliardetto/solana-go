@@ -4,7 +4,6 @@ import (
 	"crypto"
 	"crypto/ed25519"
 	crypto_rand "crypto/rand"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
@@ -117,6 +116,18 @@ func PublicKeyFromBase58(in string) (out PublicKey, err error) {
 	}
 
 	copy(out[:], val)
+	return
+}
+
+func (p PublicKey) MarshalText() ([]byte, error) {
+	return []byte(base58.Encode(p[:])), nil
+}
+
+func (p *PublicKey) UnmarshalText(data []byte) (err error) {
+	*p, err = PublicKeyFromBase58(string(data))
+	if err != nil {
+		return fmt.Errorf("invalid public key %q: %w", data, err)
+	}
 	return
 }
 

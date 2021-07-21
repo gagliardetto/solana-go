@@ -111,3 +111,32 @@ func TestPrivateKeyFromSolanaKeygenFile(t *testing.T) {
 		})
 	}
 }
+
+func TestPublicKey_MarshalText(t *testing.T) {
+	keyString := "4wBqpZM9k69W87zdYXT2bRtLViWqTiJV3i2Kn9q7S6j"
+	keyParsed := MustPublicKeyFromBase58(keyString)
+
+	var key PublicKey
+	err := key.UnmarshalText([]byte(keyString))
+	require.NoError(t, err)
+
+	assert.True(t, keyParsed.Equals(key))
+
+	keyText, err := key.MarshalText()
+	require.NoError(t, err)
+	assert.Equal(t, []byte(keyString), keyText)
+
+	type IdentityToSlotsBlocks map[PublicKey][2]int64
+
+	var payload IdentityToSlotsBlocks
+	data := `{"` + keyString + `":[3,4]}`
+	err = json.Unmarshal([]byte(data), &payload)
+	require.NoError(t, err)
+
+	assert.Equal(t,
+		IdentityToSlotsBlocks{
+			keyParsed: [2]int64{3, 4},
+		},
+		payload,
+	)
+}
