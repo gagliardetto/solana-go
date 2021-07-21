@@ -48,7 +48,7 @@ The RPC and WS client implementation is based on [this RPC spec](https://github.
 
 ## Requirements
 
-- Go 1.6
+- Go 1.16 or later
 
 ## Installation
 
