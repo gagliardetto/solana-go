@@ -29,7 +29,7 @@ $ go get github.com/gagliardetto/solana-go@latest
 
 There is currently **no stable release**. The SDK is actively developed and latest is `v0.3.2` which is an `alpha` release.
 
-The RPC and WS client implementation is based on https://github.com/solana-labs/solana/blob/dff9c88193da142693cabebfcd3bf68fa8e8b873/docs/src/developing/clients/jsonrpc-api.md
+The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/dff9c88193da142693cabebfcd3bf68fa8e8b873/docs/src/developing/clients/jsonrpc-api.md).
 
 ## Features
 

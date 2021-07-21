@@ -1139,7 +1139,7 @@ func TestClient_GetInflationRate(t *testing.T) {
 }
 
 func TestClient_GetInflationReward(t *testing.T) {
-	// TODO:
+	// TODO: add test with real value
 	responseBody := `[null]`
 	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
 	defer closer()
