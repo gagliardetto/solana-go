@@ -16,7 +16,6 @@ package ws
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -276,7 +275,7 @@ func (c *Client) subscribe(
 	return sub, nil
 }
 
-func decodeResponse(r io.Reader, reply interface{}) (err error) {
+func decodeResponseFromReader(r io.Reader, reply interface{}) (err error) {
 	var c *response
 	if err := json.NewDecoder(r).Decode(&c); err != nil {
 		return err

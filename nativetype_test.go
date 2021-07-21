@@ -1,7 +1,6 @@
 package solana
 
 import (
-	"encoding/json"
 	"strconv"
 	"testing"
 

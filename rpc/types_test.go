@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"encoding/json"
+	stdjson "encoding/json"
 	"testing"
 
 	"github.com/gagliardetto/solana-go"
@@ -65,7 +65,7 @@ func TestData_jsonParsed(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t,
-		json.RawMessage(in),
+		stdjson.RawMessage(in),
 		data.GetRawJSON(),
 	)
 	assert.Equal(t,
@@ -84,7 +84,7 @@ func TestData_jsonParsed_empty(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t,
-		json.RawMessage(in),
+		stdjson.RawMessage(in),
 		data.GetRawJSON(),
 	)
 	assert.Equal(t,

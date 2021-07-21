@@ -16,7 +16,6 @@ package serum
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"testing"

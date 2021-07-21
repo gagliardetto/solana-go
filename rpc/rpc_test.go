@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"encoding/json"
+	stdjson "encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -23,7 +23,7 @@ func mockJSONRPC(t *testing.T, response interface{}) (mock *mockJSONRPCServer, c
 			require.NoError(t, err)
 
 			var responseBody []byte
-			if v, ok := response.(json.RawMessage); ok {
+			if v, ok := response.(stdjson.RawMessage); ok {
 				responseBody = v
 			} else {
 				responseBody, err = json.Marshal(response)

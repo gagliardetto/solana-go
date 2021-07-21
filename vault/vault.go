@@ -15,7 +15,6 @@
 package vault
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 

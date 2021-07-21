@@ -4,13 +4,17 @@ package jsonrpc
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	stdjson "encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
 	"strconv"
+
+	jsoniter "github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
 	jsonrpcVersion = "2.0"
@@ -579,7 +583,7 @@ func Params(params ...interface{}) interface{} {
 //
 // If result was not an integer an error is returned.
 func (RPCResponse *RPCResponse) GetInt() (int64, error) {
-	val, ok := RPCResponse.Result.(json.Number)
+	val, ok := RPCResponse.Result.(stdjson.Number)
 	if !ok {
 		return 0, fmt.Errorf("could not parse int64 from %s", RPCResponse.Result)
 	}
@@ -596,7 +600,7 @@ func (RPCResponse *RPCResponse) GetInt() (int64, error) {
 //
 // If result was not an float64 an error is returned.
 func (RPCResponse *RPCResponse) GetFloat() (float64, error) {
-	val, ok := RPCResponse.Result.(json.Number)
+	val, ok := RPCResponse.Result.(stdjson.Number)
 	if !ok {
 		return 0, fmt.Errorf("could not parse float64 from %s", RPCResponse.Result)
 	}

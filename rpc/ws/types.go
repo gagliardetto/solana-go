@@ -1,7 +1,7 @@
 package ws
 
 import (
-	"encoding/json"
+	stdjson "encoding/json"
 	"fmt"
 	"math/rand"
 )
@@ -34,12 +34,12 @@ func (c *request) encode() ([]byte, error) {
 }
 
 type response struct {
-	Version string           `json:"jsonrpc"`
-	Params  *params          `json:"params"`
-	Error   *json.RawMessage `json:"error"`
+	Version string              `json:"jsonrpc"`
+	Params  *params             `json:"params"`
+	Error   *stdjson.RawMessage `json:"error"`
 }
 
 type params struct {
-	Result       *json.RawMessage `json:"result"`
-	Subscription int              `json:"subscription"`
+	Result       *stdjson.RawMessage `json:"result"`
+	Subscription int                 `json:"subscription"`
 }

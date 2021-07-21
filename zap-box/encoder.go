@@ -2,7 +2,6 @@ package zapbox
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"math"
 	"os"
 	"path"
@@ -11,6 +10,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/logrusorgru/aurora"
 	. "github.com/logrusorgru/aurora"
 	"go.uber.org/zap"
@@ -18,6 +18,8 @@ import (
 	"go.uber.org/zap/zapcore"
 	"golang.org/x/crypto/ssh/terminal"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
 	ansiColorEscape   = "\033["
@@ -244,7 +246,7 @@ type jsonEncoder struct {
 
 	// for encoding generic values by reflection
 	reflectBuf *buffer.Buffer
-	reflectEnc *json.Encoder
+	reflectEnc *jsoniter.Encoder
 }
 
 func newJSONEncoder(cfg zapcore.EncoderConfig, spaced bool) *jsonEncoder {

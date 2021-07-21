@@ -16,7 +16,6 @@ package serum
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"testing"

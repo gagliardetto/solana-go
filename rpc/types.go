@@ -15,7 +15,7 @@
 package rpc
 
 import (
-	"encoding/json"
+	stdjson "encoding/json"
 	"fmt"
 	"time"
 
@@ -219,7 +219,7 @@ type Account struct {
 type DataBytesOrJSON struct {
 	rawDataEncoding solana.EncodingType
 	asDecodedBinary solana.Data
-	asJSON          json.RawMessage
+	asJSON          stdjson.RawMessage
 }
 
 func (dt DataBytesOrJSON) MarshalJSON() ([]byte, error) {
@@ -270,9 +270,9 @@ func (dt *DataBytesOrJSON) GetBinary() []byte {
 	return dt.asDecodedBinary.Content
 }
 
-// GetRawJSON returns a json.RawMessage when the data
+// GetRawJSON returns a stdjson.RawMessage when the data
 // encoding is "jsonParsed".
-func (dt *DataBytesOrJSON) GetRawJSON() json.RawMessage {
+func (dt *DataBytesOrJSON) GetRawJSON() stdjson.RawMessage {
 	return dt.asJSON
 }
 

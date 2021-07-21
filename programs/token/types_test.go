@@ -17,7 +17,6 @@ package token
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"os"
 	"testing"
 

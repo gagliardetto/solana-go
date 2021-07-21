@@ -17,7 +17,6 @@ package serum
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 
 	rice "github.com/GeertJohan/go.rice"
