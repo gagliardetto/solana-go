@@ -16,20 +16,19 @@ More contracts to come.
     <img src="https://user-images.githubusercontent.com/15271561/126141780-cbd92d2c-e160-4385-9606-9094729b54d4.png" margin="auto" height="175"/>
 </div>
 
-## Installation
+## Contents
 
-> :warning: `solana-go` works using SemVer but in 0 version, which means that the 'minor' will be changed when some broken changes are introduced into the application, and the 'patch' will be changed when a new feature with new changes is added or for bug fixing. As soon as v1.0.0 be released, `solana-go` will start to use SemVer as usual.
-
-```bash
-$ cd my-project
-$ go get github.com/gagliardetto/solana-go@latest
-```
-
-## Current development status
-
-There is currently **no stable release**. The SDK is actively developed and latest is `v0.3.2` which is an `alpha` release.
-
-The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/dff9c88193da142693cabebfcd3bf68fa8e8b873/docs/src/developing/clients/jsonrpc-api.md).
+- [Solana SDK library for Go](#solana-sdk-library-for-go)
+  - [Contents](#contents)
+  - [Features](#features)
+  - [Current development status](#current-development-status)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+  - [RPC usage examples](#rpc-usage-examples)
+  - [Contributing](#contributing)
+  - [License](#license)
+  - [Credits](#credits)
+  - [Installation](#installation)
 
 ## Features
 
@@ -41,13 +40,32 @@ The RPC and WS client implementation is based on [this RPC spec](https://github.
 - [ ] Client for Serum
 - [ ] More programs
 
-## RPC usage
+## Current development status
+
+There is currently **no stable release**. The SDK is actively developed and latest is `v0.3.2` which is an `alpha` release.
+
+The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/dff9c88193da142693cabebfcd3bf68fa8e8b873/docs/src/developing/clients/jsonrpc-api.md).
+
+## Requirements
+
+- Go 1.6
+
+## Installation
+
+> :warning: `solana-go` works using SemVer but in 0 version, which means that the 'minor' will be changed when some broken changes are introduced into the application, and the 'patch' will be changed when a new feature with new changes is added or for bug fixing. As soon as v1.0.0 be released, `solana-go` will start to use SemVer as usual.
+
+```bash
+$ cd my-project
+$ go get github.com/gagliardetto/solana-go@latest
+```
+
+## RPC usage examples
 
 TODO
 
 ## Contributing
 
-Any contributions are welcome, use your standard GitHub-fu to pitch in and improve.
+We encourage everyone to contribute, submit issues, PRs, discuss. Every kind of help is welcome.
 
 ## License
 
@@ -56,3 +74,4 @@ Any contributions are welcome, use your standard GitHub-fu to pitch in and impro
 ## Credits
 
 - Gopher logo was originally created by Takuya Ueda (https://twitter.com/tenntenn). Licensed under the Creative Commons 3.0 Attributions license.
+- Pit Vipers https://www.pitviper.com/
