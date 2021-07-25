@@ -141,7 +141,26 @@ func (cl *Client) GetConfirmedSignaturesForAddress2(
 	opts *GetConfirmedSignaturesForAddress2Opts,
 ) (out GetConfirmedSignaturesForAddress2Result, err error) {
 
-	params := []interface{}{address, opts}
+	params := []interface{}{address}
+
+	if opts != nil {
+		obj := M{}
+		if opts.Limit != nil {
+			obj["limit"] = opts.Limit
+		}
+		if !opts.Before.IsZero() {
+			obj["before"] = opts.Before
+		}
+		if !opts.Until.IsZero() {
+			obj["until"] = opts.Until
+		}
+		if opts.Commitment != "" {
+			obj["commitment"] = opts.Commitment
+		}
+		if len(obj) > 0 {
+			params = append(params, obj)
+		}
+	}
 
 	err = cl.rpcClient.CallForInto(ctx, &out, "getConfirmedSignaturesForAddress2", params)
 	return

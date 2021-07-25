@@ -302,9 +302,10 @@ type KeyedAccount struct {
 }
 
 type GetConfirmedSignaturesForAddress2Opts struct {
-	Limit  uint64 `json:"limit,omitempty"`
-	Before string `json:"before,omitempty"`
-	Until  string `json:"until,omitempty"`
+	Limit      *uint64          `json:"limit,omitempty"`
+	Before     solana.Signature `json:"before,omitempty"`
+	Until      solana.Signature `json:"until,omitempty"`
+	Commitment CommitmentType   `json:"commitment,omitempty"`
 }
 
 type GetConfirmedSignaturesForAddress2Result []*TransactionSignature

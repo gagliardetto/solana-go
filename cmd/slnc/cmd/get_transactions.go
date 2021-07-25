@@ -43,10 +43,11 @@ var getTransactionsCmd = &cobra.Command{
 			return fmt.Errorf("invalid account address %q: %w", address, err)
 		}
 
+		limit := uint64(1)
 		csList, err := client.GetConfirmedSignaturesForAddress2(ctx, pubKey, &rpc.GetConfirmedSignaturesForAddress2Opts{
-			Limit:  1,
-			Before: "",
-			Until:  "",
+			Limit: &limit,
+			// Before: "",
+			// Until:  "",
 		})
 		if err != nil {
 			return fmt.Errorf("unable to retrieve confirmed transaction signatures for account: %w", err)

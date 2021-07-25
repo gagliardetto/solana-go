@@ -126,7 +126,8 @@ func TestClient_GetConfirmedSignaturesForAddress2(t *testing.T) {
 	client := New(server.URL)
 
 	account := solana.MustPublicKeyFromBase58("H7ATJQGhwG8Uf8sUntUognFpsKixPy2buFnXkvyNbGUb")
-	out, err := client.GetConfirmedSignaturesForAddress2(context.Background(), account, &GetConfirmedSignaturesForAddress2Opts{Limit: 1})
+	limit := uint64(1)
+	out, err := client.GetConfirmedSignaturesForAddress2(context.Background(), account, &GetConfirmedSignaturesForAddress2Opts{Limit: &limit})
 	require.NoError(t, err)
 
 	assert.Equal(t,
