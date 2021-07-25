@@ -296,7 +296,7 @@ const (
 	// Cannot be used if specifying dataSlice parameters (offset, length).
 	EncodingJSONParsed EncodingType = "jsonParsed"
 
-	EncodingJSON EncodingType = "json" // NOTE: not usable in almost-all places.
+	EncodingJSON EncodingType = "json" // NOTE: you're probably looking for EncodingJSONParsed
 )
 
 // IsAnyOfEncodingType checks whether the provided `candidate` is any of the `allowed`.
