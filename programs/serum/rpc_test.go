@@ -32,7 +32,7 @@ import (
 func TestFetchMarket(t *testing.T) {
 	rpcURL := os.Getenv("RPC_URL")
 	if rpcURL == "" {
-		t.Skip("Setup 'RPC_URL' to run test i.e. 'http://api.mainnet-beta.solana.com:80/rpc'")
+		t.Skip("Setup 'RPC_URL' to run test i.e. 'https://api.mainnet-beta.solana.com'")
 		return
 	}
 
@@ -57,7 +57,7 @@ func TestFetchMarket(t *testing.T) {
 func TestStreamOpenOrders(t *testing.T) {
 	rpcURL := os.Getenv("RPC_URL")
 	if rpcURL == "" {
-		t.Skip("Setup 'RPC_URL' to run test i.e. 'ws://api.mainnet-beta.solana.com:80/rpc'")
+		t.Skip("Setup 'RPC_URL' to run test i.e. 'wss://api.mainnet-beta.solana.com'")
 		return
 	}
 	client, err := ws.Connect(context.Background(), rpcURL)
@@ -65,5 +65,4 @@ func TestStreamOpenOrders(t *testing.T) {
 
 	err = StreamOpenOrders(client)
 	require.NoError(t, err)
-
 }

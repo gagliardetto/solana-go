@@ -65,9 +65,13 @@ func TestAccount(t *testing.T) {
 }
 
 func TestMint(t *testing.T) {
-
+	rpcURL := os.Getenv("RPC_URL")
+	if rpcURL == "" {
+		t.Skip("Setup 'RPC_URL' to run test i.e. 'wss://api.mainnet-beta.solana.com'")
+		return
+	}
 	addr := solana.MustPublicKeyFromBase58("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
-	cli := rpc.New("http://api.mainnet-beta.solana.com")
+	cli := rpc.New(rpcURL)
 
 	var m Mint
 	err := cli.GetAccountDataIn(context.Background(), addr, &m)
@@ -82,9 +86,13 @@ func TestMint(t *testing.T) {
 }
 
 func TestRawMint(t *testing.T) {
-
+	rpcURL := os.Getenv("RPC_URL")
+	if rpcURL == "" {
+		t.Skip("Setup 'RPC_URL' to run test i.e. 'wss://api.mainnet-beta.solana.com'")
+		return
+	}
 	addr := solana.MustPublicKeyFromBase58("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
-	cli := rpc.New("http://api.mainnet-beta.solana.com")
+	cli := rpc.New(rpcURL)
 
 	resp, err := cli.GetAccountInfo(context.Background(), addr)
 	// handle `err`
