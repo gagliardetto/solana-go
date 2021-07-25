@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 
 	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
@@ -69,6 +70,7 @@ func (cl *Client) GetBlockWithOpts(
 	slot uint64,
 	opts *GetBlockOpts,
 ) (out *GetBlockResult, err error) {
+
 	obj := M{
 		"encoding": solana.EncodingJSON,
 	}
@@ -84,6 +86,16 @@ func (cl *Client) GetBlockWithOpts(
 			obj["commitment"] = opts.Commitment
 		}
 		if opts.Encoding != "" {
+			if !solana.IsAnyOfEncodingType(
+				opts.Encoding,
+				// Valid encodings:
+				solana.EncodingJSON,
+				solana.EncodingJSONParsed,
+				solana.EncodingBase58,
+				solana.EncodingBase64,
+			) {
+				return nil, fmt.Errorf("provided encoding is not supported: %s", opts.Encoding)
+			}
 			obj["encoding"] = opts.Encoding
 		}
 	}

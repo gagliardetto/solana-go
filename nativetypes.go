@@ -298,3 +298,13 @@ const (
 
 	EncodingJSON EncodingType = "json" // NOTE: not usable in almost-all places.
 )
+
+// IsAnyOfEncodingType checks whether the provided `candidate` is any of the `allowed`.
+func IsAnyOfEncodingType(candidate EncodingType, allowed ...EncodingType) bool {
+	for _, v := range allowed {
+		if candidate == v {
+			return true
+		}
+	}
+	return false
+}
