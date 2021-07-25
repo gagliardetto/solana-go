@@ -579,7 +579,7 @@ func TestClient_GetBlockProductionWithOpts(t *testing.T) {
 			Range: &SlotRangeRequest{
 				FirstSlot: firstSlot,
 				LastSlot:  &lastSlot,
-				Identity:  &identity,
+				Identity:  identity,
 			},
 		},
 	)
