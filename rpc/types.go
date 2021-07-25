@@ -322,11 +322,25 @@ type RPCFilterMemcmp struct {
 type CommitmentType string
 
 const (
-	CommitmentMax          CommitmentType = "max"
-	CommitmentRecent       CommitmentType = "recent"
-	CommitmentRoot         CommitmentType = "root"
-	CommitmentSingle       CommitmentType = "single"
-	CommitmentSingleGossip CommitmentType = "singleGossip"
+	CommitmentMax          CommitmentType = "max"          // Deprecated as of v1.5.5
+	CommitmentRecent       CommitmentType = "recent"       // Deprecated as of v1.5.5
+	CommitmentRoot         CommitmentType = "root"         // Deprecated as of v1.5.5
+	CommitmentSingle       CommitmentType = "single"       // Deprecated as of v1.5.5
+	CommitmentSingleGossip CommitmentType = "singleGossip" // Deprecated as of v1.5.5
+
+	// The node will query the most recent block confirmed by supermajority
+	// of the cluster as having reached maximum lockout,
+	// meaning the cluster has recognized this block as finalized.
+	CommitmentFinalized CommitmentType = "finalized"
+
+	// The node will query the most recent block that has been voted on by supermajority of the cluster.
+	// - It incorporates votes from gossip and replay.
+	// - It does not count votes on descendants of a block, only direct votes on that block.
+	// - This confirmation level also upholds "optimistic confirmation" guarantees in release 1.3 and onwards.
+	CommitmentConfirmed CommitmentType = "confirmed"
+
+	// The node will query its most recent block. Note that the block may not be complete.
+	CommitmentProcessed CommitmentType = "processed"
 )
 
 // Parsed Transaction
