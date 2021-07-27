@@ -58,7 +58,6 @@ type Message struct {
 }
 
 func (m *Message) AccountMetaList() (out []*AccountMeta) {
-	return m.AccountMetaList()
 	for _, a := range m.AccountKeys {
 		out = append(out, &AccountMeta{
 			PublicKey:  a,
