@@ -216,9 +216,7 @@ func mustAnyToJSON(raw interface{}) []byte {
 // into an `interface{}` type variable, and returns it.
 func mustJSONToInterface(rawJSON []byte) interface{} {
 	var out interface{}
-	dec := json.NewDecoder(bytes.NewReader(rawJSON))
-	dec.UseNumber()
-	err := dec.Decode(&out)
+	err := json.Unmarshal(rawJSON, &out)
 	if err != nil {
 		panic(err)
 	}
