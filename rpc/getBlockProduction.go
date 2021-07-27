@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -95,8 +94,8 @@ type IdentityToSlotsBlocks map[solana.PublicKey][2]int64
 
 type SlotRangeResponse struct {
 	// First slot of the block production information (inclusive)
-	FirstSlot bin.Uint64 `json:"firstSlot"`
+	FirstSlot uint64 `json:"firstSlot"`
 
 	// Last slot of block production information (inclusive)
-	LastSlot bin.Uint64 `json:"lastSlot"`
+	LastSlot uint64 `json:"lastSlot"`
 }

@@ -2,8 +2,6 @@ package rpc
 
 import (
 	"context"
-
-	bin "github.com/dfuse-io/binary"
 )
 
 // GetVersion returns the current solana versions running on the node.
@@ -17,5 +15,5 @@ type GetVersionResult struct {
 	SolanaCore string `json:"solana-core"`
 
 	// Unique identifier of the current software's feature set.
-	FeatureSet bin.Int64 `json:"feature-set"`
+	FeatureSet int64 `json:"feature-set"`
 }

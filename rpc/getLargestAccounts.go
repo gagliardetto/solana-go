@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -46,5 +45,5 @@ type LargestAccountsResult struct {
 	Address solana.PublicKey `json:"address"`
 
 	// Number of lamports in the account.
-	Lamports bin.Uint64 `json:"lamports"`
+	Lamports uint64 `json:"lamports"`
 }

@@ -2,8 +2,6 @@ package rpc
 
 import (
 	"context"
-
-	bin "github.com/dfuse-io/binary"
 )
 
 // GetBlocks returns a list of confirmed blocks between two slots.
@@ -34,4 +32,4 @@ func (cl *Client) GetBlocks(
 	return
 }
 
-type BlocksResult []bin.Uint64
+type BlocksResult []uint64

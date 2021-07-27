@@ -19,12 +19,11 @@ import (
 	"fmt"
 	"time"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
 type Context struct {
-	Slot bin.Uint64 `json:"slot"`
+	Slot uint64 `json:"slot"`
 }
 
 type RPCContext struct {
@@ -33,7 +32,7 @@ type RPCContext struct {
 
 type GetBalanceResult struct {
 	RPCContext
-	Value bin.Uint64 `json:"value"`
+	Value uint64 `json:"value"`
 }
 
 type GetRecentBlockhashResult struct {
@@ -47,7 +46,7 @@ type BlockhashResult struct {
 }
 
 type FeeCalculator struct {
-	LamportsPerSignature bin.Uint64 `json:"lamportsPerSignature"`
+	LamportsPerSignature uint64 `json:"lamportsPerSignature"`
 }
 
 type GetConfirmedBlockResult struct {
@@ -56,11 +55,11 @@ type GetConfirmedBlockResult struct {
 	// could be zeroes if ledger was clean-up and this is unavailable
 	PreviousBlockhash solana.Hash `json:"previousBlockhash"`
 
-	ParentSlot   bin.Uint64            `json:"parentSlot"`
+	ParentSlot   uint64                `json:"parentSlot"`
 	Transactions []TransactionWithMeta `json:"transactions"`
 	Signatures   []solana.Signature    `json:"signatures"`
 	Rewards      []BlockReward         `json:"rewards"`
-	BlockTime    *bin.Uint64           `json:"blockTime,omitempty"`
+	BlockTime    *uint64               `json:"blockTime,omitempty"`
 }
 
 type BlockReward struct {
@@ -68,10 +67,10 @@ type BlockReward struct {
 	Pubkey solana.PublicKey `json:"pubkey"`
 
 	// Number of reward lamports credited or debited by the account, as a i64.
-	Lamports bin.Int64 `json:"lamports"`
+	Lamports int64 `json:"lamports"`
 
 	// Account balance in lamports after the reward was applied.
-	PostBalance bin.Uint64 `json:"postBalance"`
+	PostBalance uint64 `json:"postBalance"`
 
 	// Type of reward: "Fee", "Rent", "Voting", "Staking".
 	RewardType RewardType `json:"rewardType"`
@@ -114,12 +113,12 @@ type UiTokenAmount struct {
 	// Raw amount of tokens as a string, ignoring decimals.
 	Amount string `json:"amount"`
 
-	// TODO: <number> == bin.Int64 ???
+	// TODO: <number> == int64 ???
 	// Number of decimals configured for token's mint.
 	Decimals uint8 `json:"decimals"`
 
 	// DEPRECATED: Token amount as a float, accounting for decimals.
-	UiAmount *bin.JSONFloat64 `json:"uiAmount"`
+	UiAmount *float64 `json:"uiAmount"`
 
 	// Token amount as a string, accounting for decimals.
 	UiAmountString string `json:"uiAmountString"`
@@ -131,13 +130,13 @@ type TransactionMeta struct {
 	Err interface{} `json:"err"`
 
 	// Fee this transaction was charged
-	Fee bin.Uint64 `json:"fee"`
+	Fee uint64 `json:"fee"`
 
 	// Array of u64 account balances from before the transaction was processed
-	PreBalances []bin.Uint64 `json:"preBalances"`
+	PreBalances []uint64 `json:"preBalances"`
 
 	// Array of u64 account balances after the transaction was processed
-	PostBalances []bin.Uint64 `json:"postBalances"`
+	PostBalances []uint64 `json:"postBalances"`
 
 	// List of inner instructions or omitted if inner instruction recording
 	// was not yet enabled during this transaction
@@ -162,7 +161,7 @@ type TransactionMeta struct {
 }
 
 type InnerInstruction struct {
-	// TODO: <number> == bin.Int64 ???
+	// TODO: <number> == int64 ???
 	// Index of the transaction instruction from which the inner instruction(s) originated
 	Index uint16 `json:"index"`
 
@@ -185,7 +184,7 @@ type TransactionSignature struct {
 	Signature solana.Signature `json:"signature"`
 
 	// The slot that contains the block with the transaction.
-	Slot bin.Uint64 `json:"slot,omitempty"`
+	Slot uint64 `json:"slot,omitempty"`
 
 	// Estimated production time, as Unix timestamp (seconds since the Unix epoch)
 	// of when transaction was processed. Nil if not available.
@@ -201,7 +200,7 @@ type GetAccountInfoResult struct {
 
 type Account struct {
 	// Number of lamports assigned to this account
-	Lamports bin.Uint64 `json:"lamports"`
+	Lamports uint64 `json:"lamports"`
 
 	// Pubkey of the program this account has been assigned to
 	Owner solana.PublicKey `json:"owner"`
@@ -213,7 +212,7 @@ type Account struct {
 	Executable bool `json:"executable"`
 
 	// The epoch at which this account will next owe rent
-	RentEpoch bin.Uint64 `json:"rentEpoch"`
+	RentEpoch uint64 `json:"rentEpoch"`
 }
 
 type DataBytesOrJSON struct {
@@ -312,7 +311,7 @@ type GetConfirmedSignaturesForAddress2Result []*TransactionSignature
 
 type RPCFilter struct {
 	Memcmp   *RPCFilterMemcmp `json:"memcmp,omitempty"`
-	DataSize bin.Uint64       `json:"dataSize,omitempty"`
+	DataSize uint64           `json:"dataSize,omitempty"`
 }
 
 type RPCFilterMemcmp struct {
@@ -364,7 +363,7 @@ type AccountKey struct {
 }
 
 type ParsedInstruction struct {
-	Accounts       []bin.Int64      `json:"accounts,omitempty"`
+	Accounts       []int64          `json:"accounts,omitempty"`
 	Data           solana.Base58    `json:"data,omitempty"`
 	Parsed         *InstructionInfo `json:"parsed,omitempty"`
 	Program        string           `json:"program,omitempty"`

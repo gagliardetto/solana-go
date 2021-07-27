@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -45,11 +44,11 @@ type GetSignatureStatusesResult struct {
 
 type SignatureStatusesResult struct {
 	// The slot the transaction was processed.
-	Slot bin.Uint64 `json:"slot"`
+	Slot uint64 `json:"slot"`
 
 	// Number of blocks since signature confirmation,
 	// null if rooted or finalized by a supermajority of the cluster.
-	Confirmations *bin.Uint64 `json:"confirmations"`
+	Confirmations *uint64 `json:"confirmations"`
 
 	// Error if transaction failed, null if transaction succeeded.
 	Err interface{} `json:"err"`

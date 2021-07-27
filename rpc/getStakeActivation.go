@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -41,10 +40,10 @@ type GetStakeActivationResult struct {
 	State ActivationStateType `json:"state"`
 
 	// Stake active during the epoch.
-	Active bin.Uint64 `json:"active"`
+	Active uint64 `json:"active"`
 
 	// Stake inactive during the epoch.
-	Inactive bin.Uint64 `json:"inactive"`
+	Inactive uint64 `json:"inactive"`
 }
 
 type ActivationStateType string

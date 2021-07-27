@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -36,8 +35,8 @@ type FeesResult struct {
 	FeeCalculator FeeCalculator `json:"feeCalculator"`
 
 	// DEPRECATED - this value is inaccurate and should not be relied upon.
-	LastValidSlot bin.Uint64 `json:"lastValidSlot"`
+	LastValidSlot uint64 `json:"lastValidSlot"`
 
 	// Last block height at which a blockhash will be valid.
-	LastValidBlockHeight bin.Uint64 `json:"lastValidBlockHeight"`
+	LastValidBlockHeight uint64 `json:"lastValidBlockHeight"`
 }

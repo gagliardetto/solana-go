@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -59,7 +58,7 @@ func (cl *Client) GetTransaction(
 
 type GetTransactionResult struct {
 	// The slot this transaction was processed in.
-	Slot bin.Uint64 `json:"slot"`
+	Slot uint64 `json:"slot"`
 
 	// Estimated production time, as Unix timestamp (seconds since the Unix epoch)
 	// of when the transaction was processed.

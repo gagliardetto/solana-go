@@ -1,7 +1,6 @@
 package ws
 
 import (
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 )
@@ -10,7 +9,7 @@ type VoteResult struct {
 	// The vote hash.
 	Hash solana.Hash `json:"hash"`
 	// The slots covered by the vote.
-	Slots []bin.Uint64 `json:"slots"`
+	Slots []uint64 `json:"slots"`
 	// The timestamp of the vote.
 	Timestamp *rpc.UnixTimeSeconds `json:"timestamp,omitempty"`
 }

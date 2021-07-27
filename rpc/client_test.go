@@ -15,11 +15,12 @@
 package rpc
 
 import (
+	"bytes"
 	"context"
 	stdjson "encoding/json"
 	"testing"
 
-	bin "github.com/dfuse-io/binary"
+	"github.com/AlekSi/pointer"
 	"github.com/gagliardetto/solana-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -190,8 +191,8 @@ func TestClient_GetConfirmedTransaction(t *testing.T) {
 		},
 		Meta: &TransactionMeta{
 			Fee:               5000,
-			PreBalances:       []bin.Uint64{},
-			PostBalances:      []bin.Uint64{},
+			PreBalances:       []uint64{},
+			PostBalances:      []uint64{},
 			InnerInstructions: []InnerInstruction{},
 			LogMessages:       []string{},
 			Status: DeprecatedTransactionMetaStatus{
@@ -215,7 +216,23 @@ func mustAnyToJSON(raw interface{}) []byte {
 // into an `interface{}` type variable, and returns it.
 func mustJSONToInterface(rawJSON []byte) interface{} {
 	var out interface{}
-	err := json.Unmarshal(rawJSON, &out)
+	dec := json.NewDecoder(bytes.NewReader(rawJSON))
+	dec.UseNumber()
+	err := dec.Decode(&out)
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
+
+// mustJSONToInterfaceWithUseNumber unmarshals the provided JSON bytes
+// into an `interface{}` type variable, and returns it.
+// The decoder is configured with `UseNumber()`.
+func mustJSONToInterfaceWithUseNumber(rawJSON []byte) interface{} {
+	var out interface{}
+	dec := json.NewDecoder(bytes.NewReader(rawJSON))
+	dec.UseNumber()
+	err := dec.Decode(&out)
 	if err != nil {
 		panic(err)
 	}
@@ -225,14 +242,6 @@ func mustJSONToInterface(rawJSON []byte) interface{} {
 // wrapIntoRPC wraps the provided string is an RPC payload as result.
 func wrapIntoRPC(res string) string {
 	return `{"jsonrpc":"2.0","result":` + res + `,"id":0}`
-}
-
-func PointerToBinInt64(v bin.Int64) *bin.Int64 {
-	return &v
-}
-
-func PointerToBinUint64(v bin.Uint64) *bin.Uint64 {
-	return &v
 }
 
 func TestClient_GetRecentBlockhash(t *testing.T) {
@@ -343,8 +352,8 @@ func TestClient_GetBlock(t *testing.T) {
 
 	assert.Equal(t,
 		&GetBlockResult{
-			BlockHeight:       PointerToBinUint64(69213636),
-			BlockTime:         PointerToBinInt64(1625227950),
+			BlockHeight:       pointer.ToUint64(69213636),
+			BlockTime:         pointer.ToInt64(1625227950),
 			Blockhash:         solana.MustHashFromBase58("5M77sHdwzH6rckuQwF8HL1w52n7hjrh4GVTFiF6T8QyB"),
 			ParentSlot:        83987983,
 			PreviousBlockhash: solana.MustHashFromBase58("Aq9jSXe1jRzfiaBcRFLe4wm7j499vWVEeFQrq5nnXfZN"),
@@ -365,11 +374,11 @@ func TestClient_GetBlock(t *testing.T) {
 						LogMessages: []string{
 							"Program Vote111111111111111111111111111111111111111 invoke [1]", "Program Vote111111111111111111111111111111111111111 success",
 						},
-						PostBalances: []bin.Uint64{
+						PostBalances: []uint64{
 							441866063495, 40905918933763, 1, 1, 1,
 						},
 						PostTokenBalances: []TokenBalance{},
-						PreBalances: []bin.Uint64{
+						PreBalances: []uint64{
 							441866068495, 40905918933763, 1, 1, 1,
 						},
 						PreTokenBalances: []TokenBalance{},
@@ -414,11 +423,11 @@ func TestClient_GetBlock(t *testing.T) {
 						LogMessages: []string{
 							"Program Vote111111111111111111111111111111111111111 invoke [1]", "Program Vote111111111111111111111111111111111111111 success",
 						},
-						PostBalances: []bin.Uint64{
+						PostBalances: []uint64{
 							334759887662, 151357332545078, 1, 1, 1,
 						},
 						PostTokenBalances: []TokenBalance{},
-						PreBalances: []bin.Uint64{
+						PreBalances: []uint64{
 							334759892662, 151357332545078, 1, 1, 1,
 						},
 						PreTokenBalances: []TokenBalance{},
@@ -633,42 +642,43 @@ func TestClient_GetBlockCommitment(t *testing.T) {
 	)
 
 	expected := map[string]interface{}{"commitment": []interface{}{
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		"44854495719374",
-		0.0,
-		"51599979318189",
-		"5070972605440",
-		"140323113958535",
-		"169550804919131",
-		"272061505737107",
-		"860587424880950",
-		"1374732609383053",
-		"2334359721325133",
-		"4664454087479672",
-		"10122947678661428",
-		"52107037802932750"},
-		"totalStake": "73611541921665680",
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("0"),
+		stdjson.Number("44854495719374"),
+		stdjson.Number("0"),
+		stdjson.Number("51599979318189"),
+		stdjson.Number("5070972605440"),
+		stdjson.Number("140323113958535"),
+		stdjson.Number("169550804919131"),
+		stdjson.Number("272061505737107"),
+		stdjson.Number("860587424880950"),
+		stdjson.Number("1374732609383053"),
+		stdjson.Number("2334359721325133"),
+		stdjson.Number("4664454087479672"),
+		stdjson.Number("10122947678661428"),
+		stdjson.Number("52107037802932750"),
+	},
+		"totalStake": stdjson.Number("73611541921665680"),
 	}
 
-	got := mustJSONToInterface(mustAnyToJSON(out))
+	got := mustJSONToInterfaceWithUseNumber(mustAnyToJSON(out))
 
 	assert.Equal(t, expected, got, "both deserialized values must be equal")
 }
@@ -842,7 +852,8 @@ func TestClient_GetEpochInfo(t *testing.T) {
 		"epoch":            207.0,
 		"slotIndex":        93895.0,
 		"slotsInEpoch":     432000.0,
-		"transactionCount": "27287000257"}
+		"transactionCount": 27287000257.0,
+	}
 
 	got := mustJSONToInterface(mustAnyToJSON(out))
 
@@ -1998,7 +2009,7 @@ func TestClient_GetTransaction(t *testing.T) {
 					RecentBlockhash: solana.MustHashFromBase58("6o9C27iJ5rPi7wEpvQu1cFbB1WnRudtsPnbY8GvFWrgR"),
 					Instructions: []ParsedInstruction{
 						{
-							Accounts: []bin.Int64{
+							Accounts: []int64{
 								1,
 								2,
 								3,
@@ -2021,14 +2032,14 @@ func TestClient_GetTransaction(t *testing.T) {
 		Meta: &TransactionMeta{
 			Err: nil,
 			Fee: 5000,
-			PreBalances: []bin.Uint64{
+			PreBalances: []uint64{
 				199247215749,
 				90459349430703,
 				1,
 				1,
 				1,
 			},
-			PostBalances: []bin.Uint64{
+			PostBalances: []uint64{
 				199247210749,
 				90459349430703,
 				1,

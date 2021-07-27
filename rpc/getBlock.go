@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -124,7 +123,7 @@ type GetBlockResult struct {
 	PreviousBlockhash solana.Hash `json:"previousBlockhash"`
 
 	// The slot index of this block's parent.
-	ParentSlot bin.Uint64 `json:"parentSlot"`
+	ParentSlot uint64 `json:"parentSlot"`
 
 	// Present if "full" transaction details are requested.
 	Transactions []TransactionWithMeta `json:"transactions"`
@@ -138,8 +137,8 @@ type GetBlockResult struct {
 
 	// Estimated production time, as Unix timestamp (seconds since the Unix epoch).
 	// Nil if not available.
-	BlockTime *bin.Int64 `json:"blockTime"`
+	BlockTime *int64 `json:"blockTime"`
 
 	// The number of blocks beneath this block.
-	BlockHeight *bin.Uint64 `json:"blockHeight"`
+	BlockHeight *uint64 `json:"blockHeight"`
 }

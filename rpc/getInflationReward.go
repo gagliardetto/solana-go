@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -45,16 +44,16 @@ func (cl *Client) GetInflationReward(
 
 type GetInflationRewardResult struct {
 	// Epoch for which reward occured.
-	Epoch bin.Uint64 `json:"epoch"`
+	Epoch uint64 `json:"epoch"`
 
 	// The slot in which the rewards are effective.
-	EffectiveSlot bin.Uint64 `json:"effectiveSlot"`
+	EffectiveSlot uint64 `json:"effectiveSlot"`
 
 	// Reward amount in lamports.
-	Amount bin.Uint64 `json:"amount"`
+	Amount uint64 `json:"amount"`
 
 	// Post balance of the account in lamports.
-	PostBalance bin.Uint64 `json:"postBalance"`
+	PostBalance uint64 `json:"postBalance"`
 
 	// Vote account commission when the reward was credited.
 	Commission *uint8 `json:"commission,omitempty"`

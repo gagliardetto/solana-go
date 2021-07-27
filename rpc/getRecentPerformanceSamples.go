@@ -2,8 +2,6 @@ package rpc
 
 import (
 	"context"
-
-	bin "github.com/dfuse-io/binary"
 )
 
 // GetRecentPerformanceSamples returns a list of recent performance samples,
@@ -23,13 +21,13 @@ func (cl *Client) GetRecentPerformanceSamples(
 
 type GetRecentPerformanceSamplesResult struct {
 	// Slot in which sample was taken at.
-	Slot bin.Uint64 `json:"slot"`
+	Slot uint64 `json:"slot"`
 
 	// Number of transactions in sample.
-	NumTransactions bin.Uint64 `json:"numTransactions"`
+	NumTransactions uint64 `json:"numTransactions"`
 
 	// Number of slots in sample.
-	NumSlots bin.Uint64 `json:"numSlots"`
+	NumSlots uint64 `json:"numSlots"`
 
 	// Number of seconds in a sample window.
 	SamplePeriodSecs uint16 `json:"samplePeriodSecs"`

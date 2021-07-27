@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -64,4 +63,4 @@ func (cl *Client) GetLeaderScheduleWithOpts(
 // The result field will be a dictionary of validator identities,
 // and their corresponding leader slot indices as values
 // (indices are relative to the first slot in the requested epoch).
-type GetLeaderScheduleResult map[solana.PublicKey][]bin.Uint64
+type GetLeaderScheduleResult map[solana.PublicKey][]uint64

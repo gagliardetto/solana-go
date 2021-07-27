@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -33,8 +32,8 @@ type GetClusterNodesResult struct {
 
 	// TODO: what type is this?
 	// The unique identifier of the node's feature set.
-	FeatureSet bin.Int64 `json:"featureSet"`
+	FeatureSet int64 `json:"featureSet"`
 
 	// The shred version the node has been configured to use.
-	ShredVersion bin.Int64 `json:"shredVersion"`
+	ShredVersion int64 `json:"shredVersion"`
 }

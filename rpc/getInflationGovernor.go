@@ -2,8 +2,6 @@ package rpc
 
 import (
 	"context"
-
-	bin "github.com/dfuse-io/binary"
 )
 
 // GetInflationGovernor returns the current inflation governor.
@@ -23,17 +21,17 @@ func (cl *Client) GetInflationGovernor(
 
 type GetInflationGovernorResult struct {
 	// The initial inflation percentage from time 0.
-	Initial bin.JSONFloat64 `json:"initial"`
+	Initial float64 `json:"initial"`
 
 	// Terminal inflation percentage.
-	Terminal bin.JSONFloat64 `json:"terminal"`
+	Terminal float64 `json:"terminal"`
 
 	// Rate per year at which inflation is lowered. Rate reduction is derived using the target slot time in genesis config.
-	Taper bin.JSONFloat64 `json:"taper"`
+	Taper float64 `json:"taper"`
 
 	// Percentage of total inflation allocated to the foundation.
-	Foundation bin.JSONFloat64 `json:"foundation"`
+	Foundation float64 `json:"foundation"`
 
 	// Duration of foundation pool inflation in years.
-	FoundationTerm bin.JSONFloat64 `json:"foundationTerm"`
+	FoundationTerm float64 `json:"foundationTerm"`
 }

@@ -27,8 +27,6 @@ type GetSupplyResult struct {
 }
 
 type SupplyResult struct {
-	// TODO: use bin.Uint64 ???
-
 	// Total supply in lamports
 	Total uint64 `json:"total"`
 

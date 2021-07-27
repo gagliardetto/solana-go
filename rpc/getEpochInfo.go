@@ -2,8 +2,6 @@ package rpc
 
 import (
 	"context"
-
-	bin "github.com/dfuse-io/binary"
 )
 
 // GetEpochInfo returns information about the current epoch.
@@ -21,19 +19,19 @@ func (cl *Client) GetEpochInfo(
 
 type GetEpochInfoResult struct {
 	// The current slot.
-	AbsoluteSlot bin.Uint64 `json:"absoluteSlot"`
+	AbsoluteSlot uint64 `json:"absoluteSlot"`
 
 	// The current block height.
-	BlockHeight bin.Uint64 `json:"blockHeight"`
+	BlockHeight uint64 `json:"blockHeight"`
 
 	// The current epoch.
-	Epoch bin.Uint64 `json:"epoch"`
+	Epoch uint64 `json:"epoch"`
 
 	// The current slot relative to the start of the current epoch.
-	SlotIndex bin.Uint64 `json:"slotIndex"`
+	SlotIndex uint64 `json:"slotIndex"`
 
 	// The number of slots in this epoch.
-	SlotsInEpoch bin.Uint64 `json:"slotsInEpoch"`
+	SlotsInEpoch uint64 `json:"slotsInEpoch"`
 
-	TransactionCount bin.Uint64 `json:"transactionCount"`
+	TransactionCount uint64 `json:"transactionCount"`
 }

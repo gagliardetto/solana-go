@@ -1,8 +1,6 @@
 package ws
 
-import bin "github.com/dfuse-io/binary"
-
-type RootResult bin.Uint64
+type RootResult uint64
 
 // SignatureSubscribe subscribes to receive notification
 // anytime a new root is set by the validator.
