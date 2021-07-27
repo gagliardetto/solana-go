@@ -15,15 +15,15 @@ const (
 )
 
 const (
-	EndpointRPC_DevNet           = protocolHTTPS + hostDevNet
-	EndpointRPC_TestNet          = protocolHTTPS + hostTestNet
-	EndpointRPC_MainNetBeta      = protocolHTTPS + hostMainNetBeta
-	EndpointRPC_MainNetBetaSerum = protocolHTTPS + hostMainNetBetaSerum
+	DevNet_RPC           = protocolHTTPS + hostDevNet
+	TestNet_RPC          = protocolHTTPS + hostTestNet
+	MainNetBeta_RPC      = protocolHTTPS + hostMainNetBeta
+	MainNetBetaSerum_RPC = protocolHTTPS + hostMainNetBetaSerum
 )
 
 const (
-	EndpointWS_DevNet           = protocolWSS + hostDevNet
-	EndpointWS_TestNet          = protocolWSS + hostTestNet
-	EndpointWS_MainNetBeta      = protocolWSS + hostMainNetBeta
-	EndpointWS_MainNetBetaSerum = protocolWSS + hostMainNetBetaSerum
+	DevNet_WS           = protocolWSS + hostDevNet
+	TestNet_WS          = protocolWSS + hostTestNet
+	MainNetBeta_WS      = protocolWSS + hostMainNetBeta
+	MainNetBetaSerum_WS = protocolWSS + hostMainNetBetaSerum
 )

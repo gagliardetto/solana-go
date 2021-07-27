@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	endpoint := rpc.EndpointRPC_TestNet
+	endpoint := rpc.TestNet_RPC
 	client := rpc.New(endpoint)
 
 	pubKey := solana.MustPublicKeyFromBase58("EzK5qLWhftu8Z2znVa5fozVtobbjhd8Gdu9hQHpC8bec")

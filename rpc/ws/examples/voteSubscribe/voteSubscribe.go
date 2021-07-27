@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	client, err := ws.Connect(context.Background(), rpc.EndpointWS_MainNetBeta)
+	client, err := ws.Connect(context.Background(), rpc.MainNetBeta_WS)
 	if err != nil {
 		panic(err)
 	}

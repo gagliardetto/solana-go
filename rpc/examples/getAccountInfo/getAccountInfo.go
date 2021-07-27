@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	endpoint := rpc.EndpointRPC_MainNetBeta
+	endpoint := rpc.MainNetBeta_RPC
 	client := rpc.New(endpoint)
 
 	{
