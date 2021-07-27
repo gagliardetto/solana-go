@@ -78,11 +78,11 @@ type TransactionResultEnvelope struct {
 	asParsedTransaction *ParsedTransaction
 }
 
-func (dt TransactionResultEnvelope) MarshalJSON() ([]byte, error) {
-	if dt.asParsedTransaction != nil {
-		return json.Marshal(dt.asParsedTransaction)
+func (wrap TransactionResultEnvelope) MarshalJSON() ([]byte, error) {
+	if wrap.asParsedTransaction != nil {
+		return json.Marshal(wrap.asParsedTransaction)
 	}
-	return json.Marshal(dt.asDecodedBinary)
+	return json.Marshal(wrap.asDecodedBinary)
 }
 
 func (wrap *TransactionResultEnvelope) UnmarshalJSON(data []byte) error {
