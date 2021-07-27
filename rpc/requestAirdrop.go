@@ -24,12 +24,12 @@ import (
 func (cl *Client) RequestAirdrop(
 	ctx context.Context,
 	account solana.PublicKey,
-	lamport uint64,
+	lamports uint64,
 	commitment CommitmentType, // optional; used for retrieving blockhash and verifying airdrop success.
 ) (signature solana.Signature, err error) {
 	params := []interface{}{
 		account,
-		lamport,
+		lamports,
 	}
 	if commitment != "" {
 		params = append(params,

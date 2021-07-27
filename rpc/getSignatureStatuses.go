@@ -15,10 +15,11 @@ import (
 func (cl *Client) GetSignatureStatuses(
 	ctx context.Context,
 
-	// if true, a Solana node will search its ledger cache for any signatures not found in the recent status cache
+	// If true, a Solana node will search its ledger
+	// cache for any signatures not found in the recent status cache.
 	searchTransactionHistory bool,
 
-	// transaction signatures to confirm
+	// Transaction signatures to confirm.
 	transactionSignatures ...solana.Signature,
 ) (out *GetSignatureStatusesResult, err error) {
 	params := []interface{}{transactionSignatures}
@@ -46,7 +47,8 @@ type SignatureStatusesResult struct {
 	// The slot the transaction was processed.
 	Slot bin.Uint64 `json:"slot"`
 
-	// Number of blocks since signature confirmation, null if rooted, as well as finalized by a supermajority of the cluster.
+	// Number of blocks since signature confirmation,
+	// null if rooted or finalized by a supermajority of the cluster.
 	Confirmations *bin.Uint64 `json:"confirmations"`
 
 	// Error if transaction failed, null if transaction succeeded.

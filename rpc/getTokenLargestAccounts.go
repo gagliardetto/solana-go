@@ -27,6 +27,6 @@ type GetTokenLargestAccountsResult struct {
 	Value []*TokenLargestAccountsResult `json:"value"`
 }
 type TokenLargestAccountsResult struct {
-	Address string `json:"address"` // the address of the token account
+	Address solana.PublicKey `json:"address"` // the address of the token account
 	UiTokenAmount
 }

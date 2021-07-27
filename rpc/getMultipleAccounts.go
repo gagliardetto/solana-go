@@ -24,11 +24,13 @@ func (cl *Client) GetMultipleAccounts(
 	)
 }
 
+type GetMultipleAccountsOpts GetAccountInfoOpts
+
 // GetMultipleAccountsWithOpts returns the account information for a list of Pubkeys.
 func (cl *Client) GetMultipleAccountsWithOpts(
 	ctx context.Context,
 	accounts []solana.PublicKey,
-	opts *GetAccountInfoOpts,
+	opts *GetMultipleAccountsOpts,
 ) (out *GetMultipleAccountsResult, err error) {
 	params := []interface{}{accounts}
 

@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 
 	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
@@ -27,6 +28,16 @@ func (cl *Client) GetTransaction(
 	if opts != nil {
 		obj := M{}
 		if opts.Encoding != "" {
+			if !solana.IsAnyOfEncodingType(
+				opts.Encoding,
+				// Valid encodings:
+				solana.EncodingJSON,
+				// solana.EncodingJSONParsed, // TODO
+				solana.EncodingBase58,
+				solana.EncodingBase64,
+			) {
+				return nil, fmt.Errorf("provided encoding is not supported: %s", opts.Encoding)
+			}
 			obj["encoding"] = opts.Encoding
 		}
 		if opts.Commitment != "" {
@@ -55,6 +66,63 @@ type GetTransactionResult struct {
 	// Nil if not available.
 	BlockTime *UnixTimeSeconds `json:"blockTime"`
 
-	Transaction *ParsedTransaction `json:"transaction"`
-	Meta        *TransactionMeta   `json:"meta,omitempty"`
+	Transaction *TransactionResultEnvelope `json:"transaction"`
+	Meta        *TransactionMeta           `json:"meta,omitempty"`
+}
+
+// TransactionResultEnvelope will contain a *ParsedTransaction if the requested encoding is `solana.EncodingJSON`
+// (which is also the default when the encoding is not specified),
+// or a `solana.Data` in case of EncodingBase58, EncodingBase64.
+type TransactionResultEnvelope struct {
+	asDecodedBinary     solana.Data
+	asParsedTransaction *ParsedTransaction
+}
+
+func (dt TransactionResultEnvelope) MarshalJSON() ([]byte, error) {
+	if dt.asParsedTransaction != nil {
+		return json.Marshal(dt.asParsedTransaction)
+	}
+	return json.Marshal(dt.asDecodedBinary)
+}
+
+func (wrap *TransactionResultEnvelope) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 || (len(data) == 4 && string(data) == "null") {
+		// TODO: is this an error?
+		return nil
+	}
+
+	firstChar := data[0]
+
+	switch firstChar {
+	// Check if first character is `[`, standing for a JSON array.
+	case '[':
+		// It's base64 (or similar)
+		{
+			err := wrap.asDecodedBinary.UnmarshalJSON(data)
+			if err != nil {
+				return err
+			}
+		}
+	case '{':
+		// It's JSON, most likely.
+		{
+			return json.Unmarshal(data, &wrap.asParsedTransaction)
+		}
+	default:
+		return fmt.Errorf("Unknown kind: %v", data)
+	}
+
+	return nil
+}
+
+// GetBinary returns the decoded bytes if the encoding is
+// "base58", "base64".
+func (dt *TransactionResultEnvelope) GetBinary() []byte {
+	return dt.asDecodedBinary.Content
+}
+
+// GetRawJSON returns a *ParsedTransaction when the data
+// encoding is EncodingJSON.
+func (dt *TransactionResultEnvelope) GetParsedTransaction() *ParsedTransaction {
+	return dt.asParsedTransaction
 }

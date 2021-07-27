@@ -1588,7 +1588,7 @@ func TestClient_GetRecentPerformanceSamples(t *testing.T) {
 	defer closer()
 	client := New(server.URL)
 
-	limit := 1002
+	limit := uint(1002)
 	out, err := client.GetRecentPerformanceSamples(
 		context.Background(),
 		&limit,
@@ -1982,37 +1982,39 @@ func TestClient_GetTransaction(t *testing.T) {
 	expected := &GetTransactionResult{
 		Slot:      83311386,
 		BlockTime: &blockTime,
-		Transaction: &ParsedTransaction{
-			Signatures: []solana.Signature{
-				solana.MustSignatureFromBase58("QPzWhnwHnCwk3nj1zVCcjz1VP7EcAKouPg9Joietje3GnQTVQ5XyWxyPC3zHby8K5ahSn9SbQupauDbVRvv5DuL"),
-			},
-			Message: Message{
-				AccountKeys: []solana.PublicKey{
-					solana.MustPublicKeyFromBase58("2ZZkgKcBfp4tW8qCLj2yjxRYh9CuvEVJWb6e2KKS91Mj"),
-					solana.MustPublicKeyFromBase58("53R9tmVrTQwJAgaUCWEA7SiVf7eWAbaQarZ159ixt2D9"),
-					solana.MustPublicKeyFromBase58("SysvarS1otHashes111111111111111111111111111"),
-					solana.MustPublicKeyFromBase58("SysvarC1ock11111111111111111111111111111111"),
-					solana.MustPublicKeyFromBase58("Vote111111111111111111111111111111111111111"),
+		Transaction: &TransactionResultEnvelope{
+			asParsedTransaction: &ParsedTransaction{
+				Signatures: []solana.Signature{
+					solana.MustSignatureFromBase58("QPzWhnwHnCwk3nj1zVCcjz1VP7EcAKouPg9Joietje3GnQTVQ5XyWxyPC3zHby8K5ahSn9SbQupauDbVRvv5DuL"),
 				},
-				RecentBlockhash: solana.MustHashFromBase58("6o9C27iJ5rPi7wEpvQu1cFbB1WnRudtsPnbY8GvFWrgR"),
-				Instructions: []ParsedInstruction{
-					{
-						Accounts: []bin.Int64{
-							1,
-							2,
-							3,
-							0,
-						},
-						Data:           solana.Base58([]byte{0x74, 0x65, 0x73, 0x74}),
-						Parsed:         nil,
-						Program:        "",
-						ProgramIDIndex: 4,
+				Message: Message{
+					AccountKeys: []solana.PublicKey{
+						solana.MustPublicKeyFromBase58("2ZZkgKcBfp4tW8qCLj2yjxRYh9CuvEVJWb6e2KKS91Mj"),
+						solana.MustPublicKeyFromBase58("53R9tmVrTQwJAgaUCWEA7SiVf7eWAbaQarZ159ixt2D9"),
+						solana.MustPublicKeyFromBase58("SysvarS1otHashes111111111111111111111111111"),
+						solana.MustPublicKeyFromBase58("SysvarC1ock11111111111111111111111111111111"),
+						solana.MustPublicKeyFromBase58("Vote111111111111111111111111111111111111111"),
 					},
-				},
-				Header: solana.MessageHeader{
-					NumRequiredSignatures:       1,
-					NumReadonlySignedAccounts:   0,
-					NumReadonlyUnsignedAccounts: 3,
+					RecentBlockhash: solana.MustHashFromBase58("6o9C27iJ5rPi7wEpvQu1cFbB1WnRudtsPnbY8GvFWrgR"),
+					Instructions: []ParsedInstruction{
+						{
+							Accounts: []bin.Int64{
+								1,
+								2,
+								3,
+								0,
+							},
+							Data:           solana.Base58([]byte{0x74, 0x65, 0x73, 0x74}),
+							Parsed:         nil,
+							Program:        "",
+							ProgramIDIndex: 4,
+						},
+					},
+					Header: solana.MessageHeader{
+						NumRequiredSignatures:       1,
+						NumReadonlySignedAccounts:   0,
+						NumReadonlyUnsignedAccounts: 3,
+					},
 				},
 			},
 		},
