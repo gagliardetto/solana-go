@@ -1,0 +1,32 @@
+package main
+
+import (
+	"context"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+	endpoint := rpc.EndpointRPC_TestNet
+	client := rpc.New(endpoint)
+
+	example, err := client.GetRecentBlockhash(
+		context.TODO(),
+		rpc.CommitmentType("finalized"),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	out, err := client.GetBlockTime(
+		context.TODO(),
+		uint64(example.Context.Slot),
+	)
+	if err != nil {
+		panic(err)
+	}
+	spew.Dump(out)
+	spew.Dump(out.Time().Format(time.RFC1123))
+}
