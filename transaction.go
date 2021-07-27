@@ -1,7 +1,7 @@
 package solana
 
 import (
-	"bytes"
+	"errors"
 	"fmt"
 	"sort"
 
@@ -214,12 +214,32 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 
 type privateKeyGetter func(key PublicKey) *PrivateKey
 
+func (tx *Transaction) MarshalBinary() ([]byte, error) {
+	if len(tx.Signatures) == 0 || len(tx.Signatures) != int(tx.Message.Header.NumRequiredSignatures) {
+		return nil, errors.New("signature verification failed")
+	}
+
+	messageContent, err := tx.Message.MarshalBinary()
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode tx.Message to binary: %w", err)
+	}
+
+	signatureCount := UintToVarLenBytes(uint64(len(tx.Signatures)))
+	output := make([]byte, 0, len(signatureCount)+len(signatureCount)*64+len(messageContent))
+	output = append(output, signatureCount...)
+	for _, sig := range tx.Signatures {
+		output = append(output, sig[:]...)
+	}
+	output = append(output, messageContent...)
+
+	return output, nil
+}
+
 func (t *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error) {
-	buf := new(bytes.Buffer)
-	if err = bin.NewEncoder(buf).Encode(t.Message); err != nil {
+	messageContent, err := t.Message.MarshalBinary()
+	if err != nil {
 		return nil, fmt.Errorf("unable to encode message for signing: %w", err)
 	}
-	messageCnt := buf.Bytes()
 
 	signerKeys := t.Message.signerKeys()
 
@@ -229,7 +249,7 @@ func (t *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error)
 			return nil, fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
 		}
 
-		s, err := privateKey.Sign(messageCnt)
+		s, err := privateKey.Sign(messageContent)
 		if err != nil {
 			return nil, fmt.Errorf("failed to signed with key %q: %w", key.String(), err)
 		}

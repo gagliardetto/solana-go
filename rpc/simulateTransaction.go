@@ -14,12 +14,10 @@
 package rpc
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -87,11 +85,10 @@ func (cl *Client) SimulateTransactionWithOpts(
 	transaction *solana.Transaction,
 	opts *SimulateTransactionOpts,
 ) (out *SimulateTransactionResponse, err error) {
-	buf := new(bytes.Buffer)
-	if err := bin.NewEncoder(buf).Encode(transaction); err != nil {
+	txData, err := transaction.MarshalBinary()
+	if err != nil {
 		return nil, fmt.Errorf("send transaction: encode transaction: %w", err)
 	}
-	trxData := buf.Bytes()
 
 	obj := M{
 		"encoding": "base64",
@@ -114,7 +111,7 @@ func (cl *Client) SimulateTransactionWithOpts(
 		}
 	}
 
-	b64Data := base64.StdEncoding.EncodeToString(trxData)
+	b64Data := base64.StdEncoding.EncodeToString(txData)
 	params := []interface{}{
 		b64Data,
 		obj,

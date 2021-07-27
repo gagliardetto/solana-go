@@ -14,12 +14,10 @@
 package rpc
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
 
-	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -67,14 +65,10 @@ func (cl *Client) SendTransactionWithOpts(
 	skipPreflight bool, // if true, skip the preflight transaction checks (default: false)
 	preflightCommitment CommitmentType, // optional; Commitment level to use for preflight (default: "finalized").
 ) (signature solana.Signature, err error) {
-
-	buf := new(bytes.Buffer)
-
-	if err := bin.NewEncoder(buf).Encode(transaction); err != nil {
+	txData, err := transaction.MarshalBinary()
+	if err != nil {
 		return solana.Signature{}, fmt.Errorf("send transaction: encode transaction: %w", err)
 	}
-
-	trxData := buf.Bytes()
 
 	obj := M{
 		"encoding": "base64",
@@ -88,7 +82,7 @@ func (cl *Client) SendTransactionWithOpts(
 	}
 
 	params := []interface{}{
-		base64.StdEncoding.EncodeToString(trxData),
+		base64.StdEncoding.EncodeToString(txData),
 		obj,
 	}
 

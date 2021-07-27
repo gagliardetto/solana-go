@@ -15,6 +15,7 @@
 package solana
 
 import (
+	"encoding/binary"
 	"fmt"
 
 	bin "github.com/dfuse-io/binary"
@@ -55,6 +56,58 @@ type Message struct {
 	// List of program instructions that will be executed in sequence
 	// and committed in one atomic transaction if all succeed.
 	Instructions []CompiledInstruction `json:"instructions"`
+}
+
+// UintToVarLenBytes is used for creating a []byte that contains
+// the length of a variable, and is used for creating length
+// prefixes in a marshaled transaction.
+func UintToVarLenBytes(l uint64) []byte {
+	if l == 0 {
+		return []byte{0x0}
+	}
+	b := make([]byte, binary.MaxVarintLen64)
+	binary.PutUvarint(b, l)
+	return TrimRightZeros(b)
+}
+
+// TrimRightZeros reslices the provided slice
+// by trimming all trailing zeros from the slice.
+func TrimRightZeros(buf []byte) []byte {
+	cutIndex := len(buf)
+	for ; cutIndex > 0; cutIndex-- {
+		if buf[cutIndex-1] != 0 {
+			break
+		}
+	}
+	return buf[:cutIndex]
+}
+
+func (m *Message) MarshalBinary() ([]byte, error) {
+	b := []byte{
+		m.Header.NumRequiredSignatures,
+		m.Header.NumReadonlySignedAccounts,
+		m.Header.NumReadonlyUnsignedAccounts,
+	}
+
+	b = append(b, UintToVarLenBytes(uint64(len(m.AccountKeys)))...)
+	for _, key := range m.AccountKeys {
+		b = append(b, key[:]...)
+	}
+
+	b = append(b, m.RecentBlockhash[:]...)
+
+	b = append(b, UintToVarLenBytes(uint64(len(m.Instructions)))...)
+	for _, instruction := range m.Instructions {
+		b = append(b, byte(instruction.ProgramIDIndex))
+		b = append(b, UintToVarLenBytes(uint64(len(instruction.Accounts)))...)
+		for _, accountIdx := range instruction.Accounts {
+			b = append(b, byte(accountIdx))
+		}
+
+		b = append(b, UintToVarLenBytes(uint64(len(instruction.Data)))...)
+		b = append(b, instruction.Data...)
+	}
+	return b, nil
 }
 
 func (m *Message) AccountMetaList() (out []*AccountMeta) {
