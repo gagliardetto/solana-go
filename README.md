@@ -59,6 +59,47 @@ $ cd my-project
 $ go get github.com/gagliardetto/solana-go@latest
 ```
 
+## Examples
+
+### Create account
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  // Create a new account:
+  account := solana.NewAccount()
+  fmt.Println("account private key:", account.PrivateKey)
+  fmt.Println("account public key:", account.PublicKey())
+
+  // Create a new RPC client:
+  client := rpc.New(rpc.TestNet_RPC)
+
+  // Airdrop 1 sol to the new account:
+  out, err := client.RequestAirdrop(
+    context.TODO(),
+    account.PublicKey(),
+    solana.LAMPORTS_PER_SOL,
+    "",
+  )
+  if err != nil {
+    panic(err)
+  }
+  fmt.Println("airdrop transaction signature:", out)
+}
+```
+
+### Send Sol from one account to another
+
+
 ## RPC usage examples
 
 TODO

@@ -71,6 +71,25 @@ func NewCreateAccountInstruction(lamports uint64, space uint64, owner, from, to 
 	}
 }
 
+func NewTransferInstruction(
+	lamports uint64,
+	from solana.PublicKey,
+	to solana.PublicKey,
+) *Instruction {
+	return &Instruction{
+		BaseVariant: bin.BaseVariant{
+			TypeID: 2,
+			Impl: &Transfer{
+				Lamports: bin.Uint64(lamports),
+				Accounts: &TransferAccounts{
+					From: &solana.AccountMeta{PublicKey: from, IsSigner: true, IsWritable: true},
+					To:   &solana.AccountMeta{PublicKey: to, IsSigner: false, IsWritable: true},
+				},
+			},
+		},
+	}
+}
+
 type Instruction struct {
 	bin.BaseVariant
 }
