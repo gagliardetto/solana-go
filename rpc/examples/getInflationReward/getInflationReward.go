@@ -20,7 +20,7 @@ func main() {
 			pubKey,
 		},
 		&rpc.GetInflationRewardOpts{
-			Commitment: rpc.CommitmentType("finalized"),
+			Commitment: rpc.CommitmentFinalized,
 		},
 	)
 	if err != nil {

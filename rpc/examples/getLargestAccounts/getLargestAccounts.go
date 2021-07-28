@@ -13,7 +13,7 @@ func main() {
 
 	out, err := client.GetLargestAccounts(
 		context.TODO(),
-		rpc.CommitmentType("finalized"),
+		rpc.CommitmentFinalized,
 		rpc.LargestAccountsFilterCirculating,
 	)
 	if err != nil {

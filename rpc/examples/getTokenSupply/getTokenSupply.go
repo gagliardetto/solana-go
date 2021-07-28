@@ -16,7 +16,7 @@ func main() {
 	out, err := client.GetTokenSupply(
 		context.TODO(),
 		pubKey,
-		rpc.CommitmentType("finalized"),
+		rpc.CommitmentFinalized,
 	)
 	if err != nil {
 		panic(err)

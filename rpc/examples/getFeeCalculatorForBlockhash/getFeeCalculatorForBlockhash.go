@@ -13,7 +13,7 @@ func main() {
 
 	example, err := client.GetRecentBlockhash(
 		context.TODO(),
-		rpc.CommitmentType("finalized"),
+		rpc.CommitmentFinalized,
 	)
 	if err != nil {
 		panic(err)
@@ -22,7 +22,7 @@ func main() {
 	out, err := client.GetFeeCalculatorForBlockhash(
 		context.TODO(),
 		example.Value.Blockhash,
-		rpc.CommitmentType("finalized"),
+		rpc.CommitmentFinalized,
 	)
 	if err != nil {
 		panic(err)

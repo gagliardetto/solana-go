@@ -12,7 +12,7 @@ func main() {
 	endpoint := rpc.TestNet_RPC
 	client := rpc.New(endpoint)
 
-	example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentType("finalized"))
+	example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
 	if err != nil {
 		panic(err)
 	}
@@ -34,7 +34,7 @@ func main() {
 			// You can specify more options here:
 			&rpc.GetBlockOpts{
 				Encoding:   solana.EncodingBase64,
-				Commitment: rpc.CommitmentType("finalized"),
+				Commitment: rpc.CommitmentFinalized,
 				// Get only signatures:
 				TransactionDetails: rpc.TransactionDetailsSignatures,
 				// Exclude rewards:

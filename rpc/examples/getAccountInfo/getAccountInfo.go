@@ -27,6 +27,8 @@ func main() {
 		spew.Dump(resp)
 
 		var mint token.Mint
+		// Account{}.Data.GetBinary() returns the *decoded* binary data
+		// regardless the original encoding (it can handle them all).
 		err = bin.NewDecoder(resp.Value.Data.GetBinary()).Decode(&mint)
 		if err != nil {
 			panic(err)
@@ -61,7 +63,7 @@ func main() {
 			// You can specify more options here:
 			&rpc.GetAccountInfoOpts{
 				Encoding:   solana.EncodingBase64Zstd,
-				Commitment: rpc.CommitmentType("finalized"),
+				Commitment: rpc.CommitmentFinalized,
 				// You can get just a part of the account data by specify a DataSlice:
 				// DataSlice: &rpc.DataSlice{
 				// 	Offset: pointer.ToUint64(0),

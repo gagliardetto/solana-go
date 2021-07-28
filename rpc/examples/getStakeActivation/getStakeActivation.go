@@ -16,7 +16,7 @@ func main() {
 	out, err := client.GetStakeActivation(
 		context.TODO(),
 		pubKey,
-		rpc.CommitmentType("finalized"),
+		rpc.CommitmentFinalized,
 		nil,
 	)
 	if err != nil {

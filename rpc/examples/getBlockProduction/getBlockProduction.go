@@ -22,7 +22,7 @@ func main() {
 		out, err := client.GetBlockProductionWithOpts(
 			context.TODO(),
 			&rpc.GetBlockProductionOpts{
-				Commitment: rpc.CommitmentType("finalized"),
+				Commitment: rpc.CommitmentFinalized,
 				// Range: &rpc.SlotRangeRequest{
 				// 	FirstSlot: XXXXXX,
 				// 	Identity:  solana.MustPublicKeyFromBase58("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),

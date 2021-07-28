@@ -13,7 +13,7 @@ func main() {
 
 	out, err := client.GetBlockHeight(
 		context.TODO(),
-		rpc.CommitmentType("finalized"),
+		rpc.CommitmentFinalized,
 	)
 	if err != nil {
 		panic(err)

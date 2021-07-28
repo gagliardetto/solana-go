@@ -31,7 +31,7 @@ func main() {
 			},
 			&rpc.GetMultipleAccountsOpts{
 				Encoding:   solana.EncodingBase64Zstd,
-				Commitment: rpc.CommitmentType("finalized"),
+				Commitment: rpc.CommitmentFinalized,
 				// You can get just a part of the account data by specify a DataSlice:
 				// DataSlice: &rpc.DataSlice{
 				// 	Offset: pointer.ToUint64(0),

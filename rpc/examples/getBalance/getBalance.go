@@ -18,7 +18,7 @@ func main() {
 	out, err := client.GetBalance(
 		context.TODO(),
 		pubKey,
-		rpc.CommitmentType("finalized"),
+		rpc.CommitmentFinalized,
 	)
 	if err != nil {
 		panic(err)

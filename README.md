@@ -205,6 +205,8 @@ func main() {
     spew.Dump(resp)
 
     var mint token.Mint
+    // Account{}.Data.GetBinary() returns the *decoded* binary data
+    // regardless the original encoding (it can handle them all). 
     err = bin.NewDecoder(resp.Value.Data.GetBinary()).Decode(&mint)
     if err != nil {
       panic(err)
@@ -239,7 +241,7 @@ func main() {
       // You can specify more options here:
       &rpc.GetAccountInfoOpts{
         Encoding:   solana.EncodingBase64Zstd,
-        Commitment: rpc.CommitmentType("finalized"),
+        Commitment: rpc.CommitmentFinalized,
         // You can get just a part of the account data by specify a DataSlice:
         // DataSlice: &rpc.DataSlice{
         //  Offset: pointer.ToUint64(0),
@@ -285,7 +287,7 @@ func main() {
   out, err := client.GetBalance(
     context.TODO(),
     pubKey,
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -319,7 +321,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentType("finalized"))
+  example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
   if err != nil {
     panic(err)
   }
@@ -341,7 +343,7 @@ func main() {
       // You can specify more options here:
       &rpc.GetBlockOpts{
         Encoding:   solana.EncodingBase64,
-        Commitment: rpc.CommitmentType("finalized"),
+        Commitment: rpc.CommitmentFinalized,
         // Get only signatures:
         TransactionDetails: rpc.TransactionDetailsSignatures,
         // Exclude rewards:
@@ -372,7 +374,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentType("finalized"))
+  example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
   if err != nil {
     panic(err)
   }
@@ -406,7 +408,7 @@ func main() {
 
   out, err := client.GetBlockHeight(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -442,7 +444,7 @@ func main() {
     out, err := client.GetBlockProductionWithOpts(
       context.TODO(),
       &rpc.GetBlockProductionOpts{
-        Commitment: rpc.CommitmentType("finalized"),
+        Commitment: rpc.CommitmentFinalized,
         // Range: &rpc.SlotRangeRequest{
         //  FirstSlot: XXXXXX,
         //  Identity:  solana.MustPublicKeyFromBase58("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),
@@ -476,7 +478,7 @@ func main() {
 
   example, err := client.GetRecentBlockhash(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -512,7 +514,7 @@ func main() {
 
   example, err := client.GetRecentBlockhash(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -523,7 +525,7 @@ func main() {
     context.TODO(),
     uint64(example.Context.Slot-3),
     &endSlot,
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -550,7 +552,7 @@ func main() {
 
   example, err := client.GetRecentBlockhash(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -561,7 +563,7 @@ func main() {
     context.TODO(),
     uint64(example.Context.Slot-10),
     limit,
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -616,7 +618,7 @@ func main() {
 
   example, err := client.GetRecentBlockhash(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -640,7 +642,7 @@ func main() {
       // You can specify more options here:
       &rpc.GetConfirmedBlockOpts{
         Encoding:   solana.EncodingBase64,
-        Commitment: rpc.CommitmentType("finalized"),
+        Commitment: rpc.CommitmentFinalized,
         // Get only signatures:
         TransactionDetails: rpc.TransactionDetailsSignatures,
         // Exclude rewards:
@@ -673,7 +675,7 @@ func main() {
 
   example, err := client.GetRecentBlockhash(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -686,7 +688,7 @@ func main() {
       context.TODO(),
       uint64(example.Context.Slot-3),
       &endSlot,
-      rpc.CommitmentType("finalized"),
+      rpc.CommitmentFinalized,
     )
     if err != nil {
       panic(err)
@@ -714,7 +716,7 @@ func main() {
 
   example, err := client.GetRecentBlockhash(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -726,7 +728,7 @@ func main() {
       context.TODO(),
       uint64(example.Context.Slot-10),
       limit,
-      rpc.CommitmentType("finalized"),
+      rpc.CommitmentFinalized,
     )
     if err != nil {
       panic(err)
@@ -827,7 +829,7 @@ func main() {
 
   out, err := client.GetEpochInfo(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -880,7 +882,7 @@ func main() {
 
   example, err := client.GetRecentBlockhash(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -889,7 +891,7 @@ func main() {
   out, err := client.GetFeeCalculatorForBlockhash(
     context.TODO(),
     example.Value.Blockhash,
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -942,7 +944,7 @@ func main() {
 
   out, err := client.GetFees(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -1074,7 +1076,7 @@ func main() {
 
   out, err := client.GetInflationGovernor(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -1134,7 +1136,7 @@ func main() {
       pubKey,
     },
     &rpc.GetInflationRewardOpts{
-      Commitment: rpc.CommitmentType("finalized"),
+      Commitment: rpc.CommitmentFinalized,
     },
   )
   if err != nil {
@@ -1162,7 +1164,7 @@ func main() {
 
   out, err := client.GetLargestAccounts(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
     rpc.LargestAccountsFilterCirculating,
   )
   if err != nil {
@@ -1270,7 +1272,7 @@ func main() {
   out, err := client.GetMinimumBalanceForRentExemption(
     context.TODO(),
     dataSize,
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -1315,7 +1317,7 @@ func main() {
       },
       &rpc.GetMultipleAccountsOpts{
         Encoding:   solana.EncodingBase64Zstd,
-        Commitment: rpc.CommitmentType("finalized"),
+        Commitment: rpc.CommitmentFinalized,
         // You can get just a part of the account data by specify a DataSlice:
         // DataSlice: &rpc.DataSlice{
         //  Offset: pointer.ToUint64(0),
@@ -1378,7 +1380,7 @@ func main() {
 
   recent, err := client.GetRecentBlockhash(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -1492,7 +1494,7 @@ func main() {
 
   out, err := client.GetSlot(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -1519,7 +1521,7 @@ func main() {
 
   out, err := client.GetSlotLeader(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -1546,7 +1548,7 @@ func main() {
 
   recent, err := client.GetRecentBlockhash(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -1611,7 +1613,7 @@ func main() {
   out, err := client.GetStakeActivation(
     context.TODO(),
     pubKey,
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
     nil,
   )
   if err != nil {
@@ -1639,7 +1641,7 @@ func main() {
 
   out, err := client.GetSupply(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -1669,7 +1671,7 @@ func main() {
   out, err := client.GetTokenAccountBalance(
     context.TODO(),
     pubKey,
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -1765,7 +1767,7 @@ func main() {
   out, err := client.GetTokenLargestAccounts(
     context.TODO(),
     pubKey,
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -1795,7 +1797,7 @@ func main() {
   out, err := client.GetTokenSupply(
     context.TODO(),
     pubKey,
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
@@ -1897,7 +1899,7 @@ func main() {
 
   out, err := client.GetTransactionCount(
     context.TODO(),
-    rpc.CommitmentType("finalized"),
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
