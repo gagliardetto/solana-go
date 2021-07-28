@@ -31,71 +31,71 @@ More contracts to come.
   - [Installation](#installation)
   - [Examples](#examples)
     - [RPC Methods](#rpc-methods)
-      - [GetAccountInfo](#getaccountinfo)
-      - [GetBalance](#getbalance)
-      - [GetBlock](#getblock)
-      - [GetBlockCommitment](#getblockcommitment)
-      - [GetBlockHeight](#getblockheight)
-      - [GetBlockProduction](#getblockproduction)
-      - [GetBlockTime](#getblocktime)
-      - [GetBlocks](#getblocks)
-      - [GetBlocksWithLimit](#getblockswithlimit)
-      - [GetClusterNodes](#getclusternodes)
-      - [GetConfirmedBlock](#getconfirmedblock)
-      - [GetConfirmedBlocks](#getconfirmedblocks)
-      - [GetConfirmedBlocksWithLimit](#getconfirmedblockswithlimit)
-      - [GetConfirmedSignaturesForAddress2](#getconfirmedsignaturesforaddress2)
-      - [GetConfirmedTransaction](#getconfirmedtransaction)
-      - [GetEpochInfo](#getepochinfo)
-      - [GetEpochSchedule](#getepochschedule)
-      - [GetFeeCalculatorForBlockhash](#getfeecalculatorforblockhash)
-      - [GetFeeRateGovernor](#getfeerategovernor)
-      - [GetFees](#getfees)
-      - [GetFirstAvailableBlock](#getfirstavailableblock)
-      - [GetGenesisHash](#getgenesishash)
-      - [GetHealth](#gethealth)
-      - [GetIdentity](#getidentity)
-      - [GetInflationGovernor](#getinflationgovernor)
-      - [GetInflationRate](#getinflationrate)
-      - [GetInflationReward](#getinflationreward)
-      - [GetLargestAccounts](#getlargestaccounts)
-      - [GetLeaderSchedule](#getleaderschedule)
-      - [GetMaxRetransmitSlot](#getmaxretransmitslot)
-      - [GetMaxShredInsertSlot](#getmaxshredinsertslot)
-      - [GetMinimumBalanceForRentExemption](#getminimumbalanceforrentexemption)
-      - [GetMultipleAccounts](#getmultipleaccounts)
-      - [GetProgramAccounts](#getprogramaccounts)
-      - [GetRecentBlockhash](#getrecentblockhash)
-      - [GetRecentPerformanceSamples](#getrecentperformancesamples)
-      - [GetSignatureStatuses](#getsignaturestatuses)
-      - [GetSignaturesForAddress](#getsignaturesforaddress)
-      - [GetSlot](#getslot)
-      - [GetSlotLeader](#getslotleader)
-      - [GetSlotLeaders](#getslotleaders)
-      - [GetSnapshotSlot](#getsnapshotslot)
-      - [GetStakeActivation](#getstakeactivation)
-      - [GetSupply](#getsupply)
-      - [GetTokenAccountBalance](#gettokenaccountbalance)
-      - [GetTokenAccountsByDelegate](#gettokenaccountsbydelegate)
-      - [GetTokenAccountsByOwner](#gettokenaccountsbyowner)
-      - [GetTokenLargestAccounts](#gettokenlargestaccounts)
-      - [GetTokenSupply](#gettokensupply)
-      - [GetTransaction](#gettransaction)
-      - [GetTransactionCount](#gettransactioncount)
-      - [GetVersion](#getversion)
-      - [GetVoteAccounts](#getvoteaccounts)
-      - [MinimumLedgerSlot](#minimumledgerslot)
-      - [RequestAirdrop](#requestairdrop)
-      - [SendTransaction](#sendtransaction)
-      - [SimulateTransaction](#simulatetransaction)
+      - [GetAccountInfo](#rpc--getaccountinfo)
+      - [GetBalance](#rpc--getbalance)
+      - [GetBlock](#rpc--getblock)
+      - [GetBlockCommitment](#rpc--getblockcommitment)
+      - [GetBlockHeight](#rpc--getblockheight)
+      - [GetBlockProduction](#rpc--getblockproduction)
+      - [GetBlockTime](#rpc--getblocktime)
+      - [GetBlocks](#rpc--getblocks)
+      - [GetBlocksWithLimit](#rpc--getblockswithlimit)
+      - [GetClusterNodes](#rpc--getclusternodes)
+      - [GetConfirmedBlock](#rpc--getconfirmedblock)
+      - [GetConfirmedBlocks](#rpc--getconfirmedblocks)
+      - [GetConfirmedBlocksWithLimit](#rpc--getconfirmedblockswithlimit)
+      - [GetConfirmedSignaturesForAddress2](#rpc--getconfirmedsignaturesforaddress2)
+      - [GetConfirmedTransaction](#rpc--getconfirmedtransaction)
+      - [GetEpochInfo](#rpc--getepochinfo)
+      - [GetEpochSchedule](#rpc--getepochschedule)
+      - [GetFeeCalculatorForBlockhash](#rpc--getfeecalculatorforblockhash)
+      - [GetFeeRateGovernor](#rpc--getfeerategovernor)
+      - [GetFees](#rpc--getfees)
+      - [GetFirstAvailableBlock](#rpc--getfirstavailableblock)
+      - [GetGenesisHash](#rpc--getgenesishash)
+      - [GetHealth](#rpc--gethealth)
+      - [GetIdentity](#rpc--getidentity)
+      - [GetInflationGovernor](#rpc--getinflationgovernor)
+      - [GetInflationRate](#rpc--getinflationrate)
+      - [GetInflationReward](#rpc--getinflationreward)
+      - [GetLargestAccounts](#rpc--getlargestaccounts)
+      - [GetLeaderSchedule](#rpc--getleaderschedule)
+      - [GetMaxRetransmitSlot](#rpc--getmaxretransmitslot)
+      - [GetMaxShredInsertSlot](#rpc--getmaxshredinsertslot)
+      - [GetMinimumBalanceForRentExemption](#rpc--getminimumbalanceforrentexemption)
+      - [GetMultipleAccounts](#rpc--getmultipleaccounts)
+      - [GetProgramAccounts](#rpc--getprogramaccounts)
+      - [GetRecentBlockhash](#rpc--getrecentblockhash)
+      - [GetRecentPerformanceSamples](#rpc--getrecentperformancesamples)
+      - [GetSignatureStatuses](#rpc--getsignaturestatuses)
+      - [GetSignaturesForAddress](#rpc--getsignaturesforaddress)
+      - [GetSlot](#rpc--getslot)
+      - [GetSlotLeader](#rpc--getslotleader)
+      - [GetSlotLeaders](#rpc--getslotleaders)
+      - [GetSnapshotSlot](#rpc--getsnapshotslot)
+      - [GetStakeActivation](#rpc--getstakeactivation)
+      - [GetSupply](#rpc--getsupply)
+      - [GetTokenAccountBalance](#rpc--gettokenaccountbalance)
+      - [GetTokenAccountsByDelegate](#rpc--gettokenaccountsbydelegate)
+      - [GetTokenAccountsByOwner](#rpc--gettokenaccountsbyowner)
+      - [GetTokenLargestAccounts](#rpc--gettokenlargestaccounts)
+      - [GetTokenSupply](#rpc--gettokensupply)
+      - [GetTransaction](#rpc--gettransaction)
+      - [GetTransactionCount](#rpc--gettransactioncount)
+      - [GetVersion](#rpc--getversion)
+      - [GetVoteAccounts](#rpc--getvoteaccounts)
+      - [MinimumLedgerSlot](#rpc--minimumledgerslot)
+      - [RequestAirdrop](#rpc--requestairdrop)
+      - [SendTransaction](#rpc--sendtransaction)
+      - [SimulateTransaction](#rpc--simulatetransaction)
     - [Websocket Subscriptions](#websocket-subscriptions)
-      - [AccountSubscribe](#accountsubscribe)
-      - [LogsSubscribe](#logssubscribe)
-      - [ProgramSubscribe](#programsubscribe)
-      - [RootSubscribe](#rootsubscribe)
-      - [SignatureSubscribe](#signaturesubscribe)
-      - [SlotSubscribe](#slotsubscribe)
-      - [VoteSubscribe](#votesubscribe)
+      - [AccountSubscribe](#ws-subscriptions--accountsubscribe)
+      - [LogsSubscribe](#ws-subscriptions--logssubscribe)
+      - [ProgramSubscribe](#ws-subscriptions--programsubscribe)
+      - [RootSubscribe](#ws-subscriptions--rootsubscribe)
+      - [SignatureSubscribe](#ws-subscriptions--signaturesubscribe)
+      - [SlotSubscribe](#ws-subscriptions--slotsubscribe)
+      - [VoteSubscribe](#ws-subscriptions--votesubscribe)
 
 
 ## Features
@@ -173,7 +173,7 @@ TODO
 
 ### RPC Methods
 
-#### GetAccountInfo
+#### [RPC](#rpc-methods) > GetAccountInfo
 
 ```go
 package main
@@ -262,7 +262,7 @@ func main() {
 }
 ```
 
-#### GetBalance
+#### [RPC](#rpc-methods) > GetBalance
 
 ```go
 package main
@@ -302,7 +302,7 @@ func main() {
 }
 ```
 
-#### GetBlock
+#### [RPC](#rpc-methods) > GetBlock
 
 ```go
 package main
@@ -356,7 +356,7 @@ func main() {
 }
 ```
 
-#### GetBlockCommitment
+#### [RPC](#rpc-methods) > GetBlockCommitment
 
 ```go
 package main
@@ -388,7 +388,7 @@ func main() {
 }
 ```
 
-#### GetBlockHeight
+#### [RPC](#rpc-methods) > GetBlockHeight
 
 ```go
 package main
@@ -415,7 +415,7 @@ func main() {
 }
 ```
 
-#### GetBlockProduction
+#### [RPC](#rpc-methods) > GetBlockProduction
 
 ```go
 package main
@@ -457,7 +457,7 @@ func main() {
 }
 ```
 
-#### GetBlockTime
+#### [RPC](#rpc-methods) > GetBlockTime
 
 ```go
 package main
@@ -494,7 +494,7 @@ func main() {
 }
 ```
 
-#### GetBlocks
+#### [RPC](#rpc-methods) > GetBlocks
 
 ```go
 package main
@@ -532,7 +532,7 @@ func main() {
 }
 ```
 
-#### GetBlocksWithLimit
+#### [RPC](#rpc-methods) > GetBlocksWithLimit
 
 ```go
 package main
@@ -570,7 +570,7 @@ func main() {
 }
 ```
 
-#### GetClusterNodes
+#### [RPC](#rpc-methods) > GetClusterNodes
 
 ```go
 package main
@@ -596,7 +596,7 @@ func main() {
 }
 ```
 
-#### GetConfirmedBlock
+#### [RPC](#rpc-methods) > GetConfirmedBlock
 
 ```go
 package main
@@ -655,7 +655,7 @@ func main() {
 }
 ```
 
-#### GetConfirmedBlocks
+#### [RPC](#rpc-methods) > GetConfirmedBlocks
 
 ```go
 package main
@@ -696,7 +696,7 @@ func main() {
 }
 ```
 
-#### GetConfirmedBlocksWithLimit
+#### [RPC](#rpc-methods) > GetConfirmedBlocksWithLimit
 
 ```go
 package main
@@ -736,7 +736,7 @@ func main() {
 }
 ```
 
-#### GetConfirmedSignaturesForAddress2
+#### [RPC](#rpc-methods) > GetConfirmedSignaturesForAddress2
 
 ```go
 package main
@@ -770,7 +770,7 @@ func main() {
 }
 ```
 
-#### GetConfirmedTransaction
+#### [RPC](#rpc-methods) > GetConfirmedTransaction
 
 ```go
 package main
@@ -809,7 +809,7 @@ func main() {
 }
 ```
 
-#### GetEpochInfo
+#### [RPC](#rpc-methods) > GetEpochInfo
 
 ```go
 package main
@@ -836,7 +836,7 @@ func main() {
 }
 ```
 
-#### GetEpochSchedule
+#### [RPC](#rpc-methods) > GetEpochSchedule
 
 ```go
 package main
@@ -862,7 +862,7 @@ func main() {
 }
 ```
 
-#### GetFeeCalculatorForBlockhash
+#### [RPC](#rpc-methods) > GetFeeCalculatorForBlockhash
 
 ```go
 package main
@@ -898,7 +898,7 @@ func main() {
 }
 ```
 
-#### GetFeeRateGovernor
+#### [RPC](#rpc-methods) > GetFeeRateGovernor
 
 ```go
 package main
@@ -924,7 +924,7 @@ func main() {
 }
 ```
 
-#### GetFees
+#### [RPC](#rpc-methods) > GetFees
 
 ```go
 package main
@@ -951,7 +951,7 @@ func main() {
 }
 ```
 
-#### GetFirstAvailableBlock
+#### [RPC](#rpc-methods) > GetFirstAvailableBlock
 
 ```go
 package main
@@ -977,7 +977,7 @@ func main() {
 }
 ```
 
-#### GetGenesisHash
+#### [RPC](#rpc-methods) > GetGenesisHash
 
 ```go
 package main
@@ -1003,7 +1003,7 @@ func main() {
 }
 ```
 
-#### GetHealth
+#### [RPC](#rpc-methods) > GetHealth
 
 ```go
 package main
@@ -1030,7 +1030,7 @@ func main() {
 }
 ```
 
-#### GetIdentity
+#### [RPC](#rpc-methods) > GetIdentity
 
 ```go
 package main
@@ -1056,7 +1056,7 @@ func main() {
 }
 ```
 
-#### GetInflationGovernor
+#### [RPC](#rpc-methods) > GetInflationGovernor
 
 ```go
 package main
@@ -1083,7 +1083,7 @@ func main() {
 }
 ```
 
-#### GetInflationRate
+#### [RPC](#rpc-methods) > GetInflationRate
 
 ```go
 package main
@@ -1109,7 +1109,7 @@ func main() {
 }
 ```
 
-#### GetInflationReward
+#### [RPC](#rpc-methods) > GetInflationReward
 
 ```go
 package main
@@ -1144,7 +1144,7 @@ func main() {
 }
 ```
 
-#### GetLargestAccounts
+#### [RPC](#rpc-methods) > GetLargestAccounts
 
 ```go
 package main
@@ -1172,7 +1172,7 @@ func main() {
 }
 ```
 
-#### GetLeaderSchedule
+#### [RPC](#rpc-methods) > GetLeaderSchedule
 
 ```go
 package main
@@ -1198,7 +1198,7 @@ func main() {
 }
 ```
 
-#### GetMaxRetransmitSlot
+#### [RPC](#rpc-methods) > GetMaxRetransmitSlot
 
 ```go
 package main
@@ -1224,7 +1224,7 @@ func main() {
 }
 ```
 
-#### GetMaxShredInsertSlot
+#### [RPC](#rpc-methods) > GetMaxShredInsertSlot
 
 ```go
 package main
@@ -1250,7 +1250,7 @@ func main() {
 }
 ```
 
-#### GetMinimumBalanceForRentExemption
+#### [RPC](#rpc-methods) > GetMinimumBalanceForRentExemption
 
 ```go
 package main
@@ -1279,7 +1279,7 @@ func main() {
 }
 ```
 
-#### GetMultipleAccounts
+#### [RPC](#rpc-methods) > GetMultipleAccounts
 
 ```go
 package main
@@ -1331,7 +1331,7 @@ func main() {
 }
 ```
 
-#### GetProgramAccounts
+#### [RPC](#rpc-methods) > GetProgramAccounts
 
 ```go
 package main
@@ -1360,7 +1360,7 @@ func main() {
 }
 ```
 
-#### GetRecentBlockhash
+#### [RPC](#rpc-methods) > GetRecentBlockhash
 
 ```go
 package main
@@ -1387,7 +1387,7 @@ func main() {
 }
 ```
 
-#### GetRecentPerformanceSamples
+#### [RPC](#rpc-methods) > GetRecentPerformanceSamples
 
 ```go
 package main
@@ -1415,7 +1415,7 @@ func main() {
 }
 ```
 
-#### GetSignatureStatuses
+#### [RPC](#rpc-methods) > GetSignatureStatuses
 
 ```go
 package main
@@ -1446,7 +1446,7 @@ func main() {
 }
 ```
 
-#### GetSignaturesForAddress
+#### [RPC](#rpc-methods) > GetSignaturesForAddress
 
 ```go
 package main
@@ -1474,7 +1474,7 @@ func main() {
 }
 ```
 
-#### GetSlot
+#### [RPC](#rpc-methods) > GetSlot
 
 ```go
 package main
@@ -1501,7 +1501,7 @@ func main() {
 }
 ```
 
-#### GetSlotLeader
+#### [RPC](#rpc-methods) > GetSlotLeader
 
 ```go
 package main
@@ -1528,7 +1528,7 @@ func main() {
 }
 ```
 
-#### GetSlotLeaders
+#### [RPC](#rpc-methods) > GetSlotLeaders
 
 ```go
 package main
@@ -1564,7 +1564,7 @@ func main() {
 }
 ```
 
-#### GetSnapshotSlot
+#### [RPC](#rpc-methods) > GetSnapshotSlot
 
 ```go
 package main
@@ -1590,7 +1590,7 @@ func main() {
 }
 ```
 
-#### GetStakeActivation
+#### [RPC](#rpc-methods) > GetStakeActivation
 
 ```go
 package main
@@ -1621,7 +1621,7 @@ func main() {
 }
 ```
 
-#### GetSupply
+#### [RPC](#rpc-methods) > GetSupply
 
 ```go
 package main
@@ -1648,7 +1648,7 @@ func main() {
 }
 ```
 
-#### GetTokenAccountBalance
+#### [RPC](#rpc-methods) > GetTokenAccountBalance
 
 ```go
 package main
@@ -1678,7 +1678,7 @@ func main() {
 }
 ```
 
-#### GetTokenAccountsByDelegate
+#### [RPC](#rpc-methods) > GetTokenAccountsByDelegate
 
 ```go
 package main
@@ -1711,7 +1711,7 @@ func main() {
 }
 ```
 
-#### GetTokenAccountsByOwner
+#### [RPC](#rpc-methods) > GetTokenAccountsByOwner
 
 ```go
 package main
@@ -1744,7 +1744,7 @@ func main() {
 }
 ```
 
-#### GetTokenLargestAccounts
+#### [RPC](#rpc-methods) > GetTokenLargestAccounts
 
 ```go
 package main
@@ -1774,7 +1774,7 @@ func main() {
 }
 ```
 
-#### GetTokenSupply
+#### [RPC](#rpc-methods) > GetTokenSupply
 
 ```go
 package main
@@ -1804,7 +1804,7 @@ func main() {
 }
 ```
 
-#### GetTransaction
+#### [RPC](#rpc-methods) > GetTransaction
 
 ```go
 package main
@@ -1879,7 +1879,7 @@ func main() {
 }
 ```
 
-#### GetTransactionCount
+#### [RPC](#rpc-methods) > GetTransactionCount
 
 ```go
 package main
@@ -1906,7 +1906,7 @@ func main() {
 }
 ```
 
-#### GetVersion
+#### [RPC](#rpc-methods) > GetVersion
 
 ```go
 package main
@@ -1932,7 +1932,7 @@ func main() {
 }
 ```
 
-#### GetVoteAccounts
+#### [RPC](#rpc-methods) > GetVoteAccounts
 
 ```go
 package main
@@ -1962,7 +1962,7 @@ func main() {
 }
 ```
 
-#### MinimumLedgerSlot
+#### [RPC](#rpc-methods) > MinimumLedgerSlot
 
 ```go
 package main
@@ -1988,7 +1988,7 @@ func main() {
 }
 ```
 
-#### RequestAirdrop
+#### [RPC](#rpc-methods) > RequestAirdrop
 
 ```go
 package main
@@ -2020,7 +2020,7 @@ func main() {
 }
 ```
 
-#### SendTransaction
+#### [RPC](#rpc-methods) > SendTransaction
 
 ```go
 package main
@@ -2030,7 +2030,7 @@ func main() {
 }
 ```
 
-#### SimulateTransaction
+#### [RPC](#rpc-methods) > SimulateTransaction
 
 ```go
 package main
@@ -2043,7 +2043,7 @@ func main() {
 
 ### Websocket Subscriptions
 
-#### AccountSubscribe
+#### [WS Subscriptions](#websocket-subscriptions) > AccountSubscribe
 
 ```go
 package main
@@ -2105,7 +2105,7 @@ func main() {
 }
 ```
 
-#### LogsSubscribe
+#### [WS Subscriptions](#websocket-subscriptions) > LogsSubscribe
 
 ```go
 package main
@@ -2167,7 +2167,7 @@ func main() {
 }
 ```
 
-#### ProgramSubscribe
+#### [WS Subscriptions](#websocket-subscriptions) > ProgramSubscribe
 
 ```go
 package main
@@ -2220,7 +2220,7 @@ func main() {
 }
 ```
 
-#### RootSubscribe
+#### [WS Subscriptions](#websocket-subscriptions) > RootSubscribe
 
 ```go
 package main
@@ -2254,7 +2254,7 @@ func main() {
 }
 ```
 
-#### SignatureSubscribe
+#### [WS Subscriptions](#websocket-subscriptions) > SignatureSubscribe
 
 ```go
 package main
@@ -2295,7 +2295,7 @@ func main() {
 }
 ```
 
-#### SlotSubscribe
+#### [WS Subscriptions](#websocket-subscriptions) > SlotSubscribe
 
 ```go
 package main
@@ -2330,7 +2330,7 @@ func main() {
 }
 ```
 
-#### VoteSubscribe
+#### [WS Subscriptions](#websocket-subscriptions) > VoteSubscribe
 
 ```go
 package main
