@@ -29,6 +29,74 @@ More contracts to come.
   - [License](#license)
   - [Credits](#credits)
   - [Installation](#installation)
+  - [Examples](#examples)
+    - [RPC Methods](#rpc-methods)
+      - [GetAccountInfo](#getaccountinfo)
+      - [GetBalance](#getbalance)
+      - [GetBlock](#getblock)
+      - [GetBlockCommitment](#getblockcommitment)
+      - [GetBlockHeight](#getblockheight)
+      - [GetBlockProduction](#getblockproduction)
+      - [GetBlockTime](#getblocktime)
+      - [GetBlocks](#getblocks)
+      - [GetBlocksWithLimit](#getblockswithlimit)
+      - [GetClusterNodes](#getclusternodes)
+      - [GetConfirmedBlock](#getconfirmedblock)
+      - [GetConfirmedBlocks](#getconfirmedblocks)
+      - [GetConfirmedBlocksWithLimit](#getconfirmedblockswithlimit)
+      - [GetConfirmedSignaturesForAddress2](#getconfirmedsignaturesforaddress2)
+      - [GetConfirmedTransaction](#getconfirmedtransaction)
+      - [GetEpochInfo](#getepochinfo)
+      - [GetEpochSchedule](#getepochschedule)
+      - [GetFeeCalculatorForBlockhash](#getfeecalculatorforblockhash)
+      - [GetFeeRateGovernor](#getfeerategovernor)
+      - [GetFees](#getfees)
+      - [GetFirstAvailableBlock](#getfirstavailableblock)
+      - [GetGenesisHash](#getgenesishash)
+      - [GetHealth](#gethealth)
+      - [GetIdentity](#getidentity)
+      - [GetInflationGovernor](#getinflationgovernor)
+      - [GetInflationRate](#getinflationrate)
+      - [GetInflationReward](#getinflationreward)
+      - [GetLargestAccounts](#getlargestaccounts)
+      - [GetLeaderSchedule](#getleaderschedule)
+      - [GetMaxRetransmitSlot](#getmaxretransmitslot)
+      - [GetMaxShredInsertSlot](#getmaxshredinsertslot)
+      - [GetMinimumBalanceForRentExemption](#getminimumbalanceforrentexemption)
+      - [GetMultipleAccounts](#getmultipleaccounts)
+      - [GetProgramAccounts](#getprogramaccounts)
+      - [GetRecentBlockhash](#getrecentblockhash)
+      - [GetRecentPerformanceSamples](#getrecentperformancesamples)
+      - [GetSignatureStatuses](#getsignaturestatuses)
+      - [GetSignaturesForAddress](#getsignaturesforaddress)
+      - [GetSlot](#getslot)
+      - [GetSlotLeader](#getslotleader)
+      - [GetSlotLeaders](#getslotleaders)
+      - [GetSnapshotSlot](#getsnapshotslot)
+      - [GetStakeActivation](#getstakeactivation)
+      - [GetSupply](#getsupply)
+      - [GetTokenAccountBalance](#gettokenaccountbalance)
+      - [GetTokenAccountsByDelegate](#gettokenaccountsbydelegate)
+      - [GetTokenAccountsByOwner](#gettokenaccountsbyowner)
+      - [GetTokenLargestAccounts](#gettokenlargestaccounts)
+      - [GetTokenSupply](#gettokensupply)
+      - [GetTransaction](#gettransaction)
+      - [GetTransactionCount](#gettransactioncount)
+      - [GetVersion](#getversion)
+      - [GetVoteAccounts](#getvoteaccounts)
+      - [MinimumLedgerSlot](#minimumledgerslot)
+      - [RequestAirdrop](#requestairdrop)
+      - [SendTransaction](#sendtransaction)
+      - [SimulateTransaction](#simulatetransaction)
+    - [Websocket Subscriptions](#websocket-subscriptions)
+      - [AccountSubscribe](#accountsubscribe)
+      - [LogsSubscribe](#logssubscribe)
+      - [ProgramSubscribe](#programsubscribe)
+      - [RootSubscribe](#rootsubscribe)
+      - [SignatureSubscribe](#signaturesubscribe)
+      - [SlotSubscribe](#slotsubscribe)
+      - [VoteSubscribe](#votesubscribe)
+
 
 ## Features
 
@@ -99,10 +167,2205 @@ func main() {
 
 ### Send Sol from one account to another
 
+TODO
 
 ## RPC usage examples
 
-TODO
+### RPC Methods
+
+#### GetAccountInfo
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  bin "github.com/dfuse-io/binary"
+  solana "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/programs/token"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.MainNetBeta_RPC
+  client := rpc.New(endpoint)
+
+  {
+    pubKey := solana.MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt") // serum token
+    // basic usage
+    resp, err := client.GetAccountInfo(
+      context.TODO(),
+      pubKey,
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(resp)
+
+    var mint token.Mint
+    err = bin.NewDecoder(resp.Value.Data.GetBinary()).Decode(&mint)
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(mint)
+    // NOTE: The supply is mint.Supply, with the mint.Decimals:
+    // mint.Supply = 9998022451607088
+    // mint.Decimals = 6
+    // ... which means that the supply is 9998022451.607088
+  }
+  {
+    // Or you can use `GetAccountDataIn` which does all of the above in one call:
+    pubKey := solana.MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt") // serum token
+    var mint token.Mint
+    // Get the account, and decode its data into the provided mint object:
+    err := client.GetAccountDataIn(
+      context.TODO(),
+      pubKey,
+      &mint,
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(mint)
+  }
+  {
+    pubKey := solana.MustPublicKeyFromBase58("4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R") // raydium token
+    // advanced usage
+    resp, err := client.GetAccountInfoWithOpts(
+      context.TODO(),
+      pubKey,
+      // You can specify more options here:
+      &rpc.GetAccountInfoOpts{
+        Encoding:   solana.EncodingBase64Zstd,
+        Commitment: rpc.CommitmentType("finalized"),
+        // You can get just a part of the account data by specify a DataSlice:
+        // DataSlice: &rpc.DataSlice{
+        //  Offset: pointer.ToUint64(0),
+        //  Length: pointer.ToUint64(1024),
+        // },
+      },
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(resp)
+
+    var mint token.Mint
+    err = bin.NewDecoder(resp.Value.Data.GetBinary()).Decode(&mint)
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(mint)
+  }
+}
+```
+
+#### GetBalance
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "math/big"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.MainNetBeta_RPC
+  client := rpc.New(endpoint)
+
+  pubKey := solana.MustPublicKeyFromBase58("7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932")
+  out, err := client.GetBalance(
+    context.TODO(),
+    pubKey,
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+  spew.Dump(out.Value) // total lamports on the account; 1 sol = 1000000000 lamports
+
+  var lamportsOnAccount = new(big.Float).SetUint64(uint64(out.Value))
+  // Convert lamports to sol:
+  var solBalance = new(big.Float).Quo(lamportsOnAccount, new(big.Float).SetUint64(solana.LAMPORTS_PER_SOL))
+
+  // WARNING: this is not a precise conversion.
+  fmt.Println("◎", solBalance.Text('f', 10))
+}
+```
+
+#### GetBlock
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentType("finalized"))
+  if err != nil {
+    panic(err)
+  }
+
+  {
+    out, err := client.GetBlock(context.TODO(), uint64(example.Context.Slot))
+    if err != nil {
+      panic(err)
+    }
+    // spew.Dump(out) // NOTE: This generates a lot of output.
+    spew.Dump(len(out.Transactions))
+  }
+
+  {
+    includeRewards := false
+    out, err := client.GetBlockWithOpts(
+      context.TODO(),
+      uint64(example.Context.Slot),
+      // You can specify more options here:
+      &rpc.GetBlockOpts{
+        Encoding:   solana.EncodingBase64,
+        Commitment: rpc.CommitmentType("finalized"),
+        // Get only signatures:
+        TransactionDetails: rpc.TransactionDetailsSignatures,
+        // Exclude rewards:
+        Rewards: &includeRewards,
+      },
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+  }
+}
+```
+
+#### GetBlockCommitment
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentType("finalized"))
+  if err != nil {
+    panic(err)
+  }
+
+  out, err := client.GetBlockCommitment(
+    context.TODO(),
+    uint64(example.Context.Slot),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetBlockHeight
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetBlockHeight(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetBlockProduction
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  {
+    out, err := client.GetBlockProduction(context.TODO())
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+  }
+  {
+    out, err := client.GetBlockProductionWithOpts(
+      context.TODO(),
+      &rpc.GetBlockProductionOpts{
+        Commitment: rpc.CommitmentType("finalized"),
+        // Range: &rpc.SlotRangeRequest{
+        //  FirstSlot: XXXXXX,
+        //  Identity:  solana.MustPublicKeyFromBase58("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),
+        // },
+      },
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+  }
+}
+```
+
+#### GetBlockTime
+
+```go
+package main
+
+import (
+  "context"
+  "time"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetRecentBlockhash(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+
+  out, err := client.GetBlockTime(
+    context.TODO(),
+    uint64(example.Context.Slot),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+  spew.Dump(out.Time().Format(time.RFC1123))
+}
+```
+
+#### GetBlocks
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetRecentBlockhash(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+
+  endSlot := uint64(example.Context.Slot)
+  out, err := client.GetBlocks(
+    context.TODO(),
+    uint64(example.Context.Slot-3),
+    &endSlot,
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetBlocksWithLimit
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetRecentBlockhash(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+
+  limit := uint64(4)
+  out, err := client.GetBlocksWithLimit(
+    context.TODO(),
+    uint64(example.Context.Slot-10),
+    limit,
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetClusterNodes
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetClusterNodes(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetConfirmedBlock
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/AlekSi/pointer"
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetRecentBlockhash(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+
+  { // deprecated and is going to be removed in solana-core v1.8
+    out, err := client.GetConfirmedBlock(
+      context.TODO(),
+      uint64(example.Context.Slot),
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+  }
+  {
+    slot := uint64(example.Context.Slot)
+    out, err := client.GetConfirmedBlockWithOpts(
+      context.TODO(),
+      slot,
+      // You can specify more options here:
+      &rpc.GetConfirmedBlockOpts{
+        Encoding:   solana.EncodingBase64,
+        Commitment: rpc.CommitmentType("finalized"),
+        // Get only signatures:
+        TransactionDetails: rpc.TransactionDetailsSignatures,
+        // Exclude rewards:
+        Rewards: pointer.ToBool(false),
+      },
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+  }
+}
+```
+
+#### GetConfirmedBlocks
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetRecentBlockhash(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+
+  {
+    endSlot := uint64(example.Context.Slot)
+    // deprecated and is going to be removed in solana-core v1.8
+    out, err := client.GetConfirmedBlocks(
+      context.TODO(),
+      uint64(example.Context.Slot-3),
+      &endSlot,
+      rpc.CommitmentType("finalized"),
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+  }
+}
+```
+
+#### GetConfirmedBlocksWithLimit
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetRecentBlockhash(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+
+  limit := uint64(3)
+  { // deprecated and is going to be removed in solana-core v1.8
+    out, err := client.GetConfirmedBlocksWithLimit(
+      context.TODO(),
+      uint64(example.Context.Slot-10),
+      limit,
+      rpc.CommitmentType("finalized"),
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+  }
+}
+```
+
+#### GetConfirmedSignaturesForAddress2
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  pubKey := solana.MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt") // serum token
+  {
+    // deprecated and is going to be removed in solana-core v1.8
+    out, err := client.GetConfirmedSignaturesForAddress2(
+      context.TODO(),
+      pubKey,
+      // TODO:
+      nil,
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+  }
+}
+```
+
+#### GetConfirmedTransaction
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  pubKey := solana.MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt") // serum token
+  // Let's get a valid transaction to use in the example:
+  example, err := client.GetConfirmedSignaturesForAddress2(
+    context.TODO(),
+    pubKey,
+    nil,
+  )
+  if err != nil {
+    panic(err)
+  }
+
+  out, err := client.GetConfirmedTransaction(
+    context.TODO(),
+    example[0].Signature,
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetEpochInfo
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetEpochInfo(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetEpochSchedule
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetEpochSchedule(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetFeeCalculatorForBlockhash
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetRecentBlockhash(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+
+  out, err := client.GetFeeCalculatorForBlockhash(
+    context.TODO(),
+    example.Value.Blockhash,
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetFeeRateGovernor
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetFeeRateGovernor(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetFees
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetFees(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetFirstAvailableBlock
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetFirstAvailableBlock(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetGenesisHash
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetGenesisHash(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetHealth
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetHealth(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+  spew.Dump(out == rpc.HealthOk)
+}
+```
+
+#### GetIdentity
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetIdentity(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetInflationGovernor
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetInflationGovernor(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetInflationRate
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetInflationRate(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetInflationReward
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  pubKey := solana.MustPublicKeyFromBase58("6dmNQ5jwLeLk5REvio1JcMshcbvkYMwy26sJ8pbkvStu")
+
+  out, err := client.GetInflationReward(
+    context.TODO(),
+    []solana.PublicKey{
+      pubKey,
+    },
+    &rpc.GetInflationRewardOpts{
+      Commitment: rpc.CommitmentType("finalized"),
+    },
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetLargestAccounts
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetLargestAccounts(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+    rpc.LargestAccountsFilterCirculating,
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetLeaderSchedule
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetLeaderSchedule(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out) // NOTE: this creates a lot of output
+}
+```
+
+#### GetMaxRetransmitSlot
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetMaxRetransmitSlot(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetMaxShredInsertSlot
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetMaxShredInsertSlot(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetMinimumBalanceForRentExemption
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  dataSize := uint64(1024 * 9)
+  out, err := client.GetMinimumBalanceForRentExemption(
+    context.TODO(),
+    dataSize,
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetMultipleAccounts
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.MainNetBeta_RPC
+  client := rpc.New(endpoint)
+
+  {
+    out, err := client.GetMultipleAccounts(
+      context.TODO(),
+      solana.MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"),  // serum token
+      solana.MustPublicKeyFromBase58("4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R"), // raydium token
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+  }
+  {
+    out, err := client.GetMultipleAccountsWithOpts(
+      context.TODO(),
+      []solana.PublicKey{solana.MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"), // serum token
+        solana.MustPublicKeyFromBase58("4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R"), // raydium token
+      },
+      &rpc.GetMultipleAccountsOpts{
+        Encoding:   solana.EncodingBase64Zstd,
+        Commitment: rpc.CommitmentType("finalized"),
+        // You can get just a part of the account data by specify a DataSlice:
+        // DataSlice: &rpc.DataSlice{
+        //  Offset: pointer.ToUint64(0),
+        //  Length: pointer.ToUint64(1024),
+        // },
+      },
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+  }
+}
+```
+
+#### GetProgramAccounts
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetProgramAccounts(
+    context.TODO(),
+    solana.MustPublicKeyFromBase58("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(len(out))
+  spew.Dump(out) // NOTE: this can generate a lot of output
+}
+```
+
+#### GetRecentBlockhash
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  recent, err := client.GetRecentBlockhash(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(recent)
+}
+```
+
+#### GetRecentPerformanceSamples
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  limit := uint(3)
+  out, err := client.GetRecentPerformanceSamples(
+    context.TODO(),
+    &limit,
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetSignatureStatuses
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetSignatureStatuses(
+    context.TODO(),
+    true,
+    // All the transactions you want the get the status for:
+    solana.MustSignatureFromBase58("2CwH8SqVZWFa1EvsH7vJXGFors1NdCuWJ7Z85F8YqjCLQ2RuSHQyeGKkfo1Tj9HitSTeLoMWnxpjxF2WsCH8nGWh"),
+    solana.MustSignatureFromBase58("5YJHZPeHZuZjhunBc1CCB1NDRNf2tTJNpdb3azGsR7PfyEncCDhr95wG8EWrvjNXBc4wCKixkheSbCxoC2NCG3X7"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetSignaturesForAddress
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetSignaturesForAddress(
+    context.TODO(),
+    solana.MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetSlot
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetSlot(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetSlotLeader
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetSlotLeader(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetSlotLeaders
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  recent, err := client.GetRecentBlockhash(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+
+  out, err := client.GetSlotLeaders(
+    context.TODO(),
+    uint64(recent.Context.Slot),
+    10,
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetSnapshotSlot
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetSnapshotSlot(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetStakeActivation
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  pubKey := solana.MustPublicKeyFromBase58("EW2p7QCJNHMVj5nQCcW7Q2BDETtNBXn68FyucU4RCjvb")
+  out, err := client.GetStakeActivation(
+    context.TODO(),
+    pubKey,
+    rpc.CommitmentType("finalized"),
+    nil,
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetSupply
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetSupply(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetTokenAccountBalance
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  pubKey := solana.MustPublicKeyFromBase58("EzK5qLWhftu8Z2znVa5fozVtobbjhd8Gdu9hQHpC8bec")
+  out, err := client.GetTokenAccountBalance(
+    context.TODO(),
+    pubKey,
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetTokenAccountsByDelegate
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  pubKey := solana.MustPublicKeyFromBase58("AfkALUPjQp8R1rUwE6KhT38NuTYWCncwwHwcJu7UtAfV")
+  out, err := client.GetTokenAccountsByDelegate(
+    context.TODO(),
+    pubKey,
+    &rpc.GetTokenAccountsConfig{
+      Mint: solana.MustPublicKeyFromBase58("So11111111111111111111111111111111111111112"),
+    },
+    nil,
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetTokenAccountsByOwner
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  pubKey := solana.MustPublicKeyFromBase58("7HZaCWazgTuuFuajxaaxGYbGnyVKwxvsJKue1W4Nvyro")
+  out, err := client.GetTokenAccountsByOwner(
+    context.TODO(),
+    pubKey,
+    &rpc.GetTokenAccountsConfig{
+      Mint: solana.MustPublicKeyFromBase58("So11111111111111111111111111111111111111112"),
+    },
+    nil,
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetTokenLargestAccounts
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.MainNetBeta_RPC
+  client := rpc.New(endpoint)
+
+  pubKey := solana.MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt") // serum token
+  out, err := client.GetTokenLargestAccounts(
+    context.TODO(),
+    pubKey,
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetTokenSupply
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.MainNetBeta_RPC
+  client := rpc.New(endpoint)
+
+  pubKey := solana.MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt") // serum token
+  out, err := client.GetTokenSupply(
+    context.TODO(),
+    pubKey,
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetTransaction
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  txSig := solana.MustSignatureFromBase58("4bjVLV1g9SAfv7BSAdNnuSPRbSscADHFe4HegL6YVcuEBMY83edLEvtfjE4jfr6rwdLwKBQbaFiGgoLGtVicDzHq")
+  {
+    out, err := client.GetTransaction(
+      context.TODO(),
+      txSig,
+      nil,
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+    spew.Dump(out.Transaction.GetParsedTransaction())
+  }
+  {
+    out, err := client.GetTransaction(
+      context.TODO(),
+      txSig,
+      &rpc.GetTransactionOpts{
+        Encoding: solana.EncodingJSON,
+      },
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+    spew.Dump(out.Transaction.GetParsedTransaction())
+  }
+  {
+    out, err := client.GetTransaction(
+      context.TODO(),
+      txSig,
+      &rpc.GetTransactionOpts{
+        Encoding: solana.EncodingBase58,
+      },
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+    spew.Dump(out.Transaction.GetBinary())
+  }
+  {
+    out, err := client.GetTransaction(
+      context.TODO(),
+      txSig,
+      &rpc.GetTransactionOpts{
+        Encoding: solana.EncodingBase64,
+      },
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+    spew.Dump(out.Transaction.GetBinary())
+  }
+}
+```
+
+#### GetTransactionCount
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetTransactionCount(
+    context.TODO(),
+    rpc.CommitmentType("finalized"),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetVersion
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetVersion(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### GetVoteAccounts
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetVoteAccounts(
+    context.TODO(),
+    &rpc.GetVoteAccountsOpts{
+      VotePubkey: solana.MustPublicKeyFromBase58("vot33MHDqT6nSwubGzqtc6m16ChcUywxV7tNULF19Vu"),
+    },
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### MinimumLedgerSlot
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.MinimumLedgerSlot(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### RequestAirdrop
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  amount := solana.LAMPORTS_PER_SOL // 1 sol
+  pubKey := solana.MustPublicKeyFromBase58("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+  out, err := client.RequestAirdrop(
+    context.TODO(),
+    pubKey,
+    amount,
+    "",
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### SendTransaction
+
+```go
+package main
+
+func main() {
+
+}
+```
+
+#### SimulateTransaction
+
+```go
+package main
+
+func main() {
+
+}
+```
+
+
+### Websocket Subscriptions
+
+#### AccountSubscribe
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+  "github.com/gagliardetto/solana-go/rpc/ws"
+)
+
+func main() {
+  client, err := ws.Connect(context.Background(), rpc.MainNetBeta_WS)
+  if err != nil {
+    panic(err)
+  }
+  program := solana.MustPublicKeyFromBase58("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin") // serum
+
+  {
+    sub, err := client.AccountSubscribe(
+      program,
+      "",
+    )
+    if err != nil {
+      panic(err)
+    }
+    defer sub.Unsubscribe()
+
+    for {
+      got, err := sub.Recv()
+      if err != nil {
+        panic(err)
+      }
+      spew.Dump(got)
+    }
+  }
+  if false {
+    sub, err := client.AccountSubscribeWithOpts(
+      program,
+      "",
+      // You can specify the data encoding of the returned accounts:
+      solana.EncodingBase64,
+    )
+    if err != nil {
+      panic(err)
+    }
+    defer sub.Unsubscribe()
+
+    for {
+      got, err := sub.Recv()
+      if err != nil {
+        panic(err)
+      }
+      spew.Dump(got)
+    }
+  }
+}
+```
+
+#### LogsSubscribe
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+  "github.com/gagliardetto/solana-go/rpc/ws"
+)
+
+func main() {
+  client, err := ws.Connect(context.Background(), rpc.MainNetBeta_WS)
+  if err != nil {
+    panic(err)
+  }
+  program := solana.MustPublicKeyFromBase58("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin") // serum
+
+  {
+    // Subscribe to log events that mention the provided pubkey:
+    sub, err := client.LogsSubscribeMentions(
+      program,
+      rpc.CommitmentRecent,
+    )
+    if err != nil {
+      panic(err)
+    }
+    defer sub.Unsubscribe()
+
+    for {
+      got, err := sub.Recv()
+      if err != nil {
+        panic(err)
+      }
+      spew.Dump(got)
+    }
+  }
+  if false {
+    // Subscribe to all log events:
+    sub, err := client.LogsSubscribe(
+      ws.LogsSubscribeFilterAll,
+      rpc.CommitmentRecent,
+    )
+    if err != nil {
+      panic(err)
+    }
+    defer sub.Unsubscribe()
+
+    for {
+      got, err := sub.Recv()
+      if err != nil {
+        panic(err)
+      }
+      spew.Dump(got)
+    }
+  }
+}
+```
+
+#### ProgramSubscribe
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+  "github.com/gagliardetto/solana-go/rpc/ws"
+)
+
+func main() {
+  client, err := ws.Connect(context.Background(), rpc.MainNetBeta_WS)
+  if err != nil {
+    panic(err)
+  }
+  program := solana.MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") // token
+
+  sub, err := client.ProgramSubscribeWithOpts(
+    program,
+    rpc.CommitmentRecent,
+    solana.EncodingBase64Zstd,
+    nil,
+  )
+  if err != nil {
+    panic(err)
+  }
+  defer sub.Unsubscribe()
+
+  for {
+    got, err := sub.Recv()
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(got)
+
+    decodedBinary := got.Value.Account.Data.GetBinary()
+    if decodedBinary != nil {
+      // spew.Dump(decodedBinary)
+    }
+
+    // or if you requested solana.EncodingJSONParsed and it is supported:
+    rawJSON := got.Value.Account.Data.GetRawJSON()
+    if rawJSON != nil {
+      // spew.Dump(rawJSON)
+    }
+  }
+}
+```
+
+#### RootSubscribe
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+  "github.com/gagliardetto/solana-go/rpc/ws"
+)
+
+func main() {
+  client, err := ws.Connect(context.Background(), rpc.TestNet_WS)
+  if err != nil {
+    panic(err)
+  }
+
+  sub, err := client.RootSubscribe()
+  if err != nil {
+    panic(err)
+  }
+
+  for {
+    got, err := sub.Recv()
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(got)
+  }
+}
+```
+
+#### SignatureSubscribe
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+  "github.com/gagliardetto/solana-go/rpc/ws"
+)
+
+func main() {
+  client, err := ws.Connect(context.Background(), rpc.TestNet_WS)
+  if err != nil {
+    panic(err)
+  }
+
+  txSig := solana.MustSignatureFromBase58("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
+  sub, err := client.SignatureSubscribe(
+    txSig,
+    "",
+  )
+  if err != nil {
+    panic(err)
+  }
+  defer sub.Unsubscribe()
+
+  for {
+    got, err := sub.Recv()
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(got)
+  }
+}
+```
+
+#### SlotSubscribe
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+  "github.com/gagliardetto/solana-go/rpc/ws"
+)
+
+func main() {
+  client, err := ws.Connect(context.Background(), rpc.TestNet_WS)
+  if err != nil {
+    panic(err)
+  }
+
+  sub, err := client.SlotSubscribe()
+  if err != nil {
+    panic(err)
+  }
+  defer sub.Unsubscribe()
+
+  for {
+    got, err := sub.Recv()
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(got)
+  }
+}
+```
+
+#### VoteSubscribe
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+  "github.com/gagliardetto/solana-go/rpc/ws"
+)
+
+func main() {
+  client, err := ws.Connect(context.Background(), rpc.MainNetBeta_WS)
+  if err != nil {
+    panic(err)
+  }
+
+  // NOTE: this subscription must be enabled by the node you're connecting to.
+  // This subscription is disabled by default.
+  sub, err := client.VoteSubscribe()
+  if err != nil {
+    panic(err)
+  }
+  defer sub.Unsubscribe()
+
+  for {
+    got, err := sub.Recv()
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(got)
+  }
+}
+```
 
 ## Contributing
 
