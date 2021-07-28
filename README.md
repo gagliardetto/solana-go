@@ -89,13 +89,13 @@ More contracts to come.
       - [SendTransaction](#index--rpc--sendtransaction)
       - [SimulateTransaction](#index--rpc--simulatetransaction)
     - [Websocket Subscriptions](#websocket-subscriptions)
-      - [AccountSubscribe](#ws-subscriptions--accountsubscribe)
-      - [LogsSubscribe](#ws-subscriptions--logssubscribe)
-      - [ProgramSubscribe](#ws-subscriptions--programsubscribe)
-      - [RootSubscribe](#ws-subscriptions--rootsubscribe)
-      - [SignatureSubscribe](#ws-subscriptions--signaturesubscribe)
-      - [SlotSubscribe](#ws-subscriptions--slotsubscribe)
-      - [VoteSubscribe](#ws-subscriptions--votesubscribe)
+      - [AccountSubscribe](#index--ws-subscriptions--accountsubscribe)
+      - [LogsSubscribe](#index--ws-subscriptions--logssubscribe)
+      - [ProgramSubscribe](#index--ws-subscriptions--programsubscribe)
+      - [RootSubscribe](#index--ws-subscriptions--rootsubscribe)
+      - [SignatureSubscribe](#index--ws-subscriptions--signaturesubscribe)
+      - [SlotSubscribe](#index--ws-subscriptions--slotsubscribe)
+      - [VoteSubscribe](#index--ws-subscriptions--votesubscribe)
 
 
 ## Features
@@ -2043,7 +2043,7 @@ func main() {
 
 ### Websocket Subscriptions
 
-#### [WS Subscriptions](#websocket-subscriptions) > AccountSubscribe
+#### [index](#contents) > [WS Subscriptions](#websocket-subscriptions) > AccountSubscribe
 
 ```go
 package main
@@ -2105,7 +2105,7 @@ func main() {
 }
 ```
 
-#### [WS Subscriptions](#websocket-subscriptions) > LogsSubscribe
+#### [index](#contents) > [WS Subscriptions](#websocket-subscriptions) > LogsSubscribe
 
 ```go
 package main
@@ -2167,7 +2167,7 @@ func main() {
 }
 ```
 
-#### [WS Subscriptions](#websocket-subscriptions) > ProgramSubscribe
+#### [index](#contents) > [WS Subscriptions](#websocket-subscriptions) > ProgramSubscribe
 
 ```go
 package main
@@ -2220,7 +2220,7 @@ func main() {
 }
 ```
 
-#### [WS Subscriptions](#websocket-subscriptions) > RootSubscribe
+#### [index](#contents) > [WS Subscriptions](#websocket-subscriptions) > RootSubscribe
 
 ```go
 package main
@@ -2254,7 +2254,7 @@ func main() {
 }
 ```
 
-#### [WS Subscriptions](#websocket-subscriptions) > SignatureSubscribe
+#### [index](#contents) > [WS Subscriptions](#websocket-subscriptions) > SignatureSubscribe
 
 ```go
 package main
@@ -2295,7 +2295,7 @@ func main() {
 }
 ```
 
-#### [WS Subscriptions](#websocket-subscriptions) > SlotSubscribe
+#### [index](#contents) > [WS Subscriptions](#websocket-subscriptions) > SlotSubscribe
 
 ```go
 package main
@@ -2330,7 +2330,7 @@ func main() {
 }
 ```
 
-#### [WS Subscriptions](#websocket-subscriptions) > VoteSubscribe
+#### [index](#contents) > [WS Subscriptions](#websocket-subscriptions) > VoteSubscribe
 
 ```go
 package main
