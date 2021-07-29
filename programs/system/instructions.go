@@ -30,83 +30,82 @@ func init() {
 	solana.RegisterInstructionDecoder(PROGRAM_ID, registryDecodeInstruction)
 }
 
-func registryDecodeInstruction(accounts []*solana.AccountMeta, data []byte) (interface{}, error) {
-	inst, err := DecodeInstruction(accounts, data)
-	if err != nil {
-		return nil, err
-	}
-	return inst, nil
-}
+const (
+	// Create a new account.
+	Instruction_CreateAccount uint32 = iota
 
-func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instruction, error) {
-	var inst *Instruction
-	if err := bin.NewDecoder(data).Decode(&inst); err != nil {
-		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
-	}
+	// Assign account to a program.
+	Instruction_Assign
 
-	if v, ok := inst.Impl.(solana.AccountSettable); ok {
-		err := v.SetAccounts(accounts)
-		if err != nil {
-			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
-		}
-	}
+	// Transfer lamports.
+	Instruction_Transfer
 
-	return inst, nil
-}
+	// Create a new account at an address derived from a base pubkey and a seed.
+	Instruction_CreateAccountWithSeed
 
-func NewCreateAccountInstruction(lamports uint64, space uint64, owner, from, to solana.PublicKey) *Instruction {
-	return &Instruction{
-		BaseVariant: bin.BaseVariant{
-			TypeID: 0,
-			Impl: &CreateAccount{
-				Lamports: bin.Uint64(lamports),
-				Space:    bin.Uint64(space),
-				Owner:    owner,
-				Accounts: &CreateAccountAccounts{
-					From: &solana.AccountMeta{PublicKey: from, IsSigner: true, IsWritable: true},
-					New:  &solana.AccountMeta{PublicKey: to, IsSigner: true, IsWritable: true},
-				},
-			},
-		},
-	}
-}
+	// Consumes a stored nonce, replacing it with a successor.
+	Instruction_AdvanceNonceAccount
 
-func NewTransferInstruction(
-	lamports uint64,
-	from solana.PublicKey,
-	to solana.PublicKey,
-) *Instruction {
-	return &Instruction{
-		BaseVariant: bin.BaseVariant{
-			TypeID: 2,
-			Impl: &Transfer{
-				Lamports: bin.Uint64(lamports),
-				Accounts: &TransferAccounts{
-					From: &solana.AccountMeta{PublicKey: from, IsSigner: true, IsWritable: true},
-					To:   &solana.AccountMeta{PublicKey: to, IsSigner: false, IsWritable: true},
-				},
-			},
-		},
-	}
-}
+	// Withdraw funds from a nonce account.
+	Instruction_WithdrawNonceAccount
+
+	// Drive state of Uninitalized nonce account to Initialized, setting the nonce value.
+	Instruction_InitializeNonceAccount
+
+	// Change the entity authorized to execute nonce instruction_s on the account.
+	Instruction_AuthorizeNonceAccount
+
+	// Allocate space in a (possibly new) account without funding.
+	Instruction_Allocate
+
+	// Allocate space for and assign an account at an address derived from a base public key and a seed.
+	Instruction_AllocateWithSeed
+
+	// Assign account to a program based on a seed.
+	Instruction_AssignWithSeed
+
+	// Transfer lamports from a derived address.
+	Instruction_TransferWithSeed
+)
 
 type Instruction struct {
 	bin.BaseVariant
 }
 
-func (i *Instruction) Accounts() (out []*solana.AccountMeta) {
-	switch i.TypeID {
-	case 0:
-		accounts := i.Impl.(*CreateAccount).Accounts
-		out = []*solana.AccountMeta{accounts.From, accounts.New}
-	case 1:
-		// no account here
-	case 2:
-		accounts := i.Impl.(*Transfer).Accounts
-		out = []*solana.AccountMeta{accounts.From, accounts.To}
-	}
-	return
+var (
+	// TODO: each instruction must be here:
+	_ solana.AccountsGettable = &CreateAccount{}
+	_ solana.AccountsSettable = &CreateAccount{}
+
+	_ solana.AccountsGettable = &Assign{}
+	_ solana.AccountsSettable = &Assign{}
+
+	_ solana.AccountsGettable = &Transfer{}
+	_ solana.AccountsSettable = &Transfer{}
+
+	_ solana.AccountsGettable = &CreateAccountWithSeed{}
+	_ solana.AccountsSettable = &CreateAccountWithSeed{}
+
+	_ solana.AccountsGettable = &AdvanceNonceAccount{}
+	_ solana.AccountsSettable = &AdvanceNonceAccount{}
+)
+
+func (ins *Instruction) Accounts() (out []*solana.AccountMeta) {
+	return ins.Impl.(solana.AccountsGettable).GetAccounts()
 }
+
+// InstructionImplDef is used for deciding binary,
+// encoding and decoding json.
+var InstructionImplDef = bin.NewVariantDefinition(
+	bin.Uint32TypeIDEncoding,
+	[]bin.VariantType{
+		// TODO:
+		{"create_account", (*CreateAccount)(nil)},
+		{"assign", (*Assign)(nil)},
+		{"transfer", (*Transfer)(nil)},
+		{"create_account_with_seed", (*CreateAccountWithSeed)(nil)},
+		{"advance_nonce_account", (*AdvanceNonceAccount)(nil)},
+	})
 
 func (i *Instruction) ProgramID() solana.PublicKey {
 	return PROGRAM_ID
@@ -124,12 +123,6 @@ func (i *Instruction) TextEncode(encoder *text.Encoder, option *text.Option) err
 	return encoder.Encode(i.Impl, option)
 }
 
-var InstructionImplDef = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
-	{"create_account", (*CreateAccount)(nil)},
-	{"assign", (*Assign)(nil)},
-	{"transfer", (*Transfer)(nil)},
-})
-
 func (i *Instruction) UnmarshalBinary(decoder *bin.Decoder) error {
 	return i.BaseVariant.UnmarshalBinaryVariant(decoder, InstructionImplDef)
 }
@@ -142,67 +135,28 @@ func (i *Instruction) MarshalBinary(encoder *bin.Encoder) error {
 	return encoder.Encode(i.Impl)
 }
 
-type CreateAccountAccounts struct {
-	From *solana.AccountMeta `text:"linear,notype"`
-	New  *solana.AccountMeta `text:"linear,notype"`
-}
-
-type CreateAccount struct {
-	Lamports bin.Uint64
-	Space    bin.Uint64
-	Owner    solana.PublicKey
-	Accounts *CreateAccountAccounts `bin:"-"`
-}
-
-func (i *CreateAccount) SetAccounts(accounts []*solana.AccountMeta) error {
-	i.Accounts = &CreateAccountAccounts{
-		From: accounts[0],
-		New:  accounts[1],
+func registryDecodeInstruction(accounts []*solana.AccountMeta, data []byte) (interface{}, error) {
+	inst, err := DecodeInstruction(accounts, data)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return inst, nil
 }
 
-type Assign struct {
-	// prefixed with byte 0x01
-	Owner solana.PublicKey
-}
-
-type Transfer struct {
-	// Prefixed with byte 0x02
-	Lamports bin.Uint64
-	Accounts *TransferAccounts `bin:"-"`
-}
-
-type TransferAccounts struct {
-	From *solana.AccountMeta `text:"linear,notype"`
-	To   *solana.AccountMeta `text:"linear,notype"`
-}
-
-func (i *Transfer) SetAccounts(accounts []*solana.AccountMeta) error {
-	i.Accounts = &TransferAccounts{
-		From: accounts[0],
-		To:   accounts[1],
+func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instruction, error) {
+	var inst *Instruction
+	if err := bin.NewDecoder(data).Decode(&inst); err != nil {
+		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
-	return nil
-}
 
-type CreateAccountWithSeed struct {
-	// Prefixed with byte 0x03
-	Base     solana.PublicKey
-	SeedSize int `bin:"sizeof=Seed"`
-	Seed     string
-	Lamports bin.Uint64
-	Space    bin.Uint64
-	Owner    solana.PublicKey
-}
+	if v, ok := inst.Impl.(solana.AccountsSettable); ok {
+		err := v.SetAccounts(accounts)
+		if err != nil {
+			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
+		}
+	}
 
-type AdvanceNonceAccount struct {
-	// Prefix with 0x04
-}
-
-type WithdrawNonceAccount struct {
-	// Prefix with 0x05
-	Lamports bin.Uint64
+	return inst, nil
 }
 
 type InitializeNonceAccount struct {

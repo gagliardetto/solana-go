@@ -77,5 +77,45 @@ func Test_AccountMeta_less(t *testing.T) {
 			assert.Equal(t, test.expect, test.left.less(test.right))
 		})
 	}
+}
 
+func TestAccountMetaSlice(t *testing.T) {
+	pkey1 := MustPublicKeyFromBase58("SysvarS1otHashes111111111111111111111111111")
+
+	var slice AccountMetaSlice
+
+	setting := []*AccountMeta{
+		{PublicKey: pkey1, IsSigner: true, IsWritable: false},
+	}
+	err := slice.SetAccounts(setting)
+	require.NoError(t, err)
+
+	require.Len(t, slice, 1)
+	require.Equal(t, setting[0], slice[0])
+	require.Equal(t, setting, slice.GetAccounts())
+
+	{
+		pkey2 := MustPublicKeyFromBase58("BPFLoaderUpgradeab1e11111111111111111111111")
+
+		meta := NewAccountMeta(pkey2, true, false)
+		slice.Append(meta)
+
+		require.Len(t, slice, 2)
+		require.Equal(t, meta, slice[1])
+		require.Equal(t, meta, slice.GetAccounts()[1])
+	}
+}
+
+func TestNewAccountMeta(t *testing.T) {
+	pkey := MustPublicKeyFromBase58("SysvarS1otHashes111111111111111111111111111")
+
+	isWritable := false
+	isSigner := true
+
+	out := NewAccountMeta(pkey, isWritable, isSigner)
+
+	require.NotNil(t, out)
+
+	require.Equal(t, isSigner, out.IsSigner)
+	require.Equal(t, isWritable, out.IsWritable)
 }

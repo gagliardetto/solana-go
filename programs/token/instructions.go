@@ -43,7 +43,7 @@ func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instructio
 		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
 
-	if v, ok := inst.Impl.(solana.AccountSettable); ok {
+	if v, ok := inst.Impl.(solana.AccountsSettable); ok {
 		err := v.SetAccounts(accounts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)

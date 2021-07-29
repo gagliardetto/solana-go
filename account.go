@@ -34,8 +34,20 @@ func (a *Account) PublicKey() PublicKey {
 
 type AccountMeta struct {
 	PublicKey  PublicKey
-	IsSigner   bool
 	IsWritable bool
+	IsSigner   bool
+}
+
+func NewAccountMeta(
+	pubKey PublicKey,
+	WRITE bool,
+	SIGNER bool,
+) *AccountMeta {
+	return &AccountMeta{
+		PublicKey:  pubKey,
+		IsWritable: WRITE,
+		IsSigner:   SIGNER,
+	}
 }
 
 func (a *AccountMeta) less(act *AccountMeta) bool {
@@ -49,4 +61,19 @@ func (a *AccountMeta) less(act *AccountMeta) bool {
 		return true
 	}
 	return false
+}
+
+type AccountMetaSlice []*AccountMeta
+
+func (slice *AccountMetaSlice) Append(account *AccountMeta) {
+	*slice = append(*slice, account)
+}
+
+func (slice *AccountMetaSlice) SetAccounts(accounts []*AccountMeta) error {
+	*slice = accounts
+	return nil
+}
+
+func (slice AccountMetaSlice) GetAccounts() []*AccountMeta {
+	return slice
 }

@@ -10,8 +10,8 @@ import (
 )
 
 type Instruction interface {
-	Accounts() []*AccountMeta // returns the list of accounts the instructions requires
 	ProgramID() PublicKey     // the programID the instruction acts on
+	Accounts() []*AccountMeta // returns the list of accounts the instructions requires
 	Data() ([]byte, error)    // the binary encoded instructions
 }
 
@@ -188,7 +188,7 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 		)
 	}
 
-	for trxIdx, instruction := range instructions {
+	for txIdx, instruction := range instructions {
 		accounts = instruction.Accounts()
 		accountIndex := make([]uint16, len(accounts))
 		for idx, acc := range accounts {
@@ -196,7 +196,7 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 		}
 		data, err := instruction.Data()
 		if err != nil {
-			return nil, fmt.Errorf("unable to encode instructions [%d]: %w", trxIdx, err)
+			return nil, fmt.Errorf("unable to encode instructions [%d]: %w", txIdx, err)
 		}
 		message.Instructions = append(message.Instructions, CompiledInstruction{
 			ProgramIDIndex: accountKeyIndex[instruction.ProgramID().String()],
@@ -235,13 +235,13 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 	return output, nil
 }
 
-func (t *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error) {
-	messageContent, err := t.Message.MarshalBinary()
+func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error) {
+	messageContent, err := tx.Message.MarshalBinary()
 	if err != nil {
 		return nil, fmt.Errorf("unable to encode message for signing: %w", err)
 	}
 
-	signerKeys := t.Message.signerKeys()
+	signerKeys := tx.Message.signerKeys()
 
 	for _, key := range signerKeys {
 		privateKey := getter(key)
@@ -254,7 +254,7 @@ func (t *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error)
 			return nil, fmt.Errorf("failed to signed with key %q: %w", key.String(), err)
 		}
 
-		t.Signatures = append(t.Signatures, s)
+		tx.Signatures = append(tx.Signatures, s)
 	}
-	return t.Signatures, nil
+	return tx.Signatures, nil
 }
