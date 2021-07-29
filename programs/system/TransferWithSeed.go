@@ -24,9 +24,9 @@ func NewTransferWithSeedInstruction(
 				Owner:    owner,
 
 				AccountMetaSlice: []*solana.AccountMeta{
-					solana.NewAccountMeta(from, true, false),
-					solana.NewAccountMeta(basePubKey, false, true),
-					solana.NewAccountMeta(to, true, false),
+					solana.Meta(from).WRITE(),
+					solana.Meta(basePubKey).SIGNER(),
+					solana.Meta(to).WRITE(),
 				},
 			},
 		},

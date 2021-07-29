@@ -25,8 +25,8 @@ func NewCreateAccountInstruction(
 				Owner:    owner,
 
 				AccountMetaSlice: []*solana.AccountMeta{
-					solana.NewAccountMeta(fundingAccount, true, true),
-					solana.NewAccountMeta(newAccount, true, true),
+					solana.Meta(fundingAccount).WRITE().SIGNER(),
+					solana.Meta(newAccount).WRITE().SIGNER(),
 				},
 			},
 		},

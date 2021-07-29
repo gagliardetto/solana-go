@@ -17,9 +17,9 @@ func NewInitializeNonceAccountInstruction(
 			Impl: &InitializeNonceAccount{
 				AuthPubKey: authPubKey,
 				AccountMetaSlice: []*solana.AccountMeta{
-					solana.NewAccountMeta(noncePubKey, true, false),
-					solana.NewAccountMeta(SysVarRecentBlockHashesPubkey, false, false),
-					solana.NewAccountMeta(SysVarRentPubkey, false, false),
+					solana.Meta(noncePubKey).WRITE(),
+					solana.Meta(SysVarRecentBlockHashesPubkey),
+					solana.Meta(SysVarRentPubkey),
 				},
 			},
 		},

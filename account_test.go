@@ -119,3 +119,24 @@ func TestNewAccountMeta(t *testing.T) {
 	require.Equal(t, isSigner, out.IsSigner)
 	require.Equal(t, isWritable, out.IsWritable)
 }
+
+func TestMeta(t *testing.T) {
+	pkey := MustPublicKeyFromBase58("SysvarS1otHashes111111111111111111111111111")
+
+	meta := Meta(pkey)
+	require.NotNil(t, meta)
+	require.Equal(t, pkey, meta.PublicKey)
+
+	require.False(t, meta.IsSigner)
+	require.False(t, meta.IsWritable)
+
+	meta.SIGNER()
+
+	require.True(t, meta.IsSigner)
+	require.False(t, meta.IsWritable)
+
+	meta.WRITE()
+
+	require.True(t, meta.IsSigner)
+	require.True(t, meta.IsWritable)
+}

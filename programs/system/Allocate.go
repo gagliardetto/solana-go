@@ -17,7 +17,7 @@ func NewAllocateInstruction(
 			Impl: &Allocate{
 				Space: bin.Uint64(space),
 				AccountMetaSlice: []*solana.AccountMeta{
-					solana.NewAccountMeta(accountPubKey, true, true),
+					solana.Meta(accountPubKey).WRITE().SIGNER(),
 				},
 			},
 		},

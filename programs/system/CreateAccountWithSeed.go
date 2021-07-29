@@ -30,12 +30,12 @@ func NewCreateAccountWithSeedInstruction(
 
 				AccountMetaSlice: func() solana.AccountMetaSlice {
 					res := solana.AccountMetaSlice{
-						solana.NewAccountMeta(fundingAccount, true, true),
-						solana.NewAccountMeta(newAccount, true, false),
+						solana.Meta(fundingAccount).WRITE().SIGNER(),
+						solana.Meta(newAccount).WRITE(),
 					}
 
 					if !base.Equals(fundingAccount) {
-						res.Append(solana.NewAccountMeta(base, false, true))
+						res.Append(solana.Meta(base).SIGNER())
 					}
 
 					return res

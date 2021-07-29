@@ -20,11 +20,11 @@ func NewWithdrawNonceAccountInstruction(
 			Impl: &WithdrawNonceAccount{
 				Lamports: bin.Uint64(lamports),
 				AccountMetaSlice: []*solana.AccountMeta{
-					solana.NewAccountMeta(nonceAccount, true, false),
-					solana.NewAccountMeta(recipientAccount, true, false),
-					solana.NewAccountMeta(SysVarRecentBlockHashesPubkey, false, false),
-					solana.NewAccountMeta(SysVarRentPubkey, false, false),
-					solana.NewAccountMeta(nonceAuthority, false, true),
+					solana.Meta(nonceAccount).WRITE(),
+					solana.Meta(recipientAccount).WRITE(),
+					solana.Meta(SysVarRecentBlockHashesPubkey),
+					solana.Meta(SysVarRentPubkey),
+					solana.Meta(nonceAuthority).SIGNER(),
 				},
 			},
 		},

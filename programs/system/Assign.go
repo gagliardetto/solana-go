@@ -21,7 +21,7 @@ func NewAssignInstruction(
 				NewOwner: assignToProgramID,
 
 				AccountMetaSlice: []*solana.AccountMeta{
-					solana.NewAccountMeta(accountPubkey, true, true),
+					solana.Meta(accountPubkey).WRITE().SIGNER(),
 				},
 			},
 		},

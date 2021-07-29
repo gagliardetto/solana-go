@@ -19,8 +19,8 @@ func NewAuthorizeNonceAccountInstruction(
 			Impl: &AuthorizeNonceAccount{
 				PubKey: authorizePubKey,
 				AccountMetaSlice: []*solana.AccountMeta{
-					solana.NewAccountMeta(noncePubKey, true, false),
-					solana.NewAccountMeta(nonceAuthority, false, true),
+					solana.Meta(noncePubKey).WRITE(),
+					solana.Meta(nonceAuthority).SIGNER(),
 				},
 			},
 		},

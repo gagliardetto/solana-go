@@ -22,8 +22,8 @@ func NewAssignWithSeedInstruction(
 				Owner: owner,
 
 				AccountMetaSlice: []*solana.AccountMeta{
-					solana.NewAccountMeta(accountPubKey, true, false),
-					solana.NewAccountMeta(basePubKey, false, true),
+					solana.Meta(accountPubKey).WRITE(),
+					solana.Meta(basePubKey).SIGNER(),
 				},
 			},
 		},

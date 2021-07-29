@@ -38,6 +38,27 @@ type AccountMeta struct {
 	IsSigner   bool
 }
 
+// Meta intializes a new AccountMeta with the provided pubKey.
+func Meta(
+	pubKey PublicKey,
+) *AccountMeta {
+	return &AccountMeta{
+		PublicKey: pubKey,
+	}
+}
+
+// WRITE sets IsWritable to true.
+func (meta *AccountMeta) WRITE() *AccountMeta {
+	meta.IsWritable = true
+	return meta
+}
+
+// SIGNER sets IsSigner to true.
+func (meta *AccountMeta) SIGNER() *AccountMeta {
+	meta.IsSigner = true
+	return meta
+}
+
 func NewAccountMeta(
 	pubKey PublicKey,
 	WRITE bool,

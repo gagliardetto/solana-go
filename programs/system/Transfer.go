@@ -19,8 +19,8 @@ func NewTransferInstruction(
 				Lamports: bin.Uint64(lamports),
 
 				AccountMetaSlice: []*solana.AccountMeta{
-					solana.NewAccountMeta(from, true, true),
-					solana.NewAccountMeta(to, true, false),
+					solana.Meta(from).WRITE().SIGNER(),
+					solana.Meta(to).WRITE(),
 				},
 			},
 		},

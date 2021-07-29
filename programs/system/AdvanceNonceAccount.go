@@ -16,9 +16,9 @@ func NewAdvanceNonceAccountInstruction(
 
 			Impl: &AdvanceNonceAccount{
 				AccountMetaSlice: []*solana.AccountMeta{
-					solana.NewAccountMeta(nonceAccount, true, false),
-					solana.NewAccountMeta(SysVarRecentBlockHashesPubkey, false, false),
-					solana.NewAccountMeta(nonceAuthority, true, false),
+					solana.Meta(nonceAccount).WRITE(),
+					solana.Meta(SysVarRecentBlockHashesPubkey),
+					solana.Meta(nonceAuthority).SIGNER(),
 				},
 			},
 		},
