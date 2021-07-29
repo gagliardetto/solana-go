@@ -52,7 +52,7 @@ const (
 	// Drive state of Uninitalized nonce account to Initialized, setting the nonce value.
 	Instruction_InitializeNonceAccount
 
-	// Change the entity authorized to execute nonce instruction_s on the account.
+	// Change the entity authorized to execute nonce instructions on the account.
 	Instruction_AuthorizeNonceAccount
 
 	// Allocate space in a (possibly new) account without funding.

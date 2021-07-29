@@ -28,6 +28,6 @@ type Allocate struct {
 	// Number of bytes of memory to allocate.
 	Space bin.Uint64
 
-	// [0] = [WRITE, SIGNER] New account
+	// [0] = [WRITE, SIGNER] New account.
 	solana.AccountMetaSlice `bin:"-"`
 }
