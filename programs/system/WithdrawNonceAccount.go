@@ -8,8 +8,8 @@ import (
 func NewWithdrawNonceAccountInstruction(
 	lamports uint64,
 
-	// TODO:
 	nonceAccount solana.PublicKey,
+	recipientAccount solana.PublicKey,
 	nonceAuthority solana.PublicKey,
 ) *Instruction {
 	return &Instruction{
@@ -21,8 +21,10 @@ func NewWithdrawNonceAccountInstruction(
 				Lamports: bin.Uint64(lamports),
 				AccountMetaSlice: []*solana.AccountMeta{
 					solana.NewAccountMeta(nonceAccount, true, false),
+					solana.NewAccountMeta(recipientAccount, true, false),
 					solana.NewAccountMeta(SysVarRecentBlockHashesPubkey, false, false),
-					solana.NewAccountMeta(nonceAuthority, true, false),
+					solana.NewAccountMeta(SysVarRentPubkey, false, false),
+					solana.NewAccountMeta(nonceAuthority, false, true),
 				},
 			},
 		},

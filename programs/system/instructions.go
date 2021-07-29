@@ -88,6 +88,27 @@ var (
 
 	_ solana.AccountsGettable = &AdvanceNonceAccount{}
 	_ solana.AccountsSettable = &AdvanceNonceAccount{}
+
+	_ solana.AccountsGettable = &WithdrawNonceAccount{}
+	_ solana.AccountsSettable = &WithdrawNonceAccount{}
+
+	_ solana.AccountsGettable = &InitializeNonceAccount{}
+	_ solana.AccountsSettable = &InitializeNonceAccount{}
+
+	_ solana.AccountsGettable = &AuthorizeNonceAccount{}
+	_ solana.AccountsSettable = &AuthorizeNonceAccount{}
+
+	_ solana.AccountsGettable = &Allocate{}
+	_ solana.AccountsSettable = &Allocate{}
+
+	_ solana.AccountsGettable = &AllocateWithSeed{}
+	_ solana.AccountsSettable = &AllocateWithSeed{}
+
+	_ solana.AccountsGettable = &AssignWithSeed{}
+	_ solana.AccountsSettable = &AssignWithSeed{}
+
+	_ solana.AccountsGettable = &TransferWithSeed{}
+	_ solana.AccountsSettable = &TransferWithSeed{}
 )
 
 func (ins *Instruction) Accounts() (out []*solana.AccountMeta) {
@@ -105,6 +126,13 @@ var InstructionImplDef = bin.NewVariantDefinition(
 		{"transfer", (*Transfer)(nil)},
 		{"create_account_with_seed", (*CreateAccountWithSeed)(nil)},
 		{"advance_nonce_account", (*AdvanceNonceAccount)(nil)},
+		{"withdraw_nonce_account", (*WithdrawNonceAccount)(nil)},
+		{"initialize_nonce_account", (*InitializeNonceAccount)(nil)},
+		{"authorize_nonce_account", (*AuthorizeNonceAccount)(nil)},
+		{"allocate", (*Allocate)(nil)},
+		{"allocate_with_seed", (*AllocateWithSeed)(nil)},
+		{"assign_with_seed", (*AssignWithSeed)(nil)},
+		{"transfer_with_seed", (*TransferWithSeed)(nil)},
 	})
 
 func (i *Instruction) ProgramID() solana.PublicKey {
@@ -157,36 +185,4 @@ func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instructio
 	}
 
 	return inst, nil
-}
-
-type InitializeNonceAccount struct {
-	// Prefix with 0x06
-	AuthorizedAccount solana.PublicKey
-}
-
-type AuthorizeNonceAccount struct {
-	// Prefix with 0x07
-	AuthorizeAccount solana.PublicKey
-}
-
-type Allocate struct {
-	// Prefix with 0x08
-	Space bin.Uint64
-}
-
-type AllocateWithSeed struct {
-	// Prefixed with byte 0x09
-	Base     solana.PublicKey
-	SeedSize int `bin:"sizeof=Seed"`
-	Seed     string
-	Space    bin.Uint64
-	Owner    solana.PublicKey
-}
-
-type AssignWithSeed struct {
-	// Prefixed with byte 0x0a
-	Base     solana.PublicKey
-	SeedSize int `bin:"sizeof=Seed"`
-	Seed     string
-	Owner    solana.PublicKey
 }
