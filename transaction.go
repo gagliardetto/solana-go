@@ -61,7 +61,52 @@ func (slice *pubkeySlice) has(pubkey PublicKey) bool {
 
 var debugNewTransaction = false
 
-func NewTransaction(instructions []Instruction, blockHash Hash, opts ...TransactionOption) (*Transaction, error) {
+type TransactionBuilder struct {
+	instructions    []Instruction
+	recentBlockHash Hash
+	opts            []TransactionOption
+}
+
+// NewTransactionBuilder creates a new instruction builder.
+func NewTransactionBuilder() *TransactionBuilder {
+	return &TransactionBuilder{}
+}
+
+// WithInstruction adds the provided instruction to the builder.
+func (builder *TransactionBuilder) WithInstruction(instruction Instruction) *TransactionBuilder {
+	builder.instructions = append(builder.instructions, instruction)
+	return builder
+}
+
+// SetRecentBlockHash sets the recent blockhash for the instruction builder.
+func (builder *TransactionBuilder) SetRecentBlockHash(recentBlockHash Hash) *TransactionBuilder {
+	builder.recentBlockHash = recentBlockHash
+	return builder
+}
+
+// WithOpt adds a TransactionOption.
+func (builder *TransactionBuilder) WithOpt(opt TransactionOption) *TransactionBuilder {
+	builder.opts = append(builder.opts, opt)
+	return builder
+}
+
+// Set transaction fee payer.
+// If not set, defaults to first signer account of the first instruction.
+func (builder *TransactionBuilder) SetFeePayer(feePayer PublicKey) *TransactionBuilder {
+	builder.opts = append(builder.opts, TransactionPayer(feePayer))
+	return builder
+}
+
+// Build builds and returns a *Transaction.
+func (builder *TransactionBuilder) Build() (*Transaction, error) {
+	return NewTransaction(
+		builder.instructions,
+		builder.recentBlockHash,
+		builder.opts...,
+	)
+}
+
+func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...TransactionOption) (*Transaction, error) {
 	if len(instructions) == 0 {
 		return nil, fmt.Errorf("requires at-least one instruction to create a transaction")
 	}
@@ -82,7 +127,7 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 			}
 		}
 		if !found {
-			return nil, fmt.Errorf("cannot determine fee payer. You can ether pass the fee payer vai the 'TransactionWithInstructions' option parameter or it fallback to the first instruction's first signer")
+			return nil, fmt.Errorf("cannot determine fee payer. You can ether pass the fee payer via the 'TransactionWithInstructions' option parameter or it falls back to the first instruction's first signer")
 		}
 	}
 
@@ -154,7 +199,7 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 	}
 
 	message := Message{
-		RecentBlockhash: blockHash,
+		RecentBlockhash: recentBlockHash,
 	}
 	accountKeyIndex := map[string]uint16{}
 	for idx, acc := range finalAccounts {
