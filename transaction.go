@@ -72,8 +72,8 @@ func NewTransactionBuilder() *TransactionBuilder {
 	return &TransactionBuilder{}
 }
 
-// WithInstruction adds the provided instruction to the builder.
-func (builder *TransactionBuilder) WithInstruction(instruction Instruction) *TransactionBuilder {
+// AddInstruction adds the provided instruction to the builder.
+func (builder *TransactionBuilder) AddInstruction(instruction Instruction) *TransactionBuilder {
 	builder.instructions = append(builder.instructions, instruction)
 	return builder
 }

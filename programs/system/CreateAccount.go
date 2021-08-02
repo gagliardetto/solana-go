@@ -38,39 +38,59 @@ type CreateAccount struct {
 	solana.AccountMetaSlice `bin:"-"`
 }
 
+// NewCreateAccountBuilder initializes a new CreateAccount builder.
 func NewCreateAccountBuilder() *CreateAccount {
 	return &CreateAccount{
 		AccountMetaSlice: make(solana.AccountMetaSlice, 2),
 	}
 }
 
-// Number of lamports to transfer to the new account.
+// WithLamports sets the number of lamports to transfer to the new account.
 func (ins *CreateAccount) WithLamports(lamports uint64) *CreateAccount {
 	ins.Lamports = bin.Uint64(lamports)
 	return ins
 }
 
-// Number of bytes of memory to allocate.
+// WithSpace sets the number of bytes of memory to allocate.
 func (ins *CreateAccount) WithSpace(space uint64) *CreateAccount {
 	ins.Space = bin.Uint64(space)
 	return ins
 }
 
-// Address of program that will own the new account.
+// WithOwner sets the address of program that will own the new account.
 func (ins *CreateAccount) WithOwner(owner solana.PublicKey) *CreateAccount {
 	ins.Owner = owner
 	return ins
 }
 
-// Sets the account that will fund the new account.
+// WithFundingAccount sets the account that will fund the new account.
 func (ins *CreateAccount) WithFundingAccount(fundingAccount solana.PublicKey) *CreateAccount {
 	ins.AccountMetaSlice[0] = solana.Meta(fundingAccount).WRITE().SIGNER()
 	return ins
 }
 
+// GetFundingAccount gets the account that will fund the new account.
+func (ins *CreateAccount) GetFundingAccount() *solana.PublicKey {
+	ac := ins.AccountMetaSlice[0]
+	if ac == nil {
+		return nil
+	}
+	return &ac.PublicKey
+}
+
+// WithNewAccount sets the new account that will be created.
 func (ins *CreateAccount) WithNewAccount(newAccount solana.PublicKey) *CreateAccount {
 	ins.AccountMetaSlice[1] = solana.Meta(newAccount).WRITE().SIGNER()
 	return ins
+}
+
+// GetNewAccount gets the new account.
+func (ins *CreateAccount) GetNewAccount() *solana.PublicKey {
+	ac := ins.AccountMetaSlice[1]
+	if ac == nil {
+		return nil
+	}
+	return &ac.PublicKey
 }
 
 func (ins *CreateAccount) Validate() error {
