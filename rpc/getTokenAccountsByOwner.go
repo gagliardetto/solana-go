@@ -18,16 +18,16 @@ func (cl *Client) GetTokenAccountsByOwner(
 	if conf == nil {
 		return nil, errors.New("conf is nil")
 	}
-	if !conf.Mint.IsZero() && !conf.ProgramId.IsZero() {
+	if conf.Mint != nil && conf.ProgramId != nil {
 		return nil, errors.New("conf.Mint and conf.ProgramId are both set; must be just one of them")
 	}
 
 	{
 		confObj := M{}
-		if !conf.Mint.IsZero() {
+		if conf.Mint != nil {
 			confObj["mint"] = conf.Mint
 		}
-		if !conf.ProgramId.IsZero() {
+		if conf.ProgramId != nil {
 			confObj["programId"] = conf.ProgramId
 		}
 		if len(confObj) > 0 {

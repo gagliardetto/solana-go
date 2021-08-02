@@ -587,7 +587,7 @@ func TestClient_GetBlockProductionWithOpts(t *testing.T) {
 			Range: &SlotRangeRequest{
 				FirstSlot: firstSlot,
 				LastSlot:  &lastSlot,
-				Identity:  identity,
+				Identity:  &identity,
 			},
 		},
 	)
@@ -2128,7 +2128,7 @@ func TestClient_GetVoteAccounts(t *testing.T) {
 	client := New(server.URL)
 
 	opts := &GetVoteAccountsOpts{
-		VotePubkey: solana.MustPublicKeyFromBase58("vot33MHDqT6nSwubGzqtc6m16ChcUywxV7tNULF19Vu"),
+		VotePubkey: solana.MustPublicKeyFromBase58("vot33MHDqT6nSwubGzqtc6m16ChcUywxV7tNULF19Vu").ToPointer(),
 		Commitment: CommitmentMax,
 	}
 	out, err := client.GetVoteAccounts(
@@ -2322,7 +2322,7 @@ func TestClient_GetTokenAccountsByDelegate(t *testing.T) {
 		context.Background(),
 		pubKey,
 		&GetTokenAccountsConfig{
-			ProgramId: programID,
+			ProgramId: &programID,
 		},
 		&GetTokenAccountsOpts{
 			Commitment: CommitmentMax,
@@ -2373,7 +2373,7 @@ func TestClient_GetTokenAccountsByOwner(t *testing.T) {
 		context.Background(),
 		pubKey,
 		&GetTokenAccountsConfig{
-			ProgramId: programID,
+			ProgramId: &programID,
 		},
 		&GetTokenAccountsOpts{
 			Commitment: CommitmentMax,

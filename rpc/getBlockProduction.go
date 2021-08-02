@@ -36,7 +36,7 @@ type SlotRangeRequest struct {
 	// Only return results for this validator identity.
 	//
 	// This parameter is optional.
-	Identity solana.PublicKey `json:"identity,omitempty"`
+	Identity *solana.PublicKey `json:"identity,omitempty"`
 }
 
 // GetBlockProduction returns recent block production information from the current or previous epoch.
@@ -67,7 +67,7 @@ func (cl *Client) GetBlockProductionWithOpts(
 			if opts.Range.LastSlot != nil {
 				rngObj["lastSlot"] = opts.Range.LastSlot
 			}
-			if !opts.Range.Identity.IsZero() {
+			if opts.Range.Identity != nil {
 				rngObj["identity"] = opts.Range.Identity
 			}
 			obj["range"] = rngObj

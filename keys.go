@@ -152,8 +152,15 @@ func (p PublicKey) Equals(pb PublicKey) bool {
 	return p == pb
 }
 
+// ToPointer returns a pointer to the pubkey.
+func (p PublicKey) ToPointer() *PublicKey {
+	return &p
+}
+
 var zeroPublicKey = PublicKey{}
 
+// IsZero returns whether the public key is zero.
+// NOTE: the System Program public key is also zero.
 func (p PublicKey) IsZero() bool {
 	return p == zeroPublicKey
 }

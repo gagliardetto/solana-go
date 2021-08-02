@@ -9,12 +9,12 @@ import (
 
 type GetTokenAccountsConfig struct {
 	// Pubkey of the specific token Mint to limit accounts to.
-	Mint solana.PublicKey `json:"mint"`
+	Mint *solana.PublicKey `json:"mint"`
 
 	// OR:
 
 	// Pubkey of the Token program ID that owns the accounts.
-	ProgramId solana.PublicKey `json:"programId"`
+	ProgramId *solana.PublicKey `json:"programId"`
 }
 
 type GetTokenAccountsOpts struct {
@@ -36,16 +36,16 @@ func (cl *Client) GetTokenAccountsByDelegate(
 	if conf == nil {
 		return nil, errors.New("conf is nil")
 	}
-	if !conf.Mint.IsZero() && !conf.ProgramId.IsZero() {
+	if conf.Mint != nil && conf.ProgramId != nil {
 		return nil, errors.New("conf.Mint and conf.ProgramId are both set; must be just one of them")
 	}
 
 	{
 		confObj := M{}
-		if !conf.Mint.IsZero() {
+		if conf.Mint != nil {
 			confObj["mint"] = conf.Mint
 		}
-		if !conf.ProgramId.IsZero() {
+		if conf.ProgramId != nil {
 			confObj["programId"] = conf.ProgramId
 		}
 		if len(confObj) > 0 {

@@ -10,7 +10,7 @@ type GetVoteAccountsOpts struct {
 	Commitment CommitmentType `json:"commitment,omitempty"`
 
 	// (optional) Only return results for this validator vote address.
-	VotePubkey solana.PublicKey `json:"votePubkey,omitempty"`
+	VotePubkey *solana.PublicKey `json:"votePubkey,omitempty"`
 
 	// (optional) Do not filter out delinquent validators with no stake.
 	KeepUnstakedDelinquents *bool `json:"keepUnstakedDelinquents,omitempty"`
@@ -34,7 +34,7 @@ func (cl *Client) GetVoteAccounts(
 		if opts.Commitment != "" {
 			obj["commitment"] = string(opts.Commitment)
 		}
-		if !opts.VotePubkey.IsZero() {
+		if opts.VotePubkey != nil {
 			obj["votePubkey"] = opts.VotePubkey.String()
 		}
 		if opts.KeepUnstakedDelinquents != nil {

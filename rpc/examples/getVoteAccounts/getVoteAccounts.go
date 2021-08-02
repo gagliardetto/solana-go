@@ -15,7 +15,7 @@ func main() {
 	out, err := client.GetVoteAccounts(
 		context.TODO(),
 		&rpc.GetVoteAccountsOpts{
-			VotePubkey: solana.MustPublicKeyFromBase58("vot33MHDqT6nSwubGzqtc6m16ChcUywxV7tNULF19Vu"),
+			VotePubkey: solana.MustPublicKeyFromBase58("vot33MHDqT6nSwubGzqtc6m16ChcUywxV7tNULF19Vu").ToPointer(),
 		},
 	)
 	if err != nil {
