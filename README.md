@@ -13,7 +13,7 @@ Clients for Solana native programs, Solana Program Library (SPL), and [Serum DEX
 More contracts to come.
 
 <div align="center">
-    <img src="https://user-images.githubusercontent.com/15271561/126141780-cbd92d2c-e160-4385-9606-9094729b54d4.png" margin="auto" height="175"/>
+    <img src="https://user-images.githubusercontent.com/15271561/128235229-1d2d9116-23bb-464e-b2cc-8fb6355e3b55.png" margin="auto" height="175"/>
 </div>
 
 ## Contents
@@ -2380,4 +2380,3 @@ We encourage everyone to contribute, submit issues, PRs, discuss. Every kind of 
 ## Credits
 
 - Gopher logo was originally created by Takuya Ueda (https://twitter.com/tenntenn). Licensed under the Creative Commons 3.0 Attributions license.
-- Pit Vipers https://www.pitviper.com/
