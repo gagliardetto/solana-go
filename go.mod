@@ -47,3 +47,5 @@ require (
 	google.golang.org/api v0.29.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+replace github.com/dfuse-io/binary => github.com/gagliardetto/binary v0.2.0
