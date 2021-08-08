@@ -269,7 +269,8 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 		return nil, fmt.Errorf("failed to encode tx.Message to binary: %w", err)
 	}
 
-	signatureCount := UintToVarLenBytes(uint64(len(tx.Signatures)))
+	var signatureCount []byte
+	bin.EncodeLength(&signatureCount, len(tx.Signatures))
 	output := make([]byte, 0, len(signatureCount)+len(signatureCount)*64+len(messageContent))
 	output = append(output, signatureCount...)
 	for _, sig := range tx.Signatures {
@@ -278,6 +279,32 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 	output = append(output, messageContent...)
 
 	return output, nil
+}
+
+func (tx *Transaction) UnmarshalBinary(decoder *bin.Decoder) (err error) {
+	{
+		numSignatures, err := bin.DecodeLengthFromByteReader(decoder)
+		if err != nil {
+			return err
+		}
+
+		for i := 0; i < numSignatures; i++ {
+			sigBytes, err := decoder.ReadNBytes(64)
+			if err != nil {
+				return err
+			}
+			var sig Signature
+			copy(sig[:], sigBytes)
+			tx.Signatures = append(tx.Signatures, sig)
+		}
+	}
+	{
+		err := tx.Message.UnmarshalBinary(decoder)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error) {
