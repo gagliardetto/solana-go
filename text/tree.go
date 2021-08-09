@@ -22,7 +22,6 @@ func NewTreeEncoder(w io.Writer, docs ...string) *TreeEncoder {
 	}
 }
 
-func (e *TreeEncoder) WriteString(s string) error {
-	_, err := e.output.Write([]byte(s))
-	return err
+func (enc *TreeEncoder) WriteString(s string) (int, error) {
+	return enc.output.Write([]byte(s))
 }
