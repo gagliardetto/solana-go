@@ -59,28 +59,24 @@ type Message struct {
 	Instructions []CompiledInstruction `json:"instructions"`
 }
 
-func (mx *Message) EncodeToTree(parent treeout.Branches) {
-	parent.ParentFunc(func(txTree treeout.Branches) {
-		txTree.Child(text.Sf("RecentBlockhash: %s", mx.RecentBlockhash))
+func (mx *Message) EncodeToTree(txTree treeout.Branches) {
+	txTree.Child(text.Sf("RecentBlockhash: %s", mx.RecentBlockhash))
 
-		txTree.Child("AccountKeys[]").ParentFunc(func(accountKeysBranch treeout.Branches) {
-			for _, key := range mx.AccountKeys {
-				accountKeysBranch.Child(text.ColorizeBG(key.String()))
-			}
-		})
+	txTree.Child("AccountKeys[]").ParentFunc(func(accountKeysBranch treeout.Branches) {
+		for _, key := range mx.AccountKeys {
+			accountKeysBranch.Child(text.ColorizeBG(key.String()))
+		}
+	})
 
-		txTree.Child("Header").ParentFunc(func(message treeout.Branches) {
-			mx.Header.EncodeToTree(message)
-		})
+	txTree.Child("Header").ParentFunc(func(message treeout.Branches) {
+		mx.Header.EncodeToTree(message)
 	})
 }
 
-func (header *MessageHeader) EncodeToTree(parent treeout.Branches) {
-	parent.ParentFunc(func(mxBranch treeout.Branches) {
-		mxBranch.Child(text.Sf("NumRequiredSignatures: %v", header.NumRequiredSignatures))
-		mxBranch.Child(text.Sf("NumReadonlySignedAccounts: %v", header.NumReadonlySignedAccounts))
-		mxBranch.Child(text.Sf("NumReadonlyUnsignedAccounts: %v", header.NumReadonlyUnsignedAccounts))
-	})
+func (header *MessageHeader) EncodeToTree(mxBranch treeout.Branches) {
+	mxBranch.Child(text.Sf("NumRequiredSignatures: %v", header.NumRequiredSignatures))
+	mxBranch.Child(text.Sf("NumReadonlySignedAccounts: %v", header.NumReadonlySignedAccounts))
+	mxBranch.Child(text.Sf("NumReadonlyUnsignedAccounts: %v", header.NumReadonlyUnsignedAccounts))
 }
 
 func (mx *Message) MarshalBinary() ([]byte, error) {

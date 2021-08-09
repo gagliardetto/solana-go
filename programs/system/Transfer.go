@@ -46,7 +46,7 @@ func (inst *Transfer) EncodeToTree(parent treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch treeout.Branches) {
 						paramsBranch.Child(Sf(CC(Shakespeare("Lamports"), ": %v"), Lime(S(inst.Lamports))))
 					})
-					instructionBranch.Child("Accounts:").ParentFunc(func(accountsBranch treeout.Branches) {
+					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch treeout.Branches) {
 						accountsBranch.Child(Sf(CC(Shakespeare("Funding account"), ": %s"), text.ColorizeBG(inst.AccountMetaSlice[0].PublicKey.String())))
 						accountsBranch.Child(Sf(CC(Shakespeare("Recipient account"), ": %s"), text.ColorizeBG(inst.AccountMetaSlice[1].PublicKey.String())))
 					})
