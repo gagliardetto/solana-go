@@ -334,7 +334,7 @@ func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error
 	return tx.Signatures, nil
 }
 
-func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) error {
+func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
 	if len(encoder.Docs) == 0 {
 		encoder.Docs = []string{"Transaction"}
 	}
