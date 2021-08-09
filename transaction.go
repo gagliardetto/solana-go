@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/davecgh/go-spew/spew"
 	bin "github.com/dfuse-io/binary"
 	"github.com/gagliardetto/solana-go/text"
 	"github.com/gagliardetto/treeout"
@@ -369,6 +370,8 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 			}
 			if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
 				enToTree.EncodeToTree(message)
+			} else {
+				message.Child(spew.Sdump(decodedInstruction))
 			}
 		}
 	})
