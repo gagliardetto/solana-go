@@ -6,6 +6,8 @@ import (
 	"sort"
 
 	bin "github.com/dfuse-io/binary"
+	"github.com/gagliardetto/solana-go/text"
+	"github.com/gagliardetto/treeout"
 	"go.uber.org/zap"
 )
 
@@ -329,4 +331,45 @@ func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error
 		tx.Signatures = append(tx.Signatures, s)
 	}
 	return tx.Signatures, nil
+}
+
+func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) error {
+	if len(encoder.Docs) == 0 {
+		encoder.Docs = []string{"Transaction"}
+	}
+	tx.EncodeToTree(encoder)
+	return encoder.WriteString(encoder.Tree.String())
+}
+
+func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
+
+	parent.ParentFunc(func(txTree treeout.Branches) {
+		txTree.Child("Signatures[]").ParentFunc(func(signaturesBranch treeout.Branches) {
+			for _, sig := range tx.Signatures {
+				signaturesBranch.Child(sig.String())
+			}
+		})
+
+		txTree.Child("Message").ParentFunc(func(messageBranch treeout.Branches) {
+			tx.Message.EncodeToTree(messageBranch)
+		})
+	})
+
+	parent.Child("Instructions[]").ParentFunc(func(message treeout.Branches) {
+		for _, inst := range tx.Message.Instructions {
+
+			progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
+			if err != nil {
+				panic(err)
+			}
+
+			decodedInstruction, err := DecodeInstruction(progKey, inst.ResolveInstructionAccounts(&tx.Message), inst.Data)
+			if err != nil {
+				panic(err)
+			}
+			if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
+				enToTree.EncodeToTree(message)
+			}
+		}
+	})
 }

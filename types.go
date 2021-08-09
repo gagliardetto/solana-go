@@ -18,6 +18,8 @@ import (
 	"fmt"
 
 	bin "github.com/dfuse-io/binary"
+	"github.com/gagliardetto/solana-go/text"
+	"github.com/gagliardetto/treeout"
 )
 
 type Transaction struct {
@@ -55,6 +57,30 @@ type Message struct {
 	// List of program instructions that will be executed in sequence
 	// and committed in one atomic transaction if all succeed.
 	Instructions []CompiledInstruction `json:"instructions"`
+}
+
+func (mx *Message) EncodeToTree(parent treeout.Branches) {
+	parent.ParentFunc(func(txTree treeout.Branches) {
+		txTree.Child(text.Sf("RecentBlockhash: %s", mx.RecentBlockhash))
+
+		txTree.Child("AccountKeys[]").ParentFunc(func(accountKeysBranch treeout.Branches) {
+			for _, key := range mx.AccountKeys {
+				accountKeysBranch.Child(text.ColorizeBG(key.String()))
+			}
+		})
+
+		txTree.Child("Header").ParentFunc(func(message treeout.Branches) {
+			mx.Header.EncodeToTree(message)
+		})
+	})
+}
+
+func (header *MessageHeader) EncodeToTree(parent treeout.Branches) {
+	parent.ParentFunc(func(mxBranch treeout.Branches) {
+		mxBranch.Child(text.Sf("NumRequiredSignatures: %v", header.NumRequiredSignatures))
+		mxBranch.Child(text.Sf("NumReadonlySignedAccounts: %v", header.NumReadonlySignedAccounts))
+		mxBranch.Child(text.Sf("NumReadonlyUnsignedAccounts: %v", header.NumReadonlyUnsignedAccounts))
+	})
 }
 
 func (mx *Message) MarshalBinary() ([]byte, error) {

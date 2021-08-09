@@ -19,9 +19,11 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	bin "github.com/dfuse-io/binary"
 	solana "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/text"
+	"github.com/gagliardetto/treeout"
 )
 
 var PROGRAM_ID = solana.MustPublicKeyFromBase58("11111111111111111111111111111111")
@@ -185,4 +187,12 @@ func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instructio
 	}
 
 	return inst, nil
+}
+
+func (inst *Instruction) EncodeToTree(parent treeout.Branches) {
+	if enToTree, ok := inst.Impl.(text.EncodableToTree); ok {
+		enToTree.EncodeToTree(parent)
+	} else {
+		parent.Child(spew.Sdump(inst))
+	}
 }
