@@ -227,11 +227,17 @@ func StringToColorBG(str string) func(string) string {
 }
 
 func Colorize(str string) string {
+	if DisableColors {
+		return str
+	}
 	colorizer := StringToColor(str)
 	return colorizer(str)
 }
 
 func ColorizeBG(str string) string {
+	if DisableColors {
+		return str
+	}
 	colorizer := StringToColorBG(str)
 	return colorizer(str)
 }
