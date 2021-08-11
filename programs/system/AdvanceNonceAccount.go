@@ -30,7 +30,7 @@ func NewAdvanceNonceAccountBuilder() *AdvanceNonceAccount {
 	nb := &AdvanceNonceAccount{
 		AccountMetaSlice: make(solana.AccountMetaSlice, 3),
 	}
-	nb.AccountMetaSlice[1] = solana.Meta(SysVarRecentBlockHashesPubkey)
+	nb.AccountMetaSlice[1] = solana.Meta(solana.SysVarRecentBlockHashesPubkey)
 	return nb
 }
 

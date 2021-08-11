@@ -22,8 +22,8 @@ func NewWithdrawNonceAccountInstruction(
 				AccountMetaSlice: []*solana.AccountMeta{
 					solana.Meta(nonceAccount).WRITE(),
 					solana.Meta(recipientAccount).WRITE(),
-					solana.Meta(SysVarRecentBlockHashesPubkey),
-					solana.Meta(SysVarRentPubkey),
+					solana.Meta(solana.SysVarRecentBlockHashesPubkey),
+					solana.Meta(solana.SysVarRentPubkey),
 					solana.Meta(nonceAuthority).SIGNER(),
 				},
 			},
