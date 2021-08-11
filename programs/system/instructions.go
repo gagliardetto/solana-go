@@ -26,10 +26,14 @@ import (
 	"github.com/gagliardetto/treeout"
 )
 
-var PROGRAM_ID = solana.MustPublicKeyFromBase58("11111111111111111111111111111111")
+var (
+	ProgramID = solana.MustPublicKeyFromBase58("11111111111111111111111111111111")
+)
+
+const ProgramName = "System"
 
 func init() {
-	solana.RegisterInstructionDecoder(PROGRAM_ID, registryDecodeInstruction)
+	solana.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
 }
 
 const (
@@ -69,6 +73,37 @@ const (
 	// Transfer lamports from a derived address.
 	Instruction_TransferWithSeed
 )
+
+func InstructionIDToName(id uint32) string {
+	switch id {
+	case Instruction_CreateAccount:
+		return "CreateAccount"
+	case Instruction_Assign:
+		return "Assign"
+	case Instruction_Transfer:
+		return "Transfer"
+	case Instruction_CreateAccountWithSeed:
+		return "CreateAccountWithSeed"
+	case Instruction_AdvanceNonceAccount:
+		return "AdvanceNonceAccount"
+	case Instruction_WithdrawNonceAccount:
+		return "WithdrawNonceAccount"
+	case Instruction_InitializeNonceAccount:
+		return "InitializeNonceAccount"
+	case Instruction_AuthorizeNonceAccount:
+		return "AuthorizeNonceAccount"
+	case Instruction_Allocate:
+		return "Allocate"
+	case Instruction_AllocateWithSeed:
+		return "AllocateWithSeed"
+	case Instruction_AssignWithSeed:
+		return "AssignWithSeed"
+	case Instruction_TransferWithSeed:
+		return "TransferWithSeed"
+	default:
+		return ""
+	}
+}
 
 type Instruction struct {
 	bin.BaseVariant
@@ -138,7 +173,7 @@ var InstructionImplDef = bin.NewVariantDefinition(
 	})
 
 func (i *Instruction) ProgramID() solana.PublicKey {
-	return PROGRAM_ID
+	return ProgramID
 }
 
 func (i *Instruction) Data() ([]byte, error) {
