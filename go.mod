@@ -50,4 +50,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/dfuse-io/binary => github.com/gagliardetto/binary v0.2.0
+replace github.com/dfuse-io/binary => github.com/gagliardetto/binary v0.3.0
