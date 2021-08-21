@@ -37,7 +37,7 @@ type TokenMeta struct {
 
 func DecodeTokenMeta(in []byte) (*TokenMeta, error) {
 	var t *TokenMeta
-	decoder := bin.NewDecoder(in)
+	decoder := bin.NewBinDecoder(in)
 	err := decoder.Decode(&t)
 	if err != nil {
 		return nil, fmt.Errorf("unpack: %w", err)

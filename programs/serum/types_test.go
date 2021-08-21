@@ -22,7 +22,7 @@ func TestAccountFlag_Decoder(t *testing.T) {
 	require.NoError(t, err)
 
 	var f *AccountFlag
-	err = bin.NewDecoder(data).Decode(&f)
+	err = bin.NewBinDecoder(data).Decode(&f)
 	require.NoError(t, err)
 
 	assert.Equal(t, f.Is(AccountFlagInitialized), true, "initialized")
@@ -39,7 +39,7 @@ func TestAccountFlag_Decoder(t *testing.T) {
 	require.NoError(t, err)
 
 	var f2 *AccountFlag
-	err = bin.NewDecoder(data).Decode(&f2)
+	err = bin.NewBinDecoder(data).Decode(&f2)
 	require.NoError(t, err)
 
 	assert.Equal(t, f2.Is(AccountFlagInitialized), true, "initialized")
@@ -60,7 +60,7 @@ func TestDecoder_Market(t *testing.T) {
 	fmt.Println(hex.EncodeToString(data))
 
 	var m *MarketV2
-	err = bin.NewDecoder(data).Decode(&m)
+	err = bin.NewBinDecoder(data).Decode(&m)
 	require.NoError(t, err)
 
 	assert.Equal(t, true, m.AccountFlags.Is(AccountFlagInitialized))
@@ -77,7 +77,7 @@ func TestDecoder_Orderbook(t *testing.T) {
 	data, err := hex.DecodeString(string(cnt))
 	require.NoError(t, err)
 
-	decoder := bin.NewDecoder(data)
+	decoder := bin.NewBinDecoder(data)
 	var ob *Orderbook
 	err = decoder.Decode(&ob)
 	require.NoError(t, err)
@@ -210,7 +210,7 @@ func TestDecoder_Slabs(t *testing.T) {
 			cnt, err := hex.DecodeString(test.slabData)
 			require.NoError(t, err)
 
-			decoder := bin.NewDecoder(cnt)
+			decoder := bin.NewBinDecoder(cnt)
 			var slab *Slab
 			err = decoder.Decode(&slab)
 			require.NoError(t, err)

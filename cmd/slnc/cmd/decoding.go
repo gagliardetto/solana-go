@@ -39,14 +39,14 @@ func decodeAsToken(data []byte) (out interface{}, err error) {
 	case 120:
 		var tokenAcct token.Account
 
-		if err := bin.NewDecoder(data).Decode(&tokenAcct); err != nil {
+		if err := bin.NewBinDecoder(data).Decode(&tokenAcct); err != nil {
 			return nil, fmt.Errorf("failed unpacking: %w", err)
 		}
 
 		return tokenAcct, nil
 	case 40:
 		var mint token.Mint
-		if err := bin.NewDecoder(data).Decode(&mint); err != nil {
+		if err := bin.NewBinDecoder(data).Decode(&mint); err != nil {
 			log.Fatalln("failed unpack", err)
 		}
 

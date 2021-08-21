@@ -25,7 +25,7 @@ func registryDecodeInstruction(accounts []*solana.AccountMeta, data []byte) (int
 
 func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instruction, error) {
 	var inst Instruction
-	if err := bin.NewDecoder(data).Decode(&inst); err != nil {
+	if err := bin.NewBinDecoder(data).Decode(&inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
 
@@ -62,6 +62,8 @@ type Instruction struct {
 	bin.BaseVariant
 }
 
+var _ bin.EncoderDecoder = &Instruction{}
+
 func (i *Instruction) Accounts() (out []*solana.AccountMeta) {
 	switch i.TypeID {
 	case 0:
@@ -77,7 +79,7 @@ func (i *Instruction) ProgramID() solana.PublicKey {
 
 func (i *Instruction) Data() ([]byte, error) {
 	buf := new(bytes.Buffer)
-	if err := bin.NewEncoder(buf).Encode(i); err != nil {
+	if err := bin.NewBinEncoder(buf).Encode(i); err != nil {
 		return nil, fmt.Errorf("unable to encode instruction: %w", err)
 	}
 	return buf.Bytes(), nil
@@ -91,11 +93,11 @@ func (i *Instruction) TextEncode(encoder *text.Encoder, option *text.Option) err
 	return encoder.Encode(i.Impl, option)
 }
 
-func (i *Instruction) UnmarshalBinary(decoder *bin.Decoder) (err error) {
+func (i *Instruction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	return i.BaseVariant.UnmarshalBinaryVariant(decoder, InstructionDefVariant)
 }
 
-func (i *Instruction) MarshalBinary(encoder *bin.Encoder) error {
+func (i *Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
 	err := encoder.WriteUint32(i.TypeID, binary.LittleEndian)
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)

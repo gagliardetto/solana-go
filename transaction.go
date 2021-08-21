@@ -273,7 +273,7 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 	}
 
 	var signatureCount []byte
-	bin.EncodeLength(&signatureCount, len(tx.Signatures))
+	bin.EncodeCompactU16Length(&signatureCount, len(tx.Signatures))
 	output := make([]byte, 0, len(signatureCount)+len(signatureCount)*64+len(messageContent))
 	output = append(output, signatureCount...)
 	for _, sig := range tx.Signatures {
@@ -284,9 +284,17 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 	return output, nil
 }
 
-func (tx *Transaction) UnmarshalBinary(decoder *bin.Decoder) (err error) {
+func (tx *Transaction) MarshalWithEncoder(encoder *bin.Encoder) error {
+	out, err := tx.MarshalBinary()
+	if err != nil {
+		return err
+	}
+	return encoder.WriteBytes(out, false)
+}
+
+func (tx *Transaction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	{
-		numSignatures, err := bin.DecodeLengthFromByteReader(decoder)
+		numSignatures, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
 		if err != nil {
 			return err
 		}
@@ -302,7 +310,7 @@ func (tx *Transaction) UnmarshalBinary(decoder *bin.Decoder) (err error) {
 		}
 	}
 	{
-		err := tx.Message.UnmarshalBinary(decoder)
+		err := tx.Message.UnmarshalWithDecoder(decoder)
 		if err != nil {
 			return err
 		}

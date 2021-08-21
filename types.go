@@ -33,6 +33,8 @@ type Transaction struct {
 	Message Message `json:"message"`
 }
 
+var _ bin.EncoderDecoder = &Transaction{}
+
 func (t *Transaction) TouchAccount(account PublicKey) bool   { return t.Message.TouchAccount(account) }
 func (t *Transaction) IsSigner(account PublicKey) bool       { return t.Message.IsSigner(account) }
 func (t *Transaction) IsWritable(account PublicKey) bool     { return t.Message.IsWritable(account) }
@@ -58,6 +60,8 @@ type Message struct {
 	// and committed in one atomic transaction if all succeed.
 	Instructions []CompiledInstruction `json:"instructions"`
 }
+
+var _ bin.EncoderDecoder = &Message{}
 
 func (mx *Message) EncodeToTree(txTree treeout.Branches) {
 	txTree.Child(text.Sf("RecentBlockhash: %s", mx.RecentBlockhash))
@@ -86,28 +90,36 @@ func (mx *Message) MarshalBinary() ([]byte, error) {
 		mx.Header.NumReadonlyUnsignedAccounts,
 	}
 
-	bin.EncodeLength(&buf, len(mx.AccountKeys))
+	bin.EncodeCompactU16Length(&buf, len(mx.AccountKeys))
 	for _, key := range mx.AccountKeys {
 		buf = append(buf, key[:]...)
 	}
 
 	buf = append(buf, mx.RecentBlockhash[:]...)
 
-	bin.EncodeLength(&buf, len(mx.Instructions))
+	bin.EncodeCompactU16Length(&buf, len(mx.Instructions))
 	for _, instruction := range mx.Instructions {
 		buf = append(buf, byte(instruction.ProgramIDIndex))
-		bin.EncodeLength(&buf, len(instruction.Accounts))
+		bin.EncodeCompactU16Length(&buf, len(instruction.Accounts))
 		for _, accountIdx := range instruction.Accounts {
 			buf = append(buf, byte(accountIdx))
 		}
 
-		bin.EncodeLength(&buf, len(instruction.Data))
+		bin.EncodeCompactU16Length(&buf, len(instruction.Data))
 		buf = append(buf, instruction.Data...)
 	}
 	return buf, nil
 }
 
-func (mx *Message) UnmarshalBinary(decoder *bin.Decoder) (err error) {
+func (mx *Message) MarshalWithEncoder(encoder *bin.Encoder) error {
+	out, err := mx.MarshalBinary()
+	if err != nil {
+		return err
+	}
+	return encoder.WriteBytes(out, false)
+}
+
+func (mx *Message) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	{
 		mx.Header.NumRequiredSignatures, err = decoder.ReadUint8()
 		if err != nil {
@@ -123,7 +135,7 @@ func (mx *Message) UnmarshalBinary(decoder *bin.Decoder) (err error) {
 		}
 	}
 	{
-		numAccountKeys, err := bin.DecodeLengthFromByteReader(decoder)
+		numAccountKeys, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
 		if err != nil {
 			return err
 		}
@@ -147,7 +159,7 @@ func (mx *Message) UnmarshalBinary(decoder *bin.Decoder) (err error) {
 		mx.RecentBlockhash = recentBlockhash
 	}
 	{
-		numInstructions, err := bin.DecodeLengthFromByteReader(decoder)
+		numInstructions, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
 		if err != nil {
 			return err
 		}
@@ -160,7 +172,7 @@ func (mx *Message) UnmarshalBinary(decoder *bin.Decoder) (err error) {
 			compInst.ProgramIDIndex = uint16(programIDIndex)
 
 			{
-				numAccounts, err := bin.DecodeLengthFromByteReader(decoder)
+				numAccounts, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
 				if err != nil {
 					return err
 				}
@@ -174,7 +186,7 @@ func (mx *Message) UnmarshalBinary(decoder *bin.Decoder) (err error) {
 				}
 			}
 			{
-				dataLen, err := bin.DecodeLengthFromByteReader(decoder)
+				dataLen, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
 				if err != nil {
 					return err
 				}
@@ -291,17 +303,17 @@ func (ci *CompiledInstruction) ResolveInstructionAccounts(message *Message) (out
 	return
 }
 
-func TransactionFromData(in []byte) (*Transaction, error) {
+func TransactionFromDecoder(decoder *bin.Decoder) (*Transaction, error) {
 	var out *Transaction
-	decoder := bin.NewDecoder(in)
 	err := decoder.Decode(&out)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
-func MustTransactionFromData(in []byte) *Transaction {
-	out, err := TransactionFromData(in)
+
+func MustTransactionFromData(decoder *bin.Decoder) *Transaction {
+	out, err := TransactionFromDecoder(decoder)
 	if err != nil {
 		panic(err)
 	}

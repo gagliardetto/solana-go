@@ -63,7 +63,7 @@ func TestDecodeInstruction(t *testing.T) {
 			data, err := hex.DecodeString(test.hexData)
 			require.NoError(t, err)
 			var instruction *Instruction
-			err = bin.NewDecoder(data).Decode(&instruction)
+			err = bin.NewBinDecoder(data).Decode(&instruction)
 			require.NoError(t, err)
 			assert.Equal(t, test.expectInstruction, instruction)
 		})

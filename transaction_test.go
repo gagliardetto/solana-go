@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"testing"
 
+	bin "github.com/dfuse-io/binary"
 	"github.com/magiconair/properties/assert"
 	"github.com/mr-tron/base58"
 	"github.com/stretchr/testify/require"
@@ -98,7 +99,7 @@ func TestTransactionDecode(t *testing.T) {
 	data, err := base64.StdEncoding.DecodeString(encoded)
 	require.NoError(t, err)
 
-	tx, err := TransactionFromData(data)
+	tx, err := TransactionFromDecoder(bin.NewBinDecoder(data))
 	require.NoError(t, err)
 	require.NotNil(t, tx)
 
