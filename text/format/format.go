@@ -24,3 +24,19 @@ func Param(name string, value interface{}) string {
 func Account(name string, pubKey solana.PublicKey) string {
 	return Shakespeare(name) + ": " + text.ColorizeBG(pubKey.String())
 }
+
+func Meta(name string, meta *solana.AccountMeta) string {
+	out := Shakespeare(name) + ": " + text.ColorizeBG(meta.PublicKey.String())
+	out += " ["
+	if meta.IsWritable {
+		out += "WRITE"
+	}
+	if meta.IsWritable {
+		if meta.IsWritable {
+			out += ", "
+		}
+		out += "SIGN"
+	}
+	out += "] "
+	return out
+}
