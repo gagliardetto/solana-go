@@ -1,6 +1,8 @@
 package format
 
 import (
+	"strings"
+
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/text"
@@ -16,7 +18,7 @@ func Instruction(name string) string {
 }
 
 func Param(name string, value interface{}) string {
-	return Sf(CC(Shakespeare(name), ": %s"), Lime(spew.Sdump(value)))
+	return Sf(CC(Shakespeare(name), ": %s"), Lime(strings.TrimSpace(spew.Sdump(value))))
 }
 
 func Account(name string, pubKey solana.PublicKey) string {
