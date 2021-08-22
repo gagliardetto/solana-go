@@ -19,6 +19,7 @@ const (
 	TestNet_RPC          = protocolHTTPS + hostTestNet
 	MainNetBeta_RPC      = protocolHTTPS + hostMainNetBeta
 	MainNetBetaSerum_RPC = protocolHTTPS + hostMainNetBetaSerum
+	LocalNet_RPC         = "http://127.0.0.1:8899"
 )
 
 const (
