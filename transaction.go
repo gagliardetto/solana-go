@@ -201,6 +201,16 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 		itr++
 	}
 
+	if feePayerIndex < 0 {
+		// fee payer is not part of accounts we want to add it
+		feePayerAccount := &AccountMeta{
+			PublicKey:  feePayer,
+			IsSigner:   true,
+			IsWritable: true,
+		}
+		finalAccounts[0] = feePayerAccount
+	}
+
 	message := Message{
 		RecentBlockhash: recentBlockHash,
 	}
