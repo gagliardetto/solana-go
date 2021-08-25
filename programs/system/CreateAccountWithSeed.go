@@ -49,7 +49,7 @@ type CreateAccountWithSeed struct {
 	// Base public key.
 	Base solana.PublicKey
 
-	SeedSize int `bin:"sizeof=Seed"`
+	SeedSize int64 `bin:"sizeof=Seed"`
 	// String of ASCII chars, no longer than solana.MAX_SEED_LEN
 	Seed string
 
