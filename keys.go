@@ -157,6 +157,10 @@ func (p PublicKey) ToPointer() *PublicKey {
 	return &p
 }
 
+func (p PublicKey) Bytes() []byte {
+	return []byte(p[:])
+}
+
 var zeroPublicKey = PublicKey{}
 
 // IsZero returns whether the public key is zero.
