@@ -16,6 +16,7 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gagliardetto/solana-go"
 )
@@ -173,6 +174,45 @@ func (cl *Client) GetConfirmedTransaction(
 ) (out *TransactionWithMeta, err error) {
 	params := []interface{}{signature, "json"}
 
+	err = cl.rpcClient.CallForInto(ctx, &out, "getConfirmedTransaction", params)
+	if err != nil {
+		return nil, err
+	}
+	if out == nil {
+		return nil, ErrNotFound
+	}
+	return
+}
+
+// GetConfirmedTransactionWithOpts returns transaction details for a confirmed transaction.
+func (cl *Client) GetConfirmedTransactionWithOpts(
+	ctx context.Context,
+	signature solana.Signature,
+	opts *GetTransactionOpts,
+) (out *TransactionWithMeta, err error) {
+	params := []interface{}{signature}
+	if opts != nil {
+		obj := M{}
+		if opts.Encoding != "" {
+			if !solana.IsAnyOfEncodingType(
+				opts.Encoding,
+				// Valid encodings:
+				solana.EncodingJSON,
+				// solana.EncodingJSONParsed, // TODO
+				solana.EncodingBase58,
+				solana.EncodingBase64,
+			) {
+				return nil, fmt.Errorf("provided encoding is not supported: %s", opts.Encoding)
+			}
+			obj["encoding"] = opts.Encoding
+		}
+		if opts.Commitment != "" {
+			obj["commitment"] = opts.Commitment
+		}
+		if len(obj) > 0 {
+			params = append(params, obj)
+		}
+	}
 	err = cl.rpcClient.CallForInto(ctx, &out, "getConfirmedTransaction", params)
 	if err != nil {
 		return nil, err
