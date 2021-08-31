@@ -34,8 +34,41 @@ func (a *Account) PublicKey() PublicKey {
 
 type AccountMeta struct {
 	PublicKey  PublicKey
-	IsSigner   bool
 	IsWritable bool
+	IsSigner   bool
+}
+
+// Meta intializes a new AccountMeta with the provided pubKey.
+func Meta(
+	pubKey PublicKey,
+) *AccountMeta {
+	return &AccountMeta{
+		PublicKey: pubKey,
+	}
+}
+
+// WRITE sets IsWritable to true.
+func (meta *AccountMeta) WRITE() *AccountMeta {
+	meta.IsWritable = true
+	return meta
+}
+
+// SIGNER sets IsSigner to true.
+func (meta *AccountMeta) SIGNER() *AccountMeta {
+	meta.IsSigner = true
+	return meta
+}
+
+func NewAccountMeta(
+	pubKey PublicKey,
+	WRITE bool,
+	SIGNER bool,
+) *AccountMeta {
+	return &AccountMeta{
+		PublicKey:  pubKey,
+		IsWritable: WRITE,
+		IsSigner:   SIGNER,
+	}
 }
 
 func (a *AccountMeta) less(act *AccountMeta) bool {
@@ -49,4 +82,30 @@ func (a *AccountMeta) less(act *AccountMeta) bool {
 		return true
 	}
 	return false
+}
+
+type AccountMetaSlice []*AccountMeta
+
+func (slice *AccountMetaSlice) Append(account *AccountMeta) {
+	*slice = append(*slice, account)
+}
+
+func (slice *AccountMetaSlice) SetAccounts(accounts []*AccountMeta) error {
+	*slice = accounts
+	return nil
+}
+
+func (slice AccountMetaSlice) GetAccounts() []*AccountMeta {
+	return slice
+}
+
+// GetSigners returns the accounts that are signers.
+func (slice AccountMetaSlice) GetSigners() []*AccountMeta {
+	signers := make([]*AccountMeta, 0)
+	for _, ac := range slice {
+		if ac.IsSigner {
+			signers = append(signers, ac)
+		}
+	}
+	return signers
 }

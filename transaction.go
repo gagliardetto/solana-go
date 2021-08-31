@@ -5,13 +5,16 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/davecgh/go-spew/spew"
 	bin "github.com/dfuse-io/binary"
+	"github.com/gagliardetto/solana-go/text"
+	"github.com/gagliardetto/treeout"
 	"go.uber.org/zap"
 )
 
 type Instruction interface {
-	Accounts() []*AccountMeta // returns the list of accounts the instructions requires
 	ProgramID() PublicKey     // the programID the instruction acts on
+	Accounts() []*AccountMeta // returns the list of accounts the instructions requires
 	Data() ([]byte, error)    // the binary encoded instructions
 }
 
@@ -33,35 +36,54 @@ func TransactionPayer(payer PublicKey) TransactionOption {
 	return transactionOptionFunc(func(opts *transactionOptions) { opts.payer = payer })
 }
 
-type pubkeySlice []PublicKey
-
-// uniqueAppend appends the provided pubkey only if it is not
-// already present in the slice.
-// Returns true when the provided pubkey wasn't already present.
-func (slice *pubkeySlice) uniqueAppend(pubkey PublicKey) bool {
-	if !slice.has(pubkey) {
-		slice.append(pubkey)
-		return true
-	}
-	return false
-}
-
-func (slice *pubkeySlice) append(pubkey PublicKey) {
-	*slice = append(*slice, pubkey)
-}
-
-func (slice *pubkeySlice) has(pubkey PublicKey) bool {
-	for _, key := range *slice {
-		if key.Equals(pubkey) {
-			return true
-		}
-	}
-	return false
-}
-
 var debugNewTransaction = false
 
-func NewTransaction(instructions []Instruction, blockHash Hash, opts ...TransactionOption) (*Transaction, error) {
+type TransactionBuilder struct {
+	instructions    []Instruction
+	recentBlockHash Hash
+	opts            []TransactionOption
+}
+
+// NewTransactionBuilder creates a new instruction builder.
+func NewTransactionBuilder() *TransactionBuilder {
+	return &TransactionBuilder{}
+}
+
+// AddInstruction adds the provided instruction to the builder.
+func (builder *TransactionBuilder) AddInstruction(instruction Instruction) *TransactionBuilder {
+	builder.instructions = append(builder.instructions, instruction)
+	return builder
+}
+
+// SetRecentBlockHash sets the recent blockhash for the instruction builder.
+func (builder *TransactionBuilder) SetRecentBlockHash(recentBlockHash Hash) *TransactionBuilder {
+	builder.recentBlockHash = recentBlockHash
+	return builder
+}
+
+// WithOpt adds a TransactionOption.
+func (builder *TransactionBuilder) WithOpt(opt TransactionOption) *TransactionBuilder {
+	builder.opts = append(builder.opts, opt)
+	return builder
+}
+
+// Set transaction fee payer.
+// If not set, defaults to first signer account of the first instruction.
+func (builder *TransactionBuilder) SetFeePayer(feePayer PublicKey) *TransactionBuilder {
+	builder.opts = append(builder.opts, TransactionPayer(feePayer))
+	return builder
+}
+
+// Build builds and returns a *Transaction.
+func (builder *TransactionBuilder) Build() (*Transaction, error) {
+	return NewTransaction(
+		builder.instructions,
+		builder.recentBlockHash,
+		builder.opts...,
+	)
+}
+
+func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...TransactionOption) (*Transaction, error) {
 	if len(instructions) == 0 {
 		return nil, fmt.Errorf("requires at-least one instruction to create a transaction")
 	}
@@ -82,17 +104,17 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 			}
 		}
 		if !found {
-			return nil, fmt.Errorf("cannot determine fee payer. You can ether pass the fee payer vai the 'TransactionWithInstructions' option parameter or it fallback to the first instruction's first signer")
+			return nil, fmt.Errorf("cannot determine fee payer. You can ether pass the fee payer via the 'TransactionWithInstructions' option parameter or it falls back to the first instruction's first signer")
 		}
 	}
 
-	programIDs := make(pubkeySlice, 0)
+	programIDs := make(PublicKeySlice, 0)
 	accounts := []*AccountMeta{}
 	for _, instruction := range instructions {
 		for _, key := range instruction.Accounts() {
 			accounts = append(accounts, key)
 		}
-		programIDs.uniqueAppend(instruction.ProgramID())
+		programIDs.UniqueAppend(instruction.ProgramID())
 	}
 
 	// Add programID to the account list
@@ -153,8 +175,18 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 		itr++
 	}
 
+	if feePayerIndex < 0 {
+		// fee payer is not part of accounts we want to add it
+		feePayerAccount := &AccountMeta{
+			PublicKey:  feePayer,
+			IsSigner:   true,
+			IsWritable: true,
+		}
+		finalAccounts[0] = feePayerAccount
+	}
+
 	message := Message{
-		RecentBlockhash: blockHash,
+		RecentBlockhash: recentBlockHash,
 	}
 	accountKeyIndex := map[string]uint16{}
 	for idx, acc := range finalAccounts {
@@ -188,7 +220,7 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 		)
 	}
 
-	for trxIdx, instruction := range instructions {
+	for txIdx, instruction := range instructions {
 		accounts = instruction.Accounts()
 		accountIndex := make([]uint16, len(accounts))
 		for idx, acc := range accounts {
@@ -196,7 +228,7 @@ func NewTransaction(instructions []Instruction, blockHash Hash, opts ...Transact
 		}
 		data, err := instruction.Data()
 		if err != nil {
-			return nil, fmt.Errorf("unable to encode instructions [%d]: %w", trxIdx, err)
+			return nil, fmt.Errorf("unable to encode instructions [%d]: %w", txIdx, err)
 		}
 		message.Instructions = append(message.Instructions, CompiledInstruction{
 			ProgramIDIndex: accountKeyIndex[instruction.ProgramID().String()],
@@ -224,7 +256,8 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 		return nil, fmt.Errorf("failed to encode tx.Message to binary: %w", err)
 	}
 
-	signatureCount := UintToVarLenBytes(uint64(len(tx.Signatures)))
+	var signatureCount []byte
+	bin.EncodeCompactU16Length(&signatureCount, len(tx.Signatures))
 	output := make([]byte, 0, len(signatureCount)+len(signatureCount)*64+len(messageContent))
 	output = append(output, signatureCount...)
 	for _, sig := range tx.Signatures {
@@ -235,13 +268,47 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 	return output, nil
 }
 
-func (t *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error) {
-	messageContent, err := t.Message.MarshalBinary()
+func (tx *Transaction) MarshalWithEncoder(encoder *bin.Encoder) error {
+	out, err := tx.MarshalBinary()
+	if err != nil {
+		return err
+	}
+	return encoder.WriteBytes(out, false)
+}
+
+func (tx *Transaction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
+	{
+		numSignatures, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
+		if err != nil {
+			return err
+		}
+
+		for i := 0; i < numSignatures; i++ {
+			sigBytes, err := decoder.ReadNBytes(64)
+			if err != nil {
+				return err
+			}
+			var sig Signature
+			copy(sig[:], sigBytes)
+			tx.Signatures = append(tx.Signatures, sig)
+		}
+	}
+	{
+		err := tx.Message.UnmarshalWithDecoder(decoder)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error) {
+	messageContent, err := tx.Message.MarshalBinary()
 	if err != nil {
 		return nil, fmt.Errorf("unable to encode message for signing: %w", err)
 	}
 
-	signerKeys := t.Message.signerKeys()
+	signerKeys := tx.Message.signerKeys()
 
 	for _, key := range signerKeys {
 		privateKey := getter(key)
@@ -254,7 +321,50 @@ func (t *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error)
 			return nil, fmt.Errorf("failed to signed with key %q: %w", key.String(), err)
 		}
 
-		t.Signatures = append(t.Signatures, s)
+		tx.Signatures = append(tx.Signatures, s)
 	}
-	return t.Signatures, nil
+	return tx.Signatures, nil
+}
+
+func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
+	if len(encoder.Docs) == 0 {
+		encoder.Docs = []string{"Transaction"}
+	}
+	tx.EncodeToTree(encoder)
+	return encoder.WriteString(encoder.Tree.String())
+}
+
+func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
+
+	parent.ParentFunc(func(txTree treeout.Branches) {
+		txTree.Child("Signatures[]").ParentFunc(func(signaturesBranch treeout.Branches) {
+			for _, sig := range tx.Signatures {
+				signaturesBranch.Child(sig.String())
+			}
+		})
+
+		txTree.Child("Message").ParentFunc(func(messageBranch treeout.Branches) {
+			tx.Message.EncodeToTree(messageBranch)
+		})
+	})
+
+	parent.Child("Instructions[]").ParentFunc(func(message treeout.Branches) {
+		for _, inst := range tx.Message.Instructions {
+
+			progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
+			if err != nil {
+				panic(err)
+			}
+
+			decodedInstruction, err := DecodeInstruction(progKey, inst.ResolveInstructionAccounts(&tx.Message), inst.Data)
+			if err != nil {
+				panic(err)
+			}
+			if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
+				enToTree.EncodeToTree(message)
+			} else {
+				message.Child(spew.Sdump(decodedInstruction))
+			}
+		}
+	})
 }

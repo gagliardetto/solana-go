@@ -15,10 +15,11 @@
 package solana
 
 import (
-	"encoding/binary"
 	"fmt"
 
 	bin "github.com/dfuse-io/binary"
+	"github.com/gagliardetto/solana-go/text"
+	"github.com/gagliardetto/treeout"
 )
 
 type Transaction struct {
@@ -31,6 +32,8 @@ type Transaction struct {
 	// Defines the content of the transaction.
 	Message Message `json:"message"`
 }
+
+var _ bin.EncoderDecoder = &Transaction{}
 
 func (t *Transaction) TouchAccount(account PublicKey) bool   { return t.Message.TouchAccount(account) }
 func (t *Transaction) IsSigner(account PublicKey) bool       { return t.Message.IsSigner(account) }
@@ -58,56 +61,147 @@ type Message struct {
 	Instructions []CompiledInstruction `json:"instructions"`
 }
 
-// UintToVarLenBytes is used for creating a []byte that contains
-// the length of a variable, and is used for creating length
-// prefixes in a marshaled transaction.
-func UintToVarLenBytes(l uint64) []byte {
-	if l == 0 {
-		return []byte{0x0}
-	}
-	b := make([]byte, binary.MaxVarintLen64)
-	binary.PutUvarint(b, l)
-	return TrimRightZeros(b)
-}
+var _ bin.EncoderDecoder = &Message{}
 
-// TrimRightZeros reslices the provided slice
-// by trimming all trailing zeros from the slice.
-func TrimRightZeros(buf []byte) []byte {
-	cutIndex := len(buf)
-	for ; cutIndex > 0; cutIndex-- {
-		if buf[cutIndex-1] != 0 {
-			break
+func (mx *Message) EncodeToTree(txTree treeout.Branches) {
+	txTree.Child(text.Sf("RecentBlockhash: %s", mx.RecentBlockhash))
+
+	txTree.Child("AccountKeys[]").ParentFunc(func(accountKeysBranch treeout.Branches) {
+		for _, key := range mx.AccountKeys {
+			accountKeysBranch.Child(text.ColorizeBG(key.String()))
 		}
-	}
-	return buf[:cutIndex]
+	})
+
+	txTree.Child("Header").ParentFunc(func(message treeout.Branches) {
+		mx.Header.EncodeToTree(message)
+	})
 }
 
-func (m *Message) MarshalBinary() ([]byte, error) {
-	b := []byte{
-		m.Header.NumRequiredSignatures,
-		m.Header.NumReadonlySignedAccounts,
-		m.Header.NumReadonlyUnsignedAccounts,
+func (header *MessageHeader) EncodeToTree(mxBranch treeout.Branches) {
+	mxBranch.Child(text.Sf("NumRequiredSignatures: %v", header.NumRequiredSignatures))
+	mxBranch.Child(text.Sf("NumReadonlySignedAccounts: %v", header.NumReadonlySignedAccounts))
+	mxBranch.Child(text.Sf("NumReadonlyUnsignedAccounts: %v", header.NumReadonlyUnsignedAccounts))
+}
+
+func (mx *Message) MarshalBinary() ([]byte, error) {
+	buf := []byte{
+		mx.Header.NumRequiredSignatures,
+		mx.Header.NumReadonlySignedAccounts,
+		mx.Header.NumReadonlyUnsignedAccounts,
 	}
 
-	b = append(b, UintToVarLenBytes(uint64(len(m.AccountKeys)))...)
-	for _, key := range m.AccountKeys {
-		b = append(b, key[:]...)
+	bin.EncodeCompactU16Length(&buf, len(mx.AccountKeys))
+	for _, key := range mx.AccountKeys {
+		buf = append(buf, key[:]...)
 	}
 
-	b = append(b, m.RecentBlockhash[:]...)
+	buf = append(buf, mx.RecentBlockhash[:]...)
 
-	b = append(b, UintToVarLenBytes(uint64(len(m.Instructions)))...)
-	for _, instruction := range m.Instructions {
-		b = append(b, byte(instruction.ProgramIDIndex))
-		b = append(b, UintToVarLenBytes(uint64(len(instruction.Accounts)))...)
+	bin.EncodeCompactU16Length(&buf, len(mx.Instructions))
+	for _, instruction := range mx.Instructions {
+		buf = append(buf, byte(instruction.ProgramIDIndex))
+		bin.EncodeCompactU16Length(&buf, len(instruction.Accounts))
 		for _, accountIdx := range instruction.Accounts {
-			b = append(b, byte(accountIdx))
+			buf = append(buf, byte(accountIdx))
 		}
 
-		b = append(b, UintToVarLenBytes(uint64(len(instruction.Data)))...)
-		b = append(b, instruction.Data...)
+		bin.EncodeCompactU16Length(&buf, len(instruction.Data))
+		buf = append(buf, instruction.Data...)
 	}
-	return b, nil
+	return buf, nil
+}
+
+func (mx *Message) MarshalWithEncoder(encoder *bin.Encoder) error {
+	out, err := mx.MarshalBinary()
+	if err != nil {
+		return err
+	}
+	return encoder.WriteBytes(out, false)
+}
+
+func (mx *Message) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
+	{
+		mx.Header.NumRequiredSignatures, err = decoder.ReadUint8()
+		if err != nil {
+			return err
+		}
+		mx.Header.NumReadonlySignedAccounts, err = decoder.ReadUint8()
+		if err != nil {
+			return err
+		}
+		mx.Header.NumReadonlyUnsignedAccounts, err = decoder.ReadUint8()
+		if err != nil {
+			return err
+		}
+	}
+	{
+		numAccountKeys, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
+		if err != nil {
+			return err
+		}
+		for i := 0; i < numAccountKeys; i++ {
+			pubkeyBytes, err := decoder.ReadNBytes(32)
+			if err != nil {
+				return err
+			}
+			var sig PublicKey
+			copy(sig[:], pubkeyBytes)
+			mx.AccountKeys = append(mx.AccountKeys, sig)
+		}
+	}
+	{
+		recentBlockhashBytes, err := decoder.ReadNBytes(32)
+		if err != nil {
+			return err
+		}
+		var recentBlockhash Hash
+		copy(recentBlockhash[:], recentBlockhashBytes)
+		mx.RecentBlockhash = recentBlockhash
+	}
+	{
+		numInstructions, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
+		if err != nil {
+			return err
+		}
+		for i := 0; i < numInstructions; i++ {
+			programIDIndex, err := decoder.ReadUint8()
+			if err != nil {
+				return err
+			}
+			var compInst CompiledInstruction
+			compInst.ProgramIDIndex = uint16(programIDIndex)
+
+			{
+				numAccounts, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
+				if err != nil {
+					return err
+				}
+				compInst.AccountCount = bin.Varuint16(numAccounts)
+				for i := 0; i < numAccounts; i++ {
+					accountIndex, err := decoder.ReadUint8()
+					if err != nil {
+						return err
+					}
+					compInst.Accounts = append(compInst.Accounts, uint16(accountIndex))
+				}
+			}
+			{
+				dataLen, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
+				if err != nil {
+					return err
+				}
+				dataBytes, err := decoder.ReadNBytes(dataLen)
+				if err != nil {
+					return err
+				}
+				compInst.DataLength = bin.Varuint16(dataLen)
+				compInst.Data = Base58(dataBytes)
+			}
+			mx.Instructions = append(mx.Instructions, compInst)
+		}
+	}
+
+	return nil
 }
 
 func (m *Message) AccountMetaList() (out []*AccountMeta) {
@@ -185,12 +279,16 @@ type MessageHeader struct {
 
 type CompiledInstruction struct {
 	// Index into the message.accountKeys array indicating the program account that executes this instruction.
+	// NOTE: it is actually a uint8, but using a uint16 because uint8 is treated as a byte everywhere,
+	// and that can be an issue.
 	ProgramIDIndex uint16 `json:"programIdIndex"`
 
 	AccountCount bin.Varuint16 `json:"-" bin:"sizeof=Accounts"`
 	DataLength   bin.Varuint16 `json:"-" bin:"sizeof=Data"`
 
 	// List of ordered indices into the message.accountKeys array indicating which accounts to pass to the program.
+	// NOTE: it is actually a []uint8, but using a uint16 because []uint8 is treated as a []byte everywhere,
+	// and that can be an issue.
 	Accounts []uint16 `json:"accounts"`
 
 	// The program input data encoded in a base-58 string.
@@ -205,17 +303,17 @@ func (ci *CompiledInstruction) ResolveInstructionAccounts(message *Message) (out
 	return
 }
 
-func TransactionFromData(in []byte) (*Transaction, error) {
+func TransactionFromDecoder(decoder *bin.Decoder) (*Transaction, error) {
 	var out *Transaction
-	decoder := bin.NewDecoder(in)
 	err := decoder.Decode(&out)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
-func MustTransactionFromData(in []byte) *Transaction {
-	out, err := TransactionFromData(in)
+
+func MustTransactionFromData(decoder *bin.Decoder) *Transaction {
+	out, err := TransactionFromDecoder(decoder)
 	if err != nil {
 		panic(err)
 	}

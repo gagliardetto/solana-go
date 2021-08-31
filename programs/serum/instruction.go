@@ -24,11 +24,11 @@ func registryDecodeInstruction(accounts []*solana.AccountMeta, data []byte) (int
 func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instruction, error) {
 	// FIXME: can't we dedupe this in some ways? It's copied in all of the programs' folders.
 	var inst Instruction
-	if err := bin.NewDecoder(data).Decode(&inst); err != nil {
+	if err := bin.NewBinDecoder(data).Decode(&inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction for serum program: %w", err)
 	}
 
-	if v, ok := inst.Impl.(solana.AccountSettable); ok {
+	if v, ok := inst.Impl.(solana.AccountsSettable); ok {
 		err := v.SetAccounts(accounts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
@@ -62,11 +62,13 @@ type Instruction struct {
 	Version uint8
 }
 
+var _ bin.EncoderDecoder = &Instruction{}
+
 func (i *Instruction) TextEncode(encoder *text.Encoder, option *text.Option) error {
 	return encoder.Encode(i.Impl, option)
 }
 
-func (i *Instruction) UnmarshalBinary(decoder *bin.Decoder) (err error) {
+func (i *Instruction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	i.Version, err = decoder.ReadUint8()
 	if err != nil {
 		return fmt.Errorf("unable to read version: %w", err)
@@ -74,13 +76,13 @@ func (i *Instruction) UnmarshalBinary(decoder *bin.Decoder) (err error) {
 	return i.BaseVariant.UnmarshalBinaryVariant(decoder, InstructionDefVariant)
 }
 
-func (i *Instruction) MarshalBinary(encoder *bin.Encoder) error {
+func (i *Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
 	err := encoder.WriteUint8(i.Version)
 	if err != nil {
 		return fmt.Errorf("unable to write instruction version: %w", err)
 	}
 
-	err = encoder.WriteUint32(i.TypeID, binary.LittleEndian)
+	err = encoder.WriteUint32(i.TypeID.Uint32(), binary.LittleEndian)
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)
 	}

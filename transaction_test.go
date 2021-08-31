@@ -1,9 +1,12 @@
 package solana
 
 import (
+	"encoding/base64"
 	"testing"
 
+	bin "github.com/dfuse-io/binary"
 	"github.com/magiconair/properties/assert"
+	"github.com/mr-tron/base58"
 	"github.com/stretchr/testify/require"
 )
 
@@ -89,4 +92,62 @@ func TestNewTransaction(t *testing.T) {
 			Data:           []byte{0xcc, 0xdd},
 		},
 	})
+}
+
+func TestTransactionDecode(t *testing.T) {
+	encoded := "AfjEs3XhTc3hrxEvlnMPkm/cocvAUbFNbCl00qKnrFue6J53AhEqIFmcJJlJW3EDP5RmcMz+cNTTcZHW/WJYwAcBAAEDO8hh4VddzfcO5jbCt95jryl6y8ff65UcgukHNLWH+UQGgxCGGpgyfQVQV02EQYqm4QwzUt2qf9f1gVLM7rI4hwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6ANIF55zOZWROWRkeh+lExxZBnKFqbvIxZDLE7EijjoBAgIAAQwCAAAAOTAAAAAAAAA="
+	data, err := base64.StdEncoding.DecodeString(encoded)
+	require.NoError(t, err)
+
+	tx, err := TransactionFromDecoder(bin.NewBinDecoder(data))
+	require.NoError(t, err)
+	require.NotNil(t, tx)
+
+	require.Len(t, tx.Signatures, 1)
+	require.Equal(t,
+		MustSignatureFromBase58("5yUSwqQqeZLEEYKxnG4JC4XhaaBpV3RS4nQbK8bQTyjLX5btVq9A1Ja5nuJzV7Z3Zq8G6EVKFvN4DKUL6PSAxmTk"),
+		tx.Signatures[0],
+	)
+
+	require.Equal(t,
+		[]PublicKey{
+			MustPublicKeyFromBase58("52NGrUqh6tSGhr59ajGxsH3VnAaoRdSdTbAaV9G3UW35"),
+			MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"),
+			MustPublicKeyFromBase58("11111111111111111111111111111111"),
+		},
+		tx.Message.AccountKeys,
+	)
+
+	require.Equal(t,
+		MessageHeader{
+			NumRequiredSignatures:       1,
+			NumReadonlySignedAccounts:   0,
+			NumReadonlyUnsignedAccounts: 1,
+		},
+		tx.Message.Header,
+	)
+
+	require.Equal(t,
+		MustHashFromBase58("GcgVK9buRA7YepZh3zXuS399GJAESCisLnLDBCmR5Aoj"),
+		tx.Message.RecentBlockhash,
+	)
+
+	decodedData, err := base58.Decode("3Bxs4ART6LMJ13T5")
+	require.NoError(t, err)
+	require.Equal(t,
+		[]CompiledInstruction{
+			{
+				ProgramIDIndex: 2,
+				AccountCount:   2,
+				DataLength:     12,
+				Accounts: []uint16{
+					0,
+					1,
+				},
+				Data: Base58(decodedData),
+			},
+		},
+		tx.Message.Instructions,
+	)
+
 }

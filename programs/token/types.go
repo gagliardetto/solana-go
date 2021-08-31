@@ -50,7 +50,7 @@ type Mint struct {
 }
 
 func (m *Mint) Decode(in []byte) error {
-	decoder := bin.NewDecoder(in)
+	decoder := bin.NewBinDecoder(in)
 	err := decoder.Decode(&m)
 	if err != nil {
 		return fmt.Errorf("unpack: %w", err)

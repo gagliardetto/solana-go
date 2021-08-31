@@ -35,11 +35,13 @@ type RequestQueue struct {
 }
 
 func (r *RequestQueue) Decode(data []byte) error {
-	decoder := bin.NewDecoder(data)
+	decoder := bin.NewBinDecoder(data)
 	return decoder.Decode(&r)
 }
 
-func (q *RequestQueue) UnmarshalBinary(decoder *bin.Decoder) (err error) {
+var _ bin.EncoderDecoder = &RequestQueue{}
+
+func (q *RequestQueue) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	if err = decoder.SkipBytes(5); err != nil {
 		return err
 	}
@@ -81,7 +83,7 @@ func (q *RequestQueue) UnmarshalBinary(decoder *bin.Decoder) (err error) {
 }
 
 // TODO: fill up later
-func (q *RequestQueue) MarshalBinary(encoder *bin.Encoder) error {
+func (q *RequestQueue) MarshalWithEncoder(encoder *bin.Encoder) error {
 	return nil
 }
 
@@ -187,12 +189,14 @@ type EventQueue struct {
 	EndPadding [7]byte `json:"-"`
 }
 
+var _ bin.EncoderDecoder = &EventQueue{}
+
 func (q *EventQueue) Decode(data []byte) error {
-	decoder := bin.NewDecoder(data)
+	decoder := bin.NewBinDecoder(data)
 	return decoder.Decode(&q)
 }
 
-func (q *EventQueue) UnmarshalBinary(decoder *bin.Decoder) (err error) {
+func (q *EventQueue) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	if err = decoder.SkipBytes(5); err != nil {
 		return err
 	}
@@ -234,7 +238,7 @@ func (q *EventQueue) UnmarshalBinary(decoder *bin.Decoder) (err error) {
 }
 
 // TODO: fill up later
-func (q *EventQueue) MarshalBinary(encoder *bin.Encoder) error {
+func (q *EventQueue) MarshalWithEncoder(encoder *bin.Encoder) error {
 	return nil
 }
 

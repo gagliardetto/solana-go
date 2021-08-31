@@ -34,7 +34,7 @@ func TestCompiledInstructions(t *testing.T) {
 		Data:           Base58([]byte{1, 2, 3, 4, 5}),
 	}
 	buf := &bytes.Buffer{}
-	encoder := bin.NewEncoder(buf)
+	encoder := bin.NewBinEncoder(buf)
 	err := encoder.Encode(ci)
 	require.NoError(t, err)
 	assert.Equal(t, []byte{0x5, 0x0, 0x3, 0x5, 0x2, 0x0, 0x5, 0x0, 0x8, 0x0, 0x1, 0x2, 0x3, 0x4, 0x5}, buf.Bytes())

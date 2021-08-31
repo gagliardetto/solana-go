@@ -1,6 +1,7 @@
 package serum
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 	"testing"
 
@@ -20,7 +21,7 @@ func TestDecodeInstruction(t *testing.T) {
 			hexData: "000900000001000000b80600000000000010eb09000000000000000000168106e091da511601000000",
 			expectInstruction: &Instruction{
 				BaseVariant: bin.BaseVariant{
-					TypeID: 9,
+					TypeID: bin.TypeIDFromUint32(9, binary.LittleEndian),
 					Impl: &InstructionNewOrderV2{
 						Side:              SideAsk,
 						LimitPrice:        1720,
@@ -38,7 +39,7 @@ func TestDecodeInstruction(t *testing.T) {
 			hexData: "0002000000ffff",
 			expectInstruction: &Instruction{
 				BaseVariant: bin.BaseVariant{
-					TypeID: 2,
+					TypeID: bin.TypeIDFromUint32(2, binary.LittleEndian),
 					Impl: &InstructionMatchOrder{
 						Limit: 65535,
 					},
@@ -51,7 +52,7 @@ func TestDecodeInstruction(t *testing.T) {
 			hexData: "0005000000",
 			expectInstruction: &Instruction{
 				BaseVariant: bin.BaseVariant{
-					TypeID: 5,
+					TypeID: bin.TypeIDFromUint32(5, binary.LittleEndian),
 					Impl:   &InstructionSettleFunds{},
 				},
 				Version: 0,
@@ -63,7 +64,7 @@ func TestDecodeInstruction(t *testing.T) {
 			data, err := hex.DecodeString(test.hexData)
 			require.NoError(t, err)
 			var instruction *Instruction
-			err = bin.NewDecoder(data).Decode(&instruction)
+			err = bin.NewBinDecoder(data).Decode(&instruction)
 			require.NoError(t, err)
 			assert.Equal(t, test.expectInstruction, instruction)
 		})

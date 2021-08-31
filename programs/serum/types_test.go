@@ -2,6 +2,7 @@ package serum
 
 import (
 	"encoding/base64"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
@@ -22,7 +23,7 @@ func TestAccountFlag_Decoder(t *testing.T) {
 	require.NoError(t, err)
 
 	var f *AccountFlag
-	err = bin.NewDecoder(data).Decode(&f)
+	err = bin.NewBinDecoder(data).Decode(&f)
 	require.NoError(t, err)
 
 	assert.Equal(t, f.Is(AccountFlagInitialized), true, "initialized")
@@ -39,7 +40,7 @@ func TestAccountFlag_Decoder(t *testing.T) {
 	require.NoError(t, err)
 
 	var f2 *AccountFlag
-	err = bin.NewDecoder(data).Decode(&f2)
+	err = bin.NewBinDecoder(data).Decode(&f2)
 	require.NoError(t, err)
 
 	assert.Equal(t, f2.Is(AccountFlagInitialized), true, "initialized")
@@ -60,7 +61,7 @@ func TestDecoder_Market(t *testing.T) {
 	fmt.Println(hex.EncodeToString(data))
 
 	var m *MarketV2
-	err = bin.NewDecoder(data).Decode(&m)
+	err = bin.NewBinDecoder(data).Decode(&m)
 	require.NoError(t, err)
 
 	assert.Equal(t, true, m.AccountFlags.Is(AccountFlagInitialized))
@@ -77,7 +78,7 @@ func TestDecoder_Orderbook(t *testing.T) {
 	data, err := hex.DecodeString(string(cnt))
 	require.NoError(t, err)
 
-	decoder := bin.NewDecoder(data)
+	decoder := bin.NewBinDecoder(data)
 	var ob *Orderbook
 	err = decoder.Decode(&ob)
 	require.NoError(t, err)
@@ -89,7 +90,7 @@ func TestDecoder_Orderbook(t *testing.T) {
 	assert.Equal(t, 101, len(ob.Nodes))
 	assert.Equal(t, &Slab{
 		BaseVariant: bin.BaseVariant{
-			TypeID: 1,
+			TypeID: bin.TypeIDFromUint32(1, binary.LittleEndian),
 			Impl: &SlabInnerNode{
 				PrefixLen: 57,
 				Key: bin.Uint128{
@@ -108,7 +109,7 @@ func TestDecoder_Orderbook(t *testing.T) {
 	}, ob.Nodes[0])
 	assert.Equal(t, &Slab{
 		BaseVariant: bin.BaseVariant{
-			TypeID: 3,
+			TypeID: bin.TypeIDFromUint32(3, binary.LittleEndian),
 			Impl: &SlabFreeNode{
 				Next: 2,
 				Padding: [64]byte{
@@ -125,7 +126,7 @@ func TestDecoder_Orderbook(t *testing.T) {
 	}, ob.Nodes[1])
 	assert.Equal(t, &Slab{
 		BaseVariant: bin.BaseVariant{
-			TypeID: 2,
+			TypeID: bin.TypeIDFromUint32(2, binary.LittleEndian),
 			Impl: &SlabLeafNode{
 				OwnerSlot: 1,
 				FeeTier:   5,
@@ -154,7 +155,7 @@ func TestDecoder_Slabs(t *testing.T) {
 			slabData: "0100000035000000010babffffffffff4105000000000000400000003f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 			expectSlab: &Slab{
 				BaseVariant: bin.BaseVariant{
-					TypeID: 1,
+					TypeID: bin.TypeIDFromUint32(1, binary.LittleEndian),
 					Impl: &SlabInnerNode{
 						PrefixLen: 53,
 						Key: bin.Uint128{
@@ -175,7 +176,7 @@ func TestDecoder_Slabs(t *testing.T) {
 			slabData: "0200000014060000b2cea5ffffffffff23070000000000005ae01b52d00a090c6dc6fce8e37a225815cff2223a99c6dfdad5aae56d3db670e62c000000000000140b0fadcf8fcebf",
 			expectSlab: &Slab{
 				BaseVariant: bin.BaseVariant{
-					TypeID: 2,
+					TypeID: bin.TypeIDFromUint32(2, binary.LittleEndian),
 					Impl: &SlabLeafNode{
 						OwnerSlot: 20,
 						FeeTier:   6,
@@ -196,7 +197,7 @@ func TestDecoder_Slabs(t *testing.T) {
 			slabData: "030000003400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 			expectSlab: &Slab{
 				BaseVariant: bin.BaseVariant{
-					TypeID: 3,
+					TypeID: bin.TypeIDFromUint32(3, binary.LittleEndian),
 					Impl: &SlabFreeNode{
 						Next: 52,
 					},
@@ -210,7 +211,7 @@ func TestDecoder_Slabs(t *testing.T) {
 			cnt, err := hex.DecodeString(test.slabData)
 			require.NoError(t, err)
 
-			decoder := bin.NewDecoder(cnt)
+			decoder := bin.NewBinDecoder(cnt)
 			var slab *Slab
 			err = decoder.Decode(&slab)
 			require.NoError(t, err)

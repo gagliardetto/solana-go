@@ -95,7 +95,7 @@ type MarketV2 struct {
 }
 
 func (m *MarketV2) Decode(in []byte) error {
-	decoder := bin.NewDecoder(in)
+	decoder := bin.NewBinDecoder(in)
 	err := decoder.Decode(&m)
 	if err != nil {
 		return fmt.Errorf("unpack: %w", err)
@@ -160,11 +160,14 @@ type Slab struct {
 	bin.BaseVariant
 }
 
-func (s *Slab) UnmarshalBinary(decoder *bin.Decoder) error {
+var _ bin.EncoderDecoder = &Slab{}
+
+func (s *Slab) UnmarshalWithDecoder(decoder *bin.Decoder) error {
 	return s.BaseVariant.UnmarshalBinaryVariant(decoder, SlabFactoryImplDef)
 }
-func (s *Slab) MarshalBinary(encoder *bin.Encoder) error {
-	err := encoder.WriteUint32(s.TypeID, binary.LittleEndian)
+
+func (s *Slab) MarshalWithEncoder(encoder *bin.Encoder) error {
+	err := encoder.WriteUint32(s.TypeID.Uint32(), binary.LittleEndian)
 	if err != nil {
 		return err
 	}
@@ -305,7 +308,7 @@ func (o *OpenOrders) GetOrder(index uint32) *Order {
 }
 
 func (o *OpenOrders) Decode(in []byte) error {
-	decoder := bin.NewDecoder(in)
+	decoder := bin.NewBinDecoder(in)
 	err := decoder.Decode(&o)
 	if err != nil {
 		return fmt.Errorf("unpack: %w", err)

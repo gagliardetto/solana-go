@@ -112,7 +112,7 @@ func StreamOpenOrders(client *ws.Client) error {
 		res := d
 
 		var f *AccountFlag
-		err = bin.NewDecoder(res.Value.Account.Data.GetBinary()).Decode(&f)
+		err = bin.NewBinDecoder(res.Value.Account.Data.GetBinary()).Decode(&f)
 		if err != nil {
 			fmt.Println("***********************************", err)
 			zlog.Debug("unable to decoce account flag for account... skipping",

@@ -41,7 +41,7 @@ func (cl *Client) GetAccountDataIn(ctx context.Context, account solana.PublicKey
 	if err != nil {
 		return err
 	}
-	return bin.NewDecoder(resp.Value.Data.GetBinary()).Decode(inVar)
+	return bin.NewBinDecoder(resp.Value.Data.GetBinary()).Decode(inVar)
 }
 
 type GetAccountInfoOpts struct {
