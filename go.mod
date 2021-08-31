@@ -19,11 +19,11 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/gagliardetto/treeout v0.1.2
 	github.com/google/go-cmp v0.5.1
+	github.com/google/gofuzz v1.0.0
 	github.com/gorilla/rpc v1.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/json-iterator/go v1.1.11
 	github.com/klauspost/compress v1.13.1
-	github.com/kr/pretty v0.2.1 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/magiconair/properties v1.8.1
 	github.com/mr-tron/base58 v1.2.0
@@ -47,7 +47,8 @@ require (
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
 	golang.org/x/tools v0.0.0-20200601175630-2caf76543d99 // indirect
 	google.golang.org/api v0.29.0
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/dfuse-io/binary => github.com/gagliardetto/binary v0.3.0
+replace github.com/dfuse-io/binary => github.com/gagliardetto/binary v0.4.0
+
+replace github.com/google/gofuzz => github.com/gagliardetto/gofuzz v1.2.1

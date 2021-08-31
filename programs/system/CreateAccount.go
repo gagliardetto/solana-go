@@ -1,114 +1,207 @@
 package system
 
 import (
+	"encoding/binary"
+	"errors"
 	"fmt"
-
-	bin "github.com/dfuse-io/binary"
-	solana "github.com/gagliardetto/solana-go"
+	ag_binary "github.com/dfuse-io/binary"
+	ag_solanago "github.com/gagliardetto/solana-go"
+	ag_format "github.com/gagliardetto/solana-go/text/format"
+	ag_treeout "github.com/gagliardetto/treeout"
 )
 
-func NewCreateAccountInstruction(
-	lamports uint64,
-	space uint64,
-	owner solana.PublicKey,
-
-	fundingAccount solana.PublicKey,
-	newAccount solana.PublicKey,
-) *Instruction {
-	return NewCreateAccountBuilder().
-		WithLamports(lamports).
-		WithSpace(space).
-		WithOwner(owner).
-		WithFundingAccount(fundingAccount).
-		WithNewAccount(newAccount).
-		Build()
-}
-
-// Create a new account.
+// Create a new account
 type CreateAccount struct {
-	// Number of lamports to transfer to the new account.
-	Lamports bin.Uint64
-	// Number of bytes of memory to allocate.
-	Space bin.Uint64
-	// Address of program that will own the new account.
-	Owner solana.PublicKey
+	// Number of lamports to transfer to the new account
+	Lamports *uint64
 
-	// [0] = [WRITE, SIGNER] Funding account.
-	// [1] = [WRITE, SIGNER] New account.
-	solana.AccountMetaSlice `bin:"-"`
+	// Number of bytes of memory to allocate
+	Space *uint64
+
+	// Address of program that will own the new account
+	Owner *ag_solanago.PublicKey
+
+	// [0] = [WRITE, SIGNER] FundingAccount
+	// ··········· Funding account
+	//
+	// [1] = [WRITE, SIGNER] NewAccount
+	// ··········· New account
+	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
-// NewCreateAccountBuilder initializes a new CreateAccount builder.
-func NewCreateAccountBuilder() *CreateAccount {
-	return &CreateAccount{
-		AccountMetaSlice: make(solana.AccountMetaSlice, 2),
+// NewCreateAccountInstructionBuilder creates a new `CreateAccount` instruction builder.
+func NewCreateAccountInstructionBuilder() *CreateAccount {
+	nd := &CreateAccount{
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
+	return nd
 }
 
-// WithLamports sets the number of lamports to transfer to the new account.
-func (ins *CreateAccount) WithLamports(lamports uint64) *CreateAccount {
-	ins.Lamports = bin.Uint64(lamports)
-	return ins
+// Number of lamports to transfer to the new account
+func (inst *CreateAccount) SetLamports(lamports uint64) *CreateAccount {
+	inst.Lamports = &lamports
+	return inst
 }
 
-// WithSpace sets the number of bytes of memory to allocate.
-func (ins *CreateAccount) WithSpace(space uint64) *CreateAccount {
-	ins.Space = bin.Uint64(space)
-	return ins
+// Number of bytes of memory to allocate
+func (inst *CreateAccount) SetSpace(space uint64) *CreateAccount {
+	inst.Space = &space
+	return inst
 }
 
-// WithOwner sets the address of program that will own the new account.
-func (ins *CreateAccount) WithOwner(owner solana.PublicKey) *CreateAccount {
-	ins.Owner = owner
-	return ins
+// Address of program that will own the new account
+func (inst *CreateAccount) SetOwner(owner ag_solanago.PublicKey) *CreateAccount {
+	inst.Owner = &owner
+	return inst
 }
 
-// WithFundingAccount sets the account that will fund the new account.
-func (ins *CreateAccount) WithFundingAccount(fundingAccount solana.PublicKey) *CreateAccount {
-	ins.AccountMetaSlice[0] = solana.Meta(fundingAccount).WRITE().SIGNER()
-	return ins
+// Funding account
+func (inst *CreateAccount) SetFundingAccount(fundingAccount ag_solanago.PublicKey) *CreateAccount {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(fundingAccount).WRITE().SIGNER()
+	return inst
 }
 
-// GetFundingAccount gets the account that will fund the new account.
-func (ins *CreateAccount) GetFundingAccount() *solana.PublicKey {
-	ac := ins.AccountMetaSlice[0]
-	if ac == nil {
-		return nil
+func (inst *CreateAccount) GetFundingAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice[0]
+}
+
+// New account
+func (inst *CreateAccount) SetNewAccount(newAccount ag_solanago.PublicKey) *CreateAccount {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(newAccount).WRITE().SIGNER()
+	return inst
+}
+
+func (inst *CreateAccount) GetNewAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice[1]
+}
+
+func (inst CreateAccount) Build() *Instruction {
+	return &Instruction{BaseVariant: ag_binary.BaseVariant{
+		Impl:   inst,
+		TypeID: ag_binary.TypeIDFromUint32(Instruction_CreateAccount, binary.LittleEndian),
+	}}
+}
+
+// ValidateAndBuild validates the instruction parameters and accounts;
+// if there is a validation error, it returns the error.
+// Otherwise, it builds and returns the instruction.
+func (inst CreateAccount) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
+		return nil, err
 	}
-	return &ac.PublicKey
+	return inst.Build(), nil
 }
 
-// WithNewAccount sets the new account that will be created.
-func (ins *CreateAccount) WithNewAccount(newAccount solana.PublicKey) *CreateAccount {
-	ins.AccountMetaSlice[1] = solana.Meta(newAccount).WRITE().SIGNER()
-	return ins
-}
-
-// GetNewAccount gets the new account.
-func (ins *CreateAccount) GetNewAccount() *solana.PublicKey {
-	ac := ins.AccountMetaSlice[1]
-	if ac == nil {
-		return nil
+func (inst *CreateAccount) Validate() error {
+	// Check whether all (required) parameters are set:
+	{
+		if inst.Lamports == nil {
+			return errors.New("Lamports parameter is not set")
+		}
+		if inst.Space == nil {
+			return errors.New("Space parameter is not set")
+		}
+		if inst.Owner == nil {
+			return errors.New("Owner parameter is not set")
+		}
 	}
-	return &ac.PublicKey
-}
 
-func (ins *CreateAccount) Validate() error {
-	for accIndex, acc := range ins.AccountMetaSlice {
+	// Check whether all accounts are set:
+	for accIndex, acc := range inst.AccountMetaSlice {
 		if acc == nil {
-			return fmt.Errorf("ins.AccountMetaSlice[%v] is nil", accIndex)
+			return fmt.Errorf("ins.AccountMetaSlice[%v] is not set", accIndex)
 		}
 	}
 	return nil
 }
 
-func (ins *CreateAccount) Build() *Instruction {
-	return &Instruction{
-		BaseVariant: bin.BaseVariant{
+func (inst *CreateAccount) EncodeToTree(parent ag_treeout.Branches) {
+	parent.Child(ag_format.Program(ProgramName, ProgramID)).
+		//
+		ParentFunc(func(programBranch ag_treeout.Branches) {
+			programBranch.Child(ag_format.Instruction("CreateAccount")).
+				//
+				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
-			TypeID: Instruction_CreateAccount,
+					// Parameters of the instruction:
+					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+						paramsBranch.Child(ag_format.Param("Lamports", *inst.Lamports))
+						paramsBranch.Child(ag_format.Param("Space", *inst.Space))
+						paramsBranch.Child(ag_format.Param("Owner", *inst.Owner))
+					})
 
-			Impl: ins,
-		},
+					// Accounts of the instruction:
+					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("FundingAccount", inst.AccountMetaSlice[0]))
+						accountsBranch.Child(ag_format.Meta("NewAccount", inst.AccountMetaSlice[1]))
+					})
+				})
+		})
+}
+
+func (inst CreateAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	// Serialize `Lamports` param:
+	{
+		err := encoder.Encode(*inst.Lamports)
+		if err != nil {
+			return err
+		}
 	}
+	// Serialize `Space` param:
+	{
+		err := encoder.Encode(*inst.Space)
+		if err != nil {
+			return err
+		}
+	}
+	// Serialize `Owner` param:
+	{
+		err := encoder.Encode(*inst.Owner)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (inst *CreateAccount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	// Deserialize `Lamports` param:
+	{
+		err := decoder.Decode(&inst.Lamports)
+		if err != nil {
+			return err
+		}
+	}
+	// Deserialize `Space` param:
+	{
+		err := decoder.Decode(&inst.Space)
+		if err != nil {
+			return err
+		}
+	}
+	// Deserialize `Owner` param:
+	{
+		err := decoder.Decode(&inst.Owner)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// NewCreateAccountInstruction declares a new CreateAccount instruction with the provided parameters and accounts.
+func NewCreateAccountInstruction(
+	// Parameters:
+	lamports uint64,
+	space uint64,
+	owner ag_solanago.PublicKey,
+	// Accounts:
+	fundingAccount ag_solanago.PublicKey,
+	newAccount ag_solanago.PublicKey) *CreateAccount {
+	return NewCreateAccountInstructionBuilder().
+		SetLamports(lamports).
+		SetSpace(space).
+		SetOwner(owner).
+		SetFundingAccount(fundingAccount).
+		SetNewAccount(newAccount)
 }

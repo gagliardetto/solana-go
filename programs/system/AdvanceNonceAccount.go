@@ -1,81 +1,131 @@
 package system
 
 import (
+	"encoding/binary"
 	"fmt"
-
-	bin "github.com/dfuse-io/binary"
-	solana "github.com/gagliardetto/solana-go"
+	ag_binary "github.com/dfuse-io/binary"
+	ag_solanago "github.com/gagliardetto/solana-go"
+	ag_format "github.com/gagliardetto/solana-go/text/format"
+	ag_treeout "github.com/gagliardetto/treeout"
 )
 
-func NewAdvanceNonceAccountInstruction(
-	nonceAccount solana.PublicKey,
-	nonceAuthority solana.PublicKey,
-) *Instruction {
-	return NewAdvanceNonceAccountBuilder().
-		WithNonceAccount(nonceAccount).
-		WithNonceAuthority(nonceAuthority).
-		Build()
-}
-
-// Consumes a stored nonce, replacing it with a successor.
+// Consumes a stored nonce, replacing it with a successor
 type AdvanceNonceAccount struct {
-	// [0] = [WRITE] Nonce account.
-	// [1] = [] RecentBlockhashes sysvar.
-	// [2] = [SIGNER] Nonce authority.
-	solana.AccountMetaSlice `bin:"-"`
+
+	// [0] = [WRITE] NonceAccount
+	// ··········· Nonce account
+	//
+	// [1] = [] $(SysVarRecentBlockHashesPubkey)
+	// ··········· RecentBlockhashes sysvar
+	//
+	// [2] = [SIGNER] NonceAuthorityAccount
+	// ··········· Nonce authority
+	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
-// NewAdvanceNonceAccountBuilder initializes a new AdvanceNonceAccount builder.
-func NewAdvanceNonceAccountBuilder() *AdvanceNonceAccount {
-	nb := &AdvanceNonceAccount{
-		AccountMetaSlice: make(solana.AccountMetaSlice, 3),
+// NewAdvanceNonceAccountInstructionBuilder creates a new `AdvanceNonceAccount` instruction builder.
+func NewAdvanceNonceAccountInstructionBuilder() *AdvanceNonceAccount {
+	nd := &AdvanceNonceAccount{
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
 	}
-	nb.AccountMetaSlice[1] = solana.Meta(solana.SysVarRecentBlockHashesPubkey)
-	return nb
+	nd.AccountMetaSlice[1] = ag_solanago.Meta(ag_solanago.SysVarRecentBlockHashesPubkey)
+	return nd
 }
 
-func (ins *AdvanceNonceAccount) WithNonceAccount(nonceAccount solana.PublicKey) *AdvanceNonceAccount {
-	ins.AccountMetaSlice[0] = solana.Meta(nonceAccount).WRITE()
-	return ins
+// Nonce account
+func (inst *AdvanceNonceAccount) SetNonceAccount(nonceAccount ag_solanago.PublicKey) *AdvanceNonceAccount {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(nonceAccount).WRITE()
+	return inst
 }
 
-func (ins *AdvanceNonceAccount) GetNonceAccount() *solana.PublicKey {
-	ac := ins.AccountMetaSlice[0]
-	if ac == nil {
-		return nil
+func (inst *AdvanceNonceAccount) GetNonceAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice[0]
+}
+
+// RecentBlockhashes sysvar
+func (inst *AdvanceNonceAccount) SetSysVarRecentBlockHashesPubkeyAccount(SysVarRecentBlockHashesPubkey ag_solanago.PublicKey) *AdvanceNonceAccount {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(SysVarRecentBlockHashesPubkey)
+	return inst
+}
+
+func (inst *AdvanceNonceAccount) GetSysVarRecentBlockHashesPubkeyAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice[1]
+}
+
+// Nonce authority
+func (inst *AdvanceNonceAccount) SetNonceAuthorityAccount(nonceAuthorityAccount ag_solanago.PublicKey) *AdvanceNonceAccount {
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(nonceAuthorityAccount).SIGNER()
+	return inst
+}
+
+func (inst *AdvanceNonceAccount) GetNonceAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice[2]
+}
+
+func (inst AdvanceNonceAccount) Build() *Instruction {
+	return &Instruction{BaseVariant: ag_binary.BaseVariant{
+		Impl:   inst,
+		TypeID: ag_binary.TypeIDFromUint32(Instruction_AdvanceNonceAccount, binary.LittleEndian),
+	}}
+}
+
+// ValidateAndBuild validates the instruction parameters and accounts;
+// if there is a validation error, it returns the error.
+// Otherwise, it builds and returns the instruction.
+func (inst AdvanceNonceAccount) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
+		return nil, err
 	}
-	return &ac.PublicKey
+	return inst.Build(), nil
 }
 
-func (ins *AdvanceNonceAccount) WithNonceAuthority(nonceAuthority solana.PublicKey) *AdvanceNonceAccount {
-	ins.AccountMetaSlice[2] = solana.Meta(nonceAuthority).SIGNER()
-	return ins
-}
-
-func (ins *AdvanceNonceAccount) GetNonceAuthority() *solana.PublicKey {
-	ac := ins.AccountMetaSlice[2]
-	if ac == nil {
-		return nil
-	}
-	return &ac.PublicKey
-}
-
-func (ins *AdvanceNonceAccount) Validate() error {
-	for accIndex, acc := range ins.AccountMetaSlice {
+func (inst *AdvanceNonceAccount) Validate() error {
+	// Check whether all accounts are set:
+	for accIndex, acc := range inst.AccountMetaSlice {
 		if acc == nil {
-			return fmt.Errorf("ins.AccountMetaSlice[%v] is nil", accIndex)
+			return fmt.Errorf("ins.AccountMetaSlice[%v] is not set", accIndex)
 		}
 	}
 	return nil
 }
 
-func (ins *AdvanceNonceAccount) Build() *Instruction {
-	return &Instruction{
-		BaseVariant: bin.BaseVariant{
+func (inst *AdvanceNonceAccount) EncodeToTree(parent ag_treeout.Branches) {
+	parent.Child(ag_format.Program(ProgramName, ProgramID)).
+		//
+		ParentFunc(func(programBranch ag_treeout.Branches) {
+			programBranch.Child(ag_format.Instruction("AdvanceNonceAccount")).
+				//
+				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
-			TypeID: Instruction_AdvanceNonceAccount,
+					// Parameters of the instruction:
+					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
-			Impl: ins,
-		},
-	}
+					// Accounts of the instruction:
+					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("NonceAccount", inst.AccountMetaSlice[0]))
+						accountsBranch.Child(ag_format.Meta("$(SysVarRecentBlockHashesPubkey)", inst.AccountMetaSlice[1]))
+						accountsBranch.Child(ag_format.Meta("NonceAuthorityAccount", inst.AccountMetaSlice[2]))
+					})
+				})
+		})
+}
+
+func (inst AdvanceNonceAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	return nil
+}
+
+func (inst *AdvanceNonceAccount) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	return nil
+}
+
+// NewAdvanceNonceAccountInstruction declares a new AdvanceNonceAccount instruction with the provided parameters and accounts.
+func NewAdvanceNonceAccountInstruction(
+	// Accounts:
+	nonceAccount ag_solanago.PublicKey,
+	SysVarRecentBlockHashesPubkey ag_solanago.PublicKey,
+	nonceAuthorityAccount ag_solanago.PublicKey) *AdvanceNonceAccount {
+	return NewAdvanceNonceAccountInstructionBuilder().
+		SetNonceAccount(nonceAccount).
+		SetSysVarRecentBlockHashesPubkeyAccount(SysVarRecentBlockHashesPubkey).
+		SetNonceAuthorityAccount(nonceAuthorityAccount)
 }

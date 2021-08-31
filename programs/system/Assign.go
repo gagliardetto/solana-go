@@ -1,37 +1,133 @@
 package system
 
 import (
-	bin "github.com/dfuse-io/binary"
-	solana "github.com/gagliardetto/solana-go"
+	"encoding/binary"
+	"errors"
+	"fmt"
+	ag_binary "github.com/dfuse-io/binary"
+	ag_solanago "github.com/gagliardetto/solana-go"
+	ag_format "github.com/gagliardetto/solana-go/text/format"
+	ag_treeout "github.com/gagliardetto/treeout"
 )
 
-func NewAssignInstruction(
-	// The account that is being assigned.
-	accountPubkey solana.PublicKey,
-	// The program that is becoming the new owner of the account.
-	assignToProgramID solana.PublicKey,
-) *Instruction {
-	return &Instruction{
-		BaseVariant: bin.BaseVariant{
+// Assign account to a program
+type Assign struct {
+	// Owner program account
+	Owner *ag_solanago.PublicKey
 
-			TypeID: Instruction_Assign,
-
-			Impl: &Assign{
-
-				NewOwner: assignToProgramID,
-
-				AccountMetaSlice: []*solana.AccountMeta{
-					solana.Meta(accountPubkey).WRITE().SIGNER(),
-				},
-			},
-		},
-	}
+	// [0] = [WRITE, SIGNER] AssignedAccount
+	// ··········· Assigned account public key
+	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
-type Assign struct {
-	// Owner program account.
-	NewOwner solana.PublicKey
+// NewAssignInstructionBuilder creates a new `Assign` instruction builder.
+func NewAssignInstructionBuilder() *Assign {
+	nd := &Assign{
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+	}
+	return nd
+}
 
-	// [0] = [WRITE, SIGNER] Assigned account public key.
-	solana.AccountMetaSlice `bin:"-"`
+// Owner program account
+func (inst *Assign) SetOwner(owner ag_solanago.PublicKey) *Assign {
+	inst.Owner = &owner
+	return inst
+}
+
+// Assigned account public key
+func (inst *Assign) SetAssignedAccount(assignedAccount ag_solanago.PublicKey) *Assign {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(assignedAccount).WRITE().SIGNER()
+	return inst
+}
+
+func (inst *Assign) GetAssignedAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice[0]
+}
+
+func (inst Assign) Build() *Instruction {
+	return &Instruction{BaseVariant: ag_binary.BaseVariant{
+		Impl:   inst,
+		TypeID: ag_binary.TypeIDFromUint32(Instruction_Assign, binary.LittleEndian),
+	}}
+}
+
+// ValidateAndBuild validates the instruction parameters and accounts;
+// if there is a validation error, it returns the error.
+// Otherwise, it builds and returns the instruction.
+func (inst Assign) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
+		return nil, err
+	}
+	return inst.Build(), nil
+}
+
+func (inst *Assign) Validate() error {
+	// Check whether all (required) parameters are set:
+	{
+		if inst.Owner == nil {
+			return errors.New("Owner parameter is not set")
+		}
+	}
+
+	// Check whether all accounts are set:
+	for accIndex, acc := range inst.AccountMetaSlice {
+		if acc == nil {
+			return fmt.Errorf("ins.AccountMetaSlice[%v] is not set", accIndex)
+		}
+	}
+	return nil
+}
+
+func (inst *Assign) EncodeToTree(parent ag_treeout.Branches) {
+	parent.Child(ag_format.Program(ProgramName, ProgramID)).
+		//
+		ParentFunc(func(programBranch ag_treeout.Branches) {
+			programBranch.Child(ag_format.Instruction("Assign")).
+				//
+				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+
+					// Parameters of the instruction:
+					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+						paramsBranch.Child(ag_format.Param("Owner", *inst.Owner))
+					})
+
+					// Accounts of the instruction:
+					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("AssignedAccount", inst.AccountMetaSlice[0]))
+					})
+				})
+		})
+}
+
+func (inst Assign) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	// Serialize `Owner` param:
+	{
+		err := encoder.Encode(*inst.Owner)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (inst *Assign) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	// Deserialize `Owner` param:
+	{
+		err := decoder.Decode(&inst.Owner)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// NewAssignInstruction declares a new Assign instruction with the provided parameters and accounts.
+func NewAssignInstruction(
+	// Parameters:
+	owner ag_solanago.PublicKey,
+	// Accounts:
+	assignedAccount ag_solanago.PublicKey) *Assign {
+	return NewAssignInstructionBuilder().
+		SetOwner(owner).
+		SetAssignedAccount(assignedAccount)
 }

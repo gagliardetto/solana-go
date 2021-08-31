@@ -1,33 +1,133 @@
 package system
 
 import (
-	bin "github.com/dfuse-io/binary"
-	solana "github.com/gagliardetto/solana-go"
+	"encoding/binary"
+	"errors"
+	"fmt"
+	ag_binary "github.com/dfuse-io/binary"
+	ag_solanago "github.com/gagliardetto/solana-go"
+	ag_format "github.com/gagliardetto/solana-go/text/format"
+	ag_treeout "github.com/gagliardetto/treeout"
 )
 
-func NewAllocateInstruction(
-	space uint64,
-	accountPubKey solana.PublicKey,
-) *Instruction {
-	return &Instruction{
-		BaseVariant: bin.BaseVariant{
+// Allocate space in a (possibly new) account without funding
+type Allocate struct {
+	// Number of bytes of memory to allocate
+	Space *uint64
 
-			TypeID: Instruction_Allocate,
-
-			Impl: &Allocate{
-				Space: bin.Uint64(space),
-				AccountMetaSlice: []*solana.AccountMeta{
-					solana.Meta(accountPubKey).WRITE().SIGNER(),
-				},
-			},
-		},
-	}
+	// [0] = [WRITE, SIGNER] NewAccount
+	// ··········· New account
+	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
-type Allocate struct {
-	// Number of bytes of memory to allocate.
-	Space bin.Uint64
+// NewAllocateInstructionBuilder creates a new `Allocate` instruction builder.
+func NewAllocateInstructionBuilder() *Allocate {
+	nd := &Allocate{
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+	}
+	return nd
+}
 
-	// [0] = [WRITE, SIGNER] New account.
-	solana.AccountMetaSlice `bin:"-"`
+// Number of bytes of memory to allocate
+func (inst *Allocate) SetSpace(space uint64) *Allocate {
+	inst.Space = &space
+	return inst
+}
+
+// New account
+func (inst *Allocate) SetNewAccount(newAccount ag_solanago.PublicKey) *Allocate {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(newAccount).WRITE().SIGNER()
+	return inst
+}
+
+func (inst *Allocate) GetNewAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice[0]
+}
+
+func (inst Allocate) Build() *Instruction {
+	return &Instruction{BaseVariant: ag_binary.BaseVariant{
+		Impl:   inst,
+		TypeID: ag_binary.TypeIDFromUint32(Instruction_Allocate, binary.LittleEndian),
+	}}
+}
+
+// ValidateAndBuild validates the instruction parameters and accounts;
+// if there is a validation error, it returns the error.
+// Otherwise, it builds and returns the instruction.
+func (inst Allocate) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
+		return nil, err
+	}
+	return inst.Build(), nil
+}
+
+func (inst *Allocate) Validate() error {
+	// Check whether all (required) parameters are set:
+	{
+		if inst.Space == nil {
+			return errors.New("Space parameter is not set")
+		}
+	}
+
+	// Check whether all accounts are set:
+	for accIndex, acc := range inst.AccountMetaSlice {
+		if acc == nil {
+			return fmt.Errorf("ins.AccountMetaSlice[%v] is not set", accIndex)
+		}
+	}
+	return nil
+}
+
+func (inst *Allocate) EncodeToTree(parent ag_treeout.Branches) {
+	parent.Child(ag_format.Program(ProgramName, ProgramID)).
+		//
+		ParentFunc(func(programBranch ag_treeout.Branches) {
+			programBranch.Child(ag_format.Instruction("Allocate")).
+				//
+				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+
+					// Parameters of the instruction:
+					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
+						paramsBranch.Child(ag_format.Param("Space", *inst.Space))
+					})
+
+					// Accounts of the instruction:
+					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("NewAccount", inst.AccountMetaSlice[0]))
+					})
+				})
+		})
+}
+
+func (inst Allocate) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	// Serialize `Space` param:
+	{
+		err := encoder.Encode(*inst.Space)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (inst *Allocate) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	// Deserialize `Space` param:
+	{
+		err := decoder.Decode(&inst.Space)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// NewAllocateInstruction declares a new Allocate instruction with the provided parameters and accounts.
+func NewAllocateInstruction(
+	// Parameters:
+	space uint64,
+	// Accounts:
+	newAccount ag_solanago.PublicKey) *Allocate {
+	return NewAllocateInstructionBuilder().
+		SetSpace(space).
+		SetNewAccount(newAccount)
 }

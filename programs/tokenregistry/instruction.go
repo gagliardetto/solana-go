@@ -42,7 +42,7 @@ func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instructio
 func NewRegisterTokenInstruction(logo Logo, name Name, symbol Symbol, website Website, tokenMetaKey, ownerKey, tokenKey solana.PublicKey) *Instruction {
 	return &Instruction{
 		BaseVariant: bin.BaseVariant{
-			TypeID: 0,
+			TypeID: bin.TypeIDFromUint32(0, bin.LE()),
 			Impl: &RegisterToken{
 				Logo:    logo,
 				Name:    name,
@@ -66,7 +66,7 @@ var _ bin.EncoderDecoder = &Instruction{}
 
 func (i *Instruction) Accounts() (out []*solana.AccountMeta) {
 	switch i.TypeID {
-	case 0:
+	case bin.TypeIDFromUint32(0, bin.LE()):
 		accounts := i.Impl.(*RegisterToken).Accounts
 		out = []*solana.AccountMeta{accounts.TokenMeta, accounts.Owner, accounts.Token}
 	}
@@ -98,7 +98,7 @@ func (i *Instruction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 }
 
 func (i *Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
-	err := encoder.WriteUint32(i.TypeID, binary.LittleEndian)
+	err := encoder.WriteUint32(i.TypeID.Uint32(), binary.LittleEndian)
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)
 	}

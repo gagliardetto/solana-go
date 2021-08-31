@@ -1,16 +1,5 @@
-// Copyright 2020 dfuse Platform Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Create new accounts, allocate account data, assign accounts to owning programs,
+// transfer lamports from System Program owned accounts and pay transacation fees.
 
 package system
 
@@ -18,62 +7,67 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-
-	"github.com/davecgh/go-spew/spew"
-	bin "github.com/dfuse-io/binary"
-	solana "github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/text"
-	"github.com/gagliardetto/treeout"
+	ag_spew "github.com/davecgh/go-spew/spew"
+	ag_binary "github.com/dfuse-io/binary"
+	ag_solanago "github.com/gagliardetto/solana-go"
+	ag_text "github.com/gagliardetto/solana-go/text"
+	ag_treeout "github.com/gagliardetto/treeout"
 )
 
-var (
-	ProgramID = solana.MustPublicKeyFromBase58("11111111111111111111111111111111")
-)
+var ProgramID ag_solanago.PublicKey = ag_solanago.MustPublicKeyFromBase58("11111111111111111111111111111111")
+
+func SetProgramID(pubkey ag_solanago.PublicKey) {
+	ProgramID = pubkey
+	ag_solanago.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
+}
 
 const ProgramName = "System"
 
 func init() {
-	solana.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
+	if !ProgramID.IsZero() {
+		ag_solanago.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
+	}
 }
 
 const (
-	// Create a new account.
+	// Create a new account
 	Instruction_CreateAccount uint32 = iota
 
-	// Assign account to a program.
+	// Assign account to a program
 	Instruction_Assign
 
-	// Transfer lamports.
+	// Transfer lamports
 	Instruction_Transfer
 
-	// Create a new account at an address derived from a base pubkey and a seed.
+	// Create a new account at an address derived from a base pubkey and a seed
 	Instruction_CreateAccountWithSeed
 
-	// Consumes a stored nonce, replacing it with a successor.
+	// Consumes a stored nonce, replacing it with a successor
 	Instruction_AdvanceNonceAccount
 
-	// Withdraw funds from a nonce account.
+	// Withdraw funds from a nonce account
 	Instruction_WithdrawNonceAccount
 
-	// Drive state of Uninitalized nonce account to Initialized, setting the nonce value.
+	// Drive state of Uninitalized nonce account to Initialized, setting the nonce value
 	Instruction_InitializeNonceAccount
 
-	// Change the entity authorized to execute nonce instructions on the account.
+	// Change the entity authorized to execute nonce instructions on the account
 	Instruction_AuthorizeNonceAccount
 
-	// Allocate space in a (possibly new) account without funding.
+	// Allocate space in a (possibly new) account without funding
 	Instruction_Allocate
 
-	// Allocate space for and assign an account at an address derived from a base public key and a seed.
+	// Allocate space for and assign an account at an address derived from a base public key and a seed
 	Instruction_AllocateWithSeed
 
-	// Assign account to a program based on a seed.
+	// Assign account to a program based on a seed
 	Instruction_AssignWithSeed
 
-	// Transfer lamports from a derived address.
+	// Transfer lamports from a derived address
 	Instruction_TransferWithSeed
 )
 
+// InstructionIDToName returns the name of the instruction given its ID.
 func InstructionIDToName(id uint32) string {
 	switch id {
 	case Instruction_CreateAccount:
@@ -106,103 +100,92 @@ func InstructionIDToName(id uint32) string {
 }
 
 type Instruction struct {
-	bin.BaseVariant
+	ag_binary.BaseVariant
 }
 
-var _ bin.EncoderDecoder = &Instruction{}
+func (inst *Instruction) EncodeToTree(parent ag_treeout.Branches) {
+	if enToTree, ok := inst.Impl.(ag_text.EncodableToTree); ok {
+		enToTree.EncodeToTree(parent)
+	} else {
+		parent.Child(ag_spew.Sdump(inst))
+	}
+}
 
-var (
-	// TODO: each instruction must be here:
-	_ solana.AccountsGettable = &CreateAccount{}
-	_ solana.AccountsSettable = &CreateAccount{}
-
-	_ solana.AccountsGettable = &Assign{}
-	_ solana.AccountsSettable = &Assign{}
-
-	_ solana.AccountsGettable = &Transfer{}
-	_ solana.AccountsSettable = &Transfer{}
-
-	_ solana.AccountsGettable = &CreateAccountWithSeed{}
-	_ solana.AccountsSettable = &CreateAccountWithSeed{}
-
-	_ solana.AccountsGettable = &AdvanceNonceAccount{}
-	_ solana.AccountsSettable = &AdvanceNonceAccount{}
-
-	_ solana.AccountsGettable = &WithdrawNonceAccount{}
-	_ solana.AccountsSettable = &WithdrawNonceAccount{}
-
-	_ solana.AccountsGettable = &InitializeNonceAccount{}
-	_ solana.AccountsSettable = &InitializeNonceAccount{}
-
-	_ solana.AccountsGettable = &AuthorizeNonceAccount{}
-	_ solana.AccountsSettable = &AuthorizeNonceAccount{}
-
-	_ solana.AccountsGettable = &Allocate{}
-	_ solana.AccountsSettable = &Allocate{}
-
-	_ solana.AccountsGettable = &AllocateWithSeed{}
-	_ solana.AccountsSettable = &AllocateWithSeed{}
-
-	_ solana.AccountsGettable = &AssignWithSeed{}
-	_ solana.AccountsSettable = &AssignWithSeed{}
-
-	_ solana.AccountsGettable = &TransferWithSeed{}
-	_ solana.AccountsSettable = &TransferWithSeed{}
+var InstructionImplDef = ag_binary.NewVariantDefinition(
+	ag_binary.Uint32TypeIDEncoding,
+	[]ag_binary.VariantType{
+		{
+			"CreateAccount", (*CreateAccount)(nil),
+		},
+		{
+			"Assign", (*Assign)(nil),
+		},
+		{
+			"Transfer", (*Transfer)(nil),
+		},
+		{
+			"CreateAccountWithSeed", (*CreateAccountWithSeed)(nil),
+		},
+		{
+			"AdvanceNonceAccount", (*AdvanceNonceAccount)(nil),
+		},
+		{
+			"WithdrawNonceAccount", (*WithdrawNonceAccount)(nil),
+		},
+		{
+			"InitializeNonceAccount", (*InitializeNonceAccount)(nil),
+		},
+		{
+			"AuthorizeNonceAccount", (*AuthorizeNonceAccount)(nil),
+		},
+		{
+			"Allocate", (*Allocate)(nil),
+		},
+		{
+			"AllocateWithSeed", (*AllocateWithSeed)(nil),
+		},
+		{
+			"AssignWithSeed", (*AssignWithSeed)(nil),
+		},
+		{
+			"TransferWithSeed", (*TransferWithSeed)(nil),
+		},
+	},
 )
 
-func (ins *Instruction) Accounts() (out []*solana.AccountMeta) {
-	return ins.Impl.(solana.AccountsGettable).GetAccounts()
-}
-
-// InstructionImplDef is used for deciding binary,
-// encoding and decoding json.
-var InstructionImplDef = bin.NewVariantDefinition(
-	bin.Uint32TypeIDEncoding,
-	[]bin.VariantType{
-		// TODO:
-		{"create_account", (*CreateAccount)(nil)},
-		{"assign", (*Assign)(nil)},
-		{"transfer", (*Transfer)(nil)},
-		{"create_account_with_seed", (*CreateAccountWithSeed)(nil)},
-		{"advance_nonce_account", (*AdvanceNonceAccount)(nil)},
-		{"withdraw_nonce_account", (*WithdrawNonceAccount)(nil)},
-		{"initialize_nonce_account", (*InitializeNonceAccount)(nil)},
-		{"authorize_nonce_account", (*AuthorizeNonceAccount)(nil)},
-		{"allocate", (*Allocate)(nil)},
-		{"allocate_with_seed", (*AllocateWithSeed)(nil)},
-		{"assign_with_seed", (*AssignWithSeed)(nil)},
-		{"transfer_with_seed", (*TransferWithSeed)(nil)},
-	})
-
-func (i *Instruction) ProgramID() solana.PublicKey {
+func (inst *Instruction) ProgramID() ag_solanago.PublicKey {
 	return ProgramID
 }
 
-func (i *Instruction) Data() ([]byte, error) {
+func (inst *Instruction) Accounts() (out []*ag_solanago.AccountMeta) {
+	return inst.Impl.(ag_solanago.AccountsGettable).GetAccounts()
+}
+
+func (inst *Instruction) Data() ([]byte, error) {
 	buf := new(bytes.Buffer)
-	if err := bin.NewBinEncoder(buf).Encode(i); err != nil {
+	if err := ag_binary.NewBinEncoder(buf).Encode(inst); err != nil {
 		return nil, fmt.Errorf("unable to encode instruction: %w", err)
 	}
 	return buf.Bytes(), nil
 }
 
-func (i *Instruction) TextEncode(encoder *text.Encoder, option *text.Option) error {
-	return encoder.Encode(i.Impl, option)
+func (inst *Instruction) TextEncode(encoder *ag_text.Encoder, option *ag_text.Option) error {
+	return encoder.Encode(inst.Impl, option)
 }
 
-func (i *Instruction) UnmarshalWithDecoder(decoder *bin.Decoder) error {
-	return i.BaseVariant.UnmarshalBinaryVariant(decoder, InstructionImplDef)
+func (inst *Instruction) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	return inst.BaseVariant.UnmarshalBinaryVariant(decoder, InstructionImplDef)
 }
 
-func (i *Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
-	err := encoder.WriteUint32(i.TypeID, binary.LittleEndian)
+func (inst *Instruction) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	err := encoder.WriteUint32(inst.TypeID.Uint32(), binary.LittleEndian)
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)
 	}
-	return encoder.Encode(i.Impl)
+	return encoder.Encode(inst.Impl)
 }
 
-func registryDecodeInstruction(accounts []*solana.AccountMeta, data []byte) (interface{}, error) {
+func registryDecodeInstruction(accounts []*ag_solanago.AccountMeta, data []byte) (interface{}, error) {
 	inst, err := DecodeInstruction(accounts, data)
 	if err != nil {
 		return nil, err
@@ -210,26 +193,16 @@ func registryDecodeInstruction(accounts []*solana.AccountMeta, data []byte) (int
 	return inst, nil
 }
 
-func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instruction, error) {
-	var inst *Instruction
-	if err := bin.NewBinDecoder(data).Decode(&inst); err != nil {
+func DecodeInstruction(accounts []*ag_solanago.AccountMeta, data []byte) (*Instruction, error) {
+	inst := new(Instruction)
+	if err := ag_binary.NewBinDecoder(data).Decode(inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction: %w", err)
 	}
-
-	if v, ok := inst.Impl.(solana.AccountsSettable); ok {
+	if v, ok := inst.Impl.(ag_solanago.AccountsSettable); ok {
 		err := v.SetAccounts(accounts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
 		}
 	}
-
 	return inst, nil
-}
-
-func (inst *Instruction) EncodeToTree(parent treeout.Branches) {
-	if enToTree, ok := inst.Impl.(text.EncodableToTree); ok {
-		enToTree.EncodeToTree(parent)
-	} else {
-		parent.Child(spew.Sdump(inst))
-	}
 }

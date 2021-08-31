@@ -82,7 +82,7 @@ func (i *Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
 		return fmt.Errorf("unable to write instruction version: %w", err)
 	}
 
-	err = encoder.WriteUint32(i.TypeID, binary.LittleEndian)
+	err = encoder.WriteUint32(i.TypeID.Uint32(), binary.LittleEndian)
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)
 	}

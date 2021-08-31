@@ -167,7 +167,7 @@ func (s *Slab) UnmarshalWithDecoder(decoder *bin.Decoder) error {
 }
 
 func (s *Slab) MarshalWithEncoder(encoder *bin.Encoder) error {
-	err := encoder.WriteUint32(s.TypeID, binary.LittleEndian)
+	err := encoder.WriteUint32(s.TypeID.Uint32(), binary.LittleEndian)
 	if err != nil {
 		return err
 	}

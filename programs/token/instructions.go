@@ -83,7 +83,7 @@ func (i *Instruction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 }
 
 func (i *Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
-	err := encoder.WriteUint8(uint8(i.TypeID))
+	err := encoder.WriteUint8(i.TypeID.Uint8())
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)
 	}
