@@ -35,6 +35,9 @@ var (
 	// The Rent burn percentage is modified by manual feature activation.
 	SysVarRentPubkey = MustPublicKeyFromBase58("SysvarRent111111111111111111111111111111111")
 
+	//
+	SysVarRewardsPubkey = MustPublicKeyFromBase58("SysvarRewards111111111111111111111111111111")
+
 	// The SlotHashes sysvar contains the most recent hashes of the slot's parent banks.
 	// It is updated every slot.
 	SysVarSlotHashesPubkey = MustPublicKeyFromBase58("SysvarS1otHashes111111111111111111111111111")
@@ -45,7 +48,4 @@ var (
 	// The StakeHistory sysvar contains the history of cluster-wide stake activations and de-activations per epoch.
 	// It is updated at the start of every epoch.
 	SysVarStakeHistoryPubkey = MustPublicKeyFromBase58("SysvarStakeHistory1111111111111111111111111")
-
-	//
-	SysVarRewardsPubkey = MustPublicKeyFromBase58("SysvarRewards111111111111111111111111111111")
 )

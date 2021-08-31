@@ -140,3 +140,106 @@ func TestPublicKey_MarshalText(t *testing.T) {
 		payload,
 	)
 }
+
+func TestPublicKeySlice(t *testing.T) {
+	slice := make(PublicKeySlice, 0)
+	require.False(t, slice.Has(BPFLoaderProgramID))
+
+	slice.Append(BPFLoaderProgramID)
+	require.True(t, slice.Has(BPFLoaderProgramID))
+	require.Len(t, slice, 1)
+
+	slice.UniqueAppend(BPFLoaderProgramID)
+	require.Len(t, slice, 1)
+	slice.Append(ConfigProgramID)
+	require.Len(t, slice, 2)
+	require.True(t, slice.Has(ConfigProgramID))
+}
+
+func TestIsNativeProgramID(t *testing.T) {
+	require.True(t, isNativeProgramID(ConfigProgramID))
+}
+
+func TestCreateWithSeed(t *testing.T) {
+	{
+		got, err := CreateWithSeed(PublicKey{}, "limber chicken: 4/45", PublicKey{})
+		require.NoError(t, err)
+		require.True(t, got.Equals(MustPublicKeyFromBase58("9h1HyLCW5dZnBVap8C5egQ9Z6pHyjsh5MNy83iPqqRuq")))
+	}
+}
+
+func TestCreateProgramAddress(t *testing.T) {
+	program_id := MustPublicKeyFromBase58("BPFLoaderUpgradeab1e11111111111111111111111")
+	public_key := MustPublicKeyFromBase58("SeedPubey1111111111111111111111111111111111")
+
+	{
+		got, err := CreateProgramAddress([][]byte{
+			{},
+			{1},
+		},
+			program_id,
+		)
+		require.NoError(t, err)
+		require.True(t, got.Equals(MustPublicKeyFromBase58("BwqrghZA2htAcqq8dzP1WDAhTXYTYWj7CHxF5j7TDBAe")))
+	}
+
+	{
+		got, err := CreateProgramAddress([][]byte{
+			[]byte("☉"),
+			{0},
+		},
+			program_id,
+		)
+		require.NoError(t, err)
+		require.True(t, got.Equals(MustPublicKeyFromBase58("13yWmRpaTR4r5nAktwLqMpRNr28tnVUZw26rTvPSSB19")))
+	}
+
+	{
+		got, err := CreateProgramAddress([][]byte{
+			[]byte("Talking"),
+			[]byte("Squirrels"),
+		},
+			program_id,
+		)
+		require.NoError(t, err)
+		require.True(t, got.Equals(MustPublicKeyFromBase58("2fnQrngrQT4SeLcdToJAD96phoEjNL2man2kfRLCASVk")))
+	}
+
+	{
+		got, err := CreateProgramAddress([][]byte{
+			public_key[:],
+			{1},
+		},
+			program_id,
+		)
+		require.NoError(t, err)
+		require.True(t, got.Equals(MustPublicKeyFromBase58("976ymqVnfE32QFe6NfGDctSvVa36LWnvYxhU6G2232YL")))
+	}
+}
+
+// https://github.com/solana-labs/solana/blob/216983c50e0a618facc39aa07472ba6d23f1b33a/sdk/program/src/pubkey.rs#L590
+func TestFindProgramAddress(t *testing.T) {
+	for i := 0; i < 1_000; i++ {
+
+		program_id := NewAccount().PrivateKey.PublicKey()
+		address, bump_seed, err := FindProgramAddress(
+			[][]byte{
+				[]byte("Lil'"),
+				[]byte("Bits"),
+			},
+			program_id,
+		)
+		require.NoError(t, err)
+
+		got, err := CreateProgramAddress(
+			[][]byte{
+				[]byte("Lil'"),
+				[]byte("Bits"),
+				[]byte{bump_seed},
+			},
+			program_id,
+		)
+		require.NoError(t, err)
+		require.Equal(t, address, got)
+	}
+}

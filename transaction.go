@@ -36,32 +36,6 @@ func TransactionPayer(payer PublicKey) TransactionOption {
 	return transactionOptionFunc(func(opts *transactionOptions) { opts.payer = payer })
 }
 
-type pubkeySlice []PublicKey
-
-// uniqueAppend appends the provided pubkey only if it is not
-// already present in the slice.
-// Returns true when the provided pubkey wasn't already present.
-func (slice *pubkeySlice) uniqueAppend(pubkey PublicKey) bool {
-	if !slice.has(pubkey) {
-		slice.append(pubkey)
-		return true
-	}
-	return false
-}
-
-func (slice *pubkeySlice) append(pubkey PublicKey) {
-	*slice = append(*slice, pubkey)
-}
-
-func (slice *pubkeySlice) has(pubkey PublicKey) bool {
-	for _, key := range *slice {
-		if key.Equals(pubkey) {
-			return true
-		}
-	}
-	return false
-}
-
 var debugNewTransaction = false
 
 type TransactionBuilder struct {
@@ -134,13 +108,13 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 		}
 	}
 
-	programIDs := make(pubkeySlice, 0)
+	programIDs := make(PublicKeySlice, 0)
 	accounts := []*AccountMeta{}
 	for _, instruction := range instructions {
 		for _, key := range instruction.Accounts() {
 			accounts = append(accounts, key)
 		}
-		programIDs.uniqueAppend(instruction.ProgramID())
+		programIDs.UniqueAppend(instruction.ProgramID())
 	}
 
 	// Add programID to the account list
