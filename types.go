@@ -312,7 +312,7 @@ func TransactionFromDecoder(decoder *bin.Decoder) (*Transaction, error) {
 	return out, nil
 }
 
-func MustTransactionFromData(decoder *bin.Decoder) *Transaction {
+func MustTransactionFromDecoder(decoder *bin.Decoder) *Transaction {
 	out, err := TransactionFromDecoder(decoder)
 	if err != nil {
 		panic(err)
