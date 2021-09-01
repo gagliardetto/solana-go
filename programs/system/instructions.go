@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+
 	ag_spew "github.com/davecgh/go-spew/spew"
 	ag_binary "github.com/dfuse-io/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
@@ -14,7 +15,7 @@ import (
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
-var ProgramID ag_solanago.PublicKey = ag_solanago.MustPublicKeyFromBase58("11111111111111111111111111111111")
+var ProgramID ag_solanago.PublicKey = ag_solanago.SystemProgramID
 
 func SetProgramID(pubkey ag_solanago.PublicKey) {
 	ProgramID = pubkey
@@ -24,9 +25,7 @@ func SetProgramID(pubkey ag_solanago.PublicKey) {
 const ProgramName = "System"
 
 func init() {
-	if !ProgramID.IsZero() {
-		ag_solanago.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
-	}
+	ag_solanago.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
 }
 
 const (

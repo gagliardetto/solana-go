@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
 	ag_binary "github.com/dfuse-io/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -107,6 +108,11 @@ func (inst *CreateAccountWithSeed) GetBaseAccount() *ag_solanago.AccountMeta {
 }
 
 func (inst CreateAccountWithSeed) Build() *Instruction {
+	{
+		if !inst.Base.Equals(inst.GetFundingAccount().PublicKey) {
+			inst.Append(ag_solanago.Meta(*inst.Base).SIGNER())
+		}
+	}
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
 		TypeID: ag_binary.TypeIDFromUint32(Instruction_CreateAccountWithSeed, binary.LittleEndian),

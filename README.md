@@ -165,9 +165,111 @@ func main() {
 }
 ```
 
-### Send Sol from one account to another
+### Transfer Sol from one wallet to another wallet
 
-TODO
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "time"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/programs/system"
+  "github.com/gagliardetto/solana-go/rpc"
+  "github.com/gagliardetto/solana-go/rpc/jsonrpc"
+)
+
+func main() {
+  // Create a new RPC client:
+  client := rpc.New(rpc.DevNet_RPC)
+
+  // Load the account that you will send funds FROM:
+  accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile("/path/to/.config/solana/id.json")
+  if err != nil {
+    panic(err)
+  }
+  fmt.Println("accountFrom private key:", accountFrom)
+  fmt.Println("accountFrom public key:", accountFrom.PublicKey())
+
+  if true {
+    // Airdrop 10 sol to the account so it will have something to transfer:
+    out, err := client.RequestAirdrop(
+      context.TODO(),
+      accountFrom.PublicKey(),
+      solana.LAMPORTS_PER_SOL*10,
+      rpc.CommitmentFinalized,
+    )
+    if err != nil {
+      panic(err)
+    }
+    fmt.Println("airdrop transaction signature:", out)
+    time.Sleep(time.Second * 5)
+  }
+  //---------------
+
+  // The public key of the account that you will send sol TO:
+  accountTo := solana.MustPublicKeyFromBase58("TODO")
+  if err != nil {
+    panic(err)
+  }
+
+  recent, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
+  if err != nil {
+    panic(err)
+  }
+
+  // The amount to send (in lamports);
+  // 1 sol = 1000000000 lamports
+  amount := uint64(3333)
+  tx, err := solana.NewTransaction(
+    []solana.Instruction{
+      system.NewTransferInstruction(
+        amount,
+        accountFrom.PublicKey(),
+        accountTo,
+      ).Build(),
+    },
+    recent.Value.Blockhash,
+    solana.TransactionPayer(accountFrom.PublicKey()),
+  )
+  if err != nil {
+    panic(err)
+  }
+
+  _, err = tx.Sign(
+    func(key solana.PublicKey) *solana.PrivateKey {
+      if accountFrom.PublicKey().Equals(key) {
+        return &accountFrom
+      }
+      return nil
+    },
+  )
+  if err != nil {
+    panic(fmt.Errorf("unable to sign transaction: %w", err))
+  }
+  spew.Dump(tx)
+
+  sig, err := client.SendTransactionWithOpts(
+    context.TODO(),
+    tx,
+    false,
+    rpc.CommitmentFinalized,
+  )
+  if err != nil {
+    spew.Config.DisablePointerMethods = true
+    spew.Dump(err)
+    spew.Dump(err.(*jsonrpc.RPCError).Code)
+    spew.Dump(err.(*jsonrpc.RPCError).Data)
+    spew.Dump(err.(*jsonrpc.RPCError).Message)
+    panic(err)
+  }
+  spew.Dump(sig)
+}
+
+```
 
 ## RPC usage examples
 
