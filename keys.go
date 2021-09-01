@@ -51,14 +51,14 @@ func (k PrivateKey) String() string {
 	return base58.Encode(k)
 }
 
-func NewRandomPrivateKey() (PublicKey, PrivateKey, error) {
+func NewRandomPrivateKey() (PrivateKey, error) {
 	pub, priv, err := ed25519.GenerateKey(crypto_rand.Reader)
 	if err != nil {
-		return PublicKey{}, nil, err
+		return nil, err
 	}
 	var publicKey PublicKey
 	copy(publicKey[:], pub)
-	return publicKey, PrivateKey(priv), nil
+	return PrivateKey(priv), nil
 }
 
 func (k PrivateKey) Sign(payload []byte) (Signature, error) {

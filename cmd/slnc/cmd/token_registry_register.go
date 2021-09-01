@@ -90,7 +90,7 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 			return fmt.Errorf("unable retrieve recent block hash: %w", err)
 		}
 
-		tokenMetaAccount := solana.NewAccount()
+		tokenMetaAccount := solana.NewWallet()
 
 		lamport, err := client.GetMinimumBalanceForRentExemption(
 			context.Background(),

@@ -88,14 +88,14 @@ func NewVault() *Vault {
 // local wallet and returns the public key. It does NOT save the
 // wallet, you better do that soon after.
 func (v *Vault) NewKeyPair() (pub solana.PublicKey, err error) {
-	pub, privKey, err := solana.NewRandomPrivateKey()
+	privKey, err := solana.NewRandomPrivateKey()
 	if err != nil {
-		return
+		return solana.PublicKey{}, err
 	}
 
 	v.KeyBag = append(v.KeyBag, privKey)
 
-	return
+	return privKey.PublicKey(), nil
 }
 
 // AddPrivateKey appends the provided private key into the Vault's KeyBag

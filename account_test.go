@@ -9,11 +9,11 @@ import (
 
 func TestNewAccount(t *testing.T) {
 
-	a := NewAccount()
+	a := NewWallet()
 	privateKey := a.PrivateKey
 	public := a.PublicKey()
 
-	a2, err := AccountFromPrivateKeyBase58(privateKey.String())
+	a2, err := WalletFromPrivateKeyBase58(privateKey.String())
 	require.NoError(t, err)
 
 	require.Equal(t, privateKey, a2.PrivateKey)

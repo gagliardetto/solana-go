@@ -221,7 +221,7 @@ func TestCreateProgramAddress(t *testing.T) {
 func TestFindProgramAddress(t *testing.T) {
 	for i := 0; i < 1_000; i++ {
 
-		program_id := NewAccount().PrivateKey.PublicKey()
+		program_id := NewWallet().PrivateKey.PublicKey()
 		address, bump_seed, err := FindProgramAddress(
 			[][]byte{
 				[]byte("Lil'"),

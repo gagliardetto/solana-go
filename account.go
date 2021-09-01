@@ -4,31 +4,32 @@ import (
 	"fmt"
 )
 
-type Account struct {
+// Wallet is a wrapper around a PrivateKey
+type Wallet struct {
 	PrivateKey PrivateKey
 }
 
-func NewAccount() *Account {
-	_, privateKey, err := NewRandomPrivateKey()
+func NewWallet() *Wallet {
+	privateKey, err := NewRandomPrivateKey()
 	if err != nil {
 		panic(fmt.Sprintf("failed to generate private key: %s", err))
 	}
-	return &Account{
+	return &Wallet{
 		PrivateKey: privateKey,
 	}
 }
 
-func AccountFromPrivateKeyBase58(privateKey string) (*Account, error) {
+func WalletFromPrivateKeyBase58(privateKey string) (*Wallet, error) {
 	k, err := PrivateKeyFromBase58(privateKey)
 	if err != nil {
 		return nil, fmt.Errorf("account from private key: private key from b58: %w", err)
 	}
-	return &Account{
+	return &Wallet{
 		PrivateKey: k,
 	}, nil
 }
 
-func (a *Account) PublicKey() PublicKey {
+func (a *Wallet) PublicKey() PublicKey {
 	return a.PrivateKey.PublicKey()
 }
 
