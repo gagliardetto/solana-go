@@ -178,6 +178,7 @@ package main
 import (
   "context"
   "fmt"
+  "os"
   "time"
 
   "github.com/davecgh/go-spew/spew"
@@ -185,6 +186,7 @@ import (
   "github.com/gagliardetto/solana-go/programs/system"
   "github.com/gagliardetto/solana-go/rpc"
   "github.com/gagliardetto/solana-go/rpc/jsonrpc"
+  "github.com/gagliardetto/solana-go/text"
 )
 
 func main() {
@@ -253,6 +255,8 @@ func main() {
     panic(fmt.Errorf("unable to sign transaction: %w", err))
   }
   spew.Dump(tx)
+  // Pretty print the transaction:
+  tx.EncodeTree(text.NewTreeEncoder(os.Stdout, "Transfer SOL"))
 
   sig, err := client.SendTransactionWithOpts(
     context.TODO(),
