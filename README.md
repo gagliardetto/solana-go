@@ -105,7 +105,8 @@ func main() {
 ### Load/parse private and private keys
 
 ```go
-{ // Load private key from a json file generated with
+{ 
+  // Load private key from a json file generated with
   // $ solana-keygen new --outfile=standard.solana-keygen.json
   privateKey, err := solana.PrivateKeyFromSolanaKeygenFile("/path/to/standard.solana-keygen.json")
   if err != nil {
@@ -118,7 +119,8 @@ func main() {
   fmt.Println("public key:", publicKey.String())
 }
 
-{ // Load private key from base58:
+{ 
+  // Load private key from base58:
   {
     privateKey, err := solana.PrivateKeyFromBase58("66cDvko73yAf8LYvFMM3r8vF5vJtkk7JKMgEKwkmBC86oHdq41C7i1a2vS3zE1yCcdLLk6VUatUb32ZzVjSBXtRs")
     if err != nil {
