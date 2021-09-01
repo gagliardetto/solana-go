@@ -27,7 +27,7 @@ More contracts to come.
   - [Examples](#examples)
     - [Create Account/Wallet](#create-account-wallet)
     - [Transfer SOL from a wallet to another](#transfer-sol-from-one-wallet-to-another-wallet)
-    - [RPC](#rpc-usage-examples)
+    - [RPC (index)](#rpc-usage-examples)
       - [RPC examples](#rpc-methods)
       - [Websocket Subscription examples](#websocket-subscriptions)
   - [Contributing](#contributing)
