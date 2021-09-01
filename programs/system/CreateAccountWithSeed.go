@@ -110,7 +110,7 @@ func (inst *CreateAccountWithSeed) GetBaseAccount() *ag_solanago.AccountMeta {
 func (inst CreateAccountWithSeed) Build() *Instruction {
 	{
 		if !inst.Base.Equals(inst.GetFundingAccount().PublicKey) {
-			inst.Append(ag_solanago.Meta(*inst.Base).SIGNER())
+			inst.AccountMetaSlice[2] = ag_solanago.Meta(*inst.Base).SIGNER()
 		}
 	}
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
@@ -150,9 +150,12 @@ func (inst *CreateAccountWithSeed) Validate() error {
 	}
 
 	// Check whether all accounts are set:
-	for accIndex, acc := range inst.AccountMetaSlice {
-		if acc == nil {
-			return fmt.Errorf("ins.AccountMetaSlice[%v] is not set", accIndex)
+	{
+		if inst.AccountMetaSlice[0] == nil {
+			return fmt.Errorf("FundingAccount is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
+			return fmt.Errorf("CreatedAccount is not set")
 		}
 	}
 	return nil
