@@ -88,12 +88,12 @@ func main() {
   // Create a new RPC client:
   client := rpc.New(rpc.TestNet_RPC)
 
-  // Airdrop 1 sol to the new account:
+  // Airdrop 100 SOL to the new account:
   out, err := client.RequestAirdrop(
     context.TODO(),
     account.PublicKey(),
-    solana.LAMPORTS_PER_SOL,
-    "",
+    solana.LAMPORTS_PER_SOL*100,
+    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
