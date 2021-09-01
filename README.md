@@ -194,6 +194,12 @@ func main() {
   fmt.Println("accountFrom private key:", accountFrom)
   fmt.Println("accountFrom public key:", accountFrom.PublicKey())
 
+  // The public key of the account that you will send sol TO:
+  accountTo := solana.MustPublicKeyFromBase58("TODO")
+  // The amount to send (in lamports);
+  // 1 sol = 1000000000 lamports
+  amount := uint64(3333)
+
   if true {
     // Airdrop 10 sol to the account so it will have something to transfer:
     out, err := client.RequestAirdrop(
@@ -210,17 +216,11 @@ func main() {
   }
   //---------------
 
-  // The public key of the account that you will send sol TO:
-  accountTo := solana.MustPublicKeyFromBase58("TODO")
-
   recent, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
   if err != nil {
     panic(err)
   }
 
-  // The amount to send (in lamports);
-  // 1 sol = 1000000000 lamports
-  amount := uint64(3333)
   tx, err := solana.NewTransaction(
     []solana.Instruction{
       system.NewTransferInstruction(
