@@ -212,9 +212,6 @@ func main() {
 
   // The public key of the account that you will send sol TO:
   accountTo := solana.MustPublicKeyFromBase58("TODO")
-  if err != nil {
-    panic(err)
-  }
 
   recent, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
   if err != nil {
