@@ -81,7 +81,7 @@ import (
 
 func main() {
   // Create a new account:
-  account := solana.NewAccount()
+  account := solana.NewWallet()
   fmt.Println("account private key:", account.PrivateKey)
   fmt.Println("account public key:", account.PublicKey())
 
