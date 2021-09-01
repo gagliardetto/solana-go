@@ -19,15 +19,10 @@ More contracts to come.
 ## Contents
 
 - [Solana SDK library for Go](#solana-sdk-library-for-go)
-  - [Contents](#contents)
+  - [Contents' Index](#contents)
   - [Features](#features)
   - [Current development status](#current-development-status)
   - [Requirements](#requirements)
-  - [Installation](#installation)
-  - [RPC usage examples](#rpc-usage-examples)
-  - [Contributing](#contributing)
-  - [License](#license)
-  - [Credits](#credits)
   - [Installation](#installation)
   - [Examples](#examples)
     - [Create Account/Wallet](#create-account-wallet)
@@ -35,6 +30,9 @@ More contracts to come.
     - [RPC](#rpc-usage-examples)
       - [RPC examples](#rpc-methods)
       - [Websocket Subscription examples](#websocket-subscriptions)
+  - [Contributing](#contributing)
+  - [License](#license)
+  - [Credits](#credits)
 
 ## Features
 
