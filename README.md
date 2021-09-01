@@ -26,7 +26,7 @@ More contracts to come.
   - [Installation](#installation)
   - [Examples](#examples)
     - [Create Account/Wallet](#create-account-wallet)
-    - [Load/parse keys](#load-parse-private-and-private-keys)
+    - [Load/parse keys](#loadparse-private-and-private-keys)
     - [Transfer SOL from a wallet to another](#transfer-sol-from-one-wallet-to-another-wallet)
     - [RPC (index)](#rpc-usage-examples)
       - [RPC examples](#rpc-methods)
