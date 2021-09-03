@@ -57,13 +57,13 @@ var tokenGetMintCmd = &cobra.Command{
 		out = append(out, fmt.Sprintf("Supply | %d", mint.Supply))
 		out = append(out, fmt.Sprintf("Decimals | %d", mint.Decimals))
 
-		if mint.MintAuthorityOption != 0 {
+		if mint.MintAuthority != nil {
 			out = append(out, fmt.Sprintf("Token Authority | %s", mint.MintAuthority))
 		} else {
 			out = append(out, "No mint authority")
 		}
 
-		if mint.FreezeAuthorityOption != 0 {
+		if mint.FreezeAuthority != nil {
 			out = append(out, fmt.Sprintf("Freeze Authority | %s", mint.FreezeAuthority))
 		} else {
 			out = append(out, "No freeze authority")
