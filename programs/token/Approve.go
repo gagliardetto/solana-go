@@ -38,48 +38,61 @@ func NewApproveInstructionBuilder() *Approve {
 	return nd
 }
 
+// SetAmount sets the "amount" parameter.
 // The amount of tokens the delegate is approved for.
 func (inst *Approve) SetAmount(amount uint64) *Approve {
 	inst.Amount = &amount
 	return inst
 }
 
+// SetSourceAccount sets the "source" account.
 // The source account.
 func (inst *Approve) SetSourceAccount(source ag_solanago.PublicKey) *Approve {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(source).WRITE()
 	return inst
 }
 
+// GetSourceAccount gets the "source" account.
+// The source account.
 func (inst *Approve) GetSourceAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetDelegateAccount sets the "delegate" account.
 // The delegate.
 func (inst *Approve) SetDelegateAccount(delegate ag_solanago.PublicKey) *Approve {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(delegate)
 	return inst
 }
 
+// GetDelegateAccount gets the "delegate" account.
+// The delegate.
 func (inst *Approve) GetDelegateAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetOwnerAccount sets the "owner" account.
 // The source account owner.
 func (inst *Approve) SetOwnerAccount(owner ag_solanago.PublicKey) *Approve {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(owner)
 	return inst
 }
 
+// GetOwnerAccount gets the "owner" account.
+// The source account owner.
 func (inst *Approve) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
+// SetSignersAccount sets the "signers" account.
 // M signer accounts.
 func (inst *Approve) SetSignersAccount(signers ag_solanago.PublicKey) *Approve {
 	inst.AccountMetaSlice[3] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// M signer accounts.
 func (inst *Approve) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }

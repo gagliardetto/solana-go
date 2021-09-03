@@ -48,64 +48,81 @@ func NewApproveCheckedInstructionBuilder() *ApproveChecked {
 	return nd
 }
 
+// SetAmount sets the "amount" parameter.
 // The amount of tokens the delegate is approved for.
 func (inst *ApproveChecked) SetAmount(amount uint64) *ApproveChecked {
 	inst.Amount = &amount
 	return inst
 }
 
+// SetDecimals sets the "decimals" parameter.
 // Expected number of base 10 digits to the right of the decimal place.
 func (inst *ApproveChecked) SetDecimals(decimals uint8) *ApproveChecked {
 	inst.Decimals = &decimals
 	return inst
 }
 
+// SetSourceAccount sets the "source" account.
 // The source account.
 func (inst *ApproveChecked) SetSourceAccount(source ag_solanago.PublicKey) *ApproveChecked {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(source).WRITE()
 	return inst
 }
 
+// GetSourceAccount gets the "source" account.
+// The source account.
 func (inst *ApproveChecked) GetSourceAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetMintAccount sets the "mint" account.
 // The token mint.
 func (inst *ApproveChecked) SetMintAccount(mint ag_solanago.PublicKey) *ApproveChecked {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint)
 	return inst
 }
 
+// GetMintAccount gets the "mint" account.
+// The token mint.
 func (inst *ApproveChecked) GetMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetDelegateAccount sets the "delegate" account.
 // The delegate.
 func (inst *ApproveChecked) SetDelegateAccount(delegate ag_solanago.PublicKey) *ApproveChecked {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(delegate)
 	return inst
 }
 
+// GetDelegateAccount gets the "delegate" account.
+// The delegate.
 func (inst *ApproveChecked) GetDelegateAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
+// SetOwnerAccount sets the "owner" account.
 // The source account owner.
 func (inst *ApproveChecked) SetOwnerAccount(owner ag_solanago.PublicKey) *ApproveChecked {
 	inst.AccountMetaSlice[3] = ag_solanago.Meta(owner)
 	return inst
 }
 
+// GetOwnerAccount gets the "owner" account.
+// The source account owner.
 func (inst *ApproveChecked) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }
 
+// SetSignersAccount sets the "signers" account.
 // M signer accounts.
 func (inst *ApproveChecked) SetSignersAccount(signers ag_solanago.PublicKey) *ApproveChecked {
 	inst.AccountMetaSlice[4] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// M signer accounts.
 func (inst *ApproveChecked) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[4]
 }

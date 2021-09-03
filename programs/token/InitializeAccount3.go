@@ -31,28 +31,35 @@ func NewInitializeAccount3InstructionBuilder() *InitializeAccount3 {
 	return nd
 }
 
+// SetOwner sets the "owner" parameter.
 // The new account's owner/multisignature.
 func (inst *InitializeAccount3) SetOwner(owner ag_solanago.PublicKey) *InitializeAccount3 {
 	inst.Owner = &owner
 	return inst
 }
 
+// SetAccount sets the "account" account.
 // The account to initialize.
 func (inst *InitializeAccount3) SetAccount(account ag_solanago.PublicKey) *InitializeAccount3 {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(account).WRITE()
 	return inst
 }
 
+// GetAccount gets the "account" account.
+// The account to initialize.
 func (inst *InitializeAccount3) GetAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetMintAccount sets the "mint" account.
 // The mint this account will be associated with.
 func (inst *InitializeAccount3) SetMintAccount(mint ag_solanago.PublicKey) *InitializeAccount3 {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint)
 	return inst
 }
 
+// GetMintAccount gets the "mint" account.
+// The mint this account will be associated with.
 func (inst *InitializeAccount3) GetMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }

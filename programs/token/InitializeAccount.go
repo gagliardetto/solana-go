@@ -45,42 +45,54 @@ func NewInitializeAccountInstructionBuilder() *InitializeAccount {
 	return nd
 }
 
+// SetAccount sets the "account" account.
 // The account to initialize.
 func (inst *InitializeAccount) SetAccount(account ag_solanago.PublicKey) *InitializeAccount {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(account).WRITE()
 	return inst
 }
 
+// GetAccount gets the "account" account.
+// The account to initialize.
 func (inst *InitializeAccount) GetAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetMintAccount sets the "mint" account.
 // The mint this account will be associated with.
 func (inst *InitializeAccount) SetMintAccount(mint ag_solanago.PublicKey) *InitializeAccount {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint)
 	return inst
 }
 
+// GetMintAccount gets the "mint" account.
+// The mint this account will be associated with.
 func (inst *InitializeAccount) GetMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetOwnerAccount sets the "owner" account.
 // The new account's owner/multisignature.
 func (inst *InitializeAccount) SetOwnerAccount(owner ag_solanago.PublicKey) *InitializeAccount {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(owner)
 	return inst
 }
 
+// GetOwnerAccount gets the "owner" account.
+// The new account's owner/multisignature.
 func (inst *InitializeAccount) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
+// SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
 func (inst *InitializeAccount) SetSysVarRentPubkeyAccount(SysVarRentPubkey ag_solanago.PublicKey) *InitializeAccount {
 	inst.AccountMetaSlice[3] = ag_solanago.Meta(SysVarRentPubkey)
 	return inst
 }
 
+// GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
+// Rent sysvar.
 func (inst *InitializeAccount) GetSysVarRentPubkeyAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }

@@ -38,48 +38,61 @@ func NewBurnInstructionBuilder() *Burn {
 	return nd
 }
 
+// SetAmount sets the "amount" parameter.
 // The amount of tokens to burn.
 func (inst *Burn) SetAmount(amount uint64) *Burn {
 	inst.Amount = &amount
 	return inst
 }
 
+// SetSourceAccount sets the "source" account.
 // The account to burn from.
 func (inst *Burn) SetSourceAccount(source ag_solanago.PublicKey) *Burn {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(source).WRITE()
 	return inst
 }
 
+// GetSourceAccount gets the "source" account.
+// The account to burn from.
 func (inst *Burn) GetSourceAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetMintAccount sets the "mint" account.
 // The token mint.
 func (inst *Burn) SetMintAccount(mint ag_solanago.PublicKey) *Burn {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint).WRITE()
 	return inst
 }
 
+// GetMintAccount gets the "mint" account.
+// The token mint.
 func (inst *Burn) GetMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetOwnerAccount sets the "owner" account.
 // The account's owner/delegate.
 func (inst *Burn) SetOwnerAccount(owner ag_solanago.PublicKey) *Burn {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(owner)
 	return inst
 }
 
+// GetOwnerAccount gets the "owner" account.
+// The account's owner/delegate.
 func (inst *Burn) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
+// SetSignersAccount sets the "signers" account.
 // M signer accounts.
 func (inst *Burn) SetSignersAccount(signers ag_solanago.PublicKey) *Burn {
 	inst.AccountMetaSlice[3] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// M signer accounts.
 func (inst *Burn) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }

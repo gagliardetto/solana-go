@@ -31,32 +31,41 @@ func NewRevokeInstructionBuilder() *Revoke {
 	return nd
 }
 
+// SetSourceAccount sets the "source" account.
 // The source account.
 func (inst *Revoke) SetSourceAccount(source ag_solanago.PublicKey) *Revoke {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(source).WRITE()
 	return inst
 }
 
+// GetSourceAccount gets the "source" account.
+// The source account.
 func (inst *Revoke) GetSourceAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetOwnerAccount sets the "owner" account.
 // The source account's owner.
 func (inst *Revoke) SetOwnerAccount(owner ag_solanago.PublicKey) *Revoke {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(owner)
 	return inst
 }
 
+// GetOwnerAccount gets the "owner" account.
+// The source account's owner.
 func (inst *Revoke) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetSignersAccount sets the "signers" account.
 // M signer accounts.
 func (inst *Revoke) SetSignersAccount(signers ag_solanago.PublicKey) *Revoke {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// M signer accounts.
 func (inst *Revoke) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }

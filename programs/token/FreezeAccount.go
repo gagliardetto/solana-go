@@ -34,42 +34,54 @@ func NewFreezeAccountInstructionBuilder() *FreezeAccount {
 	return nd
 }
 
+// SetAccount sets the "account" account.
 // The account to freeze.
 func (inst *FreezeAccount) SetAccount(account ag_solanago.PublicKey) *FreezeAccount {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(account).WRITE()
 	return inst
 }
 
+// GetAccount gets the "account" account.
+// The account to freeze.
 func (inst *FreezeAccount) GetAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetMintAccount sets the "mint" account.
 // The token mint.
 func (inst *FreezeAccount) SetMintAccount(mint ag_solanago.PublicKey) *FreezeAccount {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint)
 	return inst
 }
 
+// GetMintAccount gets the "mint" account.
+// The token mint.
 func (inst *FreezeAccount) GetMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetAuthorityAccount sets the "authority" account.
 // The mint freeze authority.
 func (inst *FreezeAccount) SetAuthorityAccount(authority ag_solanago.PublicKey) *FreezeAccount {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(authority)
 	return inst
 }
 
+// GetAuthorityAccount gets the "authority" account.
+// The mint freeze authority.
 func (inst *FreezeAccount) GetAuthorityAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
+// SetSignersAccount sets the "signers" account.
 // M signer accounts.
 func (inst *FreezeAccount) SetSignersAccount(signers ag_solanago.PublicKey) *FreezeAccount {
 	inst.AccountMetaSlice[3] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// M signer accounts.
 func (inst *FreezeAccount) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }

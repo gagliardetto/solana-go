@@ -31,28 +31,35 @@ func NewInitializeMultisig2InstructionBuilder() *InitializeMultisig2 {
 	return nd
 }
 
+// SetM sets the "m" parameter.
 // The number of signers (M) required to validate this multisignature account.
 func (inst *InitializeMultisig2) SetM(m uint8) *InitializeMultisig2 {
 	inst.M = &m
 	return inst
 }
 
+// SetAccount sets the "account" account.
 // The multisignature account to initialize.
 func (inst *InitializeMultisig2) SetAccount(account ag_solanago.PublicKey) *InitializeMultisig2 {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(account).WRITE()
 	return inst
 }
 
+// GetAccount gets the "account" account.
+// The multisignature account to initialize.
 func (inst *InitializeMultisig2) GetAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetSignersAccount sets the "signers" account.
 // The signer accounts, must equal to N where 1 <= N <= 11.
 func (inst *InitializeMultisig2) SetSignersAccount(signers ag_solanago.PublicKey) *InitializeMultisig2 {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// The signer accounts, must equal to N where 1 <= N <= 11.
 func (inst *InitializeMultisig2) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }

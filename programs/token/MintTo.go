@@ -38,48 +38,61 @@ func NewMintToInstructionBuilder() *MintTo {
 	return nd
 }
 
+// SetAmount sets the "amount" parameter.
 // The amount of new tokens to mint.
 func (inst *MintTo) SetAmount(amount uint64) *MintTo {
 	inst.Amount = &amount
 	return inst
 }
 
+// SetMintAccount sets the "mint" account.
 // The mint.
 func (inst *MintTo) SetMintAccount(mint ag_solanago.PublicKey) *MintTo {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(mint).WRITE()
 	return inst
 }
 
+// GetMintAccount gets the "mint" account.
+// The mint.
 func (inst *MintTo) GetMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetDestinationAccount sets the "destination" account.
 // The account to mint tokens to.
 func (inst *MintTo) SetDestinationAccount(destination ag_solanago.PublicKey) *MintTo {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(destination).WRITE()
 	return inst
 }
 
+// GetDestinationAccount gets the "destination" account.
+// The account to mint tokens to.
 func (inst *MintTo) GetDestinationAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetAuthorityAccount sets the "authority" account.
 // The mint's minting authority.
 func (inst *MintTo) SetAuthorityAccount(authority ag_solanago.PublicKey) *MintTo {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(authority)
 	return inst
 }
 
+// GetAuthorityAccount gets the "authority" account.
+// The mint's minting authority.
 func (inst *MintTo) GetAuthorityAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
+// SetSignersAccount sets the "signers" account.
 // M signer accounts.
 func (inst *MintTo) SetSignersAccount(signers ag_solanago.PublicKey) *MintTo {
 	inst.AccountMetaSlice[3] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// M signer accounts.
 func (inst *MintTo) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }

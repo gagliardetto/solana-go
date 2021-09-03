@@ -45,40 +45,49 @@ func NewInitializeMintInstructionBuilder() *InitializeMint {
 	return nd
 }
 
+// SetDecimals sets the "decimals" parameter.
 // Number of base 10 digits to the right of the decimal place.
 func (inst *InitializeMint) SetDecimals(decimals uint8) *InitializeMint {
 	inst.Decimals = &decimals
 	return inst
 }
 
+// SetMintAuthority sets the "mint_authority" parameter.
 // The authority/multisignature to mint tokens.
 func (inst *InitializeMint) SetMintAuthority(mint_authority ag_solanago.PublicKey) *InitializeMint {
 	inst.MintAuthority = &mint_authority
 	return inst
 }
 
+// SetFreezeAuthority sets the "freeze_authority" parameter.
 // The freeze authority/multisignature of the mint.
 func (inst *InitializeMint) SetFreezeAuthority(freeze_authority ag_solanago.PublicKey) *InitializeMint {
 	inst.FreezeAuthority = &freeze_authority
 	return inst
 }
 
+// SetMintAccount sets the "mint" account.
 // The mint to initialize.
 func (inst *InitializeMint) SetMintAccount(mint ag_solanago.PublicKey) *InitializeMint {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(mint).WRITE()
 	return inst
 }
 
+// GetMintAccount gets the "mint" account.
+// The mint to initialize.
 func (inst *InitializeMint) GetMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
 func (inst *InitializeMint) SetSysVarRentPubkeyAccount(SysVarRentPubkey ag_solanago.PublicKey) *InitializeMint {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(SysVarRentPubkey)
 	return inst
 }
 
+// GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
+// Rent sysvar.
 func (inst *InitializeMint) GetSysVarRentPubkeyAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }

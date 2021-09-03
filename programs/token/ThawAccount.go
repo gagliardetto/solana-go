@@ -34,42 +34,54 @@ func NewThawAccountInstructionBuilder() *ThawAccount {
 	return nd
 }
 
+// SetAccount sets the "account" account.
 // The account to thaw.
 func (inst *ThawAccount) SetAccount(account ag_solanago.PublicKey) *ThawAccount {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(account).WRITE()
 	return inst
 }
 
+// GetAccount gets the "account" account.
+// The account to thaw.
 func (inst *ThawAccount) GetAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetMintAccount sets the "mint" account.
 // The token mint.
 func (inst *ThawAccount) SetMintAccount(mint ag_solanago.PublicKey) *ThawAccount {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint)
 	return inst
 }
 
+// GetMintAccount gets the "mint" account.
+// The token mint.
 func (inst *ThawAccount) GetMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetAuthorityAccount sets the "authority" account.
 // The mint freeze authority.
 func (inst *ThawAccount) SetAuthorityAccount(authority ag_solanago.PublicKey) *ThawAccount {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(authority)
 	return inst
 }
 
+// GetAuthorityAccount gets the "authority" account.
+// The mint freeze authority.
 func (inst *ThawAccount) GetAuthorityAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
+// SetSignersAccount sets the "signers" account.
 // M signer accounts.
 func (inst *ThawAccount) SetSignersAccount(signers ag_solanago.PublicKey) *ThawAccount {
 	inst.AccountMetaSlice[3] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// M signer accounts.
 func (inst *ThawAccount) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }

@@ -37,44 +37,55 @@ func NewSetAuthorityInstructionBuilder() *SetAuthority {
 	return nd
 }
 
+// SetAuthorityType sets the "authority_type" parameter.
 // The type of authority to update.
 func (inst *SetAuthority) SetAuthorityType(authority_type AuthorityType) *SetAuthority {
 	inst.AuthorityType = &authority_type
 	return inst
 }
 
+// SetNewAuthority sets the "new_authority" parameter.
 // The new authority.
 func (inst *SetAuthority) SetNewAuthority(new_authority ag_solanago.PublicKey) *SetAuthority {
 	inst.NewAuthority = &new_authority
 	return inst
 }
 
+// SetSubjectAccount sets the "subject" account.
 // The mint or account to change the authority of.
 func (inst *SetAuthority) SetSubjectAccount(subject ag_solanago.PublicKey) *SetAuthority {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(subject).WRITE()
 	return inst
 }
 
+// GetSubjectAccount gets the "subject" account.
+// The mint or account to change the authority of.
 func (inst *SetAuthority) GetSubjectAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetAuthorityAccount sets the "authority" account.
 // The current authority of the mint or account.
 func (inst *SetAuthority) SetAuthorityAccount(authority ag_solanago.PublicKey) *SetAuthority {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(authority)
 	return inst
 }
 
+// GetAuthorityAccount gets the "authority" account.
+// The current authority of the mint or account.
 func (inst *SetAuthority) GetAuthorityAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetSignersAccount sets the "signers" account.
 // M signer accounts.
 func (inst *SetAuthority) SetSignersAccount(signers ag_solanago.PublicKey) *SetAuthority {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// M signer accounts.
 func (inst *SetAuthority) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }

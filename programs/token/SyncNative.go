@@ -29,12 +29,15 @@ func NewSyncNativeInstructionBuilder() *SyncNative {
 	return nd
 }
 
+// SetTokenAccount sets the "tokenAccount" account.
 // The native token account to sync with its underlying lamports.
 func (inst *SyncNative) SetTokenAccount(tokenAccount ag_solanago.PublicKey) *SyncNative {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(tokenAccount).WRITE()
 	return inst
 }
 
+// GetTokenAccount gets the "tokenAccount" account.
+// The native token account to sync with its underlying lamports.
 func (inst *SyncNative) GetTokenAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }

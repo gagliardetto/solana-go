@@ -44,54 +44,68 @@ func NewMintToCheckedInstructionBuilder() *MintToChecked {
 	return nd
 }
 
+// SetAmount sets the "amount" parameter.
 // The amount of new tokens to mint.
 func (inst *MintToChecked) SetAmount(amount uint64) *MintToChecked {
 	inst.Amount = &amount
 	return inst
 }
 
+// SetDecimals sets the "decimals" parameter.
 // Expected number of base 10 digits to the right of the decimal place.
 func (inst *MintToChecked) SetDecimals(decimals uint8) *MintToChecked {
 	inst.Decimals = &decimals
 	return inst
 }
 
+// SetMintAccount sets the "mint" account.
 // The mint.
 func (inst *MintToChecked) SetMintAccount(mint ag_solanago.PublicKey) *MintToChecked {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(mint).WRITE()
 	return inst
 }
 
+// GetMintAccount gets the "mint" account.
+// The mint.
 func (inst *MintToChecked) GetMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetDestinationAccount sets the "destination" account.
 // The account to mint tokens to.
 func (inst *MintToChecked) SetDestinationAccount(destination ag_solanago.PublicKey) *MintToChecked {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(destination).WRITE()
 	return inst
 }
 
+// GetDestinationAccount gets the "destination" account.
+// The account to mint tokens to.
 func (inst *MintToChecked) GetDestinationAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetAuthorityAccount sets the "authority" account.
 // The mint's minting authority.
 func (inst *MintToChecked) SetAuthorityAccount(authority ag_solanago.PublicKey) *MintToChecked {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(authority)
 	return inst
 }
 
+// GetAuthorityAccount gets the "authority" account.
+// The mint's minting authority.
 func (inst *MintToChecked) GetAuthorityAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
+// SetSignersAccount sets the "signers" account.
 // M signer accounts.
 func (inst *MintToChecked) SetSignersAccount(signers ag_solanago.PublicKey) *MintToChecked {
 	inst.AccountMetaSlice[3] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// M signer accounts.
 func (inst *MintToChecked) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }

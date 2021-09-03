@@ -35,42 +35,54 @@ func NewCloseAccountInstructionBuilder() *CloseAccount {
 	return nd
 }
 
+// SetAccount sets the "account" account.
 // The account to close.
 func (inst *CloseAccount) SetAccount(account ag_solanago.PublicKey) *CloseAccount {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(account).WRITE()
 	return inst
 }
 
+// GetAccount gets the "account" account.
+// The account to close.
 func (inst *CloseAccount) GetAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetDestinationAccount sets the "destination" account.
 // The destination account.
 func (inst *CloseAccount) SetDestinationAccount(destination ag_solanago.PublicKey) *CloseAccount {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(destination).WRITE()
 	return inst
 }
 
+// GetDestinationAccount gets the "destination" account.
+// The destination account.
 func (inst *CloseAccount) GetDestinationAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetOwnerAccount sets the "owner" account.
 // The account's owner.
 func (inst *CloseAccount) SetOwnerAccount(owner ag_solanago.PublicKey) *CloseAccount {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(owner)
 	return inst
 }
 
+// GetOwnerAccount gets the "owner" account.
+// The account's owner.
 func (inst *CloseAccount) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
+// SetSignersAccount sets the "signers" account.
 // M signer accounts.
 func (inst *CloseAccount) SetSignersAccount(signers ag_solanago.PublicKey) *CloseAccount {
 	inst.AccountMetaSlice[3] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// M signer accounts.
 func (inst *CloseAccount) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }

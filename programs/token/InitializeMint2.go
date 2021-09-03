@@ -34,30 +34,36 @@ func NewInitializeMint2InstructionBuilder() *InitializeMint2 {
 	return nd
 }
 
+// SetDecimals sets the "decimals" parameter.
 // Number of base 10 digits to the right of the decimal place.
 func (inst *InitializeMint2) SetDecimals(decimals uint8) *InitializeMint2 {
 	inst.Decimals = &decimals
 	return inst
 }
 
+// SetMintAuthority sets the "mint_authority" parameter.
 // The authority/multisignature to mint tokens.
 func (inst *InitializeMint2) SetMintAuthority(mint_authority ag_solanago.PublicKey) *InitializeMint2 {
 	inst.MintAuthority = &mint_authority
 	return inst
 }
 
+// SetFreezeAuthority sets the "freeze_authority" parameter.
 // The freeze authority/multisignature of the mint.
 func (inst *InitializeMint2) SetFreezeAuthority(freeze_authority ag_solanago.PublicKey) *InitializeMint2 {
 	inst.FreezeAuthority = &freeze_authority
 	return inst
 }
 
+// SetMintAccount sets the "mint" account.
 // The mint to initialize.
 func (inst *InitializeMint2) SetMintAccount(mint ag_solanago.PublicKey) *InitializeMint2 {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(mint).WRITE()
 	return inst
 }
 
+// GetMintAccount gets the "mint" account.
+// The mint to initialize.
 func (inst *InitializeMint2) GetMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }

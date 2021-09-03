@@ -46,54 +46,68 @@ func NewBurnCheckedInstructionBuilder() *BurnChecked {
 	return nd
 }
 
+// SetAmount sets the "amount" parameter.
 // The amount of tokens to burn.
 func (inst *BurnChecked) SetAmount(amount uint64) *BurnChecked {
 	inst.Amount = &amount
 	return inst
 }
 
+// SetDecimals sets the "decimals" parameter.
 // Expected number of base 10 digits to the right of the decimal place.
 func (inst *BurnChecked) SetDecimals(decimals uint8) *BurnChecked {
 	inst.Decimals = &decimals
 	return inst
 }
 
+// SetSourceAccount sets the "source" account.
 // The account to burn from.
 func (inst *BurnChecked) SetSourceAccount(source ag_solanago.PublicKey) *BurnChecked {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(source).WRITE()
 	return inst
 }
 
+// GetSourceAccount gets the "source" account.
+// The account to burn from.
 func (inst *BurnChecked) GetSourceAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetMintAccount sets the "mint" account.
 // The token mint.
 func (inst *BurnChecked) SetMintAccount(mint ag_solanago.PublicKey) *BurnChecked {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint).WRITE()
 	return inst
 }
 
+// GetMintAccount gets the "mint" account.
+// The token mint.
 func (inst *BurnChecked) GetMintAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetOwnerAccount sets the "owner" account.
 // The account's owner/delegate.
 func (inst *BurnChecked) SetOwnerAccount(owner ag_solanago.PublicKey) *BurnChecked {
 	inst.AccountMetaSlice[2] = ag_solanago.Meta(owner)
 	return inst
 }
 
+// GetOwnerAccount gets the "owner" account.
+// The account's owner/delegate.
 func (inst *BurnChecked) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
+// SetSignersAccount sets the "signers" account.
 // M signer accounts.
 func (inst *BurnChecked) SetSignersAccount(signers ag_solanago.PublicKey) *BurnChecked {
 	inst.AccountMetaSlice[3] = ag_solanago.Meta(signers).SIGNER()
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// M signer accounts.
 func (inst *BurnChecked) GetSignersAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }
