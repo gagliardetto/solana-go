@@ -41,7 +41,17 @@ More contracts to come.
 - [x] Full WebSocket JSON streaming API
 - [ ] Wallet, account, and keys management
 - [ ] Clients for native programs
-- [ ] Clients for Solana Program Library
+  - [x] system
+  - [ ] config
+  - [ ] stake
+  - [ ] vote
+  - [ ] BPF Loader
+  - [ ] Secp256k1
+- [ ] Clients for Solana Program Library (SPL)
+  - [ ] token: WIP
+  - [ ] memo
+  - [ ] name-service
+  - [ ] ...
 - [ ] Client for Serum
 - [ ] More programs
 
