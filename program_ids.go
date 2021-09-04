@@ -29,15 +29,15 @@ var (
 var (
 	// A Token program on the Solana blockchain.
 	// This program defines a common implementation for Fungible and Non Fungible tokens.
-	SPLTokenProgramID = MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+	TokenProgramID = MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
 
 	// A Uniswap-like exchange for the Token program on the Solana blockchain,
 	// implementing multiple automated market maker (AMM) curves.
-	SPLTokenSwapProgramID = MustPublicKeyFromBase58("SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8")
-	SPLTokenSwapFeeOwner  = MustPublicKeyFromBase58("HfoTxFR1Tm6kGmWgYWD6J7YHVy1UwqSULUGVLXkJqaKN")
+	TokenSwapProgramID = MustPublicKeyFromBase58("SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8")
+	TokenSwapFeeOwner  = MustPublicKeyFromBase58("HfoTxFR1Tm6kGmWgYWD6J7YHVy1UwqSULUGVLXkJqaKN")
 
 	// A lending protocol for the Token program on the Solana blockchain inspired by Aave and Compound.
-	SPLTokenLendingProgramID = MustPublicKeyFromBase58("LendZqTs8gn5CTSJU1jWKhKuVpjJGom45nnwPb2AMTi")
+	TokenLendingProgramID = MustPublicKeyFromBase58("LendZqTs8gn5CTSJU1jWKhKuVpjJGom45nnwPb2AMTi")
 
 	// This program defines the convention and provides the mechanism for mapping
 	// the user's wallet address to the associated token accounts they hold.
@@ -49,5 +49,14 @@ var (
 	// to the transaction log, so that anyone can easily observe memos
 	// and know they were approved by zero or more addresses
 	// by inspecting the transaction log from a trusted provider.
-	SPLMemoProgramID = MustPublicKeyFromBase58("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")
+	MemoProgramID = MustPublicKeyFromBase58("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")
+)
+
+var (
+	// The Mint for native SOL Token accounts
+	SolMint = MustPublicKeyFromBase58("So11111111111111111111111111111111111111112")
+)
+
+var (
+	TokenMetadataProgramID = MustPublicKeyFromBase58("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
 )

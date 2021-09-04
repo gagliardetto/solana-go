@@ -18,15 +18,25 @@ import (
 	"context"
 	"fmt"
 
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go/rpc"
 )
 
-//go:generate rice embed-go
+const MINT_SIZE = 82
+
+func (mint *Mint) Decode(data []byte) error {
+	mint = new(Mint)
+	dec := bin.NewBinDecoder(data)
+	if err := dec.Decode(&mint); err != nil {
+		return fmt.Errorf("unable to decode mint: %w", err)
+	}
+	return nil
+}
 
 func FetchMints(ctx context.Context, rpcCli *rpc.Client) (out []*Mint, err error) {
 	resp, err := rpcCli.GetProgramAccountsWithOpts(
 		ctx,
-		TOKEN_PROGRAM_ID,
+		ProgramID,
 		&rpc.GetProgramAccountsOpts{
 			Filters: []rpc.RPCFilter{
 				{
@@ -45,7 +55,7 @@ func FetchMints(ctx context.Context, rpcCli *rpc.Client) (out []*Mint, err error
 	for _, keyedAcct := range resp {
 		acct := keyedAcct.Account
 
-		m := &Mint{}
+		m := new(Mint)
 		if err := m.Decode(acct.Data.GetBinary()); err != nil {
 			return nil, fmt.Errorf("unable to decode mint %q: %w", acct.Owner.String(), err)
 		}

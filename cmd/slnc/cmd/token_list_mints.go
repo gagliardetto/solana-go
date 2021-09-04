@@ -36,16 +36,15 @@ var tokenListMintsCmd = &cobra.Command{
 		out := []string{"Mint | Decimals | Supply | Token Authority | Freeze Authority"}
 		for _, m := range mints {
 			line := []string{
-				fmt.Sprintf("%d", m.MintAuthorityOption),
 				fmt.Sprintf("%d", m.Supply),
 				fmt.Sprintf("%d", m.Decimals),
 			}
-			if m.MintAuthorityOption != 0 {
+			if m.MintAuthority != nil {
 				line = append(line, fmt.Sprintf("%s", m.MintAuthority))
 			} else {
 				line = append(line, "No mint authority")
 			}
-			if m.FreezeAuthorityOption != 0 {
+			if m.FreezeAuthority != nil {
 				line = append(line, fmt.Sprintf("%s", m.FreezeAuthority))
 			} else {
 				line = append(line, "No freeze authority")

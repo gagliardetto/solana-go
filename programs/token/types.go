@@ -1,66 +1,51 @@
 package token
 
 import (
-	"fmt"
-
-	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
+	ag_binary "github.com/gagliardetto/binary"
+	ag_solanago "github.com/gagliardetto/solana-go"
 )
 
-// Token contract interface
+type AuthorityType ag_binary.BorshEnum
 
-type Token struct {
-	ProgramID string
-	Mint      string
-}
+const (
+	// Authority to mint new tokens
+	AuthorityMintTokens AuthorityType = iota
 
-func New(programID string, mint string) *Token {
-	return &Token{ProgramID: programID, Mint: mint}
-}
+	// Authority to freeze any account associated with the Mint
+	AuthorityFreezeAccount
 
-type Account struct {
-	Mint            solana.PublicKey
-	Owner           solana.PublicKey
-	Amount          bin.Uint64
-	IsDelegateSet   uint32
-	Delegate        solana.PublicKey
-	IsInitialized   bool
-	IsNative        bool
-	Padding         [2]byte `json:"-"`
-	DelegatedAmount bin.Uint64
-}
+	// Owner of a given token account
+	AuthorityAccountOwner
+
+	// Authority to close a token account
+	AuthorityCloseAccount
+)
+
+type AccountState ag_binary.BorshEnum
+
+const (
+	// Account is not yet initialized
+	Uninitialized AccountState = iota
+
+	// Account is initialized; the account owner and/or delegate may perform permitted operations
+	// on this account
+	Initialized
+
+	// Account has been frozen by the mint freeze authority. Neither the account owner nor
+	// the delegate are able to perform operations on this account.
+	Frozen
+)
 
 type Multisig struct {
-	M             byte
-	N             byte
+	// Number of signers required
+	M uint8
+
+	// Number of valid signers
+	N uint8
+
+	// Is `true` if this structure has been initialized
 	IsInitialized bool
-	Signers       [11]solana.PublicKey
-}
 
-const MINT_SIZE = 82
-
-type Mint struct {
-	MintAuthorityOption   uint32
-	MintAuthority         solana.PublicKey
-	Supply                bin.Uint64
-	Decimals              uint8
-	IsInitialized         bool
-	FreezeAuthorityOption uint32
-	FreezeAuthority       solana.PublicKey
-}
-
-func (m *Mint) Decode(in []byte) error {
-	decoder := bin.NewBinDecoder(in)
-	err := decoder.Decode(&m)
-	if err != nil {
-		return fmt.Errorf("unpack: %w", err)
-	}
-	return nil
-}
-
-type MintMeta struct {
-	TokenSymbol string
-	MintAddress solana.PublicKey
-	TokenName   string
-	IconURL     string `json:"icon"`
+	// Signer public keys
+	Signers [11]ag_solanago.PublicKey
 }

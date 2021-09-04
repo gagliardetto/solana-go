@@ -140,3 +140,64 @@ func TestMeta(t *testing.T) {
 	require.True(t, meta.IsSigner)
 	require.True(t, meta.IsWritable)
 }
+
+func TestSplitFrom(t *testing.T) {
+	slice := make(AccountMetaSlice, 0)
+	slice = append(slice, Meta(BPFLoaderDeprecatedProgramID))
+	slice = append(slice, Meta(TokenProgramID))
+	slice = append(slice, Meta(TokenLendingProgramID))
+	slice = append(slice, Meta(SPLAssociatedTokenAccountProgramID))
+	slice = append(slice, Meta(MemoProgramID))
+
+	require.Len(t, slice, 5)
+
+	{
+		part1, part2 := slice.SplitFrom(0)
+		require.Len(t, part1, 0)
+		require.Len(t, part2, 5)
+	}
+	{
+		part1, part2 := slice.SplitFrom(1)
+		require.Len(t, part1, 1)
+		require.Len(t, part2, 4)
+		require.Equal(t, Meta(BPFLoaderDeprecatedProgramID), part1[0])
+		require.Equal(t, Meta(TokenProgramID), part2[0])
+		require.Equal(t, Meta(TokenLendingProgramID), part2[1])
+		require.Equal(t, Meta(SPLAssociatedTokenAccountProgramID), part2[2])
+		require.Equal(t, Meta(MemoProgramID), part2[3])
+	}
+	{
+		part1, part2 := slice.SplitFrom(2)
+		require.Len(t, part1, 2)
+		require.Len(t, part2, 3)
+	}
+	{
+		part1, part2 := slice.SplitFrom(3)
+		require.Len(t, part1, 3)
+		require.Len(t, part2, 2)
+	}
+	{
+		part1, part2 := slice.SplitFrom(4)
+		require.Len(t, part1, 4)
+		require.Len(t, part2, 1)
+	}
+	{
+		part1, part2 := slice.SplitFrom(5)
+		require.Len(t, part1, 5)
+		require.Len(t, part2, 0)
+	}
+	{
+		part1, part2 := slice.SplitFrom(6)
+		require.Len(t, part1, 5)
+		require.Len(t, part2, 0)
+	}
+	{
+		part1, part2 := slice.SplitFrom(10000)
+		require.Len(t, part1, 5)
+		require.Len(t, part2, 0)
+	}
+	require.Panics(t,
+		func() {
+			slice.SplitFrom(-1)
+		})
+}
