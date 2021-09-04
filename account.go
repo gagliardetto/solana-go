@@ -110,3 +110,39 @@ func (slice AccountMetaSlice) GetSigners() []*AccountMeta {
 	}
 	return signers
 }
+
+func (slice AccountMetaSlice) Len() int {
+	return len(slice)
+}
+
+func (slice AccountMetaSlice) SplitFrom(index int) (AccountMetaSlice, AccountMetaSlice) {
+	if index < 0 {
+		panic("negative index")
+	}
+	if index == 0 {
+		return AccountMetaSlice{}, slice
+	}
+	if index > len(slice)-1 {
+		return slice, AccountMetaSlice{}
+	}
+
+	firstLen, secondLen := calcSplitAtLengths(len(slice), index)
+
+	first := make(AccountMetaSlice, firstLen)
+	copy(first, slice[:index])
+
+	second := make(AccountMetaSlice, secondLen)
+	copy(second, slice[index:])
+
+	return first, second
+}
+
+func calcSplitAtLengths(total int, index int) (int, int) {
+	if index == 0 {
+		return 0, total
+	}
+	if index > total-1 {
+		return total, 0
+	}
+	return index, total - index
+}
