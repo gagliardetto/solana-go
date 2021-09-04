@@ -30,13 +30,26 @@ type Transfer struct {
 	//
 	// [3...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Accounts ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Signers  ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+}
+
+func (obj *Transfer) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	obj.Accounts, obj.Signers = ag_solanago.AccountMetaSlice(accounts).SplitFrom(3)
+	return nil
+}
+
+func (slice Transfer) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	accounts = append(accounts, slice.Accounts...)
+	accounts = append(accounts, slice.Signers...)
+	return
 }
 
 // NewTransferInstructionBuilder creates a new `Transfer` instruction builder.
 func NewTransferInstructionBuilder() *Transfer {
 	nd := &Transfer{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
+		Accounts: make(ag_solanago.AccountMetaSlice, 3),
+		Signers:  make(ag_solanago.AccountMetaSlice, 0),
 	}
 	return nd
 }
@@ -51,43 +64,38 @@ func (inst *Transfer) SetAmount(amount uint64) *Transfer {
 // SetSourceAccount sets the "source" account.
 // The source account.
 func (inst *Transfer) SetSourceAccount(source ag_solanago.PublicKey) *Transfer {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(source).WRITE()
+	inst.Accounts[0] = ag_solanago.Meta(source).WRITE()
 	return inst
 }
 
 // GetSourceAccount gets the "source" account.
 // The source account.
 func (inst *Transfer) GetSourceAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[0]
+	return inst.Accounts[0]
 }
 
 // SetDestinationAccount sets the "destination" account.
 // The destination account.
 func (inst *Transfer) SetDestinationAccount(destination ag_solanago.PublicKey) *Transfer {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(destination).WRITE()
+	inst.Accounts[1] = ag_solanago.Meta(destination).WRITE()
 	return inst
 }
 
 // GetDestinationAccount gets the "destination" account.
 // The destination account.
 func (inst *Transfer) GetDestinationAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[1]
+	return inst.Accounts[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The source account owner/delegate.
 func (inst *Transfer) SetOwnerAccount(owner ag_solanago.PublicKey, multisigSigners ...ag_solanago.PublicKey) *Transfer {
-	if len(multisigSigners) > 0 {
-		// Set owner;
-		inst.AccountMetaSlice[2] = ag_solanago.Meta(owner)
-		// Reset signers:
-		inst.AccountMetaSlice = inst.AccountMetaSlice[:3]
-		// Add signers:
-		for _, signer := range multisigSigners {
-			inst.AccountMetaSlice = append(inst.AccountMetaSlice, ag_solanago.Meta(signer).SIGNER())
-		}
-	} else {
-		inst.AccountMetaSlice[2] = ag_solanago.Meta(owner).SIGNER()
+	inst.Accounts[2] = ag_solanago.Meta(owner)
+	if len(multisigSigners) == 0 {
+		inst.Accounts[2].SIGNER()
+	}
+	for _, signer := range multisigSigners {
+		inst.Signers = append(inst.Signers, ag_solanago.Meta(signer).SIGNER())
 	}
 	return inst
 }
@@ -95,16 +103,7 @@ func (inst *Transfer) SetOwnerAccount(owner ag_solanago.PublicKey, multisigSigne
 // GetOwnerAccount gets the "owner" account.
 // The source account owner/delegate.
 func (inst *Transfer) GetOwnerAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[2]
-}
-
-// GetSigners gets the "signers" accounts.
-// M signer accounts.
-func (inst *Transfer) GetSigners() []*ag_solanago.AccountMeta {
-	if len(inst.AccountMetaSlice) == 3 {
-		return nil
-	}
-	return inst.AccountMetaSlice[3:]
+	return inst.Accounts[2]
 }
 
 func (inst Transfer) Build() *Instruction {
@@ -134,17 +133,20 @@ func (inst *Transfer) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMetaSlice[0] == nil {
+		if inst.Accounts[0] == nil {
 			return fmt.Errorf("accounts.Source is not set")
 		}
-		if inst.AccountMetaSlice[1] == nil {
+		if inst.Accounts[1] == nil {
 			return fmt.Errorf("accounts.Destination is not set")
 		}
-		if inst.AccountMetaSlice[2] == nil {
+		if inst.Accounts[2] == nil {
 			return fmt.Errorf("accounts.Owner is not set")
 		}
-		if !inst.AccountMetaSlice[2].IsSigner && len(inst.AccountMetaSlice) == 3 {
+		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
+		}
+		if len(inst.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
 		}
 	}
 	return nil
@@ -165,11 +167,12 @@ func (inst *Transfer) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("source", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("destination", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice[2]))
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.AccountMetaSlice[3:])))
-						for i, v := range inst.AccountMetaSlice[3:] {
+						accountsBranch.Child(ag_format.Meta("source", inst.Accounts[0]))
+						accountsBranch.Child(ag_format.Meta("destination", inst.Accounts[1]))
+						accountsBranch.Child(ag_format.Meta("owner", inst.Accounts[2]))
+
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for i, v := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("signers[%v]", i), v))
 						}
 					})
@@ -202,10 +205,10 @@ func NewTransferInstruction(
 	source ag_solanago.PublicKey,
 	destination ag_solanago.PublicKey,
 	owner ag_solanago.PublicKey,
-	signers []ag_solanago.PublicKey) *Transfer {
+	multisigSigners []ag_solanago.PublicKey) *Transfer {
 	return NewTransferInstructionBuilder().
 		SetAmount(amount).
 		SetSourceAccount(source).
 		SetDestinationAccount(destination).
-		SetOwnerAccount(owner, signers...)
+		SetOwnerAccount(owner, multisigSigners...)
 }
