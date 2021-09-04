@@ -144,10 +144,10 @@ func TestMeta(t *testing.T) {
 func TestSplitFrom(t *testing.T) {
 	slice := make(AccountMetaSlice, 0)
 	slice = append(slice, Meta(BPFLoaderDeprecatedProgramID))
-	slice = append(slice, Meta(SPLTokenProgramID))
-	slice = append(slice, Meta(SPLTokenLendingProgramID))
+	slice = append(slice, Meta(TokenProgramID))
+	slice = append(slice, Meta(TokenLendingProgramID))
 	slice = append(slice, Meta(SPLAssociatedTokenAccountProgramID))
-	slice = append(slice, Meta(SPLMemoProgramID))
+	slice = append(slice, Meta(MemoProgramID))
 
 	require.Len(t, slice, 5)
 
@@ -161,10 +161,10 @@ func TestSplitFrom(t *testing.T) {
 		require.Len(t, part1, 1)
 		require.Len(t, part2, 4)
 		require.Equal(t, Meta(BPFLoaderDeprecatedProgramID), part1[0])
-		require.Equal(t, Meta(SPLTokenProgramID), part2[0])
-		require.Equal(t, Meta(SPLTokenLendingProgramID), part2[1])
+		require.Equal(t, Meta(TokenProgramID), part2[0])
+		require.Equal(t, Meta(TokenLendingProgramID), part2[1])
 		require.Equal(t, Meta(SPLAssociatedTokenAccountProgramID), part2[2])
-		require.Equal(t, Meta(SPLMemoProgramID), part2[3])
+		require.Equal(t, Meta(MemoProgramID), part2[3])
 	}
 	{
 		part1, part2 := slice.SplitFrom(2)

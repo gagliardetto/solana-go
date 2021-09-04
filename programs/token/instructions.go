@@ -17,7 +17,7 @@ import (
 
 const MAX_SIGNERS = 11
 
-var ProgramID ag_solanago.PublicKey = ag_solanago.SPLTokenProgramID
+var ProgramID ag_solanago.PublicKey = ag_solanago.TokenProgramID
 
 func SetProgramID(pubkey ag_solanago.PublicKey) {
 	ProgramID = pubkey
