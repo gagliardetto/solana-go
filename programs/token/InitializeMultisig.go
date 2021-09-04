@@ -198,7 +198,8 @@ func NewInitializeMultisigInstruction(
 	// Accounts:
 	account ag_solanago.PublicKey,
 	SysVarRentPubkey ag_solanago.PublicKey,
-	signers []ag_solanago.PublicKey) *InitializeMultisig {
+	signers []ag_solanago.PublicKey,
+) *InitializeMultisig {
 	return NewInitializeMultisigInstructionBuilder().
 		SetM(m).
 		SetAccount(account).

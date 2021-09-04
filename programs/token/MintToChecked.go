@@ -3,6 +3,8 @@ package token
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
+
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -29,13 +31,29 @@ type MintToChecked struct {
 	//
 	// [2] = [] authority
 	// ··········· The mint's minting authority.
-	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	//
+	// [3...] = [SIGNER] signers
+	// ··········· M signer accounts.
+	Accounts ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Signers  ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+}
+
+func (obj *MintToChecked) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	obj.Accounts, obj.Signers = ag_solanago.AccountMetaSlice(accounts).SplitFrom(3)
+	return nil
+}
+
+func (slice MintToChecked) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	accounts = append(accounts, slice.Accounts...)
+	accounts = append(accounts, slice.Signers...)
+	return
 }
 
 // NewMintToCheckedInstructionBuilder creates a new `MintToChecked` instruction builder.
 func NewMintToCheckedInstructionBuilder() *MintToChecked {
 	nd := &MintToChecked{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
+		Accounts: make(ag_solanago.AccountMetaSlice, 3),
+		Signers:  make(ag_solanago.AccountMetaSlice, 0),
 	}
 	return nd
 }
@@ -57,40 +75,46 @@ func (inst *MintToChecked) SetDecimals(decimals uint8) *MintToChecked {
 // SetMintAccount sets the "mint" account.
 // The mint.
 func (inst *MintToChecked) SetMintAccount(mint ag_solanago.PublicKey) *MintToChecked {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(mint).WRITE()
+	inst.Accounts[0] = ag_solanago.Meta(mint).WRITE()
 	return inst
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint.
 func (inst *MintToChecked) GetMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[0]
+	return inst.Accounts[0]
 }
 
 // SetDestinationAccount sets the "destination" account.
 // The account to mint tokens to.
 func (inst *MintToChecked) SetDestinationAccount(destination ag_solanago.PublicKey) *MintToChecked {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(destination).WRITE()
+	inst.Accounts[1] = ag_solanago.Meta(destination).WRITE()
 	return inst
 }
 
 // GetDestinationAccount gets the "destination" account.
 // The account to mint tokens to.
 func (inst *MintToChecked) GetDestinationAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[1]
+	return inst.Accounts[1]
 }
 
 // SetAuthorityAccount sets the "authority" account.
 // The mint's minting authority.
-func (inst *MintToChecked) SetAuthorityAccount(authority ag_solanago.PublicKey) *MintToChecked {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(authority)
+func (inst *MintToChecked) SetAuthorityAccount(authority ag_solanago.PublicKey, multisigSigners ...ag_solanago.PublicKey) *MintToChecked {
+	inst.Accounts[2] = ag_solanago.Meta(authority)
+	if len(multisigSigners) == 0 {
+		inst.Accounts[2].SIGNER()
+	}
+	for _, signer := range multisigSigners {
+		inst.Signers = append(inst.Signers, ag_solanago.Meta(signer).SIGNER())
+	}
 	return inst
 }
 
 // GetAuthorityAccount gets the "authority" account.
 // The mint's minting authority.
 func (inst *MintToChecked) GetAuthorityAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[2]
+	return inst.Accounts[2]
 }
 
 func (inst MintToChecked) Build() *Instruction {
@@ -123,14 +147,20 @@ func (inst *MintToChecked) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMetaSlice[0] == nil {
+		if inst.Accounts[0] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.AccountMetaSlice[1] == nil {
+		if inst.Accounts[1] == nil {
 			return errors.New("accounts.Destination is not set")
 		}
-		if inst.AccountMetaSlice[2] == nil {
+		if inst.Accounts[2] == nil {
 			return errors.New("accounts.Authority is not set")
+		}
+		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
+			return fmt.Errorf("accounts.Signers is not set")
+		}
+		if len(inst.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
 		}
 	}
 	return nil
@@ -152,9 +182,14 @@ func (inst *MintToChecked) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("mint", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("destination", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("authority", inst.AccountMetaSlice[2]))
+						accountsBranch.Child(ag_format.Meta("mint", inst.Accounts[0]))
+						accountsBranch.Child(ag_format.Meta("destination", inst.Accounts[1]))
+						accountsBranch.Child(ag_format.Meta("authority", inst.Accounts[2]))
+
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for i, v := range inst.Signers {
+							signersBranch.Child(ag_format.Meta(fmt.Sprintf("signers[%v]", i), v))
+						}
 					})
 				})
 		})
@@ -195,11 +230,13 @@ func NewMintToCheckedInstruction(
 	// Accounts:
 	mint ag_solanago.PublicKey,
 	destination ag_solanago.PublicKey,
-	authority ag_solanago.PublicKey) *MintToChecked {
+	authority ag_solanago.PublicKey,
+	multisigSigners []ag_solanago.PublicKey,
+) *MintToChecked {
 	return NewMintToCheckedInstructionBuilder().
 		SetAmount(amount).
 		SetDecimals(decimals).
 		SetMintAccount(mint).
 		SetDestinationAccount(destination).
-		SetAuthorityAccount(authority)
+		SetAuthorityAccount(authority, multisigSigners...)
 }

@@ -2,10 +2,11 @@ package token
 
 import (
 	"bytes"
-	ag_gofuzz "github.com/gagliardetto/gofuzz"
-	ag_require "github.com/stretchr/testify/require"
 	"strconv"
 	"testing"
+
+	ag_gofuzz "github.com/gagliardetto/gofuzz"
+	ag_require "github.com/stretchr/testify/require"
 )
 
 func TestEncodeDecode_SetAuthority(t *testing.T) {
@@ -15,14 +16,16 @@ func TestEncodeDecode_SetAuthority(t *testing.T) {
 			{
 				params := new(SetAuthority)
 				fu.Fuzz(params)
-				params.AccountMetaSlice = nil
+				params.Accounts = nil
+				params.Signers = nil
 				buf := new(bytes.Buffer)
 				err := encodeT(*params, buf)
 				ag_require.NoError(t, err)
 				//
 				got := new(SetAuthority)
 				err = decodeT(got, buf.Bytes())
-				got.AccountMetaSlice = nil
+				params.Accounts = nil
+				params.Signers = nil
 				ag_require.NoError(t, err)
 				ag_require.Equal(t, params, got)
 			}

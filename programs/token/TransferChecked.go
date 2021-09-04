@@ -3,6 +3,8 @@ package token
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
+
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -35,13 +37,29 @@ type TransferChecked struct {
 	//
 	// [3] = [] owner
 	// ··········· The source account's owner/delegate.
-	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	//
+	// [4...] = [SIGNER] signers
+	// ··········· M signer accounts.
+	Accounts ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Signers  ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+}
+
+func (obj *TransferChecked) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	obj.Accounts, obj.Signers = ag_solanago.AccountMetaSlice(accounts).SplitFrom(4)
+	return nil
+}
+
+func (slice TransferChecked) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	accounts = append(accounts, slice.Accounts...)
+	accounts = append(accounts, slice.Signers...)
+	return
 }
 
 // NewTransferCheckedInstructionBuilder creates a new `TransferChecked` instruction builder.
 func NewTransferCheckedInstructionBuilder() *TransferChecked {
 	nd := &TransferChecked{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 4),
+		Accounts: make(ag_solanago.AccountMetaSlice, 4),
+		Signers:  make(ag_solanago.AccountMetaSlice, 0),
 	}
 	return nd
 }
@@ -63,53 +81,59 @@ func (inst *TransferChecked) SetDecimals(decimals uint8) *TransferChecked {
 // SetSourceAccount sets the "source" account.
 // The source account.
 func (inst *TransferChecked) SetSourceAccount(source ag_solanago.PublicKey) *TransferChecked {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(source).WRITE()
+	inst.Accounts[0] = ag_solanago.Meta(source).WRITE()
 	return inst
 }
 
 // GetSourceAccount gets the "source" account.
 // The source account.
 func (inst *TransferChecked) GetSourceAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[0]
+	return inst.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
 func (inst *TransferChecked) SetMintAccount(mint ag_solanago.PublicKey) *TransferChecked {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint)
+	inst.Accounts[1] = ag_solanago.Meta(mint)
 	return inst
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
 func (inst *TransferChecked) GetMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[1]
+	return inst.Accounts[1]
 }
 
 // SetDestinationAccount sets the "destination" account.
 // The destination account.
 func (inst *TransferChecked) SetDestinationAccount(destination ag_solanago.PublicKey) *TransferChecked {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(destination).WRITE()
+	inst.Accounts[2] = ag_solanago.Meta(destination).WRITE()
 	return inst
 }
 
 // GetDestinationAccount gets the "destination" account.
 // The destination account.
 func (inst *TransferChecked) GetDestinationAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[2]
+	return inst.Accounts[2]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The source account's owner/delegate.
-func (inst *TransferChecked) SetOwnerAccount(owner ag_solanago.PublicKey) *TransferChecked {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(owner)
+func (inst *TransferChecked) SetOwnerAccount(owner ag_solanago.PublicKey, multisigSigners ...ag_solanago.PublicKey) *TransferChecked {
+	inst.Accounts[3] = ag_solanago.Meta(owner)
+	if len(multisigSigners) == 0 {
+		inst.Accounts[3].SIGNER()
+	}
+	for _, signer := range multisigSigners {
+		inst.Signers = append(inst.Signers, ag_solanago.Meta(signer).SIGNER())
+	}
 	return inst
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The source account's owner/delegate.
 func (inst *TransferChecked) GetOwnerAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[3]
+	return inst.Accounts[3]
 }
 
 func (inst TransferChecked) Build() *Instruction {
@@ -142,17 +166,23 @@ func (inst *TransferChecked) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMetaSlice[0] == nil {
+		if inst.Accounts[0] == nil {
 			return errors.New("accounts.Source is not set")
 		}
-		if inst.AccountMetaSlice[1] == nil {
+		if inst.Accounts[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.AccountMetaSlice[2] == nil {
+		if inst.Accounts[2] == nil {
 			return errors.New("accounts.Destination is not set")
 		}
-		if inst.AccountMetaSlice[3] == nil {
+		if inst.Accounts[3] == nil {
 			return errors.New("accounts.Owner is not set")
+		}
+		if !inst.Accounts[3].IsSigner && len(inst.Signers) == 0 {
+			return fmt.Errorf("accounts.Signers is not set")
+		}
+		if len(inst.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
 		}
 	}
 	return nil
@@ -174,10 +204,15 @@ func (inst *TransferChecked) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("source", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("mint", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("destination", inst.AccountMetaSlice[2]))
-						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice[3]))
+						accountsBranch.Child(ag_format.Meta("source", inst.Accounts[0]))
+						accountsBranch.Child(ag_format.Meta("mint", inst.Accounts[1]))
+						accountsBranch.Child(ag_format.Meta("destination", inst.Accounts[2]))
+						accountsBranch.Child(ag_format.Meta("owner", inst.Accounts[3]))
+
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for i, v := range inst.Signers {
+							signersBranch.Child(ag_format.Meta(fmt.Sprintf("signers[%v]", i), v))
+						}
 					})
 				})
 		})
@@ -219,12 +254,14 @@ func NewTransferCheckedInstruction(
 	source ag_solanago.PublicKey,
 	mint ag_solanago.PublicKey,
 	destination ag_solanago.PublicKey,
-	owner ag_solanago.PublicKey) *TransferChecked {
+	owner ag_solanago.PublicKey,
+	multisigSigners []ag_solanago.PublicKey,
+) *TransferChecked {
 	return NewTransferCheckedInstructionBuilder().
 		SetAmount(amount).
 		SetDecimals(decimals).
 		SetSourceAccount(source).
 		SetMintAccount(mint).
 		SetDestinationAccount(destination).
-		SetOwnerAccount(owner)
+		SetOwnerAccount(owner, multisigSigners...)
 }

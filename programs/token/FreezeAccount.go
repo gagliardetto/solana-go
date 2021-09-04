@@ -3,6 +3,8 @@ package token
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
+
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -20,13 +22,29 @@ type FreezeAccount struct {
 	//
 	// [2] = [] authority
 	// ··········· The mint freeze authority.
-	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	//
+	// [3...] = [SIGNER] signers
+	// ··········· M signer accounts.
+	Accounts ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Signers  ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+}
+
+func (obj *FreezeAccount) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	obj.Accounts, obj.Signers = ag_solanago.AccountMetaSlice(accounts).SplitFrom(3)
+	return nil
+}
+
+func (slice FreezeAccount) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	accounts = append(accounts, slice.Accounts...)
+	accounts = append(accounts, slice.Signers...)
+	return
 }
 
 // NewFreezeAccountInstructionBuilder creates a new `FreezeAccount` instruction builder.
 func NewFreezeAccountInstructionBuilder() *FreezeAccount {
 	nd := &FreezeAccount{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
+		Accounts: make(ag_solanago.AccountMetaSlice, 3),
+		Signers:  make(ag_solanago.AccountMetaSlice, 0),
 	}
 	return nd
 }
@@ -34,40 +52,46 @@ func NewFreezeAccountInstructionBuilder() *FreezeAccount {
 // SetAccount sets the "account" account.
 // The account to freeze.
 func (inst *FreezeAccount) SetAccount(account ag_solanago.PublicKey) *FreezeAccount {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(account).WRITE()
+	inst.Accounts[0] = ag_solanago.Meta(account).WRITE()
 	return inst
 }
 
 // GetAccount gets the "account" account.
 // The account to freeze.
 func (inst *FreezeAccount) GetAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[0]
+	return inst.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
 func (inst *FreezeAccount) SetMintAccount(mint ag_solanago.PublicKey) *FreezeAccount {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint)
+	inst.Accounts[1] = ag_solanago.Meta(mint)
 	return inst
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
 func (inst *FreezeAccount) GetMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[1]
+	return inst.Accounts[1]
 }
 
 // SetAuthorityAccount sets the "authority" account.
 // The mint freeze authority.
-func (inst *FreezeAccount) SetAuthorityAccount(authority ag_solanago.PublicKey) *FreezeAccount {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(authority)
+func (inst *FreezeAccount) SetAuthorityAccount(authority ag_solanago.PublicKey, multisigSigners ...ag_solanago.PublicKey) *FreezeAccount {
+	inst.Accounts[2] = ag_solanago.Meta(authority)
+	if len(multisigSigners) == 0 {
+		inst.Accounts[2].SIGNER()
+	}
+	for _, signer := range multisigSigners {
+		inst.Signers = append(inst.Signers, ag_solanago.Meta(signer).SIGNER())
+	}
 	return inst
 }
 
 // GetAuthorityAccount gets the "authority" account.
 // The mint freeze authority.
 func (inst *FreezeAccount) GetAuthorityAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[2]
+	return inst.Accounts[2]
 }
 
 func (inst FreezeAccount) Build() *Instruction {
@@ -90,14 +114,20 @@ func (inst FreezeAccount) ValidateAndBuild() (*Instruction, error) {
 func (inst *FreezeAccount) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMetaSlice[0] == nil {
+		if inst.Accounts[0] == nil {
 			return errors.New("accounts.Account is not set")
 		}
-		if inst.AccountMetaSlice[1] == nil {
+		if inst.Accounts[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.AccountMetaSlice[2] == nil {
+		if inst.Accounts[2] == nil {
 			return errors.New("accounts.Authority is not set")
+		}
+		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
+			return fmt.Errorf("accounts.Signers is not set")
+		}
+		if len(inst.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
 		}
 	}
 	return nil
@@ -116,9 +146,14 @@ func (inst *FreezeAccount) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("account", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("mint", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("authority", inst.AccountMetaSlice[2]))
+						accountsBranch.Child(ag_format.Meta("account", inst.Accounts[0]))
+						accountsBranch.Child(ag_format.Meta("mint", inst.Accounts[1]))
+						accountsBranch.Child(ag_format.Meta("authority", inst.Accounts[2]))
+
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for i, v := range inst.Signers {
+							signersBranch.Child(ag_format.Meta(fmt.Sprintf("signers[%v]", i), v))
+						}
 					})
 				})
 		})
@@ -136,9 +171,11 @@ func NewFreezeAccountInstruction(
 	// Accounts:
 	account ag_solanago.PublicKey,
 	mint ag_solanago.PublicKey,
-	authority ag_solanago.PublicKey) *FreezeAccount {
+	authority ag_solanago.PublicKey,
+	multisigSigners []ag_solanago.PublicKey,
+) *FreezeAccount {
 	return NewFreezeAccountInstructionBuilder().
 		SetAccount(account).
 		SetMintAccount(mint).
-		SetAuthorityAccount(authority)
+		SetAuthorityAccount(authority, multisigSigners...)
 }

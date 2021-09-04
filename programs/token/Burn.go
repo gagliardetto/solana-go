@@ -3,6 +3,8 @@ package token
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
+
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -23,13 +25,29 @@ type Burn struct {
 	//
 	// [2] = [] owner
 	// ··········· The account's owner/delegate.
-	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	//
+	// [3...] = [SIGNER] signers
+	// ··········· M signer accounts.
+	Accounts ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Signers  ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+}
+
+func (obj *Burn) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	obj.Accounts, obj.Signers = ag_solanago.AccountMetaSlice(accounts).SplitFrom(3)
+	return nil
+}
+
+func (slice Burn) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	accounts = append(accounts, slice.Accounts...)
+	accounts = append(accounts, slice.Signers...)
+	return
 }
 
 // NewBurnInstructionBuilder creates a new `Burn` instruction builder.
 func NewBurnInstructionBuilder() *Burn {
 	nd := &Burn{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
+		Accounts: make(ag_solanago.AccountMetaSlice, 3),
+		Signers:  make(ag_solanago.AccountMetaSlice, 0),
 	}
 	return nd
 }
@@ -44,40 +62,46 @@ func (inst *Burn) SetAmount(amount uint64) *Burn {
 // SetSourceAccount sets the "source" account.
 // The account to burn from.
 func (inst *Burn) SetSourceAccount(source ag_solanago.PublicKey) *Burn {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(source).WRITE()
+	inst.Accounts[0] = ag_solanago.Meta(source).WRITE()
 	return inst
 }
 
 // GetSourceAccount gets the "source" account.
 // The account to burn from.
 func (inst *Burn) GetSourceAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[0]
+	return inst.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
 func (inst *Burn) SetMintAccount(mint ag_solanago.PublicKey) *Burn {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint).WRITE()
+	inst.Accounts[1] = ag_solanago.Meta(mint).WRITE()
 	return inst
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
 func (inst *Burn) GetMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[1]
+	return inst.Accounts[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The account's owner/delegate.
-func (inst *Burn) SetOwnerAccount(owner ag_solanago.PublicKey) *Burn {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(owner)
+func (inst *Burn) SetOwnerAccount(owner ag_solanago.PublicKey, multisigSigners ...ag_solanago.PublicKey) *Burn {
+	inst.Accounts[2] = ag_solanago.Meta(owner)
+	if len(multisigSigners) == 0 {
+		inst.Accounts[2].SIGNER()
+	}
+	for _, signer := range multisigSigners {
+		inst.Signers = append(inst.Signers, ag_solanago.Meta(signer).SIGNER())
+	}
 	return inst
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The account's owner/delegate.
 func (inst *Burn) GetOwnerAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[2]
+	return inst.Accounts[2]
 }
 
 func (inst Burn) Build() *Instruction {
@@ -107,14 +131,20 @@ func (inst *Burn) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMetaSlice[0] == nil {
+		if inst.Accounts[0] == nil {
 			return errors.New("accounts.Source is not set")
 		}
-		if inst.AccountMetaSlice[1] == nil {
+		if inst.Accounts[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.AccountMetaSlice[2] == nil {
+		if inst.Accounts[2] == nil {
 			return errors.New("accounts.Owner is not set")
+		}
+		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
+			return fmt.Errorf("accounts.Signers is not set")
+		}
+		if len(inst.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
 		}
 	}
 	return nil
@@ -135,9 +165,14 @@ func (inst *Burn) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("source", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("mint", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice[2]))
+						accountsBranch.Child(ag_format.Meta("source", inst.Accounts[0]))
+						accountsBranch.Child(ag_format.Meta("mint", inst.Accounts[1]))
+						accountsBranch.Child(ag_format.Meta("owner", inst.Accounts[2]))
+
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for i, v := range inst.Signers {
+							signersBranch.Child(ag_format.Meta(fmt.Sprintf("signers[%v]", i), v))
+						}
 					})
 				})
 		})
@@ -167,10 +202,12 @@ func NewBurnInstruction(
 	// Accounts:
 	source ag_solanago.PublicKey,
 	mint ag_solanago.PublicKey,
-	owner ag_solanago.PublicKey) *Burn {
+	owner ag_solanago.PublicKey,
+	multisigSigners []ag_solanago.PublicKey,
+) *Burn {
 	return NewBurnInstructionBuilder().
 		SetAmount(amount).
 		SetSourceAccount(source).
 		SetMintAccount(mint).
-		SetOwnerAccount(owner)
+		SetOwnerAccount(owner, multisigSigners...)
 }

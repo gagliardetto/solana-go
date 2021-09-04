@@ -3,6 +3,8 @@ package token
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
+
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -19,13 +21,26 @@ type InitializeMultisig2 struct {
 	//
 	// [1] = [SIGNER] signers
 	// ··········· The signer accounts, must equal to N where 1 <= N <= 11.
-	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Accounts ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Signers  ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+}
+
+func (obj *InitializeMultisig2) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	obj.Accounts, obj.Signers = ag_solanago.AccountMetaSlice(accounts).SplitFrom(1)
+	return nil
+}
+
+func (slice InitializeMultisig2) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	accounts = append(accounts, slice.Accounts...)
+	accounts = append(accounts, slice.Signers...)
+	return
 }
 
 // NewInitializeMultisig2InstructionBuilder creates a new `InitializeMultisig2` instruction builder.
 func NewInitializeMultisig2InstructionBuilder() *InitializeMultisig2 {
 	nd := &InitializeMultisig2{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
+		Accounts: make(ag_solanago.AccountMetaSlice, 1),
+		Signers:  make(ag_solanago.AccountMetaSlice, 0),
 	}
 	return nd
 }
@@ -40,27 +55,23 @@ func (inst *InitializeMultisig2) SetM(m uint8) *InitializeMultisig2 {
 // SetAccount sets the "account" account.
 // The multisignature account to initialize.
 func (inst *InitializeMultisig2) SetAccount(account ag_solanago.PublicKey) *InitializeMultisig2 {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(account).WRITE()
+	inst.Accounts[0] = ag_solanago.Meta(account).WRITE()
 	return inst
 }
 
 // GetAccount gets the "account" account.
 // The multisignature account to initialize.
 func (inst *InitializeMultisig2) GetAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[0]
+	return inst.Accounts[0]
 }
 
-// SetSignersAccount sets the "signers" account.
+// AddSigners adds the "signers" accounts.
 // The signer accounts, must equal to N where 1 <= N <= 11.
-func (inst *InitializeMultisig2) SetSignersAccount(signers ag_solanago.PublicKey) *InitializeMultisig2 {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(signers).SIGNER()
+func (inst *InitializeMultisig2) AddSigners(signers ...ag_solanago.PublicKey) *InitializeMultisig2 {
+	for _, signer := range signers {
+		inst.Signers = append(inst.Signers, ag_solanago.Meta(signer).SIGNER())
+	}
 	return inst
-}
-
-// GetSignersAccount gets the "signers" account.
-// The signer accounts, must equal to N where 1 <= N <= 11.
-func (inst *InitializeMultisig2) GetSignersAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[1]
 }
 
 func (inst InitializeMultisig2) Build() *Instruction {
@@ -90,11 +101,14 @@ func (inst *InitializeMultisig2) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMetaSlice[0] == nil {
+		if inst.Accounts[0] == nil {
 			return errors.New("accounts.Account is not set")
 		}
-		if inst.AccountMetaSlice[1] == nil {
-			return errors.New("accounts.Signers is not set")
+		if len(inst.Signers) == 0 {
+			return fmt.Errorf("accounts.Signers is not set")
+		}
+		if len(inst.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
 		}
 	}
 	return nil
@@ -115,8 +129,12 @@ func (inst *InitializeMultisig2) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("account", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("signers", inst.AccountMetaSlice[1]))
+						accountsBranch.Child(ag_format.Meta("account", inst.Accounts[0]))
+
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for i, v := range inst.Signers {
+							signersBranch.Child(ag_format.Meta(fmt.Sprintf("signers[%v]", i), v))
+						}
 					})
 				})
 		})
@@ -145,9 +163,10 @@ func NewInitializeMultisig2Instruction(
 	m uint8,
 	// Accounts:
 	account ag_solanago.PublicKey,
-	signers ag_solanago.PublicKey) *InitializeMultisig2 {
+	signers []ag_solanago.PublicKey,
+) *InitializeMultisig2 {
 	return NewInitializeMultisig2InstructionBuilder().
 		SetM(m).
 		SetAccount(account).
-		SetSignersAccount(signers)
+		AddSigners(signers...)
 }

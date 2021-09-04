@@ -3,6 +3,8 @@ package token
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
+
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -33,13 +35,29 @@ type ApproveChecked struct {
 	//
 	// [3] = [] owner
 	// ··········· The source account owner.
-	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	//
+	// [4...] = [SIGNER] signers
+	// ··········· M signer accounts.
+	Accounts ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Signers  ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+}
+
+func (obj *ApproveChecked) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	obj.Accounts, obj.Signers = ag_solanago.AccountMetaSlice(accounts).SplitFrom(4)
+	return nil
+}
+
+func (slice ApproveChecked) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	accounts = append(accounts, slice.Accounts...)
+	accounts = append(accounts, slice.Signers...)
+	return
 }
 
 // NewApproveCheckedInstructionBuilder creates a new `ApproveChecked` instruction builder.
 func NewApproveCheckedInstructionBuilder() *ApproveChecked {
 	nd := &ApproveChecked{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 4),
+		Accounts: make(ag_solanago.AccountMetaSlice, 4),
+		Signers:  make(ag_solanago.AccountMetaSlice, 0),
 	}
 	return nd
 }
@@ -61,53 +79,59 @@ func (inst *ApproveChecked) SetDecimals(decimals uint8) *ApproveChecked {
 // SetSourceAccount sets the "source" account.
 // The source account.
 func (inst *ApproveChecked) SetSourceAccount(source ag_solanago.PublicKey) *ApproveChecked {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(source).WRITE()
+	inst.Accounts[0] = ag_solanago.Meta(source).WRITE()
 	return inst
 }
 
 // GetSourceAccount gets the "source" account.
 // The source account.
 func (inst *ApproveChecked) GetSourceAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[0]
+	return inst.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
 func (inst *ApproveChecked) SetMintAccount(mint ag_solanago.PublicKey) *ApproveChecked {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint)
+	inst.Accounts[1] = ag_solanago.Meta(mint)
 	return inst
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
 func (inst *ApproveChecked) GetMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[1]
+	return inst.Accounts[1]
 }
 
 // SetDelegateAccount sets the "delegate" account.
 // The delegate.
 func (inst *ApproveChecked) SetDelegateAccount(delegate ag_solanago.PublicKey) *ApproveChecked {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(delegate)
+	inst.Accounts[2] = ag_solanago.Meta(delegate)
 	return inst
 }
 
 // GetDelegateAccount gets the "delegate" account.
 // The delegate.
 func (inst *ApproveChecked) GetDelegateAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[2]
+	return inst.Accounts[2]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The source account owner.
-func (inst *ApproveChecked) SetOwnerAccount(owner ag_solanago.PublicKey) *ApproveChecked {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(owner)
+func (inst *ApproveChecked) SetOwnerAccount(owner ag_solanago.PublicKey, multisigSigners ...ag_solanago.PublicKey) *ApproveChecked {
+	inst.Accounts[3] = ag_solanago.Meta(owner)
+	if len(multisigSigners) == 0 {
+		inst.Accounts[3].SIGNER()
+	}
+	for _, signer := range multisigSigners {
+		inst.Signers = append(inst.Signers, ag_solanago.Meta(signer).SIGNER())
+	}
 	return inst
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The source account owner.
 func (inst *ApproveChecked) GetOwnerAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[3]
+	return inst.Accounts[3]
 }
 
 func (inst ApproveChecked) Build() *Instruction {
@@ -140,17 +164,23 @@ func (inst *ApproveChecked) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMetaSlice[0] == nil {
+		if inst.Accounts[0] == nil {
 			return errors.New("accounts.Source is not set")
 		}
-		if inst.AccountMetaSlice[1] == nil {
+		if inst.Accounts[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.AccountMetaSlice[2] == nil {
+		if inst.Accounts[2] == nil {
 			return errors.New("accounts.Delegate is not set")
 		}
-		if inst.AccountMetaSlice[3] == nil {
+		if inst.Accounts[3] == nil {
 			return errors.New("accounts.Owner is not set")
+		}
+		if !inst.Accounts[3].IsSigner && len(inst.Signers) == 0 {
+			return fmt.Errorf("accounts.Signers is not set")
+		}
+		if len(inst.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
 		}
 	}
 	return nil
@@ -172,10 +202,15 @@ func (inst *ApproveChecked) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("source", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("mint", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("delegate", inst.AccountMetaSlice[2]))
-						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice[3]))
+						accountsBranch.Child(ag_format.Meta("source", inst.Accounts[0]))
+						accountsBranch.Child(ag_format.Meta("mint", inst.Accounts[1]))
+						accountsBranch.Child(ag_format.Meta("delegate", inst.Accounts[2]))
+						accountsBranch.Child(ag_format.Meta("owner", inst.Accounts[3]))
+
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for i, v := range inst.Signers {
+							signersBranch.Child(ag_format.Meta(fmt.Sprintf("signers[%v]", i), v))
+						}
 					})
 				})
 		})
@@ -217,12 +252,14 @@ func NewApproveCheckedInstruction(
 	source ag_solanago.PublicKey,
 	mint ag_solanago.PublicKey,
 	delegate ag_solanago.PublicKey,
-	owner ag_solanago.PublicKey) *ApproveChecked {
+	owner ag_solanago.PublicKey,
+	multisigSigners []ag_solanago.PublicKey,
+) *ApproveChecked {
 	return NewApproveCheckedInstructionBuilder().
 		SetAmount(amount).
 		SetDecimals(decimals).
 		SetSourceAccount(source).
 		SetMintAccount(mint).
 		SetDelegateAccount(delegate).
-		SetOwnerAccount(owner)
+		SetOwnerAccount(owner, multisigSigners...)
 }
