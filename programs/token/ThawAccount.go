@@ -2,8 +2,8 @@ package token
 
 import (
 	"encoding/binary"
-	"fmt"
-	ag_binary "github.com/dfuse-io/binary"
+	"errors"
+	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
@@ -20,16 +20,13 @@ type ThawAccount struct {
 	//
 	// [2] = [] authority
 	// ··········· The mint freeze authority.
-	//
-	// [3] = [SIGNER] signers
-	// ··········· M signer accounts.
 	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewThawAccountInstructionBuilder creates a new `ThawAccount` instruction builder.
 func NewThawAccountInstructionBuilder() *ThawAccount {
 	nd := &ThawAccount{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 4),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
 	}
 	return nd
 }
@@ -73,19 +70,6 @@ func (inst *ThawAccount) GetAuthorityAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
-// SetSignersAccount sets the "signers" account.
-// M signer accounts.
-func (inst *ThawAccount) SetSignersAccount(signers ag_solanago.PublicKey) *ThawAccount {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(signers).SIGNER()
-	return inst
-}
-
-// GetSignersAccount gets the "signers" account.
-// M signer accounts.
-func (inst *ThawAccount) GetSignersAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[3]
-}
-
 func (inst ThawAccount) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
@@ -107,16 +91,13 @@ func (inst *ThawAccount) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return fmt.Errorf("accounts.Account is not set")
+			return errors.New("accounts.Account is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return fmt.Errorf("accounts.Mint is not set")
+			return errors.New("accounts.Mint is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
-			return fmt.Errorf("accounts.Authority is not set")
-		}
-		if inst.AccountMetaSlice[3] == nil {
-			return fmt.Errorf("accounts.Signers is not set")
+			return errors.New("accounts.Authority is not set")
 		}
 	}
 	return nil
@@ -138,7 +119,6 @@ func (inst *ThawAccount) EncodeToTree(parent ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("account", inst.AccountMetaSlice[0]))
 						accountsBranch.Child(ag_format.Meta("mint", inst.AccountMetaSlice[1]))
 						accountsBranch.Child(ag_format.Meta("authority", inst.AccountMetaSlice[2]))
-						accountsBranch.Child(ag_format.Meta("signers", inst.AccountMetaSlice[3]))
 					})
 				})
 		})
@@ -156,11 +136,9 @@ func NewThawAccountInstruction(
 	// Accounts:
 	account ag_solanago.PublicKey,
 	mint ag_solanago.PublicKey,
-	authority ag_solanago.PublicKey,
-	signers ag_solanago.PublicKey) *ThawAccount {
+	authority ag_solanago.PublicKey) *ThawAccount {
 	return NewThawAccountInstructionBuilder().
 		SetAccount(account).
 		SetMintAccount(mint).
-		SetAuthorityAccount(authority).
-		SetSignersAccount(signers)
+		SetAuthorityAccount(authority)
 }

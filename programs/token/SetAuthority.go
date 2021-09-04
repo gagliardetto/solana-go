@@ -3,8 +3,7 @@ package token
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
-	ag_binary "github.com/dfuse-io/binary"
+	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
@@ -23,16 +22,13 @@ type SetAuthority struct {
 	//
 	// [1] = [] authority
 	// ··········· The current authority of the mint or account.
-	//
-	// [2] = [SIGNER] signers
-	// ··········· M signer accounts.
 	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewSetAuthorityInstructionBuilder creates a new `SetAuthority` instruction builder.
 func NewSetAuthorityInstructionBuilder() *SetAuthority {
 	nd := &SetAuthority{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
@@ -77,19 +73,6 @@ func (inst *SetAuthority) GetAuthorityAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
-// SetSignersAccount sets the "signers" account.
-// M signer accounts.
-func (inst *SetAuthority) SetSignersAccount(signers ag_solanago.PublicKey) *SetAuthority {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(signers).SIGNER()
-	return inst
-}
-
-// GetSignersAccount gets the "signers" account.
-// M signer accounts.
-func (inst *SetAuthority) GetSignersAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[2]
-}
-
 func (inst SetAuthority) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
@@ -118,13 +101,10 @@ func (inst *SetAuthority) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return fmt.Errorf("accounts.Subject is not set")
+			return errors.New("accounts.Subject is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return fmt.Errorf("accounts.Authority is not set")
-		}
-		if inst.AccountMetaSlice[2] == nil {
-			return fmt.Errorf("accounts.Signers is not set")
+			return errors.New("accounts.Authority is not set")
 		}
 	}
 	return nil
@@ -148,7 +128,6 @@ func (inst *SetAuthority) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("subject", inst.AccountMetaSlice[0]))
 						accountsBranch.Child(ag_format.Meta("authority", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("signers", inst.AccountMetaSlice[2]))
 					})
 				})
 		})
@@ -209,12 +188,10 @@ func NewSetAuthorityInstruction(
 	new_authority ag_solanago.PublicKey,
 	// Accounts:
 	subject ag_solanago.PublicKey,
-	authority ag_solanago.PublicKey,
-	signers ag_solanago.PublicKey) *SetAuthority {
+	authority ag_solanago.PublicKey) *SetAuthority {
 	return NewSetAuthorityInstructionBuilder().
 		SetAuthorityType(authority_type).
 		SetNewAuthority(new_authority).
 		SetSubjectAccount(subject).
-		SetAuthorityAccount(authority).
-		SetSignersAccount(signers)
+		SetAuthorityAccount(authority)
 }

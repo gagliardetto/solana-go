@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	ag_gofuzz "github.com/google/gofuzz"
+	ag_gofuzz "github.com/gagliardetto/gofuzz"
 	ag_require "github.com/stretchr/testify/require"
 )
 

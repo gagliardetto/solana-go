@@ -3,8 +3,7 @@ package token
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
-	ag_binary "github.com/dfuse-io/binary"
+	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
@@ -24,16 +23,13 @@ type Burn struct {
 	//
 	// [2] = [] owner
 	// ··········· The account's owner/delegate.
-	//
-	// [3] = [SIGNER] signers
-	// ··········· M signer accounts.
 	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewBurnInstructionBuilder creates a new `Burn` instruction builder.
 func NewBurnInstructionBuilder() *Burn {
 	nd := &Burn{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 4),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
 	}
 	return nd
 }
@@ -84,19 +80,6 @@ func (inst *Burn) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
-// SetSignersAccount sets the "signers" account.
-// M signer accounts.
-func (inst *Burn) SetSignersAccount(signers ag_solanago.PublicKey) *Burn {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(signers).SIGNER()
-	return inst
-}
-
-// GetSignersAccount gets the "signers" account.
-// M signer accounts.
-func (inst *Burn) GetSignersAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[3]
-}
-
 func (inst Burn) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
@@ -125,16 +108,13 @@ func (inst *Burn) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return fmt.Errorf("accounts.Source is not set")
+			return errors.New("accounts.Source is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return fmt.Errorf("accounts.Mint is not set")
+			return errors.New("accounts.Mint is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
-			return fmt.Errorf("accounts.Owner is not set")
-		}
-		if inst.AccountMetaSlice[3] == nil {
-			return fmt.Errorf("accounts.Signers is not set")
+			return errors.New("accounts.Owner is not set")
 		}
 	}
 	return nil
@@ -158,7 +138,6 @@ func (inst *Burn) EncodeToTree(parent ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("source", inst.AccountMetaSlice[0]))
 						accountsBranch.Child(ag_format.Meta("mint", inst.AccountMetaSlice[1]))
 						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice[2]))
-						accountsBranch.Child(ag_format.Meta("signers", inst.AccountMetaSlice[3]))
 					})
 				})
 		})
@@ -188,12 +167,10 @@ func NewBurnInstruction(
 	// Accounts:
 	source ag_solanago.PublicKey,
 	mint ag_solanago.PublicKey,
-	owner ag_solanago.PublicKey,
-	signers ag_solanago.PublicKey) *Burn {
+	owner ag_solanago.PublicKey) *Burn {
 	return NewBurnInstructionBuilder().
 		SetAmount(amount).
 		SetSourceAccount(source).
 		SetMintAccount(mint).
-		SetOwnerAccount(owner).
-		SetSignersAccount(signers)
+		SetOwnerAccount(owner)
 }

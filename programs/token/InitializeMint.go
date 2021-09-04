@@ -3,8 +3,7 @@ package token
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
-	ag_binary "github.com/dfuse-io/binary"
+	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
@@ -123,10 +122,10 @@ func (inst *InitializeMint) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return fmt.Errorf("accounts.Mint is not set")
+			return errors.New("accounts.Mint is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return fmt.Errorf("accounts.SysVarRentPubkey is not set")
+			return errors.New("accounts.SysVarRentPubkey is not set")
 		}
 	}
 	return nil

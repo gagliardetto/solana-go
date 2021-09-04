@@ -3,8 +3,7 @@ package token
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
-	ag_binary "github.com/dfuse-io/binary"
+	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
@@ -34,16 +33,13 @@ type ApproveChecked struct {
 	//
 	// [3] = [] owner
 	// ··········· The source account owner.
-	//
-	// [4] = [SIGNER] signers
-	// ··········· M signer accounts.
 	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewApproveCheckedInstructionBuilder creates a new `ApproveChecked` instruction builder.
 func NewApproveCheckedInstructionBuilder() *ApproveChecked {
 	nd := &ApproveChecked{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 5),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 4),
 	}
 	return nd
 }
@@ -114,19 +110,6 @@ func (inst *ApproveChecked) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }
 
-// SetSignersAccount sets the "signers" account.
-// M signer accounts.
-func (inst *ApproveChecked) SetSignersAccount(signers ag_solanago.PublicKey) *ApproveChecked {
-	inst.AccountMetaSlice[4] = ag_solanago.Meta(signers).SIGNER()
-	return inst
-}
-
-// GetSignersAccount gets the "signers" account.
-// M signer accounts.
-func (inst *ApproveChecked) GetSignersAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[4]
-}
-
 func (inst ApproveChecked) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
@@ -158,19 +141,16 @@ func (inst *ApproveChecked) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return fmt.Errorf("accounts.Source is not set")
+			return errors.New("accounts.Source is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return fmt.Errorf("accounts.Mint is not set")
+			return errors.New("accounts.Mint is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
-			return fmt.Errorf("accounts.Delegate is not set")
+			return errors.New("accounts.Delegate is not set")
 		}
 		if inst.AccountMetaSlice[3] == nil {
-			return fmt.Errorf("accounts.Owner is not set")
-		}
-		if inst.AccountMetaSlice[4] == nil {
-			return fmt.Errorf("accounts.Signers is not set")
+			return errors.New("accounts.Owner is not set")
 		}
 	}
 	return nil
@@ -196,7 +176,6 @@ func (inst *ApproveChecked) EncodeToTree(parent ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("mint", inst.AccountMetaSlice[1]))
 						accountsBranch.Child(ag_format.Meta("delegate", inst.AccountMetaSlice[2]))
 						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice[3]))
-						accountsBranch.Child(ag_format.Meta("signers", inst.AccountMetaSlice[4]))
 					})
 				})
 		})
@@ -238,14 +217,12 @@ func NewApproveCheckedInstruction(
 	source ag_solanago.PublicKey,
 	mint ag_solanago.PublicKey,
 	delegate ag_solanago.PublicKey,
-	owner ag_solanago.PublicKey,
-	signers ag_solanago.PublicKey) *ApproveChecked {
+	owner ag_solanago.PublicKey) *ApproveChecked {
 	return NewApproveCheckedInstructionBuilder().
 		SetAmount(amount).
 		SetDecimals(decimals).
 		SetSourceAccount(source).
 		SetMintAccount(mint).
 		SetDelegateAccount(delegate).
-		SetOwnerAccount(owner).
-		SetSignersAccount(signers)
+		SetOwnerAccount(owner)
 }

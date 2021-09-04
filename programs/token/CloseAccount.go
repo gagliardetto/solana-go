@@ -2,8 +2,8 @@ package token
 
 import (
 	"encoding/binary"
-	"fmt"
-	ag_binary "github.com/dfuse-io/binary"
+	"errors"
+	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
@@ -21,16 +21,13 @@ type CloseAccount struct {
 	//
 	// [2] = [] owner
 	// ··········· The account's owner.
-	//
-	// [3] = [SIGNER] signers
-	// ··········· M signer accounts.
 	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewCloseAccountInstructionBuilder creates a new `CloseAccount` instruction builder.
 func NewCloseAccountInstructionBuilder() *CloseAccount {
 	nd := &CloseAccount{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 4),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
 	}
 	return nd
 }
@@ -74,19 +71,6 @@ func (inst *CloseAccount) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[2]
 }
 
-// SetSignersAccount sets the "signers" account.
-// M signer accounts.
-func (inst *CloseAccount) SetSignersAccount(signers ag_solanago.PublicKey) *CloseAccount {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(signers).SIGNER()
-	return inst
-}
-
-// GetSignersAccount gets the "signers" account.
-// M signer accounts.
-func (inst *CloseAccount) GetSignersAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[3]
-}
-
 func (inst CloseAccount) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
@@ -108,16 +92,13 @@ func (inst *CloseAccount) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return fmt.Errorf("accounts.Account is not set")
+			return errors.New("accounts.Account is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return fmt.Errorf("accounts.Destination is not set")
+			return errors.New("accounts.Destination is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
-			return fmt.Errorf("accounts.Owner is not set")
-		}
-		if inst.AccountMetaSlice[3] == nil {
-			return fmt.Errorf("accounts.Signers is not set")
+			return errors.New("accounts.Owner is not set")
 		}
 	}
 	return nil
@@ -139,7 +120,6 @@ func (inst *CloseAccount) EncodeToTree(parent ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("account", inst.AccountMetaSlice[0]))
 						accountsBranch.Child(ag_format.Meta("destination", inst.AccountMetaSlice[1]))
 						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice[2]))
-						accountsBranch.Child(ag_format.Meta("signers", inst.AccountMetaSlice[3]))
 					})
 				})
 		})
@@ -157,11 +137,9 @@ func NewCloseAccountInstruction(
 	// Accounts:
 	account ag_solanago.PublicKey,
 	destination ag_solanago.PublicKey,
-	owner ag_solanago.PublicKey,
-	signers ag_solanago.PublicKey) *CloseAccount {
+	owner ag_solanago.PublicKey) *CloseAccount {
 	return NewCloseAccountInstructionBuilder().
 		SetAccount(account).
 		SetDestinationAccount(destination).
-		SetOwnerAccount(owner).
-		SetSignersAccount(signers)
+		SetOwnerAccount(owner)
 }

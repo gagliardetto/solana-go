@@ -3,8 +3,7 @@ package token
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
-	ag_binary "github.com/dfuse-io/binary"
+	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
@@ -36,16 +35,13 @@ type TransferChecked struct {
 	//
 	// [3] = [] owner
 	// ··········· The source account's owner/delegate.
-	//
-	// [4] = [SIGNER] signers
-	// ··········· M signer accounts.
 	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewTransferCheckedInstructionBuilder creates a new `TransferChecked` instruction builder.
 func NewTransferCheckedInstructionBuilder() *TransferChecked {
 	nd := &TransferChecked{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 5),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 4),
 	}
 	return nd
 }
@@ -116,19 +112,6 @@ func (inst *TransferChecked) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }
 
-// SetSignersAccount sets the "signers" account.
-// M signer accounts.
-func (inst *TransferChecked) SetSignersAccount(signers ag_solanago.PublicKey) *TransferChecked {
-	inst.AccountMetaSlice[4] = ag_solanago.Meta(signers).SIGNER()
-	return inst
-}
-
-// GetSignersAccount gets the "signers" account.
-// M signer accounts.
-func (inst *TransferChecked) GetSignersAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[4]
-}
-
 func (inst TransferChecked) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
@@ -160,19 +143,16 @@ func (inst *TransferChecked) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return fmt.Errorf("accounts.Source is not set")
+			return errors.New("accounts.Source is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return fmt.Errorf("accounts.Mint is not set")
+			return errors.New("accounts.Mint is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
-			return fmt.Errorf("accounts.Destination is not set")
+			return errors.New("accounts.Destination is not set")
 		}
 		if inst.AccountMetaSlice[3] == nil {
-			return fmt.Errorf("accounts.Owner is not set")
-		}
-		if inst.AccountMetaSlice[4] == nil {
-			return fmt.Errorf("accounts.Signers is not set")
+			return errors.New("accounts.Owner is not set")
 		}
 	}
 	return nil
@@ -198,7 +178,6 @@ func (inst *TransferChecked) EncodeToTree(parent ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("mint", inst.AccountMetaSlice[1]))
 						accountsBranch.Child(ag_format.Meta("destination", inst.AccountMetaSlice[2]))
 						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice[3]))
-						accountsBranch.Child(ag_format.Meta("signers", inst.AccountMetaSlice[4]))
 					})
 				})
 		})
@@ -240,14 +219,12 @@ func NewTransferCheckedInstruction(
 	source ag_solanago.PublicKey,
 	mint ag_solanago.PublicKey,
 	destination ag_solanago.PublicKey,
-	owner ag_solanago.PublicKey,
-	signers ag_solanago.PublicKey) *TransferChecked {
+	owner ag_solanago.PublicKey) *TransferChecked {
 	return NewTransferCheckedInstructionBuilder().
 		SetAmount(amount).
 		SetDecimals(decimals).
 		SetSourceAccount(source).
 		SetMintAccount(mint).
 		SetDestinationAccount(destination).
-		SetOwnerAccount(owner).
-		SetSignersAccount(signers)
+		SetOwnerAccount(owner)
 }

@@ -2,8 +2,8 @@ package token
 
 import (
 	"encoding/binary"
-	"fmt"
-	ag_binary "github.com/dfuse-io/binary"
+	"errors"
+	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
@@ -17,16 +17,13 @@ type Revoke struct {
 	//
 	// [1] = [] owner
 	// ··········· The source account's owner.
-	//
-	// [2] = [SIGNER] signers
-	// ··········· M signer accounts.
 	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewRevokeInstructionBuilder creates a new `Revoke` instruction builder.
 func NewRevokeInstructionBuilder() *Revoke {
 	nd := &Revoke{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
@@ -57,19 +54,6 @@ func (inst *Revoke) GetOwnerAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
-// SetSignersAccount sets the "signers" account.
-// M signer accounts.
-func (inst *Revoke) SetSignersAccount(signers ag_solanago.PublicKey) *Revoke {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(signers).SIGNER()
-	return inst
-}
-
-// GetSignersAccount gets the "signers" account.
-// M signer accounts.
-func (inst *Revoke) GetSignersAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice[2]
-}
-
 func (inst Revoke) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
@@ -91,13 +75,10 @@ func (inst *Revoke) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return fmt.Errorf("accounts.Source is not set")
+			return errors.New("accounts.Source is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return fmt.Errorf("accounts.Owner is not set")
-		}
-		if inst.AccountMetaSlice[2] == nil {
-			return fmt.Errorf("accounts.Signers is not set")
+			return errors.New("accounts.Owner is not set")
 		}
 	}
 	return nil
@@ -118,7 +99,6 @@ func (inst *Revoke) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("source", inst.AccountMetaSlice[0]))
 						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("signers", inst.AccountMetaSlice[2]))
 					})
 				})
 		})
@@ -135,10 +115,8 @@ func (obj *Revoke) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) 
 func NewRevokeInstruction(
 	// Accounts:
 	source ag_solanago.PublicKey,
-	owner ag_solanago.PublicKey,
-	signers ag_solanago.PublicKey) *Revoke {
+	owner ag_solanago.PublicKey) *Revoke {
 	return NewRevokeInstructionBuilder().
 		SetSourceAccount(source).
-		SetOwnerAccount(owner).
-		SetSignersAccount(signers)
+		SetOwnerAccount(owner)
 }

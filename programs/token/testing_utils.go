@@ -3,7 +3,7 @@ package token
 import (
 	"bytes"
 	"fmt"
-	ag_binary "github.com/dfuse-io/binary"
+	ag_binary "github.com/gagliardetto/binary"
 )
 
 func encodeT(data interface{}, buf *bytes.Buffer) error {
