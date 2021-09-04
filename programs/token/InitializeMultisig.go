@@ -48,6 +48,7 @@ func NewInitializeMultisigInstructionBuilder() *InitializeMultisig {
 	return nd
 }
 
+// SetM sets the "m" parameter.
 // The number of signers (M) required to validate this multisignature
 // account.
 func (inst *InitializeMultisig) SetM(m uint8) *InitializeMultisig {
@@ -55,34 +56,44 @@ func (inst *InitializeMultisig) SetM(m uint8) *InitializeMultisig {
 	return inst
 }
 
+// SetAccount sets the "account" account.
 // The multisignature account to initialize.
 func (inst *InitializeMultisig) SetAccount(account ag_solanago.PublicKey) *InitializeMultisig {
 	inst.AccountMetaSlice[0] = ag_solanago.Meta(account).WRITE()
 	return inst
 }
 
+// GetAccount gets the "account" account.
+// The multisignature account to initialize.
 func (inst *InitializeMultisig) GetAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[0]
 }
 
+// SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
 func (inst *InitializeMultisig) SetSysVarRentPubkeyAccount(SysVarRentPubkey ag_solanago.PublicKey) *InitializeMultisig {
 	inst.AccountMetaSlice[1] = ag_solanago.Meta(SysVarRentPubkey)
 	return inst
 }
 
+// GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
+// Rent sysvar.
 func (inst *InitializeMultisig) GetSysVarRentPubkeyAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[1]
 }
 
+// SetSigners sets the "signers" accounts.
 // ..2+N The signer accounts, must equal to N where 1 <= N <=11
 func (inst *InitializeMultisig) SetSigners(signers ...ag_solanago.PublicKey) *InitializeMultisig {
+	inst.AccountMetaSlice = inst.AccountMetaSlice[:2]
 	for _, signer := range signers {
 		inst.AccountMetaSlice = append(inst.AccountMetaSlice, ag_solanago.Meta(signer).SIGNER())
 	}
 	return inst
 }
 
+// GetSignersAccount gets the "signers" account.
+// ..2+N The signer accounts, must equal to N where 1 <= N <=11
 func (inst *InitializeMultisig) GetSigners() []*ag_solanago.AccountMeta {
 	if len(inst.AccountMetaSlice) == 2 {
 		return nil
@@ -124,7 +135,7 @@ func (inst *InitializeMultisig) Validate() error {
 			return fmt.Errorf("accounts.SysVarRentPubkey is not set")
 		}
 		if len(inst.AccountMetaSlice) == 2 {
-			return fmt.Errorf("Signers are not set")
+			return fmt.Errorf("accounts.Signers is not set")
 		}
 	}
 	return nil
@@ -147,7 +158,10 @@ func (inst *InitializeMultisig) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("account", inst.AccountMetaSlice[0]))
 						accountsBranch.Child(ag_format.Meta("$(SysVarRentPubkey)", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("signers", inst.AccountMetaSlice[2]))
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.AccountMetaSlice[2:])))
+						for i, v := range inst.AccountMetaSlice[2:] {
+							signersBranch.Child(ag_format.Meta(fmt.Sprintf("signers[%v]", i), v))
+						}
 					})
 				})
 		})
@@ -177,10 +191,10 @@ func NewInitializeMultisigInstruction(
 	// Accounts:
 	account ag_solanago.PublicKey,
 	SysVarRentPubkey ag_solanago.PublicKey,
-	signers ag_solanago.PublicKey) *InitializeMultisig {
+	signers []ag_solanago.PublicKey) *InitializeMultisig {
 	return NewInitializeMultisigInstructionBuilder().
 		SetM(m).
 		SetAccount(account).
 		SetSysVarRentPubkeyAccount(SysVarRentPubkey).
-		SetSignersAccount(signers)
+		SetSigners(signers...)
 }
