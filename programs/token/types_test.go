@@ -20,7 +20,7 @@ import (
 	"os"
 	"testing"
 
-	bin "github.com/dfuse-io/binary"
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/mr-tron/base58"

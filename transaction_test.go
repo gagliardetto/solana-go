@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	bin "github.com/dfuse-io/binary"
+	bin "github.com/gagliardetto/binary"
 	"github.com/magiconair/properties/assert"
 	"github.com/mr-tron/base58"
 	"github.com/stretchr/testify/require"

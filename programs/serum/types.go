@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"math/big"
 
-	bin "github.com/dfuse-io/binary"
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"go.uber.org/zap"
 )

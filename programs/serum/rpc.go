@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	rice "github.com/GeertJohan/go.rice"
-	bin "github.com/dfuse-io/binary"
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/gagliardetto/solana-go/rpc/ws"

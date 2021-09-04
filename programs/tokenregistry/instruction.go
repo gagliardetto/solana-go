@@ -7,7 +7,7 @@ import (
 
 	"github.com/gagliardetto/solana-go/text"
 
-	bin "github.com/dfuse-io/binary"
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 )
 

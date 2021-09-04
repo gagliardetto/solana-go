@@ -15,9 +15,9 @@ require (
 	github.com/aybabtme/rgbterm v0.0.0-20170906152045-cc83f3b3ce59
 	github.com/buger/jsonparser v1.1.1
 	github.com/davecgh/go-spew v1.1.1
-	github.com/dfuse-io/binary v0.0.0-20210216024852-4ae6830a495d
 	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70
 	github.com/fatih/color v1.7.0
+	github.com/gagliardetto/binary v0.4.1
 	github.com/gagliardetto/gofuzz v1.2.2
 	github.com/gagliardetto/treeout v0.1.2
 	github.com/google/go-cmp v0.5.1
@@ -49,5 +49,3 @@ require (
 	golang.org/x/tools v0.0.0-20200601175630-2caf76543d99 // indirect
 	google.golang.org/api v0.29.0
 )
-
-replace github.com/dfuse-io/binary => github.com/gagliardetto/binary v0.4.0

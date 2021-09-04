@@ -16,7 +16,7 @@ package tokenregistry
 import (
 	"fmt"
 
-	bin "github.com/dfuse-io/binary"
+	bin "github.com/gagliardetto/binary"
 
 	"github.com/gagliardetto/solana-go"
 )

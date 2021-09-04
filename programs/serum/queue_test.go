@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	bin "github.com/dfuse-io/binary"
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/diff"
 	"github.com/gagliardetto/solana-go/rpc"

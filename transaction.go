@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"github.com/davecgh/go-spew/spew"
-	bin "github.com/dfuse-io/binary"
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go/text"
 	"github.com/gagliardetto/treeout"
 	"go.uber.org/zap"
