@@ -1,7 +1,6 @@
 package token
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 
@@ -81,7 +80,7 @@ func (inst *Revoke) GetOwnerAccount() *ag_solanago.AccountMeta {
 func (inst Revoke) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: ag_binary.TypeIDFromUint32(Instruction_Revoke, binary.LittleEndian),
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_Revoke),
 	}}
 }
 

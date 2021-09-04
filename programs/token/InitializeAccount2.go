@@ -1,8 +1,8 @@
 package token
 
 import (
-	"encoding/binary"
 	"errors"
+
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -86,7 +86,7 @@ func (inst *InitializeAccount2) GetSysVarRentPubkeyAccount() *ag_solanago.Accoun
 func (inst InitializeAccount2) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: ag_binary.TypeIDFromUint32(Instruction_InitializeAccount2, binary.LittleEndian),
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_InitializeAccount2),
 	}}
 }
 

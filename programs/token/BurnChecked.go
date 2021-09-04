@@ -1,7 +1,6 @@
 package token
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 
@@ -122,7 +121,7 @@ func (inst *BurnChecked) GetOwnerAccount() *ag_solanago.AccountMeta {
 func (inst BurnChecked) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: ag_binary.TypeIDFromUint32(Instruction_BurnChecked, binary.LittleEndian),
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_BurnChecked),
 	}}
 }
 

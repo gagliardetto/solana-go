@@ -1,7 +1,6 @@
 package token
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 
@@ -77,7 +76,7 @@ func (inst *InitializeMultisig2) AddSigners(signers ...ag_solanago.PublicKey) *I
 func (inst InitializeMultisig2) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: ag_binary.TypeIDFromUint32(Instruction_InitializeMultisig2, binary.LittleEndian),
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_InitializeMultisig2),
 	}}
 }
 

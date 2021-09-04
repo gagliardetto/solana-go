@@ -5,7 +5,6 @@ package token
 
 import (
 	"bytes"
-	"encoding/binary"
 	"fmt"
 
 	ag_spew "github.com/davecgh/go-spew/spew"
@@ -41,7 +40,7 @@ const (
 	// `CreateAccount` instruction that creates the account being initialized.
 	// Otherwise another party can acquire ownership of the uninitialized
 	// account.
-	Instruction_InitializeMint uint32 = iota
+	Instruction_InitializeMint uint8 = iota
 
 	// Initializes a new account to hold tokens.  If this account is associated
 	// with the native mint then the token balance of the initialized account
@@ -162,7 +161,7 @@ const (
 )
 
 // InstructionIDToName returns the name of the instruction given its ID.
-func InstructionIDToName(id uint32) string {
+func InstructionIDToName(id uint8) string {
 	switch id {
 	case Instruction_InitializeMint:
 		return "InitializeMint"
@@ -224,7 +223,7 @@ func (inst *Instruction) EncodeToTree(parent ag_treeout.Branches) {
 }
 
 var InstructionImplDef = ag_binary.NewVariantDefinition(
-	ag_binary.Uint32TypeIDEncoding,
+	ag_binary.Uint8TypeIDEncoding,
 	[]ag_binary.VariantType{
 		{
 			"InitializeMint", (*InitializeMint)(nil),
@@ -317,7 +316,7 @@ func (inst *Instruction) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error 
 }
 
 func (inst *Instruction) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	err := encoder.WriteUint32(inst.TypeID.Uint32(), binary.LittleEndian)
+	err := encoder.WriteUint8(inst.TypeID.Uint8())
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)
 	}
