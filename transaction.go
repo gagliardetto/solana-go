@@ -352,18 +352,20 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 		for _, inst := range tx.Message.Instructions {
 
 			progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
-			if err != nil {
-				panic(err)
-			}
-
-			decodedInstruction, err := DecodeInstruction(progKey, inst.ResolveInstructionAccounts(&tx.Message), inst.Data)
-			if err != nil {
-				panic(err)
-			}
-			if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
-				enToTree.EncodeToTree(message)
+			if err == nil {
+				decodedInstruction, err := DecodeInstruction(progKey, inst.ResolveInstructionAccounts(&tx.Message), inst.Data)
+				if err == nil {
+					if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
+						enToTree.EncodeToTree(message)
+					} else {
+						message.Child(spew.Sdump(decodedInstruction))
+					}
+				} else {
+					// TODO: log error?
+					message.Child(fmt.Sprintf(text.RedBG("cannot decode instruction for %s program: %s"), progKey, err))
+				}
 			} else {
-				message.Child(spew.Sdump(decodedInstruction))
+				message.Child(fmt.Sprintf(text.RedBG("cannot ResolveProgramIDIndex: %s"), err))
 			}
 		}
 	})
