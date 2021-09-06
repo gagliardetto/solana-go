@@ -337,7 +337,7 @@ func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
 func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 
 	parent.ParentFunc(func(txTree treeout.Branches) {
-		txTree.Child("Signatures[]").ParentFunc(func(signaturesBranch treeout.Branches) {
+		txTree.Child(fmt.Sprintf("Signatures[len=%v]", len(tx.Signatures))).ParentFunc(func(signaturesBranch treeout.Branches) {
 			for _, sig := range tx.Signatures {
 				signaturesBranch.Child(sig.String())
 			}
@@ -348,7 +348,7 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 		})
 	})
 
-	parent.Child("Instructions[]").ParentFunc(func(message treeout.Branches) {
+	parent.Child(fmt.Sprintf("Instructions[len=%v]", len(tx.Message.Instructions))).ParentFunc(func(message treeout.Branches) {
 		for _, inst := range tx.Message.Instructions {
 
 			progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
