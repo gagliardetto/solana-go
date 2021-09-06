@@ -27,4 +27,5 @@ const (
 	TestNet_WS          = protocolWSS + hostTestNet
 	MainNetBeta_WS      = protocolWSS + hostMainNetBeta
 	MainNetBetaSerum_WS = protocolWSS + hostMainNetBetaSerum
+	LocalNet_WS         = "ws://127.0.0.1:8900"
 )
