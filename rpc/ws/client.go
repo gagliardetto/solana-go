@@ -40,6 +40,15 @@ type Client struct {
 	reconnectOnErr          bool
 }
 
+const (
+	// Time allowed to write a message to the peer.
+	writeWait = 10 * time.Second
+	// Time allowed to read the next pong message from the peer.
+	pongWait = 60 * time.Second
+	// Send pings to peer with this period. Must be less than pongWait.
+	pingPeriod = (pongWait * 9) / 10
+)
+
 // Connect creates a new websocket client connecting to the provided endpoint.
 func Connect(ctx context.Context, rpcEndpoint string) (c *Client, err error) {
 	c = &Client{
@@ -60,12 +69,17 @@ func Connect(ctx context.Context, rpcEndpoint string) (c *Client, err error) {
 	}
 
 	go func() {
+		c.conn.SetReadDeadline(time.Now().Add(pongWait))
+		c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+		ticker := time.NewTicker(pingPeriod)
 		for {
-			c.conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
-			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				return
+			select {
+			case <-ticker.C:
+				c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+				if err := c.conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+					return
+				}
 			}
-			time.Sleep(20 * time.Second)
 		}
 	}()
 	go c.receiveMessages()
