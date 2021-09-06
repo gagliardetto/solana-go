@@ -61,7 +61,7 @@ func SendAndConfirmTransactionWithOpts(
 			return sig, err
 		}
 		if got.Value.Err != nil {
-			return sig, fmt.Errorf("confirmation error: %v", got.Value.Err)
+			return sig, fmt.Errorf("transaction confirmation failed: %v", got.Value.Err)
 		} else {
 			return sig, nil
 		}
