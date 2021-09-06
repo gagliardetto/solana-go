@@ -327,8 +327,8 @@ func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error
 }
 
 func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
-	if len(encoder.Docs) == 0 {
-		encoder.Docs = []string{"Transaction"}
+	if len(encoder.Doc) == 0 {
+		encoder.Doc = "Transaction"
 	}
 	tx.EncodeToTree(encoder)
 	return encoder.WriteString(encoder.Tree.String())
@@ -337,7 +337,7 @@ func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
 func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 
 	parent.ParentFunc(func(txTree treeout.Branches) {
-		txTree.Child("Signatures[]").ParentFunc(func(signaturesBranch treeout.Branches) {
+		txTree.Child(fmt.Sprintf("Signatures[len=%v]", len(tx.Signatures))).ParentFunc(func(signaturesBranch treeout.Branches) {
 			for _, sig := range tx.Signatures {
 				signaturesBranch.Child(sig.String())
 			}
@@ -348,22 +348,24 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 		})
 	})
 
-	parent.Child("Instructions[]").ParentFunc(func(message treeout.Branches) {
+	parent.Child(fmt.Sprintf("Instructions[len=%v]", len(tx.Message.Instructions))).ParentFunc(func(message treeout.Branches) {
 		for _, inst := range tx.Message.Instructions {
 
 			progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
-			if err != nil {
-				panic(err)
-			}
-
-			decodedInstruction, err := DecodeInstruction(progKey, inst.ResolveInstructionAccounts(&tx.Message), inst.Data)
-			if err != nil {
-				panic(err)
-			}
-			if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
-				enToTree.EncodeToTree(message)
+			if err == nil {
+				decodedInstruction, err := DecodeInstruction(progKey, inst.ResolveInstructionAccounts(&tx.Message), inst.Data)
+				if err == nil {
+					if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
+						enToTree.EncodeToTree(message)
+					} else {
+						message.Child(spew.Sdump(decodedInstruction))
+					}
+				} else {
+					// TODO: log error?
+					message.Child(fmt.Sprintf(text.RedBG("cannot decode instruction for %s program: %s"), progKey, err))
+				}
 			} else {
-				message.Child(spew.Sdump(decodedInstruction))
+				message.Child(fmt.Sprintf(text.RedBG("cannot ResolveProgramIDIndex: %s"), err))
 			}
 		}
 	})

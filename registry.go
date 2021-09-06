@@ -12,20 +12,20 @@ type InstructionDecoder func(instructionAccounts []*AccountMeta, data []byte) (i
 var InstructionDecoderRegistry = map[string]InstructionDecoder{}
 
 func RegisterInstructionDecoder(programID PublicKey, decoder InstructionDecoder) {
-	p := programID.String()
-	if _, found := InstructionDecoderRegistry[p]; found {
-		panic(fmt.Sprintf("unable to re-register instruction decoder for program %q", p))
+	pid := programID.String()
+	if _, found := InstructionDecoderRegistry[pid]; found {
+		panic(fmt.Sprintf("unable to re-register instruction decoder for program %q", pid))
 	}
 
-	InstructionDecoderRegistry[p] = decoder
+	InstructionDecoderRegistry[pid] = decoder
 }
 
 func DecodeInstruction(programID PublicKey, accounts []*AccountMeta, data []byte) (interface{}, error) {
-	p := programID.String()
+	pid := programID.String()
 
-	decoder, found := InstructionDecoderRegistry[p]
+	decoder, found := InstructionDecoderRegistry[pid]
 	if !found {
-		return nil, fmt.Errorf("unknown programID, cannot find any instruction decoder %q", p)
+		return nil, fmt.Errorf("instruction decoder not found for %s", pid)
 	}
 
 	return decoder(accounts, data)

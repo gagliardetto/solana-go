@@ -139,16 +139,16 @@ func (inst *TransferWithSeed) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Parameters of the instruction:
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("Lamports", *inst.Lamports))
-						paramsBranch.Child(ag_format.Param("FromSeed", *inst.FromSeed))
+						paramsBranch.Child(ag_format.Param(" Lamports", *inst.Lamports))
+						paramsBranch.Child(ag_format.Param(" FromSeed", *inst.FromSeed))
 						paramsBranch.Child(ag_format.Param("FromOwner", *inst.FromOwner))
 					})
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("FundingAccount", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("BaseForFundingAccount", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("RecipientAccount", inst.AccountMetaSlice[2]))
+						accountsBranch.Child(ag_format.Meta("       Funding", inst.AccountMetaSlice[0]))
+						accountsBranch.Child(ag_format.Meta("BaseForFunding", inst.AccountMetaSlice[1]))
+						accountsBranch.Child(ag_format.Meta("     Recipient", inst.AccountMetaSlice[2]))
 					})
 				})
 		})

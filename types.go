@@ -66,7 +66,7 @@ var _ bin.EncoderDecoder = &Message{}
 func (mx *Message) EncodeToTree(txTree treeout.Branches) {
 	txTree.Child(text.Sf("RecentBlockhash: %s", mx.RecentBlockhash))
 
-	txTree.Child("AccountKeys[]").ParentFunc(func(accountKeysBranch treeout.Branches) {
+	txTree.Child(fmt.Sprintf("AccountKeys[len=%v]", len(mx.AccountKeys))).ParentFunc(func(accountKeysBranch treeout.Branches) {
 		for _, key := range mx.AccountKeys {
 			accountKeysBranch.Child(text.ColorizeBG(key.String()))
 		}
