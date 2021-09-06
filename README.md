@@ -48,7 +48,7 @@ More contracts to come.
   - [ ] BPF Loader
   - [ ] Secp256k1
 - [ ] Clients for Solana Program Library (SPL)
-  - [ ] token: WIP
+  - [x] token
   - [ ] memo
   - [ ] name-service
   - [ ] ...
