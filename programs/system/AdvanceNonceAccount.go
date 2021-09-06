@@ -103,9 +103,9 @@ func (inst *AdvanceNonceAccount) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("NonceAccount", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("$(SysVarRecentBlockHashesPubkey)", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("NonceAuthorityAccount", inst.AccountMetaSlice[2]))
+						accountsBranch.Child(ag_format.Meta("                  Nonce", inst.AccountMetaSlice[0]))
+						accountsBranch.Child(ag_format.Meta("SysVarRecentBlockHashes", inst.AccountMetaSlice[1]))
+						accountsBranch.Child(ag_format.Meta("         NonceAuthority", inst.AccountMetaSlice[2]))
 					})
 				})
 		})

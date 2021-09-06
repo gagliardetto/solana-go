@@ -107,8 +107,8 @@ func (inst *Transfer) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("FundingAccount", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("RecipientAccount", inst.AccountMetaSlice[1]))
+						accountsBranch.Child(ag_format.Meta("  Funding", inst.AccountMetaSlice[0]))
+						accountsBranch.Child(ag_format.Meta("Recipient", inst.AccountMetaSlice[1]))
 					})
 				})
 		})
