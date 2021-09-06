@@ -132,7 +132,11 @@ func (inst *InitializeMultisig2) EncodeToTree(parent ag_treeout.Branches) {
 
 						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
 						for i, v := range inst.Signers {
-							signersBranch.Child(ag_format.Meta(fmt.Sprintf("signers[%v]", i), v))
+							if len(inst.Signers) > 9 && i < 10 {
+								signersBranch.Child(ag_format.Meta(fmt.Sprintf(" [%v]", i), v))
+							} else {
+								signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), v))
+							}
 						}
 					})
 				})

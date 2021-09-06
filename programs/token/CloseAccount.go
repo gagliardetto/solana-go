@@ -146,13 +146,17 @@ func (inst *CloseAccount) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("account", inst.Accounts[0]))
+						accountsBranch.Child(ag_format.Meta("    account", inst.Accounts[0]))
 						accountsBranch.Child(ag_format.Meta("destination", inst.Accounts[1]))
-						accountsBranch.Child(ag_format.Meta("owner", inst.Accounts[2]))
+						accountsBranch.Child(ag_format.Meta("      owner", inst.Accounts[2]))
 
 						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
 						for i, v := range inst.Signers {
-							signersBranch.Child(ag_format.Meta(fmt.Sprintf("signers[%v]", i), v))
+							if len(inst.Signers) > 9 && i < 10 {
+								signersBranch.Child(ag_format.Meta(fmt.Sprintf(" [%v]", i), v))
+							} else {
+								signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), v))
+							}
 						}
 					})
 				})

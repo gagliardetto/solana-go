@@ -114,9 +114,9 @@ func (inst *InitializeMint2) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Parameters of the instruction:
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("Decimals", *inst.Decimals))
-						paramsBranch.Child(ag_format.Param("MintAuthority", *inst.MintAuthority))
-						paramsBranch.Child(ag_format.Param("FreezeAuthority (OPTIONAL)", inst.FreezeAuthority))
+						paramsBranch.Child(ag_format.Param("             Decimals", *inst.Decimals))
+						paramsBranch.Child(ag_format.Param("        MintAuthority", *inst.MintAuthority))
+						paramsBranch.Child(ag_format.Param("FreezeAuthority (OPT)", inst.FreezeAuthority))
 					})
 
 					// Accounts of the instruction:
