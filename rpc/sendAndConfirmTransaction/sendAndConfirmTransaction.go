@@ -4,12 +4,29 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/gagliardetto/solana-go/rpc/ws"
 )
 
+// Send and wait for confirmation of a transaction.
+func SendAndConfirmTransaction(
+	ctx context.Context,
+	rpcClient *rpc.Client,
+	wsClient *ws.Client,
+	transaction *solana.Transaction,
+) (signature solana.Signature, err error) {
+	return SendAndConfirmTransactionWithOpts(
+		ctx,
+		rpcClient,
+		wsClient,
+		transaction,
+		false,
+		rpc.CommitmentFinalized,
+	)
+}
+
+// Send and wait for confirmation of a transaction.
 func SendAndConfirmTransactionWithOpts(
 	ctx context.Context,
 	rpcClient *rpc.Client,
@@ -31,10 +48,10 @@ func SendAndConfirmTransactionWithOpts(
 
 	sub, err := wsClient.SignatureSubscribe(
 		sig,
-		rpc.CommitmentConfirmed,
+		rpc.CommitmentFinalized,
 	)
 	if err != nil {
-		panic(err)
+		return sig, err
 	}
 	defer sub.Unsubscribe()
 
@@ -43,7 +60,6 @@ func SendAndConfirmTransactionWithOpts(
 		if err != nil {
 			return sig, err
 		}
-		spew.Dump(got)
 		if got.Value.Err != nil {
 			return sig, fmt.Errorf("confirmation error: %v", got.Value.Err)
 		} else {
