@@ -40,7 +40,7 @@ func Meta(name string, meta *solana.AccountMeta) string {
 		out += "WRITE"
 	}
 	if meta.IsSigner {
-		if meta.IsSigner {
+		if meta.IsWritable {
 			out += ", "
 		}
 		out += "SIGN"
