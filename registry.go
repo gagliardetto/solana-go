@@ -21,11 +21,11 @@ func RegisterInstructionDecoder(programID PublicKey, decoder InstructionDecoder)
 }
 
 func DecodeInstruction(programID PublicKey, accounts []*AccountMeta, data []byte) (interface{}, error) {
-	p := programID.String()
+	pid := programID.String()
 
-	decoder, found := InstructionDecoderRegistry[p]
+	decoder, found := InstructionDecoderRegistry[pid]
 	if !found {
-		return nil, fmt.Errorf("unknown programID, cannot find any instruction decoder %q", p)
+		return nil, fmt.Errorf("instruction decoder not found for %s", pid)
 	}
 
 	return decoder(accounts, data)
