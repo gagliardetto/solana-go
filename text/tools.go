@@ -173,14 +173,10 @@ func Bold(str string) string {
 
 type sf func(int, string) string
 
-// Apply given transformation func for each line in string
 func foreachLine(str string, transform sf) (out string) {
-	out = ""
-
 	for idx, line := range strings.Split(str, "\n") {
 		out += transform(idx, line)
 	}
-
 	return
 }
 

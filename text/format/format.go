@@ -18,7 +18,15 @@ func Instruction(name string) string {
 }
 
 func Param(name string, value interface{}) string {
-	return Sf(CC(Shakespeare(name), ": %s"), Lime(strings.TrimSpace(spew.Sdump(value))))
+	return Sf(
+		Shakespeare(name)+": %s",
+		strings.TrimSpace(
+			prefixEachLineExceptFirst(
+				strings.Repeat(" ", len(name)+2),
+				strings.TrimSpace(spew.Sdump(value)),
+			),
+		),
+	)
 }
 
 func Account(name string, pubKey solana.PublicKey) string {
@@ -39,4 +47,23 @@ func Meta(name string, meta *solana.AccountMeta) string {
 	}
 	out += "] "
 	return out
+}
+
+func prefixEachLineExceptFirst(prefix string, s string) string {
+	return foreachLine(s,
+		func(i int, line string) string {
+			if i == 0 {
+				return Lime(line) + "\n"
+			}
+			return prefix + Lime(line) + "\n"
+		})
+}
+
+type sf func(int, string) string
+
+func foreachLine(str string, transform sf) (out string) {
+	for idx, line := range strings.Split(str, "\n") {
+		out += transform(idx, line)
+	}
+	return
 }

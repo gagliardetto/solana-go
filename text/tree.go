@@ -15,10 +15,10 @@ type EncodableToTree interface {
 	EncodeToTree(parent treeout.Branches)
 }
 
-func NewTreeEncoder(w io.Writer, docs ...string) *TreeEncoder {
+func NewTreeEncoder(w io.Writer, doc string) *TreeEncoder {
 	return &TreeEncoder{
 		output: w,
-		Tree:   treeout.New(docs...),
+		Tree:   treeout.New(doc),
 	}
 }
 
