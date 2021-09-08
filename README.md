@@ -277,9 +277,6 @@ func main() {
     rpc.CommitmentFinalized,
   )
   if err != nil {
-    spew.Config.DisableMethods = true
-    spew.Config.DisablePointerMethods = true
-    spew.Dump(err)
     panic(err)
   }
   spew.Dump(sig)
