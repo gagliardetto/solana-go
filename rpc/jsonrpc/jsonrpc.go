@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
-	"strconv"
 
+	"github.com/davecgh/go-spew/spew"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -210,9 +210,16 @@ type RPCError struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
+var spewConf = spew.ConfigState{
+	Indent:                " ",
+	DisableMethods:        true,
+	DisablePointerMethods: true,
+	SortKeys:              true,
+}
+
 // Error function is provided to be used as error object.
 func (e *RPCError) Error() string {
-	return strconv.Itoa(e.Code) + ":" + e.Message
+	return spewConf.Sdump(e)
 }
 
 // HTTPError represents a error that occurred on HTTP level.
