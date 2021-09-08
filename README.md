@@ -277,11 +277,9 @@ func main() {
     rpc.CommitmentFinalized,
   )
   if err != nil {
+    spew.Config.DisableMethods = true
     spew.Config.DisablePointerMethods = true
     spew.Dump(err)
-    spew.Dump(err.(*jsonrpc.RPCError).Code)
-    spew.Dump(err.(*jsonrpc.RPCError).Data)
-    spew.Dump(err.(*jsonrpc.RPCError).Message)
     panic(err)
   }
   spew.Dump(sig)
