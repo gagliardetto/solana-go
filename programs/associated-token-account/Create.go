@@ -16,16 +16,16 @@ type Create struct {
 	Mint   solana.PublicKey `bin:"-" borsh_skip:"true"`
 
 	// [0] = [WRITE, SIGNER] Payer
-	// ··········· Paying account
+	// ··········· Funding account
 	//
 	// [1] = [WRITE] AssociatedTokenAccount
-	// ··········· Address of the associated token account
+	// ··········· Associated token account address to be created
 	//
 	// [2] = [] Wallet
-	// ··········· Wallet
+	// ··········· Wallet address for the new associated token account
 	//
 	// [3] = [] TokenMint
-	// ··········· SPL token mint
+	// ··········· The token mint for the new associated token account
 	//
 	// [4] = [] SystemProgram
 	// ··········· System program ID
