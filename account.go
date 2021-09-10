@@ -96,8 +96,14 @@ func (slice *AccountMetaSlice) SetAccounts(accounts []*AccountMeta) error {
 	return nil
 }
 
-func (slice AccountMetaSlice) GetAccounts() []*AccountMeta {
-	return slice
+func (slice AccountMetaSlice) GetAccounts() (out []*AccountMeta) {
+	out = make([]*AccountMeta, 0)
+	for i := range slice {
+		if slice[i] != nil {
+			out = append(out, slice[i])
+		}
+	}
+	return out
 }
 
 // GetSigners returns the accounts that are signers.
