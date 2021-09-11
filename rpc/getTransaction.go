@@ -63,7 +63,7 @@ type GetTransactionResult struct {
 	// Estimated production time, as Unix timestamp (seconds since the Unix epoch)
 	// of when the transaction was processed.
 	// Nil if not available.
-	BlockTime *UnixTimeSeconds `json:"blockTime"`
+	BlockTime *solana.UnixTimeSeconds `json:"blockTime"`
 
 	Transaction *TransactionResultEnvelope `json:"transaction"`
 	Meta        *TransactionMeta           `json:"meta,omitempty"`

@@ -2,7 +2,6 @@ package ws
 
 import (
 	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/rpc"
 )
 
 type VoteResult struct {
@@ -11,7 +10,7 @@ type VoteResult struct {
 	// The slots covered by the vote.
 	Slots []uint64 `json:"slots"`
 	// The timestamp of the vote.
-	Timestamp *rpc.UnixTimeSeconds `json:"timestamp,omitempty"`
+	Timestamp *solana.UnixTimeSeconds `json:"timestamp,omitempty"`
 }
 
 // VoteSubscribe (UNSTABLE, disabled by default) subscribes

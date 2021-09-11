@@ -17,7 +17,6 @@ package rpc
 import (
 	stdjson "encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/gagliardetto/solana-go"
 )
@@ -188,7 +187,7 @@ type TransactionSignature struct {
 
 	// Estimated production time, as Unix timestamp (seconds since the Unix epoch)
 	// of when transaction was processed. Nil if not available.
-	BlockTime *UnixTimeSeconds `json:"blockTime,omitempty"`
+	BlockTime *solana.UnixTimeSeconds `json:"blockTime,omitempty"`
 
 	ConfirmationStatus ConfirmationStatusType `json:"confirmationStatus,omitempty"`
 }
@@ -380,10 +379,3 @@ func (p *ParsedInstruction) IsParsed() bool {
 }
 
 type M map[string]interface{}
-
-// Unix timestamp (seconds since the Unix epoch)
-type UnixTimeSeconds int64
-
-func (res UnixTimeSeconds) Time() time.Time {
-	return time.Unix(int64(res), 0)
-}

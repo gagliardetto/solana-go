@@ -1,6 +1,6 @@
 package ws
 
-import "github.com/gagliardetto/solana-go/rpc"
+import "github.com/gagliardetto/solana-go"
 
 type SlotsUpdatesResult struct {
 	// The parent slot.
@@ -8,7 +8,7 @@ type SlotsUpdatesResult struct {
 	// The newly updated slot.
 	Slot uint64 `json:"slot"`
 	// The Unix timestamp of the update.
-	Timestamp *rpc.UnixTimeSeconds `json:"timestamp"`
+	Timestamp *solana.UnixTimeSeconds `json:"timestamp"`
 	// The update type.
 	Type SlotsUpdatesType `json:"type"`
 }

@@ -16,6 +16,7 @@ package solana
 
 import (
 	"fmt"
+	"time"
 
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go/text"
@@ -318,4 +319,11 @@ func MustTransactionFromDecoder(decoder *bin.Decoder) *Transaction {
 		panic(err)
 	}
 	return out
+}
+
+// Unix timestamp (seconds since the Unix epoch)
+type UnixTimeSeconds int64
+
+func (res UnixTimeSeconds) Time() time.Time {
+	return time.Unix(int64(res), 0)
 }

@@ -1987,7 +1987,7 @@ func TestClient_GetTransaction(t *testing.T) {
 	)
 
 	blockTimeSeconds := int64(1624821990)
-	blockTime := UnixTimeSeconds(blockTimeSeconds)
+	blockTime := solana.UnixTimeSeconds(blockTimeSeconds)
 	expected := &GetTransactionResult{
 		Slot:      83311386,
 		BlockTime: &blockTime,
