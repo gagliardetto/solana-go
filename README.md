@@ -41,15 +41,15 @@ More contracts to come.
 - [x] Full WebSocket JSON streaming API
 - [ ] Wallet, account, and keys management
 - [ ] Clients for native programs
-  - [x] system
+  - [x] [system](/programs/system)
   - [ ] config
   - [ ] stake
   - [ ] vote
   - [ ] BPF Loader
   - [ ] Secp256k1
 - [ ] Clients for Solana Program Library (SPL)
-  - [x] token
-  - [x] associated-token-account
+  - [x] [SPL token](/programs/token)
+  - [x] [associated-token-account](/programs/associated-token-account)
   - [ ] memo
   - [ ] name-service
   - [ ] ...
