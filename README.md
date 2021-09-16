@@ -37,7 +37,7 @@ More contracts to come.
 
 ## Features
 
-- [x] Full JSON RPC API
+- [x] [Full JSON RPC API](#rpc-usage-examples)
 - [x] Full WebSocket JSON streaming API
 - [ ] Wallet, account, and keys management
 - [ ] Clients for native programs
@@ -54,6 +54,8 @@ More contracts to come.
   - [ ] name-service
   - [ ] ...
 - [ ] Client for Serum
+- [ ] Metaplex clients:
+  - You can find client for all Metaplex programs ("metaplex", "auction", "token-metadata", "token-vault", "nft-candy-machine") here: https://github.com/gagliardetto/metaplex-go
 - [ ] More programs
 
 ## Current development status
