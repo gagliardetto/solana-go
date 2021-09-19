@@ -327,3 +327,7 @@ type UnixTimeSeconds int64
 func (res UnixTimeSeconds) Time() time.Time {
 	return time.Unix(int64(res), 0)
 }
+
+func (res UnixTimeSeconds) String() string {
+	return time.Unix(int64(res), 0).String()
+}
