@@ -198,13 +198,21 @@ import (
   "github.com/gagliardetto/solana-go"
   "github.com/gagliardetto/solana-go/programs/system"
   "github.com/gagliardetto/solana-go/rpc"
+  confirm "github.com/gagliardetto/solana-go/rpc/sendAndConfirmTransaction"
   "github.com/gagliardetto/solana-go/rpc/jsonrpc"
+  "github.com/gagliardetto/solana-go/rpc/ws"
   "github.com/gagliardetto/solana-go/text"
 )
 
 func main() {
   // Create a new RPC client:
-  client := rpc.New(rpc.DevNet_RPC)
+  rpcClient := rpc.New(rpc.DevNet_RPC)
+
+  // Create a new WS client (used for confirming transactions)
+  wsClient, err := ws.Connect(context.Background(), rpc.DevNet_WS)
+  if err != nil {
+    panic(err)
+  }
 
   // Load the account that you will send funds FROM:
   accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile("/path/to/.config/solana/id.json")
@@ -222,7 +230,7 @@ func main() {
 
   if true {
     // Airdrop 10 sol to the account so it will have something to transfer:
-    out, err := client.RequestAirdrop(
+    out, err := rpcClient.RequestAirdrop(
       context.TODO(),
       accountFrom.PublicKey(),
       solana.LAMPORTS_PER_SOL*10,
@@ -236,7 +244,7 @@ func main() {
   }
   //---------------
 
-  recent, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
+  recent, err := rpcClient.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
   if err != nil {
     panic(err)
   }
@@ -271,16 +279,29 @@ func main() {
   // Pretty print the transaction:
   tx.EncodeTree(text.NewTreeEncoder(os.Stdout, "Transfer SOL"))
 
-  sig, err := client.SendTransactionWithOpts(
+  // Send transaction, and wait for confirmation:
+  sig, err := confirm.SendAndConfirmTransaction(
     context.TODO(),
+    rpcClient,
+    wsClient,
     tx,
-    false,
-    rpc.CommitmentFinalized,
   )
   if err != nil {
     panic(err)
   }
   spew.Dump(sig)
+
+  // Or just send the transaction WITHOUT waiting for confirmation:
+  // sig, err := rpcClient.SendTransactionWithOpts(
+  //   context.TODO(),
+  //   tx,
+  //   false,
+  //   rpc.CommitmentFinalized,
+  // )
+  // if err != nil {
+  //   panic(err)
+  // }
+  // spew.Dump(sig)
 }
 
 ```
