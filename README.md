@@ -55,11 +55,11 @@ More contracts to come.
   - [ ] ...
 - [ ] Client for Serum
 - [ ] [Metaplex](https://github.com/gagliardetto/metaplex-go):
-  - metaplex
-  - auction
-  - token-metadata
-  - token-vault
-  - nft-candy-machine
+  - [x] auction
+  - [x] metaplex
+  - [x] token-metadata
+  - [x] token-vault
+  - [x] nft-candy-machine
 - [ ] More programs
 
 ## Current development status
