@@ -73,14 +73,11 @@ func NewAccountMeta(
 }
 
 func (a *AccountMeta) less(act *AccountMeta) bool {
-	if a.IsSigner && !act.IsSigner {
-		return true
-	} else if !a.IsSigner && act.IsSigner {
-		return false
+	if a.IsSigner != act.IsSigner {
+		return a.IsSigner
 	}
-
-	if a.IsWritable {
-		return true
+	if a.IsWritable != act.IsWritable {
+		return a.IsWritable
 	}
 	return false
 }
