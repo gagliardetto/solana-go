@@ -54,7 +54,7 @@ More contracts to come.
   - [ ] name-service
   - [ ] ...
 - [ ] Client for Serum
-- [ ] [Metaplex](https://github.com/gagliardetto/metaplex-go):
+- [x] [Metaplex](https://github.com/gagliardetto/metaplex-go):
   - [x] auction
   - [x] metaplex
   - [x] token-metadata
