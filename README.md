@@ -54,8 +54,12 @@ More contracts to come.
   - [ ] name-service
   - [ ] ...
 - [ ] Client for Serum
-- [ ] Metaplex clients:
-  - You can find client for all Metaplex programs ("metaplex", "auction", "token-metadata", "token-vault", "nft-candy-machine") here: https://github.com/gagliardetto/metaplex-go
+- [ ] [Metaplex](https://github.com/gagliardetto/metaplex-go):
+  - metaplex
+  - auction
+  - token-metadata
+  - token-vault
+  - nft-candy-machine
 - [ ] More programs
 
 ## Current development status
