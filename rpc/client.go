@@ -37,6 +37,7 @@ type Client struct {
 
 type JSONRPCClient interface {
 	CallForInto(ctx context.Context, out interface{}, method string, params []interface{}) error
+	CallWithCallback(ctx context.Context, method string, params []interface{}, callback func(*http.Request, *http.Response) error) error
 }
 
 // New creates a new Solana JSON RPC client.
@@ -66,6 +67,16 @@ type clientWithRateLimiting struct {
 func (wr *clientWithRateLimiting) CallForInto(ctx context.Context, out interface{}, method string, params []interface{}) error {
 	wr.rateLimiter.Take()
 	return wr.rpcClient.CallForInto(ctx, &out, method, params)
+}
+
+func (wr *clientWithRateLimiting) CallWithCallback(
+	ctx context.Context,
+	method string,
+	params []interface{},
+	callback func(*http.Request, *http.Response) error,
+) error {
+	wr.rateLimiter.Take()
+	return wr.rpcClient.CallWithCallback(ctx, method, params, callback)
 }
 
 // NewWithRateLimit creates a new rate-limitted Solana RPC client.
@@ -125,4 +136,18 @@ func newHTTP() *http.Client {
 		Timeout:   defaultTimeout,
 		Transport: gzhttp.Transport(tr),
 	}
+}
+
+// RPCCallForInto allows to access the raw RPC client and send custom requests.
+func (cl *Client) RPCCallForInto(ctx context.Context, out interface{}, method string, params []interface{}) error {
+	return cl.rpcClient.CallForInto(ctx, out, method, params)
+}
+
+func (cl *Client) RPCCallWithCallback(
+	ctx context.Context,
+	method string,
+	params []interface{},
+	callback func(*http.Request, *http.Response) error,
+) error {
+	return cl.rpcClient.CallWithCallback(ctx, method, params, callback)
 }

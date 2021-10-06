@@ -72,8 +72,6 @@ type RPCClient interface {
 	//
 	CallFor(ctx context.Context, out interface{}, method string, params ...interface{}) error
 
-	CallForInto(ctx context.Context, out interface{}, method string, params []interface{}) error
-
 	// CallBatch invokes a list of RPCRequests in a single batch request.
 	//
 	// Most convenient is to use the following form:
@@ -119,6 +117,9 @@ type RPCClient interface {
 	// - the id's must be mapped against the id's you provided
 	// - RPCPersponses is enriched with helper functions e.g.: responses.HasError() returns  true if one of the responses holds an RPCError
 	CallBatchRaw(ctx context.Context, requests RPCRequests) (RPCResponses, error)
+
+	CallForInto(ctx context.Context, out interface{}, method string, params []interface{}) error
+	CallWithCallback(ctx context.Context, method string, params []interface{}, callback func(*http.Request, *http.Response) error) error
 }
 
 // RPCRequest represents a JSON-RPC request object.
@@ -189,10 +190,10 @@ func NewRequest(method string, params ...interface{}) *RPCRequest {
 //
 // See: http://www.jsonrpc.org/specification#response_object
 type RPCResponse struct {
-	JSONRPC string      `json:"jsonrpc"`
-	Result  interface{} `json:"result,omitempty"`
-	Error   *RPCError   `json:"error,omitempty"`
-	ID      int         `json:"id"`
+	JSONRPC string             `json:"jsonrpc"`
+	Result  stdjson.RawMessage `json:"result,omitempty"`
+	Error   *RPCError          `json:"error,omitempty"`
+	ID      int                `json:"id"`
 }
 
 // RPCError represents a JSON-RPC error object if an RPC error occurred.
@@ -231,6 +232,13 @@ func (e *RPCError) Error() string {
 type HTTPError struct {
 	Code int
 	err  error
+}
+
+func NewHTTPError(code int, err error) *HTTPError {
+	return &HTTPError{
+		Code: code,
+		err:  err,
+	}
 }
 
 // Error function is provided to be used as error object.
@@ -368,6 +376,29 @@ func (client *rpcClient) CallForInto(
 	return rpcResponse.GetObject(out)
 }
 
+func (client *rpcClient) CallWithCallback(
+	ctx context.Context,
+	method string,
+	params []interface{},
+	callback func(*http.Request, *http.Response) error,
+) error {
+
+	request := &RPCRequest{
+		Method:  method,
+		JSONRPC: jsonrpcVersion,
+	}
+
+	if params != nil {
+		request.Params = params
+	}
+
+	return client.doCallWithCallbackOnHTTPResponse(
+		ctx,
+		request,
+		callback,
+	)
+}
+
 func (client *rpcClient) CallRaw(ctx context.Context, request *RPCRequest) (*RPCResponse, error) {
 
 	return client.doCall(ctx, request)
@@ -430,49 +461,71 @@ func (client *rpcClient) newRequest(ctx context.Context, req interface{}) (*http
 	return request, nil
 }
 
-func (client *rpcClient) doCall(ctx context.Context, RPCRequest *RPCRequest) (*RPCResponse, error) {
-
-	httpRequest, err := client.newRequest(ctx, RPCRequest)
-	if err != nil {
-		return nil, fmt.Errorf("rpc call %v() on %v: %v", RPCRequest.Method, httpRequest.URL.String(), err.Error())
-	}
-	httpResponse, err := client.httpClient.Do(httpRequest)
-	if err != nil {
-		return nil, fmt.Errorf("rpc call %v() on %v: %v", RPCRequest.Method, httpRequest.URL.String(), err.Error())
-	}
-	defer httpResponse.Body.Close()
+func (client *rpcClient) doCall(
+	ctx context.Context,
+	RPCRequest *RPCRequest,
+) (*RPCResponse, error) {
 
 	var rpcResponse *RPCResponse
-	decoder := json.NewDecoder(httpResponse.Body)
-	decoder.DisallowUnknownFields()
-	decoder.UseNumber()
-	err = decoder.Decode(&rpcResponse)
+	err := client.doCallWithCallbackOnHTTPResponse(
+		ctx,
+		RPCRequest,
+		func(httpRequest *http.Request, httpResponse *http.Response) error {
+			decoder := json.NewDecoder(httpResponse.Body)
+			decoder.DisallowUnknownFields()
+			decoder.UseNumber()
+			err := decoder.Decode(&rpcResponse)
 
-	// parsing error
+			// parsing error
+			if err != nil {
+				// if we have some http error, return it
+				if httpResponse.StatusCode >= 400 {
+					return &HTTPError{
+						Code: httpResponse.StatusCode,
+						err:  fmt.Errorf("rpc call %v() on %v status code: %v. could not decode body to rpc response: %v", RPCRequest.Method, httpRequest.URL.String(), httpResponse.StatusCode, err.Error()),
+					}
+				}
+				return fmt.Errorf("rpc call %v() on %v status code: %v. could not decode body to rpc response: %v", RPCRequest.Method, httpRequest.URL.String(), httpResponse.StatusCode, err.Error())
+			}
+
+			// response body empty
+			if rpcResponse == nil {
+				// if we have some http error, return it
+				if httpResponse.StatusCode >= 400 {
+					return &HTTPError{
+						Code: httpResponse.StatusCode,
+						err:  fmt.Errorf("rpc call %v() on %v status code: %v. rpc response missing", RPCRequest.Method, httpRequest.URL.String(), httpResponse.StatusCode),
+					}
+				}
+				return fmt.Errorf("rpc call %v() on %v status code: %v. rpc response missing", RPCRequest.Method, httpRequest.URL.String(), httpResponse.StatusCode)
+			}
+			return nil
+		},
+	)
 	if err != nil {
-		// if we have some http error, return it
-		if httpResponse.StatusCode >= 400 {
-			return nil, &HTTPError{
-				Code: httpResponse.StatusCode,
-				err:  fmt.Errorf("rpc call %v() on %v status code: %v. could not decode body to rpc response: %v", RPCRequest.Method, httpRequest.URL.String(), httpResponse.StatusCode, err.Error()),
-			}
-		}
-		return nil, fmt.Errorf("rpc call %v() on %v status code: %v. could not decode body to rpc response: %v", RPCRequest.Method, httpRequest.URL.String(), httpResponse.StatusCode, err.Error())
-	}
-
-	// response body empty
-	if rpcResponse == nil {
-		// if we have some http error, return it
-		if httpResponse.StatusCode >= 400 {
-			return nil, &HTTPError{
-				Code: httpResponse.StatusCode,
-				err:  fmt.Errorf("rpc call %v() on %v status code: %v. rpc response missing", RPCRequest.Method, httpRequest.URL.String(), httpResponse.StatusCode),
-			}
-		}
-		return nil, fmt.Errorf("rpc call %v() on %v status code: %v. rpc response missing", RPCRequest.Method, httpRequest.URL.String(), httpResponse.StatusCode)
+		return nil, err
 	}
 
 	return rpcResponse, nil
+}
+
+func (client *rpcClient) doCallWithCallbackOnHTTPResponse(
+	ctx context.Context,
+	RPCRequest *RPCRequest,
+	callback func(*http.Request, *http.Response) error,
+) error {
+
+	httpRequest, err := client.newRequest(ctx, RPCRequest)
+	if err != nil {
+		return fmt.Errorf("rpc call %v() on %v: %v", RPCRequest.Method, httpRequest.URL.String(), err.Error())
+	}
+	httpResponse, err := client.httpClient.Do(httpRequest)
+	if err != nil {
+		return fmt.Errorf("rpc call %v() on %v: %v", RPCRequest.Method, httpRequest.URL.String(), err.Error())
+	}
+	defer httpResponse.Body.Close()
+
+	return callback(httpRequest, httpResponse)
 }
 
 func (client *rpcClient) doBatchCall(ctx context.Context, rpcRequest []*RPCRequest) ([]*RPCResponse, error) {
@@ -586,77 +639,16 @@ func Params(params ...interface{}) interface{} {
 	return finalParams
 }
 
-// GetInt converts the rpc response to an int64 and returns it.
-//
-// If result was not an integer an error is returned.
-func (RPCResponse *RPCResponse) GetInt() (int64, error) {
-	val, ok := RPCResponse.Result.(stdjson.Number)
-	if !ok {
-		return 0, fmt.Errorf("could not parse int64 from %s", RPCResponse.Result)
-	}
-
-	i, err := val.Int64()
-	if err != nil {
-		return 0, err
-	}
-
-	return i, nil
-}
-
-// GetFloat converts the rpc response to float64 and returns it.
-//
-// If result was not an float64 an error is returned.
-func (RPCResponse *RPCResponse) GetFloat() (float64, error) {
-	val, ok := RPCResponse.Result.(stdjson.Number)
-	if !ok {
-		return 0, fmt.Errorf("could not parse float64 from %s", RPCResponse.Result)
-	}
-
-	f, err := val.Float64()
-	if err != nil {
-		return 0, err
-	}
-
-	return f, nil
-}
-
-// GetBool converts the rpc response to a bool and returns it.
-//
-// If result was not a bool an error is returned.
-func (RPCResponse *RPCResponse) GetBool() (bool, error) {
-	val, ok := RPCResponse.Result.(bool)
-	if !ok {
-		return false, fmt.Errorf("could not parse bool from %s", RPCResponse.Result)
-	}
-
-	return val, nil
-}
-
-// GetString converts the rpc response to a string and returns it.
-//
-// If result was not a string an error is returned.
-func (RPCResponse *RPCResponse) GetString() (string, error) {
-	val, ok := RPCResponse.Result.(string)
-	if !ok {
-		return "", fmt.Errorf("could not parse string from %s", RPCResponse.Result)
-	}
-
-	return val, nil
-}
-
 // GetObject converts the rpc response to an arbitrary type.
 //
 // The function works as you would expect it from json.Unmarshal()
 func (RPCResponse *RPCResponse) GetObject(toType interface{}) error {
-	js, err := json.Marshal(RPCResponse.Result)
-	if err != nil {
-		return err
+	rv := reflect.ValueOf(toType)
+	if rv.Kind() != reflect.Ptr {
+		return fmt.Errorf("expected a pointer, got a value: %s", reflect.TypeOf(toType))
 	}
-
-	err = json.Unmarshal(js, toType)
-	if err != nil {
-		return err
+	if RPCResponse.Result == nil {
+		RPCResponse.Result = []byte(`null`)
 	}
-
-	return nil
+	return json.Unmarshal(RPCResponse.Result, toType)
 }
