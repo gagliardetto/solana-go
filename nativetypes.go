@@ -19,9 +19,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"sync"
 
-	"github.com/klauspost/compress/zstd"
+	"github.com/mostynb/zstdpool-freelist"
 	"github.com/mr-tron/base58"
 )
 
@@ -174,27 +173,7 @@ func (t Data) MarshalJSON() ([]byte, error) {
 		})
 }
 
-var zstdReaderPool *sync.Pool
-
-func init() {
-	zstdReaderPool = &sync.Pool{
-		New: func() interface{} {
-			reader, _ := zstd.NewReader(nil)
-			return reader
-		},
-	}
-}
-
-var zstdWriterPool *sync.Pool
-
-func init() {
-	zstdWriterPool = &sync.Pool{
-		New: func() interface{} {
-			writer, _ := zstd.NewWriter(nil)
-			return writer
-		},
-	}
-}
+var zstdDecoderPool = zstdpool.NewDecoderPool()
 
 func (t *Data) UnmarshalJSON(data []byte) (err error) {
 	var in []string
@@ -233,12 +212,13 @@ func (t *Data) UnmarshalJSON(data []byte) (err error) {
 		if err != nil {
 			return err
 		}
-		zstdDecoder := zstdReaderPool.Get().(*zstd.Decoder)
-		zstdDecoder.Reset(nil)
-		defer func() {
-			zstdReaderPool.Put(zstdDecoder)
-		}()
-		t.Content, err = zstdDecoder.DecodeAll(rawBytes, nil)
+		dec, err := zstdDecoderPool.Get(nil)
+		if err != nil {
+			return err
+		}
+		defer zstdDecoderPool.Put(dec)
+
+		t.Content, err = dec.DecodeAll(rawBytes, nil)
 		if err != nil {
 			return err
 		}
@@ -248,6 +228,8 @@ func (t *Data) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
+var zstdEncoderPool = zstdpool.NewEncoderPool()
+
 func (t Data) String() string {
 	switch EncodingType(t.Encoding) {
 	case EncodingBase58:
@@ -255,19 +237,17 @@ func (t Data) String() string {
 	case EncodingBase64:
 		return base64.StdEncoding.EncodeToString(t.Content)
 	case EncodingBase64Zstd:
-		zstdEncoder := zstdWriterPool.Get().(*zstd.Encoder)
-		zstdEncoder.Reset(nil)
-		defer func() {
-			zstdEncoder.Close()
-			zstdWriterPool.Put(zstdEncoder)
-		}()
-		out := zstdEncoder.EncodeAll(t.Content, nil)
-		return base64.StdEncoding.EncodeToString(out)
+		enc, err := zstdEncoderPool.Get(nil)
+		if err != nil {
+			// TODO: remove panic?
+			panic(err)
+		}
+		defer zstdEncoderPool.Put(enc)
+		return base64.StdEncoding.EncodeToString(enc.EncodeAll(t.Content, nil))
 	default:
 		// TODO
 		return ""
 	}
-	return ""
 }
 
 type ByteWrapper struct {
