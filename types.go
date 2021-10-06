@@ -329,5 +329,15 @@ func (res UnixTimeSeconds) Time() time.Time {
 }
 
 func (res UnixTimeSeconds) String() string {
-	return time.Unix(int64(res), 0).String()
+	return res.Time().String()
+}
+
+type DurationSeconds int64
+
+func (res DurationSeconds) Duration() time.Duration {
+	return time.Duration(res) * time.Second
+}
+
+func (res DurationSeconds) String() string {
+	return res.Duration().String()
 }
