@@ -125,7 +125,7 @@ if err != nil {
 spew.Dump(sig)
 ```
 
-The above command will send the transaction, and wait for its conformation.
+The above command will send the transaction, and wait for its confirmation.
 
 ## Borsh encoding/decoding
 
