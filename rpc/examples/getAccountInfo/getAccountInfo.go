@@ -58,7 +58,7 @@ func main() {
 		pubKey := solana.MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt") // serum token
 		var mint token.Mint
 		// Get the account, and decode its data into the provided mint object:
-		err := client.GetAccountDataIn(
+		err := client.GetAccountDataInto(
 			context.TODO(),
 			pubKey,
 			&mint,
@@ -67,6 +67,20 @@ func main() {
 			panic(err)
 		}
 		spew.Dump(mint)
+	}
+	{
+		// // Or you can use `GetAccountDataBorsh` which does all of the above in one call but for borsh-encoded data:
+		// var metadata token_metadata.Metadata
+		// // Get the account, and decode its data into the provided metadata object:
+		// err := client.GetAccountDataBorsh(
+		//   context.TODO(),
+		//   pubKey,
+		//   &metadata,
+		// )
+		// if err != nil {
+		//   panic(err)
+		// }
+		// spew.Dump(metadata)
 	}
 	{
 		pubKey := solana.MustPublicKeyFromBase58("4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R") // raydium token

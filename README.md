@@ -1,6 +1,6 @@
 # Solana SDK library for Go
 
-[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v0.5.1?tab=doc)
+[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v1.0.1?tab=doc)
 [![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/gagliardetto/solana-go?include_prereleases&label=release-tag)](https://github.com/gagliardetto/solana-go/releases)
 [![Build Status](https://github.com/gagliardetto/solana-go/workflows/tests/badge.svg?branch=main)](https://github.com/gagliardetto/solana-go/actions?query=branch%3Amain)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/gagliardetto/solana-go/main)](https://www.tickgit.com/browse?repo=github.com/gagliardetto/solana-go&branch=main)
@@ -64,7 +64,7 @@ More contracts to come.
 
 ## Current development status
 
-There is currently **no stable release**. The SDK is actively developed and latest is `v0.5.1` which is an `alpha` release.
+There is currently **no stable release**. The SDK is actively developed and latest is `v1.0.1` which is an `alpha` release.
 
 The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/dff9c88193da142693cabebfcd3bf68fa8e8b873/docs/src/developing/clients/jsonrpc-api.md).
 
@@ -74,11 +74,9 @@ The RPC and WS client implementation is based on [this RPC spec](https://github.
 
 ## Installation
 
-> :warning: `solana-go` works using SemVer but in 0 version, which means that the 'minor' will be changed when some broken changes are introduced into the application, and the 'patch' will be changed when a new feature with new changes is added or for bug fixing. As soon as v1.0.0 be released, `solana-go` will start to use SemVer as usual.
-
 ```bash
 $ cd my-project
-$ go get github.com/gagliardetto/solana-go@v0.5.1
+$ go get github.com/gagliardetto/solana-go@v1.0.1
 ```
 
 ## Pretty-Print transactions/instructions
@@ -471,11 +469,11 @@ func main() {
     // ... which means that the supply is 9998022451.607088
   }
   {
-    // Or you can use `GetAccountDataIn` which does all of the above in one call:
+    // Or you can use `GetAccountDataInto` which does all of the above in one call:
     pubKey := solana.MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt") // serum token
     var mint token.Mint
     // Get the account, and decode its data into the provided mint object:
-    err := client.GetAccountDataIn(
+    err := client.GetAccountDataInto(
       context.TODO(),
       pubKey,
       &mint,
@@ -484,6 +482,20 @@ func main() {
       panic(err)
     }
     spew.Dump(mint)
+  }
+  {
+    // // Or you can use `GetAccountDataBorshInto` which does all of the above in one call but for borsh-encoded data:
+    // var metadata token_metadata.Metadata
+    // // Get the account, and decode its data into the provided metadata object:
+    // err := client.GetAccountDataBorshInto(
+    //   context.TODO(),
+    //   pubKey,
+    //   &metadata,
+    // )
+    // if err != nil {
+    //   panic(err)
+    // }
+    // spew.Dump(metadata)
   }
   {
     pubKey := solana.MustPublicKeyFromBase58("4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R") // raydium token

@@ -90,11 +90,11 @@ func FetchMarket(ctx context.Context, rpcCli *rpc.Client, marketAddr solana.Publ
 		return nil, fmt.Errorf("unsupported market data length: %d", dataLen)
 	}
 
-	if err := rpcCli.GetAccountDataIn(ctx, meta.MarketV2.QuoteMint, &meta.QuoteMint); err != nil {
+	if err := rpcCli.GetAccountDataInto(ctx, meta.MarketV2.QuoteMint, &meta.QuoteMint); err != nil {
 		return nil, fmt.Errorf("getting quote mint: %w", err)
 	}
 
-	if err := rpcCli.GetAccountDataIn(ctx, meta.MarketV2.BaseMint, &meta.BaseMint); err != nil {
+	if err := rpcCli.GetAccountDataInto(ctx, meta.MarketV2.BaseMint, &meta.BaseMint); err != nil {
 		return nil, fmt.Errorf("getting base token: %w", err)
 	}
 
