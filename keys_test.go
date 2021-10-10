@@ -260,3 +260,14 @@ func TestFindProgramAddress(t *testing.T) {
 		require.Equal(t, address, got)
 	}
 }
+
+func TestFindTokenMetadataAddress(t *testing.T) {
+	// Zuuper Grapes (TOILET)
+	// https://solscan.io/token/77K8mr457qxUSSNSfi4sSj5euP8DyuJJWHAUQVW8QCp3
+	mint := MustPublicKeyFromBase58("77K8mr457qxUSSNSfi4sSj5euP8DyuJJWHAUQVW8QCp3")
+	metadataPDA, bumpSeed, err := FindTokenMetadataAddress(mint)
+	require.NoError(t, err)
+	// https://solscan.io/account/GfihrEYCPrvUyrMyMQPdhGEStxa9nKEK2Wfn9iK4AZq2
+	assert.Equal(t, metadataPDA, MustPublicKeyFromBase58("GfihrEYCPrvUyrMyMQPdhGEStxa9nKEK2Wfn9iK4AZq2"))
+	assert.Equal(t, bumpSeed, uint8(0xfd))
+}
