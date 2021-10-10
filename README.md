@@ -81,6 +81,51 @@ $ cd my-project
 $ go get github.com/gagliardetto/solana-go@v0.5.1
 ```
 
+## Pretty-Print transactions/instructions
+
+![pretty-printed](https://user-images.githubusercontent.com/15271561/136708519-399c9498-3d20-48d6-89fa-bdf43aac6d83.png)
+
+Instructions can be pretty-printed with the `EncodeTree` method on a `Transaction`:
+
+```go
+tx, err := solana.NewTransaction(
+  []solana.Instruction{
+    system.NewTransferInstruction(
+      amount,
+      accountFrom.PublicKey(),
+      accountTo,
+    ).Build(),
+  },
+  recent.Value.Blockhash,
+  solana.TransactionPayer(accountFrom.PublicKey()),
+)
+
+...
+
+// Pretty print the transaction:
+tx.EncodeTree(text.NewTreeEncoder(os.Stdout, "Transfer SOL"))
+```
+
+## SendAndConfirmTransaction
+
+You can wait for a transaction confirmation using the `sne` package tools (for a complete example: [see here](#transfer-sol-from-one-wallet-to-another-wallet))
+
+```go
+// Send transaction, and wait for confirmation:
+sig, err := confirm.SendAndConfirmTransaction(
+  context.TODO(),
+  rpcClient,
+  wsClient,
+  tx,
+)
+if err != nil {
+  panic(err)
+}
+spew.Dump(sig)
+```
+
+The above command will send the transaction, and wait for its conformation.
+
 ## Examples
 
 ### Create account (wallet)
