@@ -124,6 +124,41 @@ spew.Dump(sig)
 
 The above command will send the transaction, and wait for its conformation.
 
+## Borsh encoding/decoding
+
+You can use the `github.com/gagliardetto/binary` package for encoding/decoding borsh-encoded data:
+
+Decoder:
+
+```go
+  resp, err := client.GetAccountInfo(
+    context.TODO(),
+    pubKey,
+  )
+  if err != nil {
+    panic(err)
+  }
+ 
+  borshDec := bin.NewBorshDecoder(resp.Value.Data.GetBinary())
+  var meta token_metadata.Metadata
+  err = borshDec.Decode(&meta)
+  if err != nil {
+    panic(err)
+  }
+```
+
+Encoder:
+
+```go
+buf := new(bytes.Buffer)
+borshEncoder := bin.NewBorshEncoder(buf)
+err := borshEncoder.Encode(meta)
+if err != nil {
+  panic(err)
+}
+// fmt.Print(buf.Bytes())
+```
+
 ## Examples
 
 ### Create account (wallet)
