@@ -108,7 +108,7 @@ tx.EncodeTree(text.NewTreeEncoder(os.Stdout, "Transfer SOL"))
 
 ## SendAndConfirmTransaction
 
-You can wait for a transaction confirmation using the `sne` package tools (for a complete example: [see here](#transfer-sol-from-one-wallet-to-another-wallet))
+You can wait for a transaction confirmation using the `github.com/gagliardetto/solana-go/rpc/sendAndConfirmTransaction` package tools (for a complete example: [see here](#transfer-sol-from-one-wallet-to-another-wallet))
 
 ```go
 // Send transaction, and wait for confirmation:
