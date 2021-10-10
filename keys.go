@@ -355,3 +355,13 @@ func findAssociatedTokenAddressAndBumpSeed(
 		programID,
 	)
 }
+
+// FindTokenMetadataAddress returns the token metadata program-derived address given a SPL token mint address.
+func FindTokenMetadataAddress(mint PublicKey) (PublicKey, uint8, error) {
+	seed := [][]byte{
+		[]byte("metadata"),
+		TokenMetadataProgramID[:],
+		mint[:],
+	}
+	return FindProgramAddress(seed, TokenMetadataProgramID)
+}
