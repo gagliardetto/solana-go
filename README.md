@@ -186,11 +186,11 @@ func main() {
   // Create a new RPC client:
   client := rpc.New(rpc.TestNet_RPC)
 
-  // Airdrop 100 SOL to the new account:
+  // Airdrop 5 SOL to the new account:
   out, err := client.RequestAirdrop(
     context.TODO(),
     account.PublicKey(),
-    solana.LAMPORTS_PER_SOL*100,
+    solana.LAMPORTS_PER_SOL*5,
     rpc.CommitmentFinalized,
   )
   if err != nil {
@@ -314,11 +314,11 @@ func main() {
   amount := uint64(3333)
 
   if true {
-    // Airdrop 10 sol to the account so it will have something to transfer:
+    // Airdrop 5 sol to the account so it will have something to transfer:
     out, err := rpcClient.RequestAirdrop(
       context.TODO(),
       accountFrom.PublicKey(),
-      solana.LAMPORTS_PER_SOL*10,
+      solana.LAMPORTS_PER_SOL*5,
       rpc.CommitmentFinalized,
     )
     if err != nil {
