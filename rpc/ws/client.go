@@ -78,15 +78,22 @@ func Connect(ctx context.Context, rpcEndpoint string) (c *Client, err error) {
 		for {
 			select {
 			case <-ticker.C:
-				c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-				if err := c.conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-					return
-				}
+				c.sendPing()
 			}
 		}
 	}()
 	go c.receiveMessages()
 	return c, nil
+}
+
+func (c *Client) sendPing() {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+	if err := c.conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+		return
+	}
 }
 
 func (c *Client) Close() {
