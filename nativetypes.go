@@ -43,6 +43,10 @@ func HashFromBase58(in string) (Hash, error) {
 	return Hash(tmp), nil
 }
 
+func HashFromBytes(in []byte) Hash {
+	return Hash(PublicKeyFromBytes(in))
+}
+
 func (ha Hash) MarshalJSON() ([]byte, error) {
 	return json.Marshal(base58.Encode(ha[:]))
 }
