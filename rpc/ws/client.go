@@ -97,6 +97,8 @@ func (c *Client) sendPing() {
 }
 
 func (c *Client) Close() {
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	c.conn.Close()
 }
 
