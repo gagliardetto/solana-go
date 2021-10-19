@@ -251,12 +251,13 @@ func (c *Client) closeSubscription(reqID uint64, err error) {
 }
 
 func (c *Client) unsubscribe(subID uint64, method string) error {
-	req := newRequest([]interface{}{subID}, method, map[string]interface{}{})
+	req := newRequest([]interface{}{subID}, method, nil)
 	data, err := req.encode()
 	if err != nil {
 		return fmt.Errorf("unable to encode unsubscription message for subID %d and method %s", subID, method)
 	}
 
+	c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 	err = c.conn.WriteMessage(websocket.TextMessage, data)
 	if err != nil {
 		return fmt.Errorf("unable to send unsubscription message for subID %d and method %s", subID, method)
@@ -293,6 +294,7 @@ func (c *Client) subscribe(
 	zlog.Info("added new subscription to websocket client", zap.Int("count", len(c.subscriptionByRequestID)))
 
 	zlog.Debug("writing data to conn", zap.String("data", string(data)))
+	c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 	err = c.conn.WriteMessage(websocket.TextMessage, data)
 	if err != nil {
 		return nil, fmt.Errorf("unable to write request: %w", err)
