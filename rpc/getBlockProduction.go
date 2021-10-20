@@ -28,13 +28,13 @@ type GetBlockProductionResult struct {
 type GetBlockProductionOpts struct {
 	//
 	// This parameter is optional.
-	Commitment CommitmentType
+	Commitment CommitmentType `json:"commitment,omitempty"`
 
 	// Slot range to return block production for.
 	// If parameter not provided, defaults to current epoch.
 	//
 	// This parameter is optional.
-	Range *SlotRangeRequest
+	Range *SlotRangeRequest `json:"range,omitempty"`
 
 	// Only return results for this validator identity.
 	//
