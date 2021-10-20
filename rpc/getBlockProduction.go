@@ -35,6 +35,11 @@ type GetBlockProductionOpts struct {
 	//
 	// This parameter is optional.
 	Range *SlotRangeRequest
+
+	// Only return results for this validator identity.
+	//
+	// This parameter is optional.
+	Identity *solana.PublicKey `json:"identity,omitempty"`
 }
 
 type SlotRangeRequest struct {
@@ -46,11 +51,6 @@ type SlotRangeRequest struct {
 	//
 	// This parameter is optional.
 	LastSlot *uint64 `json:"lastSlot,omitempty"`
-
-	// Only return results for this validator identity.
-	//
-	// This parameter is optional.
-	Identity *solana.PublicKey `json:"identity,omitempty"`
 }
 
 // GetBlockProduction returns recent block production information from the current or previous epoch.
@@ -81,10 +81,10 @@ func (cl *Client) GetBlockProductionWithOpts(
 			if opts.Range.LastSlot != nil {
 				rngObj["lastSlot"] = opts.Range.LastSlot
 			}
-			if opts.Range.Identity != nil {
-				rngObj["identity"] = opts.Range.Identity
-			}
 			obj["range"] = rngObj
+		}
+		if opts.Identity != nil {
+			obj["identity"] = opts.Identity
 		}
 		if len(obj) != 0 {
 			params = append(params, obj)

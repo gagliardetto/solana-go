@@ -590,8 +590,8 @@ func TestClient_GetBlockProductionWithOpts(t *testing.T) {
 			Range: &SlotRangeRequest{
 				FirstSlot: firstSlot,
 				LastSlot:  &lastSlot,
-				Identity:  &identity,
 			},
+			Identity: &identity,
 		},
 	)
 	require.NoError(t, err)
@@ -607,8 +607,8 @@ func TestClient_GetBlockProductionWithOpts(t *testing.T) {
 					"range": map[string]interface{}{
 						"firstSlot": float64(firstSlot),
 						"lastSlot":  float64(lastSlot),
-						"identity":  string(identity.String()),
 					},
+					"identity": identity.String(),
 				},
 			},
 		},
