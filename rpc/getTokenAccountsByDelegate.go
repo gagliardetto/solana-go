@@ -93,5 +93,5 @@ func (cl *Client) GetTokenAccountsByDelegate(
 
 type GetTokenAccountsResult struct {
 	RPCContext
-	Value []*Account `json:"value"`
+	Value []*GetTokenAccountsInfoResult `json:"value"`
 }
