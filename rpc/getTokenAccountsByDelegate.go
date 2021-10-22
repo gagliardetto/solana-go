@@ -93,26 +93,10 @@ func (cl *Client) GetTokenAccountsByDelegate(
 
 type GetTokenAccountsResult struct {
 	RPCContext
-	Value []*Account `json:"value"`
+	Value []*TokenAccount `json:"value"`
 }
 
-func (r *GetTokenAccountsResult) UnmarshalJSON(b []byte) error {
-	s := struct {
-		RPCContext
-		Value []struct {
-			Account Account
-		}
-	}{}
-
-	if err := json.Unmarshal(b, &s); err != nil {
-		return err
-	}
-
-	(*r).RPCContext = s.RPCContext
-	(*r).Value = make([]*Account, len(s.Value))
-
-	for i := range s.Value {
-		(*r).Value[i] = &s.Value[i].Account
-	}
-	return nil
+type TokenAccount struct {
+	Pubkey  solana.PublicKey `json:"pubkey"`
+	Account Account `json:"account"`
 }
