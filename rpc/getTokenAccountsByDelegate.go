@@ -66,6 +66,7 @@ func (cl *Client) GetTokenAccountsByDelegate(
 			params = append(params, confObj)
 		}
 	}
+	defaultEncoding := solana.EncodingBase64
 	{
 		optsObj := M{}
 		if opts != nil {
@@ -74,16 +75,23 @@ func (cl *Client) GetTokenAccountsByDelegate(
 			}
 			if opts.Encoding != "" {
 				optsObj["encoding"] = opts.Encoding
+			} else {
+				optsObj["encoding"] = defaultEncoding
 			}
 			if opts.DataSlice != nil {
 				optsObj["dataSlice"] = M{
 					"offset": opts.DataSlice.Offset,
 					"length": opts.DataSlice.Length,
 				}
+				if opts.Encoding == solana.EncodingJSONParsed {
+					return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
+				}
 			}
 			if len(optsObj) > 0 {
 				params = append(params, optsObj)
 			}
+		} else {
+			params = append(params, M{"encoding": defaultEncoding})
 		}
 	}
 
@@ -98,5 +106,5 @@ type GetTokenAccountsResult struct {
 
 type TokenAccount struct {
 	Pubkey  solana.PublicKey `json:"pubkey"`
-	Account Account `json:"account"`
+	Account Account          `json:"account"`
 }

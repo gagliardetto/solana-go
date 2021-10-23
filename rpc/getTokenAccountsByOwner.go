@@ -48,6 +48,7 @@ func (cl *Client) GetTokenAccountsByOwner(
 			params = append(params, confObj)
 		}
 	}
+	defaultEncoding := solana.EncodingBase64
 	{
 		optsObj := M{}
 		if opts != nil {
@@ -56,6 +57,8 @@ func (cl *Client) GetTokenAccountsByOwner(
 			}
 			if opts.Encoding != "" {
 				optsObj["encoding"] = opts.Encoding
+			} else {
+				optsObj["encoding"] = defaultEncoding
 			}
 			if opts.DataSlice != nil {
 				optsObj["dataSlice"] = M{
@@ -69,6 +72,8 @@ func (cl *Client) GetTokenAccountsByOwner(
 			if len(optsObj) > 0 {
 				params = append(params, optsObj)
 			}
+		} else {
+			params = append(params, M{"encoding": defaultEncoding})
 		}
 	}
 
