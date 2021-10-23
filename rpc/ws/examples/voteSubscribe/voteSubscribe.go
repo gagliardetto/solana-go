@@ -27,6 +27,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer client.Close()
 
 	// NOTE: this subscription must be enabled by the node you're connecting to.
 	// This subscription is disabled by default.

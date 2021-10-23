@@ -29,6 +29,7 @@ func main() {
 		panic(err)
 	}
 	program := solana.MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") // token
+	defer client.Close()
 
 	sub, err := client.ProgramSubscribeWithOpts(
 		program,

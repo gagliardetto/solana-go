@@ -27,6 +27,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer client.Close()
 
 	sub, err := client.RootSubscribe()
 	if err != nil {
