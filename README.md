@@ -189,7 +189,7 @@ if err != nil {
 spew.Dump(mint)
 ```
 
-The data will automatically get decoded and returned (**regardless the encoding**) when you call the `resp.Value.Data.GetBinary()` method.
+The data will **AUTOMATICALLY get decoded** and returned (**the right decoder will be used**) when you call the `resp.Value.Data.GetBinary()` method.
 
 ## Examples
 
