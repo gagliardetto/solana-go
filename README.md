@@ -27,6 +27,7 @@ More contracts to come.
   - [Pretty-Print transactions/instructions](#pretty-print-transactionsinstructions)
   - [SendAndConfirmTransaction](#sendandconfirmtransaction)
   - [Borsh encoding/decoding](#borsh-encodingdecoding)
+  - [ZSTD encoding](#zstd-account-data-encoding)
   - [Examples](#examples)
     - [Create Account/Wallet](#create-account-wallet)
     - [Load/parse keys](#loadparse-private-and-private-keys)
@@ -161,6 +162,34 @@ if err != nil {
 }
 // fmt.Print(buf.Bytes())
 ```
+
+## ZSTD account data encoding
+
+You can request account data to be encoded with base64+zstd in the `Encoding` parameter:
+
+```go
+resp, err := client.GetAccountInfoWithOpts(
+  context.TODO(),
+  pubKey,
+  &rpc.GetAccountInfoOpts{
+    Encoding:   solana.EncodingBase64Zstd,
+    Commitment: rpc.CommitmentFinalized,
+  },
+)
+if err != nil {
+  panic(err)
+}
+spew.Dump(resp)
+
+var mint token.Mint
+err = bin.NewDecoder(resp.Value.Data.GetBinary()).Decode(&mint)
+if err != nil {
+  panic(err)
+}
+spew.Dump(mint)
+```
+
+The data will automatically get decoded (**regardless the encoding**) when you call the `resp.Value.Data.GetBinary()` method.
 
 ## Examples
 
