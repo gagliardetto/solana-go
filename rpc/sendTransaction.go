@@ -73,22 +73,10 @@ func (cl *Client) SendTransactionWithOpts(
 		return solana.Signature{}, fmt.Errorf("send transaction: encode transaction: %w", err)
 	}
 
-	obj := M{
-		"encoding": "base64",
-	}
-
-	if skipPreflight {
-		obj["skipPreflight"] = skipPreflight
-	}
-	if preflightCommitment != "" {
-		obj["preflightCommitment"] = preflightCommitment
-	}
-
-	params := []interface{}{
+	return cl.SendEncodedTransactionWithOpts(
+		ctx,
 		base64.StdEncoding.EncodeToString(txData),
-		obj,
-	}
-
-	err = cl.rpcClient.CallForInto(ctx, &signature, "sendTransaction", params)
-	return
+		skipPreflight,
+		preflightCommitment,
+	)
 }
