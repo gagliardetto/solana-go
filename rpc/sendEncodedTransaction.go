@@ -18,12 +18,12 @@ package rpc
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/gagliardetto/solana-go"
 )
 
 // SendEncodedTransaction submits a signed base64 encoded transaction to the cluster for processing.
+// The only difference between this function and SignTransaction is that the latter takes a *solana.Transaction value, as the former takes a raw base64 string
 func (cl *Client) SendEncodedTransaction(
 	ctx context.Context,
 	encodedTx string,
@@ -37,14 +37,12 @@ func (cl *Client) SendEncodedTransaction(
 }
 
 // SendEncodedTransaction submits a signed base64 encoded transaction to the cluster for processing.
-// The only difference between this function and SignTransaction is that the latter takes a *solana.Transaction value, as the former takes a raw base64 string
 func (cl *Client) SendEncodedTransactionWithOpts(
 	ctx context.Context,
 	encodedTx string,
 	skipPreflight bool, // if true, skip the preflight transaction checks (default: false)
 	preflightCommitment CommitmentType, // optional; Commitment level to use for preflight (default: "finalized").
 ) (signature solana.Signature, err error) {
-	fmt.Println("SendEncodedTransaction: ", encodedTx)
 
 	obj := M{
 		"encoding": "base64",
@@ -58,7 +56,7 @@ func (cl *Client) SendEncodedTransactionWithOpts(
 	}
 
 	params := []interface{}{
-		encodedTx,
+        encodedTx,
 		obj,
 	}
 

@@ -19,7 +19,6 @@ package rpc
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 
 	"github.com/gagliardetto/solana-go"
 )
@@ -30,7 +29,6 @@ func (cl *Client) SendRawTransaction(
 	ctx context.Context,
 	rawTx []byte,
 ) (signature solana.Signature, err error) {
-	fmt.Println("SendRawTransaction: ", rawTx)
 	return cl.SendEncodedTransactionWithOpts(
 		ctx,
 		base64.StdEncoding.EncodeToString(rawTx),
