@@ -29,10 +29,25 @@ func (cl *Client) SendRawTransaction(
 	ctx context.Context,
 	rawTx []byte,
 ) (signature solana.Signature, err error) {
+	return cl.SendRawTransactionWithOpts(
+		ctx,
+		rawTx,
+		false,
+		"",
+	)
+}
+
+// SendRawTransactionWithOpts submits a raw encoded transaction as a byte array to the cluster for processing.
+func (cl *Client) SendRawTransactionWithOpts(
+	ctx context.Context,
+	rawTx []byte,
+	skipPreflight bool, // if true, skip the preflight transaction checks (default: false)
+	preflightCommitment CommitmentType, // optional; Commitment level to use for preflight (default: "finalized").
+) (signature solana.Signature, err error) {
 	return cl.SendEncodedTransactionWithOpts(
 		ctx,
 		base64.StdEncoding.EncodeToString(rawTx),
-		false,
-		"",
+		skipPreflight,
+		preflightCommitment,
 	)
 }

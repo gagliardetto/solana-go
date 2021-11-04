@@ -2464,12 +2464,10 @@ func TestClient_SendRawTransaction(t *testing.T) {
 
 	client := New(server.URL)
 
-	// rawTx := []byte(encodedTx)
 	rawTx, err := base64.StdEncoding.DecodeString(encodedTx)
 	require.NoError(t, err)
-	//rawTx[10] = 1
+
 	out, err := client.SendRawTransaction(context.Background(), rawTx)
-	panic("aiohsd")
 	require.NoError(t, err)
 
 	expected := mustJSONToInterface([]byte(responseBody))

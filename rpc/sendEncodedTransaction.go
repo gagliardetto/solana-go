@@ -36,7 +36,7 @@ func (cl *Client) SendEncodedTransaction(
 	)
 }
 
-// SendEncodedTransaction submits a signed base64 encoded transaction to the cluster for processing.
+// SendEncodedTransactionWithOpts submits a signed base64 encoded transaction to the cluster for processing.
 func (cl *Client) SendEncodedTransactionWithOpts(
 	ctx context.Context,
 	encodedTx string,
@@ -56,7 +56,7 @@ func (cl *Client) SendEncodedTransactionWithOpts(
 	}
 
 	params := []interface{}{
-        encodedTx,
+		encodedTx,
 		obj,
 	}
 
