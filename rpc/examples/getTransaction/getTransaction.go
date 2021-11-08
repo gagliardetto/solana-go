@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/davecgh/go-spew/spew"
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 )
@@ -80,5 +81,11 @@ func main() {
 		}
 		spew.Dump(out)
 		spew.Dump(out.Transaction.GetBinary())
+
+		decodedTx, err := solana.TransactionFromDecoder(bin.NewBinDecoder(out.Transaction.GetBinary()))
+		if err != nil {
+			panic(err)
+		}
+		spew.Dump(decodedTx)
 	}
 }
