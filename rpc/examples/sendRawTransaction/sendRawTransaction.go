@@ -19,8 +19,6 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 )
 
@@ -29,17 +27,12 @@ func main() {
 	client := rpc.New(endpoint)
 	base64Tx := "AfjEs3XhTc3hrxEvlnMPkm/cocvAUbFNbCl00qKnrFue6J53AhEqIFmcJJlJW3EDP5RmcMz+cNTTcZHW/WJYwAcBAAEDO8hh4VddzfcO5jbCt95jryl6y8ff65UcgukHNLWH+UQGgxCGGpgyfQVQV02EQYqm4QwzUt2qf9f1gVLM7rI4hwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6ANIF55zOZWROWRkeh+lExxZBnKFqbvIxZDLE7EijjoBAgIAAQwCAAAAOTAAAAAAAAA="
 
-	data, err := base64.StdEncoding.DecodeString(base64Tx)
+	txRaw, err := base64.StdEncoding.DecodeString(base64Tx)
 	if err != nil {
 		panic(err)
 	}
 
-	tx, err := solana.TransactionFromDecoder(bin.NewBinDecoder(data))
-	if err != nil {
-		panic(err)
-	}
-
-	sig, err := client.SendTransaction(context.TODO(), tx)
+	sig, err := client.SendRawTransaction(context.TODO(), txRaw)
 	if err != nil {
 		panic(err)
 	}

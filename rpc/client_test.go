@@ -20,10 +20,13 @@ package rpc
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	stdjson "encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/AlekSi/pointer"
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -2411,8 +2414,67 @@ func TestClient_GetTokenAccountsByOwner(t *testing.T) {
 	assert.Equal(t, expected, got, "both deserialized values must be equal")
 }
 
+var encodedTx string = "AfjEs3XhTc3hrxEvlnMPkm/cocvAUbFNbCl00qKnrFue6J53AhEqIFmcJJlJW3EDP5RmcMz+cNTTcZHW/WJYwAcBAAEDO8hh4VddzfcO5jbCt95jryl6y8ff65UcgukHNLWH+UQGgxCGGpgyfQVQV02EQYqm4QwzUt2qf9f1gVLM7rI4hwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6ANIF55zOZWROWRkeh+lExxZBnKFqbvIxZDLE7EijjoBAgIAAQwCAAAAOTAAAAAAAAA="
+var txSignatureString string = "5yUSwqQqeZLEEYKxnG4JC4XhaaBpV3RS4nQbK8bQTyjLX5btVq9A1Ja5nuJzV7Z3Zq8G6EVKFvN4DKUL6PSAxmTk"
+
 func TestClient_SendTransaction(t *testing.T) {
-	// TODO
+	responseBody := fmt.Sprintf(`"%s"`, txSignatureString)
+	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+
+	data, err := base64.StdEncoding.DecodeString(encodedTx)
+	require.NoError(t, err)
+
+	tx, err := solana.TransactionFromDecoder(bin.NewBinDecoder(data))
+	require.NoError(t, err)
+
+	client := New(server.URL)
+
+	out, err := client.SendTransaction(context.Background(), tx)
+	require.NoError(t, err)
+
+	expected := mustJSONToInterface([]byte(responseBody))
+
+	got := mustJSONToInterface(mustAnyToJSON(out))
+
+	assert.Equal(t, expected, got, "both deserialized values must be equal")
+}
+
+func TestClient_SendEncodedTransaction(t *testing.T) {
+	responseBody := fmt.Sprintf(`"%s"`, txSignatureString)
+	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+
+	client := New(server.URL)
+
+	out, err := client.SendEncodedTransaction(context.Background(), encodedTx)
+	require.NoError(t, err)
+
+	expected := mustJSONToInterface([]byte(responseBody))
+
+	got := mustJSONToInterface(mustAnyToJSON(out))
+
+	assert.Equal(t, expected, got, "both deserialized values must be equal")
+}
+
+func TestClient_SendRawTransaction(t *testing.T) {
+	responseBody := fmt.Sprintf(`"%s"`, txSignatureString)
+	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+
+	client := New(server.URL)
+
+	rawTx, err := base64.StdEncoding.DecodeString(encodedTx)
+	require.NoError(t, err)
+
+	out, err := client.SendRawTransaction(context.Background(), rawTx)
+	require.NoError(t, err)
+
+	expected := mustJSONToInterface([]byte(responseBody))
+
+	got := mustJSONToInterface(mustAnyToJSON(out))
+
+	assert.Equal(t, expected, got, "both deserialized values must be equal")
 }
 
 func TestClient_SimulateTransaction(t *testing.T) {
