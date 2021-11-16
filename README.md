@@ -26,6 +26,7 @@ More contracts to come.
   - [Installation](#installation)
   - [Pretty-Print transactions/instructions](#pretty-print-transactionsinstructions)
   - [SendAndConfirmTransaction](#sendandconfirmtransaction)
+  - [Decode an instruction data](#parsedecode-an-instruction-from-a-transaction)
   - [Borsh encoding/decoding](#borsh-encodingdecoding)
   - [ZSTD encoding](#zstd-account-data-encoding)
   - [Examples](#examples)
@@ -128,7 +129,7 @@ spew.Dump(sig)
 
 The above command will send the transaction, and wait for its confirmation.
 
-## Parse/decode an instruction from a transaction.
+## Parse/decode an instruction from a transaction
 
 ```go
 package main
