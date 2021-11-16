@@ -30,7 +30,7 @@ More contracts to come.
   - [ZSTD encoding](#zstd-account-data-encoding)
   - [Examples](#examples)
     - [Create Account/Wallet](#create-account-wallet)
-    - [Load/parse keys](#loadparse-private-and-private-keys)
+    - [Load/parse keys](#loadparse-private-and-public-keys)
     - [Transfer SOL from a wallet to another](#transfer-sol-from-one-wallet-to-another-wallet)
     - [RPC (index)](#rpc-usage-examples)
       - [RPC examples](#rpc-methods)
@@ -127,6 +127,139 @@ spew.Dump(sig)
 ```
 
 The above command will send the transaction, and wait for its confirmation.
+
+## Parse/decode an instruction from a transaction.
+
+```go
+package main
+
+import (
+  "context"
+  "encoding/base64"
+  "os"
+  "reflect"
+
+  "github.com/davecgh/go-spew/spew"
+  bin "github.com/gagliardetto/binary"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/programs/system"
+  "github.com/gagliardetto/solana-go/rpc"
+  "github.com/gagliardetto/solana-go/text"
+)
+
+func main() {
+  exampleFromGetTransaction()
+}
+
+func exampleFromBase64() {
+
+  encoded := "AfjEs3XhTc3hrxEvlnMPkm/cocvAUbFNbCl00qKnrFue6J53AhEqIFmcJJlJW3EDP5RmcMz+cNTTcZHW/WJYwAcBAAEDO8hh4VddzfcO5jbCt95jryl6y8ff65UcgukHNLWH+UQGgxCGGpgyfQVQV02EQYqm4QwzUt2qf9f1gVLM7rI4hwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6ANIF55zOZWROWRkeh+lExxZBnKFqbvIxZDLE7EijjoBAgIAAQwCAAAAOTAAAAAAAAA="
+
+  data, err := base64.StdEncoding.DecodeString(encoded)
+  if err != nil {
+    panic(err)
+  }
+
+  // parse transaction:
+  tx, err := solana.TransactionFromDecoder(bin.NewBinDecoder(data))
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(tx)
+
+  // parse a system program instruction:
+  inst, err := system.DecodeInstruction(tx.AccountMetaList(), tx.Message.Instructions[0].Data)
+  if err != nil {
+    panic(err)
+  }
+  // inst.Impl contains the specific instruction type (in this case, `inst.Impl` is a `*system.Transfer`)
+  spew.Dump(inst)
+
+  // OR
+  {
+    // There is a more general instruction decoder (you need to register a decoder for each program ID beforehand using solana.DecodeInstruction)
+    decodedInstruction, err := solana.DecodeInstruction(system.ProgramID, inst.Accounts(), tx.Message.Instructions[0].Data)
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(decodedInstruction)
+
+    // decodedInstruction == inst
+    if !reflect.DeepEqual(inst, decodedInstruction) {
+      panic("they are NOT equal (this would never happen)")
+    }
+
+    // To register other (not yet registered decoders), you can add them with
+    // `solana.RegisterInstructionDecoder` function.
+  }
+
+  {
+    _, err := tx.EncodeTree(text.NewTreeEncoder(os.Stdout, text.Bold("TEST TRANSACTION")))
+    if err != nil {
+      panic(err)
+    }
+  }
+}
+
+func exampleFromGetTransaction() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  txSig := solana.MustSignatureFromBase58("3pByJJ2ff7EQANKd2bgetmnYQxknk3QUib1xLMnrg6aCvg5hS78peaGMoceC9AFckomqrsgo38DpzrG2LPW9zj3g")
+  {
+    out, err := client.GetTransaction(
+      context.TODO(),
+      txSig,
+      &rpc.GetTransactionOpts{
+        Encoding: solana.EncodingBase64,
+      },
+    )
+    if err != nil {
+      panic(err)
+    }
+
+    tx, err := solana.TransactionFromDecoder(bin.NewBinDecoder(out.Transaction.GetBinary()))
+    if err != nil {
+      panic(err)
+    }
+    // inst.Impl contains the specific instruction type (in this case, `inst.Impl` is a `*system.Transfer`)
+    spew.Dump(tx)
+
+    // parse a system program instruction:
+    inst, err := system.DecodeInstruction(tx.AccountMetaList(), tx.Message.Instructions[0].Data)
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(inst)
+
+    // OR
+    {
+      // There is a more general instruction decoder (you need to register a decoder for each program ID beforehand using solana.DecodeInstruction)
+      decodedInstruction, err := solana.DecodeInstruction(system.ProgramID, inst.Accounts(), tx.Message.Instructions[0].Data)
+      if err != nil {
+        panic(err)
+      }
+      spew.Dump(decodedInstruction)
+
+      // decodedInstruction == inst
+      if !reflect.DeepEqual(inst, decodedInstruction) {
+        panic("they are NOT equal (this would never happen)")
+      }
+
+      // To register other (not yet registered decoders), you can add them with
+      // `solana.RegisterInstructionDecoder` function.
+    }
+
+    {
+      // pretty-print whole transaction:
+      _, err := tx.EncodeTree(text.NewTreeEncoder(os.Stdout, text.Bold("TEST TRANSACTION")))
+      if err != nil {
+        panic(err)
+      }
+    }
+  }
+}
+``` 
 
 ## Borsh encoding/decoding
 
