@@ -2160,46 +2160,6 @@ func main() {
     out, err := client.GetTransaction(
       context.TODO(),
       txSig,
-      nil,
-    )
-    if err != nil {
-      panic(err)
-    }
-    spew.Dump(out)
-    spew.Dump(out.Transaction.GetParsedTransaction())
-  }
-  {
-    out, err := client.GetTransaction(
-      context.TODO(),
-      txSig,
-      &rpc.GetTransactionOpts{
-        Encoding: solana.EncodingJSON,
-      },
-    )
-    if err != nil {
-      panic(err)
-    }
-    spew.Dump(out)
-    spew.Dump(out.Transaction.GetParsedTransaction())
-  }
-  {
-    out, err := client.GetTransaction(
-      context.TODO(),
-      txSig,
-      &rpc.GetTransactionOpts{
-        Encoding: solana.EncodingBase58,
-      },
-    )
-    if err != nil {
-      panic(err)
-    }
-    spew.Dump(out)
-    spew.Dump(out.Transaction.GetBinary())
-  }
-  {
-    out, err := client.GetTransaction(
-      context.TODO(),
-      txSig,
       &rpc.GetTransactionOpts{
         Encoding: solana.EncodingBase64,
       },
@@ -2209,6 +2169,24 @@ func main() {
     }
     spew.Dump(out)
     spew.Dump(out.Transaction.GetBinary())
+
+    decodedTx, err := solana.TransactionFromDecoder(bin.NewBinDecoder(out.Transaction.GetBinary()))
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(decodedTx)
+  }
+  {
+    out, err := client.GetTransaction(
+      context.TODO(),
+      txSig,
+      nil,
+    )
+    if err != nil {
+      panic(err)
+    }
+    spew.Dump(out)
+    spew.Dump(out.Transaction.GetParsedTransaction())
   }
 }
 ```
