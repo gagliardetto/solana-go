@@ -229,7 +229,7 @@ func main() {
 }
 ```
 
-### Load/parse private and private keys
+### Load/parse private and public keys
 
 ```go
 { 
