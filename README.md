@@ -197,7 +197,6 @@ func exampleFromGetTransaction() {
 }
 
 func decodeSystemTransfer(tx *solana.Transaction) {
-  // inst.Impl contains the specific instruction type (in this case, `inst.Impl` is a `*system.Transfer`)
   spew.Dump(tx)
 
   // we know that the first instruction of the transaction is a `system` program instruction:
@@ -208,6 +207,7 @@ func decodeSystemTransfer(tx *solana.Transaction) {
   if err != nil {
     panic(err)
   }
+  // inst.Impl contains the specific instruction type (in this case, `inst.Impl` is a `*system.Transfer`)
   spew.Dump(inst)
 
   // OR
