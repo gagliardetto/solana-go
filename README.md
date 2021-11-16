@@ -153,7 +153,6 @@ func main() {
 }
 
 func exampleFromBase64() {
-
   encoded := "AfjEs3XhTc3hrxEvlnMPkm/cocvAUbFNbCl00qKnrFue6J53AhEqIFmcJJlJW3EDP5RmcMz+cNTTcZHW/WJYwAcBAAEDO8hh4VddzfcO5jbCt95jryl6y8ff65UcgukHNLWH+UQGgxCGGpgyfQVQV02EQYqm4QwzUt2qf9f1gVLM7rI4hwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6ANIF55zOZWROWRkeh+lExxZBnKFqbvIxZDLE7EijjoBAgIAAQwCAAAAOTAAAAAAAAA="
 
   data, err := base64.StdEncoding.DecodeString(encoded)
@@ -212,7 +211,10 @@ func decodeSystemTransfer(tx *solana.Transaction) {
 
   // OR
   {
-    // There is a more general instruction decoder (you need to register a decoder for each program ID beforehand using solana.DecodeInstruction)
+    // There is a more general instruction decoder;
+    // before you can use you `solana.DecodeInstruction`,
+    // you must to register a decoder for each program ID beforehand
+    // by using `solana.RegisterInstructionDecoder`.
     decodedInstruction, err := solana.DecodeInstruction(
       system.ProgramID,
       i0.ResolveInstructionAccounts(&tx.Message),
