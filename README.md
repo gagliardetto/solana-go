@@ -208,17 +208,20 @@ func decodeSystemTransfer(tx *solana.Transaction) {
   }
   // inst.Impl contains the specific instruction type (in this case, `inst.Impl` is a `*system.Transfer`)
   spew.Dump(inst)
+  if _, ok := inst.Impl.(*system.Transfer); !ok {
+    panic("the instruction is not a *system.Transfer")
+  }
 
   // OR
   {
-    // There is a more general instruction decoder;
-    // before you can use you `solana.DecodeInstruction`,
-    // you must to register a decoder for each program ID beforehand
-    // by using `solana.RegisterInstructionDecoder`.
+    // There is a more general instruction decoder: `solana.DecodeInstruction`.
+    // But before you can use `solana.DecodeInstruction`,
+    // you must register a decoder for each program ID beforehand
+    // by using `solana.RegisterInstructionDecoder` (all solana-go program clients do it automatically with the default program IDs).
     decodedInstruction, err := solana.DecodeInstruction(
       system.ProgramID,
       i0.ResolveInstructionAccounts(&tx.Message),
-      tx.Message.Instructions[0].Data,
+      i0.Data,
     )
     if err != nil {
       panic(err)
