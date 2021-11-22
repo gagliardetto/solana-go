@@ -13,3 +13,81 @@
 // limitations under the License.
 
 package system
+
+import (
+	"encoding/binary"
+
+	bin "github.com/gagliardetto/binary"
+	"github.com/gagliardetto/solana-go"
+)
+
+type NonceAccount struct {
+	Version          uint32
+	State            uint32
+	AuthorizedPubkey solana.PublicKey
+	Nonce            solana.PublicKey
+	FeeCalculator    FeeCalculator
+}
+
+type FeeCalculator struct {
+	LamportsPerSignature uint64
+}
+
+func (obj NonceAccount) MarshalWithEncoder(encoder *bin.Encoder) (err error) {
+	err = encoder.WriteUint32(obj.Version, binary.LittleEndian)
+	if err != nil {
+		return err
+	}
+	err = encoder.WriteUint32(obj.State, binary.LittleEndian)
+	if err != nil {
+		return err
+	}
+	err = encoder.WriteBytes(obj.AuthorizedPubkey[:], false)
+	if err != nil {
+		return err
+	}
+	err = encoder.WriteBytes(obj.Nonce[:], false)
+	if err != nil {
+		return err
+	}
+	return obj.FeeCalculator.MarshalWithEncoder(encoder)
+}
+
+func (obj *NonceAccount) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
+	{
+		obj.Version, err = decoder.ReadUint32(binary.LittleEndian)
+		if err != nil {
+			return err
+		}
+	}
+	{
+		obj.State, err = decoder.ReadUint32(binary.LittleEndian)
+		if err != nil {
+			return err
+		}
+	}
+	{
+		buf, err := decoder.ReadNBytes(32)
+		if err != nil {
+			return err
+		}
+		obj.AuthorizedPubkey = solana.PublicKeyFromBytes(buf)
+	}
+	{
+		buf, err := decoder.ReadNBytes(32)
+		if err != nil {
+			return err
+		}
+		obj.Nonce = solana.PublicKeyFromBytes(buf)
+	}
+	return obj.FeeCalculator.UnmarshalWithDecoder(decoder)
+}
+
+func (obj FeeCalculator) MarshalWithEncoder(encoder *bin.Encoder) (err error) {
+	return encoder.WriteUint64(obj.LamportsPerSignature, binary.LittleEndian)
+}
+
+func (obj *FeeCalculator) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
+	obj.LamportsPerSignature, err = decoder.ReadUint64(binary.LittleEndian)
+	return err
+}
