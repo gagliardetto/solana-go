@@ -1854,9 +1854,42 @@ func TestClient_GetSupply(t *testing.T) {
 	defer closer()
 	client := New(server.URL)
 
-	out, err := client.GetSupply(
+	out, err := client.GetSupply(context.Background())
+	require.NoError(t, err)
+
+	assert.Equal(t,
+		map[string]interface{}{
+			"id":      float64(0),
+			"jsonrpc": "2.0",
+			"method":  "getSupply",
+			"params": []interface{}{
+				map[string]interface{}{
+					"commitment": string(CommitmentConfirmed),
+				},
+			},
+		},
+		server.RequestBody(t),
+	)
+
+	expected := mustJSONToInterface([]byte(responseBody))
+
+	got := mustJSONToInterface(mustAnyToJSON(out))
+
+	assert.Equal(t, expected, got, "both deserialized values must be equal")
+}
+
+func TestClient_GetSupply_CommitmentMax(t *testing.T) {
+	responseBody := `{"context":{"slot":83999524},"value":{"circulating":1370901328666198300,"nonCirculating":154690270000000,"nonCirculatingAccounts":["Br3aeVGapRb2xTq17RU2pYZCoJpWA7bq6TKBCcYtMSmt","AzHQ8Bia1grVVbcGyci7wzueSWkgvu7YZVZ4B9rkL5P6","GpYnVDgB7dzvwSgsjQFeHznjG6Kt1DLBFYrKxjGU1LuD","6ii8XC6KrfRcCR63cvJVhE73iCB1G44ZEaLW4WFYzy61","CoqCEzUA7KpCUxkV8ihGn9oru6imf6oVnjYKpa6jY5TC","CqqiPBWPqr3qN4gjiBQjWNT52eRFys5xdGdbQ69ywHfX","CND6ZjRTzaCFVdX7pSSWgjTfHZuhxqFDoUBqWBJguNoA","2qXZP8ZUCpvEd3VPow2zobf9S1db1vTBG3oqLWUANVNm","3s7wyR22skqVwwYRLiboJ9BYaEMsKkKqgetGZw7xtkgc","5TXdcD9Sq8UE2h6wSQj6HC7TYHZNqTdXPvmVZWFMsDzp","DQQGPtj7pphPHCLzzBuEyDDQByUcKGrsJdsH7SP3hAug","EAJJD6nDqtXcZ4DnQb19F9XEz8y8bRDHxbWbahatZNbL","DrKzW5koKSZp4mg4BdHLwr72MMXscd2kTiWgckCvvPXz","BhvLngiqqKeZ8rpxch2uGjeCiC88zzewoWPRuoxpp1aS","CVgyXrbEd1ctEuvq11QdpnCQVnPit8NLdhyqXQHLprM2","4bDVNTq2xJKK4WjKQ214DaYBh1NE5s2H1PvcoRuPdnSf","3ZrsTmNM6AkMcqFfv3ryfhQ2jMfqP64RQbqVyAaxqhrQ","E6HM7ny8AAY28Q8Za9RyrX7x1MyEdDkaXYFGUwoy4kM2","AVYpwVou2BhdLivAwLxKPALZQsY7aZNkNmGbP2fZw7RU","H3Ni7vG1CsmJZdTvxF7RkAf9UM5qk4RsohJsmPvtZNnu","Ga7HnuewhNo3htQxy6mgs2oM6WxuZpA9hJCnBhP75J8o","AG3m2bAibcY8raMt4oXEGqRHwX4FWKPPJVjZxn1LySDX","CsUqV42gVQLJwQsKyjWHqGkfHarxn9hcY4YeSjgaaeTd","5XdtyEDREHJXXW1CTtCsVjJRjBapAwK78ZquzvnNVRrV","3jnknRabs7G2V9dKhxd2KP85pNWXKXiedYnYxtySnQMs","8W58E8JVJjH1jCy5CeHJQgvwFXTyAVyesuXRZGbcSUGG","3bTGcGB9F98XxnrBNftmmm48JGfPgi5sYxDEKiCjQYk3","JCwT5Ygmq3VeBEbDjL8s8E82Ra2rP9bq45QfZE7Xyaq7","Es13uD2p64UVPFpEWfDtd6SERdoNR2XVgqBQBZcZSLqW","C7C8odR8oashR5Feyrq2tJKaXL18id1dSj2zbkDGL2C2","GdnSyH3YtwcxFvQrVVJMm1JhTS4QVX7MFsX56uJLUfiZ","CuatS6njAcfkFHnvai7zXCs7syA9bykXWsDCJEWfhjHG","6nN69B4uZuESZYxr9nrLDjmKRtjDZQXrehwkfQTKw62U","Hm9JW7of5i9dnrboS8pCUCSeoQUPh7JsP1rkbJnW7An4","GvpCiTgq9dmEeojCDBivoLoZqc4AkbUDACpqPMwYLWKh","GK2zqSsXLA2rwVZk347RYhh6jJpRsCA69FjLW93ZGi3B","F9MWFw8cnYVwsRq8Am1PGfFL3cQUZV37mbGoxZftzLjN","63DtkW7zuARcd185EmHAkfF44bDcC2SiTSEj2spLP3iA","GEWSkfWgHkpiLbeKaAnwvqnECGdRNf49at5nFccVey7c","DbF5Cmc4A8gSVaLCxurLoRZE93K164xF4Mjcqqe1xsHk","HKJgYGTTYYR2ZkfJKHbn58w676fKueQXmvbtpyvrSM3N","3euMq5VfpURASdXrHComyoovnfQDPgBKV8Wa4omQ3Qpd","6zw7em7uQdmMpuS9fGz8Nq9TLHa5YQhEKKwPjo5PwDK4","3o6xgkJ9sTmDeQWyfj3sxwon18fXJB9PV5LDc8sfgR4a","9LJrasfs648fi2uzmFqNVSrcCtz6xQaYC5E1BeyPHTJM","8DE8fqPfv1fp9DHyGyDFFaMjpopMgDeXspzoi9jpBJjC","FgnjRCqdtAhdLxNmhMN2zGdUjm364QQhPR2Z9C5d9wut","GHzNBbsKr43UeJ2wQpkGdmNqowZsv1xnLpq1bPNqAiHn","5q54XjQ7vDx4y6KphPeE97LUNiYGtP55spjvXAWPGBuf","4sxwau4mdqZ8zEJsfryXq4QFYnMJSCp3HWuZQod8WU5k","Hz9nydgN1k15wnwffKX7CSmZp4VFTnTwLXAEdomFGNXy","CWeRmXme7LmbaUWTZWFLt6FMnpzLCHaQLuR2TdgFn4Lq","8CUUMKYNGxdgYio5CLHRHyzMEhhVRMcqefgE6dLqnVRK","DE1bawNcRJB9rVm3buyMVfr8mBEoyyu73NBovf2oXJsJ","xQadXQiUTCCFhfHjvQx1hyJK6KVWr1w2fD6DT3cdwj7","7Np41oeYqPefeNQEHSv1UDhYrehxin3NStELsSKCT4K2","BuCEvc9ze8UoAQwwsQLy8d447C8sA4zeVtVpc6m5wQeS","CUageMFi49kzoDqtdU8NvQ4Bq3sbtJygjKDAXJ45nmAi","14FUT96s9swbmH7ZjpDvfEDywnAYy9zaNhv4xvezySGu","H1rt8KvXkNhQExTRfkY8r9wjZbZ8yCih6J4wQ5Fz9HGP","9huDUZfxoJ7wGMTffUE7vh1xePqef7gyrLJu9NApncqA","BUnRE27mYXN9p8H1Ay24GXhJC88q2CuwLoNU2v2CrW4W","H3EP5q7LL6XfqPmxLp8yBvDwgUHfvhvQxKxrq644K8d5","FwfaykN7ACnsEUDHANzGHqTGQZMcGnUSsahAHUqbdPrz","Fg12tB1tz8w6zJSQ4ZAGotWoCztdMJF9hqK8R11pakog","8UVjvYyoqP6sqcctTso3xpCdCfgTMiv3VRh7vraC2eJk","GNiz4Mq886bTNDT3pijGsu2gbw6it7sqrwncro45USeB","7W8FhaRLM2Hr9sZMXFwWbe4QqphkCnVvPDvjv7YbRuDj","CQDYc4ET2mbFhVpgj41gXahL6Exn5ZoPcGAzSHuYxwmE","2WWb1gRzuXDd5viZLQF7pNRR6Y7UiyeaPpaL35X6j3ve","3epceuFZLxwjCKhMdiigxconx8GDGH9HVDQZ8eqazaHA","8rT45mqpuDBR1vcnDc9kwP9DrZAXDR4ZeuKWw3u1gTGa","GhsotwFMH6XUrRLJCxcx62h7748N2Uq8mf87hUGkmPhg","Fgyh8EeYGZtbW8sS33YmNQnzx54WXPrJ5KWNPkCfWPot","3itU5ME8L6FDqtMiRoUiT1F7PwbkTtHBbW51YWD5jtjm","7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri","FiWYY85b58zEEcPtxe3PuqzWPjqBJXqdwgZeqSBmT9Cn","8vqrX3H2BYLaXVintse3gorPEM4TgTwTFZNN1Fm9TdYs","FbGeZS8LiPCZiFpFwdUUeF2yxXtSsdfJoHTsVMvM8STh","3ahQgaKYVhsKq5ybdxzHDD6nAgHCZNkxrNDfGo21ykUT","EziVYi3Sv5kJWxmU77PnbrT8jmkVuqwdiFLLzZpLVEn7","Ep5Y58PaSyALPrdFxDVAdfKtVdP55vApvsWjb3jSmXsG","9hknftBZAQL4f48tWfk3bUEV5YSLcYYtDRqNmpNnhCWG","6yKHERk8rsbmJxvMpPuwPs1ct3hRiP7xaJF2tvnGU6nK","8pNBEppa1VcFAsx4Hzq9CpdXUXZjUXbvQwLX2K7QsCwb","5D5NxsNVTgXHyVziwV7mDFwVDS6voaBsyyGxUbhQrhNW","FV8c2PQfsWqXUWBaiF7TSMMim5bZ5G53PCfh7eKbaz54","nGME7HgBT6tAJN1f6YuCCngpqT5cvSTndZUVLjQ4jwA","BUjkdqUuH5Lz9XzcMcR4DdEMnFG6r8QzUMBm16Rfau96","Mc5XB47H3DKJHym5RLa9mPzWv5snERsF3KNv5AauXK8","FR84wZQy3Y3j2gWz6pgETUiUoJtreMEuWfbg6573UCj9","7Y8smnoUrYKGGuDq2uaFKVxJYhojgg7DVixHyAtGTYEV","4NEb5MLmDDFCe4S9c3DacHLTHxfNwZrbk7Kojy41541h","3zFnorNhzsF3k446HB9bwb64CByzocBWaJ5JBqgN7Cez","BRz3NM1jouNETV6SBWW7Eg1EBLM2bB1vrRyMeur3cbGZ","GpxpMVhrBBBEYbEJxdR62w3daWz444V7m6dxYDZKH77D","HCV5dGFJXRrJ3jhDYA4DCeb9TEDTwGGYXtT3wHksu2Zr","8otuo6Jc7n9ceg5ESbMnsqzsk75yPwcNK7YiDz7e5Wb5","CzAHrrrHKx9Lxf6wdCMrsZkLvk74c7J2vGv8VYPUmY6v","HbZ5FfmKWNHC7uwk6TF1hVi6TCs7dtYfdjEcuPGgzFAg","Eyr9P5XsjK2NUKNCnfu39eqpGoiLFgVAv1LSQgMZCwiQ","7xJ9CLtEAcEShw9kW2gSoZkRWL566Dg12cvgzANJwbTr","1ddE4tL2WhjUE3iWBniF9HA7Yni8GWXNu5mFW7XabUC","5PLJZLJiRR9vf7d1JCCg7UuWjtyN9nkab9uok6TqSyuP","BivdSm1m8LtgfJRLS6QPdJ3oSys4DcNmstLiviB3ZVq1","6LHVCmk59bnpeNBobFkPR2GLneqVbQ4WyFuRuSAiJgMR","5khMKAcvmsFaAhoKkdg3u5abvKsmjUQNmhTNP624WB1F","5smrYwb1Hr2T8XMnvsqccTgXxuqQs14iuE8RbHFYf2Cf","5qC7uu1gHgJ4f2c6PixtYRxkzdZWR24DWcVGQR2BpBhj","8ndGYFjav6NDXvzYcxs449Aub3AxYv4vYpk89zRDwgj7","6o5v1HC7WhBnLfRHp8mQTtCP2khdXXjhuyGyYEoy2Suy","CHmdL15akDcJgBkY6BP3hzs98Dqr6wbdDC5p8odvtSbq","EMAY24PrS6rWfvpqffFCsTsFJypeeYYmtUc26wdh3Wup","6HUwuZs3PBup79UygZwyowozDNKydP33T1dt7ViFbQQr","AsrYX4FeLXnZcrjcZmrASY2Eq1jvEeQfwxtNTxS5zojA","GumSE5HsMV5HCwBTv2D2D81yy9x17aDkvobkqAfTRgmo","AzVV9ZZDxTgW4wWfJmsG6ytaHpQGSe1yz76Nyy84VbQF","CakcnaRDHka2gXyfbEd2d3xsvkJkqsLw2akB3zsN1D2S","DUS1KxwUhUyDKB4A81E8vdnTe3hSahd92Abtn9CXsEcj"],"total":1371056018936198100}}`
+	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+	client := New(server.URL)
+
+	out, err := client.GetSupplyWithOpts(
 		context.Background(),
-		CommitmentMax,
+		&GetSupplyOpts{
+			Commitment: CommitmentMax,
+			ExcludeNonCirculatingAccountsList: false,
+		},
 	)
 	require.NoError(t, err)
 
@@ -1868,6 +1901,45 @@ func TestClient_GetSupply(t *testing.T) {
 			"params": []interface{}{
 				map[string]interface{}{
 					"commitment": string(CommitmentMax),
+					"excludeNonCirculatingAccountsList": false,
+				},
+			},
+		},
+		server.RequestBody(t),
+	)
+
+	expected := mustJSONToInterface([]byte(responseBody))
+
+	got := mustJSONToInterface(mustAnyToJSON(out))
+
+	assert.Equal(t, expected, got, "both deserialized values must be equal")
+}
+
+func TestClient_GetSupply_ExcludeNonCirculatingAccounts(t *testing.T) {
+	responseBody := `{"context":{"slot":83999524},"value":{"circulating":1370901328666198300,"nonCirculating":154690270000000,
+"nonCirculatingAccounts":[],"total":1371056018936198100}}`
+	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+	client := New(server.URL)
+
+	out, err := client.GetSupplyWithOpts(
+		context.Background(),
+		&GetSupplyOpts{
+			Commitment: CommitmentConfirmed,
+			ExcludeNonCirculatingAccountsList: true,
+		},
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t,
+		map[string]interface{}{
+			"id":      float64(0),
+			"jsonrpc": "2.0",
+			"method":  "getSupply",
+			"params": []interface{}{
+				map[string]interface{}{
+					"commitment": string(CommitmentConfirmed),
+					"excludeNonCirculatingAccountsList": true,
 				},
 			},
 		},
