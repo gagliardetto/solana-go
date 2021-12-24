@@ -178,7 +178,11 @@ func (inst TransferWithSeed) MarshalWithEncoder(encoder *ag_binary.Encoder) erro
 	}
 	// Serialize `FromSeed` param:
 	{
-		err := encoder.Encode(*inst.FromSeed)
+		err := encoder.WriteUint64(uint64(len(*inst.FromSeed)), binary.LittleEndian)
+		if err != nil {
+			return err
+		}
+		err = encoder.WriteBytes([]byte(*inst.FromSeed), false)
 		if err != nil {
 			return err
 		}
@@ -203,10 +207,16 @@ func (inst *TransferWithSeed) UnmarshalWithDecoder(decoder *ag_binary.Decoder) e
 	}
 	// Deserialize `FromSeed` param:
 	{
-		err := decoder.Decode(&inst.FromSeed)
+		length, err := decoder.ReadUint64(binary.LittleEndian)
 		if err != nil {
 			return err
 		}
+		bytes, err := decoder.ReadNBytes(int(length))
+		if err != nil {
+			return err
+		}
+		value := string(bytes)
+		inst.FromSeed = &value
 	}
 	// Deserialize `FromOwner` param:
 	{

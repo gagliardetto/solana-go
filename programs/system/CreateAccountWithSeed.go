@@ -212,7 +212,11 @@ func (inst CreateAccountWithSeed) MarshalWithEncoder(encoder *ag_binary.Encoder)
 	}
 	// Serialize `Seed` param:
 	{
-		err := encoder.Encode(*inst.Seed)
+		err := encoder.WriteUint64(uint64(len(*inst.Seed)), binary.LittleEndian)
+		if err != nil {
+			return err
+		}
+		err = encoder.WriteBytes([]byte(*inst.Seed), false)
 		if err != nil {
 			return err
 		}
@@ -251,10 +255,16 @@ func (inst *CreateAccountWithSeed) UnmarshalWithDecoder(decoder *ag_binary.Decod
 	}
 	// Deserialize `Seed` param:
 	{
-		err := decoder.Decode(&inst.Seed)
+		length, err := decoder.ReadUint64(binary.LittleEndian)
 		if err != nil {
 			return err
 		}
+		bytes, err := decoder.ReadNBytes(int(length))
+		if err != nil {
+			return err
+		}
+		value := string(bytes)
+		inst.Seed = &value
 	}
 	// Deserialize `Lamports` param:
 	{
