@@ -6,6 +6,8 @@ import (
 )
 
 // IsBlockhashValid returns the balance of the account of provided publicKey.
+//
+// NEW: This method is only available in solana-core v1.9 or newer. Please use getFeeCalculatorForBlockhash for solana-core v1.8
 func (cl *Client) IsBlockhashValid(
 	ctx context.Context,
 	// Blockhash to be queried. Required.
