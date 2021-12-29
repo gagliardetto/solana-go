@@ -447,7 +447,7 @@ func (client *rpcClient) newRequest(ctx context.Context, req interface{}) (*http
 
 	request, err := http.NewRequestWithContext(ctx, "POST", client.endpoint, bytes.NewReader(body))
 	if err != nil {
-		return nil, err
+		return request, err
 	}
 
 	request.Header.Set("Content-Type", "application/json")
@@ -514,10 +514,12 @@ func (client *rpcClient) doCallWithCallbackOnHTTPResponse(
 	RPCRequest *RPCRequest,
 	callback func(*http.Request, *http.Response) error,
 ) error {
-
 	httpRequest, err := client.newRequest(ctx, RPCRequest)
 	if err != nil {
-		return fmt.Errorf("rpc call %v() on %v: %v", RPCRequest.Method, httpRequest.URL.String(), err.Error())
+		if httpRequest != nil {
+			return fmt.Errorf("rpc call %v() on %v: %v", RPCRequest.Method, httpRequest.URL.String(), err.Error())
+		}
+		return fmt.Errorf("rpc call %v(): %v", RPCRequest.Method, err.Error())
 	}
 	httpResponse, err := client.httpClient.Do(httpRequest)
 	if err != nil {
@@ -531,7 +533,10 @@ func (client *rpcClient) doCallWithCallbackOnHTTPResponse(
 func (client *rpcClient) doBatchCall(ctx context.Context, rpcRequest []*RPCRequest) ([]*RPCResponse, error) {
 	httpRequest, err := client.newRequest(ctx, rpcRequest)
 	if err != nil {
-		return nil, fmt.Errorf("rpc batch call on %v: %v", httpRequest.URL.String(), err.Error())
+		if httpRequest != nil {
+			return nil, fmt.Errorf("rpc batch call on %v: %v", httpRequest.URL.String(), err.Error())
+		}
+		return nil, fmt.Errorf("rpc batch call: %v", err.Error())
 	}
 	httpResponse, err := client.httpClient.Do(httpRequest)
 	if err != nil {
