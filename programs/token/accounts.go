@@ -14,7 +14,13 @@
 
 package token
 
-import ag_solanago "github.com/gagliardetto/solana-go"
+import (
+	"encoding/binary"
+
+	bin "github.com/gagliardetto/binary"
+	"github.com/gagliardetto/solana-go"
+	ag_solanago "github.com/gagliardetto/solana-go"
+)
 
 type Mint struct {
 	// Optional authority used to mint new tokens. The mint authority may only be provided during
@@ -33,6 +39,107 @@ type Mint struct {
 
 	// Optional authority to freeze token accounts.
 	FreezeAuthority *ag_solanago.PublicKey `bin:"optional"`
+}
+
+func (mint *Mint) UnmarshalWithDecoder(dec *bin.Decoder) (err error) {
+	{
+		v, err := dec.ReadUint32(binary.LittleEndian)
+		if err != nil {
+			return err
+		}
+		if v == 1 {
+			v, err := dec.ReadNBytes(32)
+			if err != nil {
+				return err
+			}
+			mint.MintAuthority = solana.PublicKeyFromBytes(v).ToPointer()
+		}
+	}
+	{
+		v, err := dec.ReadUint64(binary.LittleEndian)
+		if err != nil {
+			return err
+		}
+		mint.Supply = v
+	}
+	{
+		v, err := dec.ReadUint8()
+		if err != nil {
+			return err
+		}
+		mint.Decimals = v
+	}
+	{
+		v, err := dec.ReadBool()
+		if err != nil {
+			return err
+		}
+		mint.IsInitialized = v
+	}
+	{
+		v, err := dec.ReadUint32(binary.LittleEndian)
+		if err != nil {
+			return err
+		}
+		if v == 1 {
+			v, err := dec.ReadNBytes(32)
+			if err != nil {
+				return err
+			}
+			mint.FreezeAuthority = solana.PublicKeyFromBytes(v).ToPointer()
+		}
+	}
+	return nil
+}
+
+func (mint Mint) MarshalWithEncoder(encoder *bin.Encoder) (err error) {
+	{
+		if mint.MintAuthority == nil {
+			err = encoder.WriteUint32(0, binary.LittleEndian)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteUint32(1, binary.LittleEndian)
+			if err != nil {
+				return err
+			}
+			err = encoder.WriteBytes(mint.MintAuthority[:], false)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	err = encoder.WriteUint64(mint.Supply, binary.LittleEndian)
+	if err != nil {
+		return err
+	}
+	err = encoder.WriteUint8(mint.Decimals)
+	if err != nil {
+		return err
+	}
+	err = encoder.WriteBool(mint.IsInitialized)
+	if err != nil {
+		return err
+	}
+	{
+		if mint.FreezeAuthority == nil {
+			err = encoder.WriteUint32(0, binary.LittleEndian)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteUint32(1, binary.LittleEndian)
+			if err != nil {
+				return err
+			}
+			err = encoder.WriteBytes(mint.FreezeAuthority[:], false)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 type Account struct {
