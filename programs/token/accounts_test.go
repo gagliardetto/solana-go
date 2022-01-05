@@ -42,7 +42,7 @@ func TestMint(t *testing.T) {
 			buf := new(bytes.Buffer)
 			err := bin.NewBinEncoder(buf).Encode(mint)
 			require.NoError(t, err)
-			require.Equal(t, account, buf.Bytes())
+			require.Equal(t, account, buf.Bytes(), bin.FormatByteSlice(buf.Bytes()))
 		}
 	}
 }
