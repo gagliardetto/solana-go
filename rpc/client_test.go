@@ -1864,7 +1864,7 @@ func TestClient_GetSupply(t *testing.T) {
 			"method":  "getSupply",
 			"params": []interface{}{
 				map[string]interface{}{
-					"commitment": string(CommitmentConfirmed),
+					"commitment": string(CommitmentFinalized),
 				},
 			},
 		},
