@@ -21,18 +21,33 @@ import (
 )
 
 // GetSupply returns information about the current supply.
-func (cl *Client) GetSupply(
+func (cl *Client) GetSupply(ctx context.Context, commitment CommitmentType) (out *GetSupplyResult, err error) {
+	return cl.GetSupplyWithOpts(ctx, &GetSupplyOpts{Commitment: commitment})
+}
+
+// GetSupply returns information about the current supply.
+func (cl *Client) GetSupplyWithOpts(
 	ctx context.Context,
-	commitment CommitmentType, // optional
+	opts *GetSupplyOpts,
 ) (out *GetSupplyResult, err error) {
-	params := []interface{}{}
-	if commitment != "" {
-		params = append(params,
-			M{"commitment": commitment},
-		)
+	obj := M{
+		"commitment": CommitmentConfirmed,
 	}
-	err = cl.rpcClient.CallForInto(ctx, &out, "getSupply", params)
+	if opts != nil {
+		if opts.Commitment != "" {
+			obj["commitment"] = opts.Commitment
+		}
+		obj["excludeNonCirculatingAccountsList"] = opts.ExcludeNonCirculatingAccountsList
+	}
+
+	err = cl.rpcClient.CallForInto(ctx, &out, "getSupply", []interface{}{obj})
 	return
+}
+
+type GetSupplyOpts struct {
+	Commitment CommitmentType `json:"commitment,omitempty"`
+
+	ExcludeNonCirculatingAccountsList bool `json:"excludeNonCirculatingAccountsList,omitempty"`
 }
 
 type GetSupplyResult struct {
