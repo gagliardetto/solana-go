@@ -1865,6 +1865,7 @@ func TestClient_GetSupply(t *testing.T) {
 			"params": []interface{}{
 				map[string]interface{}{
 					"commitment": string(CommitmentFinalized),
+					"excludeNonCirculatingAccountsList": false,
 				},
 			},
 		},
