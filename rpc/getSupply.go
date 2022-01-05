@@ -21,8 +21,8 @@ import (
 )
 
 // GetSupply returns information about the current supply.
-func (cl *Client) GetSupply(ctx context.Context) (out *GetSupplyResult, err error) {
-	return cl.GetSupplyWithOpts(ctx, nil)
+func (cl *Client) GetSupply(ctx context.Context, commitment rpc.CommitmentType) (out *GetSupplyResult, err error) {
+	return cl.GetSupplyWithOpts(ctx, &GetSupplyOpts{Commitment: commitment})
 }
 
 // GetSupply returns information about the current supply.

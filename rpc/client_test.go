@@ -1854,7 +1854,7 @@ func TestClient_GetSupply(t *testing.T) {
 	defer closer()
 	client := New(server.URL)
 
-	out, err := client.GetSupply(context.Background())
+	out, err := client.GetSupply(context.Background(), CommitmentFinalized)
 	require.NoError(t, err)
 
 	assert.Equal(t,
