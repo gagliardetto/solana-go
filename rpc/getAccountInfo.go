@@ -30,7 +30,6 @@ func (cl *Client) GetAccountInfo(ctx context.Context, account solana.PublicKey) 
 		ctx,
 		account,
 		&GetAccountInfoOpts{
-			Encoding:   solana.EncodingBase64,
 			Commitment: "",
 			DataSlice:  nil,
 		},
@@ -93,7 +92,10 @@ func (cl *Client) GetAccountInfoWithOpts(
 	opts *GetAccountInfoOpts,
 ) (out *GetAccountInfoResult, err error) {
 
-	obj := M{}
+	obj := M{
+		// default encoding:
+		"encoding": solana.EncodingBase64,
+	}
 
 	if opts != nil {
 		if opts.Encoding != "" {
