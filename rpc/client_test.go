@@ -2477,6 +2477,46 @@ func TestClient_SendRawTransaction(t *testing.T) {
 	assert.Equal(t, expected, got, "both deserialized values must be equal")
 }
 
+func TestClient_IsBlockhashValid(t *testing.T) {
+	responseBody := `{"context":{"slot":100688709},"value":true}`
+	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+
+	client := New(server.URL)
+
+	blockhashString := "dv4ACNkpYPcE3aKmYDqZm9G5EB3J4MRoeE7WNDRBVJB"
+	blockhash := solana.MustHashFromBase58(blockhashString)
+	out, err := client.IsBlockhashValid(
+		context.Background(),
+		blockhash,
+		CommitmentMax,
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t,
+		map[string]interface{}{
+			"id":      float64(0),
+			"jsonrpc": "2.0",
+			"method":  "isBlockhashValid",
+			"params": []interface{}{
+				blockhashString,
+				map[string]interface{}{
+					"commitment": string(CommitmentMax),
+				},
+			},
+		},
+		server.RequestBody(t),
+	)
+
+	assert.Equal(t,
+		&IsValidBlockhashResult{
+			RPCContext: RPCContext{
+				Context{Slot: 100688709},
+			},
+			Value: true,
+		}, out)
+}
+
 func TestClient_SimulateTransaction(t *testing.T) {
 	// TODO
 }

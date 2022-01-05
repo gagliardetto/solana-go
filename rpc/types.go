@@ -200,6 +200,11 @@ type GetAccountInfoResult struct {
 	Value *Account `json:"value"`
 }
 
+type IsValidBlockhashResult struct {
+	RPCContext
+	Value bool `json:"value"`
+}
+
 type Account struct {
 	// Number of lamports assigned to this account
 	Lamports uint64 `json:"lamports"`
