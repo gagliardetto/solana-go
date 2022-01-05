@@ -177,11 +177,7 @@ func (inst AllocateWithSeed) MarshalWithEncoder(encoder *ag_binary.Encoder) erro
 	}
 	// Serialize `Seed` param:
 	{
-		err := encoder.WriteUint64(uint64(len(*inst.Seed)), binary.LittleEndian)
-		if err != nil {
-			return err
-		}
-		err = encoder.WriteBytes([]byte(*inst.Seed), false)
+		err := encoder.WriteRustString(*inst.Seed)
 		if err != nil {
 			return err
 		}
@@ -213,15 +209,10 @@ func (inst *AllocateWithSeed) UnmarshalWithDecoder(decoder *ag_binary.Decoder) e
 	}
 	// Deserialize `Seed` param:
 	{
-		length, err := decoder.ReadUint64(binary.LittleEndian)
+		value, err := decoder.ReadRustString()
 		if err != nil {
 			return err
 		}
-		bytes, err := decoder.ReadNBytes(int(length))
-		if err != nil {
-			return err
-		}
-		value := string(bytes)
 		inst.Seed = &value
 	}
 	// Deserialize `Space` param:
