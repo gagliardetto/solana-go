@@ -2,11 +2,6 @@ module github.com/gagliardetto/solana-go
 
 go 1.16
 
-retract (
-	v1.0.1-beta.1 // Published accidentally.
-	v1.0.0 // Published accidentally.
-)
-
 require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.4 // indirect
 	filippo.io/edwards25519 v1.0.0-rc.1
