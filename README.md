@@ -50,7 +50,7 @@ More contracts to come.
   - [ ] config
   - [ ] stake
   - [ ] vote
-  - [ ] BPF Loader
+  - [x] BPF Loader
   - [ ] Secp256k1
 - [ ] Clients for Solana Program Library (SPL)
   - [x] [SPL token](/programs/token)
@@ -262,7 +262,7 @@ Decoder:
   if err != nil {
     panic(err)
   }
- 
+
   borshDec := bin.NewBorshDecoder(resp.Value.Data.GetBinary())
   var meta token_metadata.Metadata
   err = borshDec.Decode(&meta)
@@ -352,7 +352,7 @@ func main() {
 ### Load/parse private and public keys
 
 ```go
-{ 
+{
   // Load private key from a json file generated with
   // $ solana-keygen new --outfile=standard.solana-keygen.json
   privateKey, err := solana.PrivateKeyFromSolanaKeygenFile("/path/to/standard.solana-keygen.json")
@@ -366,7 +366,7 @@ func main() {
   fmt.Println("public key:", publicKey.String())
 }
 
-{ 
+{
   // Load private key from base58:
   {
     privateKey, err := solana.PrivateKeyFromBase58("66cDvko73yAf8LYvFMM3r8vF5vJtkk7JKMgEKwkmBC86oHdq41C7i1a2vS3zE1yCcdLLk6VUatUb32ZzVjSBXtRs")
@@ -644,7 +644,7 @@ func main() {
 
     var mint token.Mint
     // Account{}.Data.GetBinary() returns the *decoded* binary data
-    // regardless the original encoding (it can handle them all). 
+    // regardless the original encoding (it can handle them all).
     err = bin.NewDecoder(resp.Value.Data.GetBinary()).Decode(&mint)
     if err != nil {
       panic(err)
