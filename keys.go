@@ -182,6 +182,11 @@ func (p PublicKey) Bytes() []byte {
 	return []byte(p[:])
 }
 
+// Check if a `Pubkey` is on the ed25519 curve.
+func (p PublicKey) IsOnCurve() bool {
+	return IsOnCurve(p[:])
+}
+
 var zeroPublicKey = PublicKey{}
 
 // IsZero returns whether the public key is zero.
@@ -281,21 +286,19 @@ func CreateWithSeed(base PublicKey, seed string, owner PublicKey) (PublicKey, er
 
 const PDA_MARKER = "ProgramDerivedAddress"
 
+var ErrMaxSeedLengthExceeded = errors.New("Max seed length exceeded")
+
 // Create a program address.
 // Ported from https://github.com/solana-labs/solana/blob/216983c50e0a618facc39aa07472ba6d23f1b33a/sdk/program/src/pubkey.rs#L204
 func CreateProgramAddress(seeds [][]byte, programID PublicKey) (PublicKey, error) {
 	if len(seeds) > MaxSeeds {
-		return PublicKey{}, errors.New("Max seed length exceeded")
+		return PublicKey{}, ErrMaxSeedLengthExceeded
 	}
 
 	for _, seed := range seeds {
 		if len(seed) > MaxSeedLength {
-			return PublicKey{}, errors.New("Max seed length exceeded")
+			return PublicKey{}, ErrMaxSeedLengthExceeded
 		}
-	}
-
-	if isNativeProgramID(programID) {
-		return PublicKey{}, fmt.Errorf("illegal owner: %s is a native program", programID)
 	}
 
 	buf := []byte{}
@@ -307,13 +310,18 @@ func CreateProgramAddress(seeds [][]byte, programID PublicKey) (PublicKey, error
 	buf = append(buf, []byte(PDA_MARKER)...)
 	hash := sha256.Sum256(buf)
 
-	_, err := new(edwards25519.Point).SetBytes(hash[:])
-	isOnCurve := err == nil
-	if isOnCurve {
+	if IsOnCurve(hash[:]) {
 		return PublicKey{}, errors.New("invalid seeds; address must fall off the curve")
 	}
 
 	return PublicKeyFromBytes(hash[:]), nil
+}
+
+// Check if the provided `b` is on the ed25519 curve.
+func IsOnCurve(b []byte) bool {
+	_, err := new(edwards25519.Point).SetBytes(b)
+	isOnCurve := err == nil
+	return isOnCurve
 }
 
 // Find a valid program address and its corresponding bump seed.
