@@ -75,39 +75,10 @@ var getTransactionsCmd = &cobra.Command{
 				return fmt.Errorf("unable to get confirmed transaction with signature %q: %s", cs.Signature, ct.Meta.Err)
 			}
 
-			fmt.Print("\nInstructions:\n-------------\n\n")
-			for _, i := range ct.Transaction.Message.Instructions {
-
-				id, err := ct.Transaction.ResolveProgramIDIndex(i.ProgramIDIndex)
-				if err != nil {
-					return fmt.Errorf("unable to resolve program ID: %w", err)
-				}
-
-				decoder := solana.InstructionDecoderRegistry[id.String()]
-				if decoder == nil {
-					fmt.Println("raw instruction:")
-					fmt.Printf("Program: %s Data: %s\n", id.String(), i.Data)
-					fmt.Println("Accounts:")
-					for _, accIndex := range i.Accounts {
-						key := ct.Transaction.Message.AccountKeys[accIndex]
-
-						fmt.Printf("%s Is Writable: %t Is Signer: %t\n", key.String(), ct.Transaction.IsWritable(key), ct.Transaction.IsSigner(key))
-					}
-					fmt.Printf("\n\n")
-					continue
-				}
-
-				decoded, err := decoder(ct.Transaction.AccountMetaList(), i.Data)
-				if err != nil {
-					return fmt.Errorf("unable to decode instruction: %w", err)
-				}
-
-				err = text.NewEncoder(os.Stdout).Encode(decoded, nil)
-				if err != nil {
-					return fmt.Errorf("unable to text encoder instruction: %w", err)
-				}
+			_, err = ct.Transaction.EncodeTree(text.NewTreeEncoder(os.Stdout, text.Bold("INSTRUCTIONS")))
+			if err != nil {
+				panic(err)
 			}
-			text.EncoderColorCyan.Print("\n\nEnd of transaction\n\n")
 		}
 
 		return nil

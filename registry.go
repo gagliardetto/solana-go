@@ -18,32 +18,75 @@
 package solana
 
 import (
+	"errors"
 	"fmt"
+	"sync"
 )
+
+var ErrInstructionDecoderNotFound = errors.New("instruction decoder not found")
 
 // InstructionDecoder receives the AccountMeta FOR THAT INSTRUCTION,
 // and not the accounts of the *Message object. Resolve with
 // CompiledInstruction.ResolveInstructionAccounts(message) beforehand.
 type InstructionDecoder func(instructionAccounts []*AccountMeta, data []byte) (interface{}, error)
 
-var InstructionDecoderRegistry = map[string]InstructionDecoder{}
+var instructionDecoderRegistry = newInstructionDecoderRegistry()
+
+type decoderRegistry struct {
+	mu       *sync.RWMutex
+	decoders map[PublicKey]InstructionDecoder
+}
+
+func newInstructionDecoderRegistry() *decoderRegistry {
+	return &decoderRegistry{
+		mu:       &sync.RWMutex{},
+		decoders: make(map[PublicKey]InstructionDecoder),
+	}
+}
+
+func (reg *decoderRegistry) Has(programID PublicKey) bool {
+	reg.mu.RLock()
+	defer reg.mu.RUnlock()
+
+	_, ok := reg.decoders[programID]
+	return ok
+}
+
+func (reg *decoderRegistry) Get(programID PublicKey) (InstructionDecoder, bool) {
+	reg.mu.RLock()
+	defer reg.mu.RUnlock()
+
+	decoder, ok := reg.decoders[programID]
+	return decoder, ok
+}
+
+// RegisterIfNew registers the provided decoder for the provided programID ONLY if there isn't
+// already a registered decoder for the programID.
+// Returns true if was successfully registered right now (non-previously registered);
+// returns false if there already was a decoder registered.
+func (reg *decoderRegistry) RegisterIfNew(programID PublicKey, decoder InstructionDecoder) bool {
+	reg.mu.Lock()
+	defer reg.mu.Unlock()
+
+	_, ok := reg.decoders[programID]
+	if ok {
+		return false
+	}
+	reg.decoders[programID] = decoder
+	return true
+}
 
 func RegisterInstructionDecoder(programID PublicKey, decoder InstructionDecoder) {
-	pid := programID.String()
-	if _, found := InstructionDecoderRegistry[pid]; found {
-		panic(fmt.Sprintf("unable to re-register instruction decoder for program %q", pid))
+	isNew := instructionDecoderRegistry.RegisterIfNew(programID, decoder)
+	if !isNew {
+		panic(fmt.Sprintf("unable to re-register instruction decoder for program %s", programID))
 	}
-
-	InstructionDecoderRegistry[pid] = decoder
 }
 
 func DecodeInstruction(programID PublicKey, accounts []*AccountMeta, data []byte) (interface{}, error) {
-	pid := programID.String()
-
-	decoder, found := InstructionDecoderRegistry[pid]
+	decoder, found := instructionDecoderRegistry.Get(programID)
 	if !found {
-		return nil, fmt.Errorf("instruction decoder not found for %s", pid)
+		return nil, ErrInstructionDecoderNotFound
 	}
-
 	return decoder(accounts, data)
 }
