@@ -311,6 +311,78 @@ spew.Dump(mint)
 
 The data will **AUTOMATICALLY get decoded** and returned (**the right decoder will be used**) when you call the `resp.Value.Data.GetBinary()` method.
 
+## Timeouts and Custom HTTP Clients
+
+You can use a timeout context:
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+defer cancel()
+acc, err := rpcClient.GetAccountInfoWithOpts(
+  ctx,
+  accountID,
+  &rpc.GetAccountInfoOpts{
+    Commitment: rpc.CommitmentProcessed,
+  },
+)
+```
+
+Or you can initialize the RPC client using a custom HTTP client using `rpc.NewWithCustomRPCClient`:
+
+```go
+func NewHTTPTransport(
+  timeout time.Duration,
+  maxIdleConnsPerHost int,
+  keepAlive time.Duration,
+) *http.Transport {
+  return &http.Transport{
+    IdleConnTimeout:     timeout,
+    MaxIdleConnsPerHost: maxIdleConnsPerHost,
+    Proxy:               http.ProxyFromEnvironment,
+    Dial: (&net.Dialer{
+      Timeout:   timeout,
+      KeepAlive: keepAlive,
+    }).Dial,
+  }
+}
+
+// NewHTTP returns a new Client from the provided config.
+func NewHTTP(
+  timeout time.Duration,
+  maxIdleConnsPerHost int,
+  keepAlive time.Duration,
+) *http.Client {
+  tr := NewHTTPTransport(
+    timeout,
+    maxIdleConnsPerHost,
+    keepAlive,
+  )
+
+  return &http.Client{
+    Timeout:   timeout,
+    Transport: tr,
+  }
+}
+
+// NewRPC creates a new Solana JSON RPC client.
+func NewRPC(rpcEndpoint string) *rpc.Client {
+  var (
+    defaultMaxIdleConnsPerHost = 10
+    defaultTimeout             = 25 * time.Second
+    defaultKeepAlive           = 180 * time.Second
+  )
+  opts := &jsonrpc.RPCClientOpts{
+    HTTPClient: NewHTTP(
+      defaultTimeout,
+      defaultMaxIdleConnsPerHost,
+      defaultKeepAlive,
+    ),
+  }
+  rpcClient := jsonrpc.NewClientWithOpts(rpcEndpoint, opts)
+  return rpc.NewWithCustomRPCClient(rpcClient)
+}
+```
+
 ## Examples
 
 ### Create account (wallet)
