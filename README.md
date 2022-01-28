@@ -29,6 +29,7 @@ More contracts to come.
   - [Decode an instruction data](#parsedecode-an-instruction-from-a-transaction)
   - [Borsh encoding/decoding](#borsh-encodingdecoding)
   - [ZSTD encoding](#zstd-account-data-encoding)
+  - [Timeouts and Custom HTTP Clients](#timeouts-and-custom-http-clients)
   - [Examples](#examples)
     - [Create Account/Wallet](#create-account-wallet)
     - [Load/parse keys](#loadparse-private-and-public-keys)
