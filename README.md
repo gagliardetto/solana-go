@@ -331,6 +331,15 @@ acc, err := rpcClient.GetAccountInfoWithOpts(
 Or you can initialize the RPC client using a custom HTTP client using `rpc.NewWithCustomRPCClient`:
 
 ```go
+import (
+  "net"
+  "net/http"
+  "time"
+
+  "github.com/gagliardetto/solana-go/rpc"
+  "github.com/gagliardetto/solana-go/rpc/jsonrpc"
+)
+
 func NewHTTPTransport(
   timeout time.Duration,
   maxIdleConnsPerHost int,
