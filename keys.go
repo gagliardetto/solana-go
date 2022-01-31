@@ -212,8 +212,8 @@ func (slice *PublicKeySlice) UniqueAppend(pubkey PublicKey) bool {
 	return false
 }
 
-func (slice *PublicKeySlice) Append(pubkey PublicKey) {
-	*slice = append(*slice, pubkey)
+func (slice *PublicKeySlice) Append(pubkeys ...PublicKey) {
+	*slice = append(*slice, pubkeys...)
 }
 
 func (slice PublicKeySlice) Has(pubkey PublicKey) bool {
@@ -223,6 +223,52 @@ func (slice PublicKeySlice) Has(pubkey PublicKey) bool {
 		}
 	}
 	return false
+}
+
+// Split splits the slice into chunks of the specified size.
+func (slice PublicKeySlice) Split(chunkSize int) []PublicKeySlice {
+	divided := make([]PublicKeySlice, 0)
+	if len(slice) == 0 || chunkSize < 1 {
+		return divided
+	}
+	if len(slice) == 1 {
+		return append(divided, slice)
+	}
+
+	for i := 0; i < len(slice); i += chunkSize {
+		end := i + chunkSize
+
+		if end > len(slice) {
+			end = len(slice)
+		}
+
+		divided = append(divided, slice[i:end])
+	}
+
+	return divided
+}
+
+// GetAddedRemovedPubkeys accepts two slices of pubkeys (`previous` and `next`), and returns
+// two slices:
+// - `added` is the slice of pubkeys that are present in `next` but NOT present in `previous`.
+// - `removed` is the slice of pubkeys that are present in `previous` but are NOT present in `next`.
+func GetAddedRemovedPubkeys(previous PublicKeySlice, next PublicKeySlice) (added PublicKeySlice, removed PublicKeySlice) {
+	added = make(PublicKeySlice, 0)
+	removed = make(PublicKeySlice, 0)
+
+	for _, prev := range previous {
+		if !next.Has(prev) {
+			removed = append(removed, prev)
+		}
+	}
+
+	for _, nx := range next {
+		if !previous.Has(nx) {
+			added = append(added, nx)
+		}
+	}
+
+	return
 }
 
 var nativeProgramIDs = PublicKeySlice{

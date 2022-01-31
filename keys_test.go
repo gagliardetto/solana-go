@@ -160,18 +160,156 @@ func TestPublicKey_MarshalText(t *testing.T) {
 }
 
 func TestPublicKeySlice(t *testing.T) {
-	slice := make(PublicKeySlice, 0)
-	require.False(t, slice.Has(BPFLoaderProgramID))
+	{
+		slice := make(PublicKeySlice, 0)
+		require.False(t, slice.Has(BPFLoaderProgramID))
 
-	slice.Append(BPFLoaderProgramID)
-	require.True(t, slice.Has(BPFLoaderProgramID))
-	require.Len(t, slice, 1)
+		slice.Append(BPFLoaderProgramID)
+		require.True(t, slice.Has(BPFLoaderProgramID))
+		require.Len(t, slice, 1)
 
-	slice.UniqueAppend(BPFLoaderProgramID)
-	require.Len(t, slice, 1)
-	slice.Append(ConfigProgramID)
-	require.Len(t, slice, 2)
-	require.True(t, slice.Has(ConfigProgramID))
+		slice.UniqueAppend(BPFLoaderProgramID)
+		require.Len(t, slice, 1)
+		slice.Append(ConfigProgramID)
+		require.Len(t, slice, 2)
+		require.True(t, slice.Has(ConfigProgramID))
+	}
+
+	{
+		slice := make(PublicKeySlice, 0)
+		{
+			require.Equal(t, []PublicKeySlice{}, slice.Split(1))
+		}
+		slice.Append(
+			SysVarRentPubkey,
+			SysVarRewardsPubkey,
+		)
+		{
+			require.Equal(t,
+				[]PublicKeySlice{},
+				slice.Split(0),
+			)
+			require.Equal(t,
+				[]PublicKeySlice{},
+				slice.Split(-333),
+			)
+		}
+		{
+			require.Equal(t,
+				[]PublicKeySlice{
+					{SysVarRentPubkey},
+					{SysVarRewardsPubkey},
+				},
+				slice.Split(1),
+			)
+		}
+		slice.Append(
+			BPFLoaderProgramID,
+			BPFLoaderDeprecatedProgramID,
+			FeatureProgramID,
+			ConfigProgramID,
+			StakeProgramID,
+			VoteProgramID,
+			SystemProgramID,
+		)
+		{
+			require.Equal(t,
+				[]PublicKeySlice{
+					{SysVarRentPubkey},
+					{SysVarRewardsPubkey},
+					{BPFLoaderProgramID},
+					{BPFLoaderDeprecatedProgramID},
+					{FeatureProgramID},
+					{ConfigProgramID},
+					{StakeProgramID},
+					{VoteProgramID},
+					{SystemProgramID},
+				},
+				slice.Split(1),
+			)
+		}
+		{
+			require.Equal(t,
+				[]PublicKeySlice{
+					{SysVarRentPubkey, SysVarRewardsPubkey},
+					{BPFLoaderProgramID, BPFLoaderDeprecatedProgramID},
+					{FeatureProgramID, ConfigProgramID},
+					{StakeProgramID, VoteProgramID},
+					{SystemProgramID},
+				},
+				slice.Split(2),
+			)
+		}
+	}
+}
+
+func TestGetAddedRemovedPubkeys(t *testing.T) {
+	{
+		previous := PublicKeySlice{}
+		next := PublicKeySlice{BPFLoaderProgramID}
+
+		added, removed := GetAddedRemovedPubkeys(previous, next)
+		require.Equal(t,
+			PublicKeySlice{BPFLoaderProgramID},
+			added,
+		)
+		require.Equal(t,
+			PublicKeySlice{},
+			removed,
+		)
+	}
+	{
+		previous := PublicKeySlice{
+			SysVarClockPubkey,
+			SysVarEpochSchedulePubkey,
+			SysVarFeesPubkey,
+			SysVarInstructionsPubkey,
+			SysVarRecentBlockHashesPubkey,
+		}
+		next := PublicKeySlice{
+			SysVarClockPubkey,
+			SysVarEpochSchedulePubkey,
+			SysVarFeesPubkey,
+			SysVarInstructionsPubkey,
+			SysVarRecentBlockHashesPubkey,
+		}
+
+		added, removed := GetAddedRemovedPubkeys(previous, next)
+		require.Equal(t,
+			PublicKeySlice{},
+			added,
+		)
+		require.Equal(t,
+			PublicKeySlice{},
+			removed,
+		)
+	}
+	{
+		previous := PublicKeySlice{
+			SysVarClockPubkey,
+			SysVarEpochSchedulePubkey,
+			SysVarFeesPubkey,
+			SysVarInstructionsPubkey,
+			SysVarRecentBlockHashesPubkey,
+		}
+		next := PublicKeySlice{
+			SysVarEpochSchedulePubkey,
+			SysVarFeesPubkey,
+			SysVarInstructionsPubkey,
+			SysVarRecentBlockHashesPubkey,
+			ConfigProgramID,
+		}
+
+		added, removed := GetAddedRemovedPubkeys(previous, next)
+		require.Equal(t,
+			PublicKeySlice{ConfigProgramID},
+			added,
+		)
+		require.Equal(t,
+			PublicKeySlice{SysVarClockPubkey},
+			removed,
+		)
+	}
 }
 
 func TestIsNativeProgramID(t *testing.T) {
