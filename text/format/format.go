@@ -48,6 +48,9 @@ func Account(name string, pubKey solana.PublicKey) string {
 }
 
 func Meta(name string, meta *solana.AccountMeta) string {
+	if meta == nil {
+		return Shakespeare(name) + ": " + "<nil>"
+	}
 	out := Shakespeare(name) + ": " + text.ColorizeBG(meta.PublicKey.String())
 	out += " ["
 	if meta.IsWritable {

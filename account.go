@@ -120,6 +120,15 @@ func (slice AccountMetaSlice) GetAccounts() (out []*AccountMeta) {
 	return out
 }
 
+// Get returns the AccountMeta at the desired index.
+// If the index is not present, it returns nil.
+func (slice AccountMetaSlice) Get(index int) *AccountMeta {
+	if len(slice) > index {
+		return slice[index]
+	}
+	return nil
+}
+
 // GetSigners returns the accounts that are signers.
 func (slice AccountMetaSlice) GetSigners() []*AccountMeta {
 	signers := make([]*AccountMeta, 0)
