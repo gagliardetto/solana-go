@@ -1,6 +1,6 @@
 # Solana SDK library for Go
 
-[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v1.0.4?tab=doc)
+[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v1.1.0?tab=doc)
 [![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/gagliardetto/solana-go?include_prereleases&label=release-tag)](https://github.com/gagliardetto/solana-go/releases)
 [![Build Status](https://github.com/gagliardetto/solana-go/workflows/tests/badge.svg?branch=main)](https://github.com/gagliardetto/solana-go/actions?query=branch%3Amain)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/gagliardetto/solana-go/main)](https://www.tickgit.com/browse?repo=github.com/gagliardetto/solana-go&branch=main)
@@ -8,9 +8,11 @@
 
 Go library to interface with Solana JSON RPC and WebSocket interfaces.
 
-Clients for Solana native programs, Solana Program Library (SPL), and [Serum DEX](https://dex.projectserum.com) are in development.
+Clients for Solana native programs, Solana Program Library (SPL), and [Serum DEX](https://dex.projectserum.com) **are in development**.
 
 More contracts to come.
+
+**If you're using/developing Solana programs written in [Anchor Framework](https://github.com/project-serum/anchor), you can use [anchor-go](https://github.com/gagliardetto/anchor-go) to generate Golang clients**
 
 <div align="center">
     <img src="https://user-images.githubusercontent.com/15271561/128235229-1d2d9116-23bb-464e-b2cc-8fb6355e3b55.png" margin="auto" height="175"/>
@@ -70,7 +72,7 @@ More contracts to come.
 
 ## Current development status
 
-There is currently **no stable release**. The SDK is actively developed and latest is `v1.0.4` which is an `alpha` release.
+There is currently **no stable release**. The SDK is actively developed and latest is `v1.1.0` which is an `alpha` release.
 
 The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/dff9c88193da142693cabebfcd3bf68fa8e8b873/docs/src/developing/clients/jsonrpc-api.md).
 
@@ -82,7 +84,7 @@ The RPC and WS client implementation is based on [this RPC spec](https://github.
 
 ```bash
 $ cd my-project
-$ go get github.com/gagliardetto/solana-go@v1.0.4
+$ go get github.com/gagliardetto/solana-go@v1.1.0
 ```
 
 ## Pretty-Print transactions/instructions
