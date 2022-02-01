@@ -23,10 +23,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
-	"strings"
 	"testing"
-
-	"github.com/gagliardetto/solana-go/diff"
 
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
@@ -261,59 +258,6 @@ func TestOrderID(t *testing.T) {
 
 	assert.Equal(t, "00000000000193c100000000000fbcc2", orderID.HexString(false))
 	assert.Equal(t, "0x00000000000193c100000000000fbcc2", orderID.HexString(true))
-
-}
-
-func Test_OpenOrderDiff(t *testing.T) {
-	oldDataFile := "testdata/serum-open-orders-old.hex"
-	newDataFile := "testdata/serum-open-orders-new.hex"
-	// is_free_slot diff => 0000f0d0ffffffffffffffffffffffff -> 0000e0d0ffffffffffffffffffffffff
-	// IsBidBits diff => d7a5032f000000000000000000000000 -> d6a5132f000000000000000000000000
-	// added orders[20] => 00000000000000000000000000000000 -> fddeacffffffffff4008000000000000 (price = 2112, seqNum = 5447938)
-
-	olDataJSONFile := strings.ReplaceAll(oldDataFile, ".hex", ".json")
-	newDataJSONFile := strings.ReplaceAll(newDataFile, ".hex", ".json")
-
-	oldOpenOrders := &OpenOrders{}
-	require.NoError(t, oldOpenOrders.Decode(readHexFile(t, oldDataFile)))
-
-	newOpenOrders := &OpenOrders{}
-	require.NoError(t, newOpenOrders.Decode(readHexFile(t, newDataFile)))
-
-	oldCnt, err := json.MarshalIndent(oldOpenOrders, "", " ")
-	require.NoError(t, err)
-	writeFile(t, olDataJSONFile, oldCnt)
-
-	newCnt, err := json.MarshalIndent(newOpenOrders, "", " ")
-	require.NoError(t, err)
-	writeFile(t, newDataJSONFile, newCnt)
-
-	hasNewOrder := false
-	newOrderIndex := uint32(0)
-	diff.Diff(oldOpenOrders, newOpenOrders, diff.OnEvent(func(event diff.Event) {
-		if match, _ := event.Match("Orders[#]"); match {
-			switch event.Kind {
-			case diff.KindAdded:
-				if index, found := event.Path.SliceIndex(); found {
-					hasNewOrder = true
-					newOrderIndex = uint32(index)
-				}
-			}
-		}
-	}))
-
-	assert.Equal(t, hasNewOrder, true)
-	assert.Equal(t, newOrderIndex, uint32(20))
-	newOrder := newOpenOrders.GetOrder(newOrderIndex)
-	assert.Equal(t, &Order{
-		ID: OrderID{
-			Hi: 0x0000000000000840,
-			Lo: 0xffffffffffacdefd,
-		},
-		Side: SideBid,
-	}, newOrder)
-	assert.Equal(t, newOrder.SeqNum(), uint64(5447938))
-	assert.Equal(t, newOrder.Price(), uint64(2112))
 
 }
 

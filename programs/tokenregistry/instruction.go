@@ -59,7 +59,7 @@ func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instructio
 func NewRegisterTokenInstruction(logo Logo, name Name, symbol Symbol, website Website, tokenMetaKey, ownerKey, tokenKey solana.PublicKey) *Instruction {
 	return &Instruction{
 		BaseVariant: bin.BaseVariant{
-			TypeID: bin.TypeIDFromUint32(0, bin.LE()),
+			TypeID: bin.TypeIDFromUint32(0, bin.LE),
 			Impl: &RegisterToken{
 				Logo:    logo,
 				Name:    name,
@@ -83,7 +83,7 @@ var _ bin.EncoderDecoder = &Instruction{}
 
 func (i *Instruction) Accounts() (out []*solana.AccountMeta) {
 	switch i.TypeID {
-	case bin.TypeIDFromUint32(0, bin.LE()):
+	case bin.TypeIDFromUint32(0, bin.LE):
 		accounts := i.Impl.(*RegisterToken).Accounts
 		out = []*solana.AccountMeta{accounts.TokenMeta, accounts.Owner, accounts.Token}
 	}

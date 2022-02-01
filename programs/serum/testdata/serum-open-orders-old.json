@@ -6,8 +6,8 @@
  "NativeBaseTokenTotal": "374817100000",
  "NativeQuoteTokenFree": "27061856249",
  "NativeQuoteTokenTotal": "398993915777",
- "FreeSlotBits": "0xffffffffffffffffffffffffd0f00000",
- "IsBidBits": "0x0000000000000000000000002f03a5d7",
+ "FreeSlotBits": "340282366920938463463374607430978633728",
+ "IsBidBits": "788768215",
  "Orders": [
   {
    "Lo": 18446744073704103085,
