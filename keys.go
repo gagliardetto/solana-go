@@ -199,6 +199,25 @@ func (p PublicKey) String() string {
 	return base58.Encode(p[:])
 }
 
+// Short returns a shortened pubkey string,
+// only including the first n chars, ellipsis, and the last n characters.
+// NOTE: this is ONLY for visual representation for humans,
+// and cannot be used for anything else.
+func (p PublicKey) Short(n int) string {
+	return formatShortPubkey(n, p)
+}
+
+func formatShortPubkey(n int, pubkey PublicKey) string {
+	if n > 10 {
+		n = 10
+	}
+	if n < 3 {
+		n = 3
+	}
+	str := pubkey.String()
+	return str[:n] + "..." + str[len(str)-n:]
+}
+
 type PublicKeySlice []PublicKey
 
 // UniqueAppend appends the provided pubkey only if it is not
