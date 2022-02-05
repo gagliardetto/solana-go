@@ -19,7 +19,6 @@ package solana
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
 
@@ -96,7 +95,7 @@ func SignatureFromBase58(in string) (out Signature, err error) {
 		return
 	}
 
-	if len(val) != 64 {
+	if len(val) != SignatureLength {
 		err = fmt.Errorf("invalid length, expected 64, got %d", len(val))
 		return
 	}
@@ -111,6 +110,22 @@ func MustSignatureFromBase58(in string) Signature {
 	}
 	return out
 }
+
+func SignatureFromBytes(in []byte) (out Signature) {
+	byteCount := len(in)
+	if byteCount == 0 {
+		return
+	}
+
+	max := SignatureLength
+	if byteCount < max {
+		max = byteCount
+	}
+
+	copy(out[:], in[0:max])
+	return
+}
+
 func (p Signature) MarshalJSON() ([]byte, error) {
 	return json.Marshal(base58.Encode(p[:]))
 }
@@ -127,8 +142,8 @@ func (p *Signature) UnmarshalJSON(data []byte) (err error) {
 		return err
 	}
 
-	if len(dat) != 64 {
-		return errors.New("invalid data length for public key")
+	if len(dat) != SignatureLength {
+		return fmt.Errorf("invalid length for Signature, expected 64, got %d", len(dat))
 	}
 
 	target := Signature{}
