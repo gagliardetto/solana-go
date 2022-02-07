@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -77,10 +78,10 @@ type GetTransactionResult struct {
 	// Estimated production time, as Unix timestamp (seconds since the Unix epoch)
 	// of when the transaction was processed.
 	// Nil if not available.
-	BlockTime *solana.UnixTimeSeconds `json:"blockTime"`
+	BlockTime *solana.UnixTimeSeconds `json:"blockTime" bin:"optional"`
 
-	Transaction *TransactionResultEnvelope `json:"transaction"`
-	Meta        *TransactionMeta           `json:"meta,omitempty"`
+	Transaction *TransactionResultEnvelope `json:"transaction" bin:"optional"`
+	Meta        *TransactionMeta           `json:"meta,omitempty" bin:"optional"`
 }
 
 // TransactionResultEnvelope will contain a *ParsedTransaction if the requested encoding is `solana.EncodingJSON`
@@ -134,8 +135,136 @@ func (dt *TransactionResultEnvelope) GetBinary() []byte {
 	return dt.asDecodedBinary.Content
 }
 
+func (dt *TransactionResultEnvelope) GetData() solana.Data {
+	return dt.asDecodedBinary
+}
+
 // GetRawJSON returns a *ParsedTransaction when the data
 // encoding is EncodingJSON.
 func (dt *TransactionResultEnvelope) GetParsedTransaction() *ParsedTransaction {
 	return dt.asParsedTransaction
+}
+
+func (obj TransactionResultEnvelope) MarshalWithEncoder(encoder *bin.Encoder) (err error) {
+	return encoder.Encode(obj.asDecodedBinary)
+}
+
+func (obj *TransactionResultEnvelope) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
+	return decoder.Decode(&obj.asDecodedBinary)
+}
+
+func (obj GetTransactionResult) MarshalWithEncoder(encoder *bin.Encoder) (err error) {
+	err = encoder.WriteUint64(obj.Slot, bin.LE)
+	if err != nil {
+		return err
+	}
+	{
+		if obj.BlockTime == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = encoder.WriteInt64(int64(*obj.BlockTime), bin.LE)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	{
+		if obj.Transaction == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			err = obj.Transaction.MarshalWithEncoder(encoder)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	{
+		if obj.Meta == nil {
+			err = encoder.WriteBool(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = encoder.WriteBool(true)
+			if err != nil {
+				return err
+			}
+			// NOTE: storing as JSON bytes:
+			buf, err := json.Marshal(obj.Meta)
+			if err != nil {
+				return err
+			}
+			err = encoder.WriteBytes(buf, true)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (obj *GetTransactionResult) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
+	// Deserialize `Slot`:
+	obj.Slot, err = decoder.ReadUint64(bin.LE)
+	if err != nil {
+		return err
+	}
+	// Deserialize `BlockTime` (optional):
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = decoder.Decode(&obj.BlockTime)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			obj.Transaction = new(TransactionResultEnvelope)
+			err = obj.Transaction.UnmarshalWithDecoder(decoder)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	{
+		ok, err := decoder.ReadBool()
+		if err != nil {
+			return err
+		}
+		if ok {
+			// NOTE: storing as JSON bytes:
+			buf, err := decoder.ReadByteSlice()
+			if err != nil {
+				return err
+			}
+			err = json.Unmarshal(buf, &obj.Meta)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

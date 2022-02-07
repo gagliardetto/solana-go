@@ -142,7 +142,7 @@ type TransactionMeta struct {
 
 	// List of inner instructions or omitted if inner instruction recording
 	// was not yet enabled during this transaction
-	InnerInstructions []InnerInstruction `json:"innerInstructions,omitempty"`
+	InnerInstructions []InnerInstruction `json:"innerInstructions"`
 
 	// List of token balances from before the transaction was processed
 	// or omitted if token balance recording was not yet enabled during this transaction
@@ -159,7 +159,7 @@ type TransactionMeta struct {
 	// DEPRECATED: Transaction status.
 	Status DeprecatedTransactionMetaStatus `json:"status"`
 
-	Rewards []BlockReward `json:"rewards,omitempty"`
+	Rewards []BlockReward `json:"rewards"`
 }
 
 type InnerInstruction struct {

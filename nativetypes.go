@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 
+	bin "github.com/gagliardetto/binary"
 	"github.com/mostynb/zstdpool-freelist"
 	"github.com/mr-tron/base58"
 )
@@ -270,6 +271,33 @@ func (t Data) String() string {
 		// TODO
 		return ""
 	}
+}
+
+func (obj Data) MarshalWithEncoder(encoder *bin.Encoder) (err error) {
+	err = encoder.WriteBytes(obj.Content, true)
+	if err != nil {
+		return err
+	}
+	err = encoder.WriteString(string(obj.Encoding))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *Data) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
+	obj.Content, err = decoder.ReadByteSlice()
+	if err != nil {
+		return err
+	}
+	{
+		enc, err := decoder.ReadString()
+		if err != nil {
+			return err
+		}
+		obj.Encoding = EncodingType(enc)
+	}
+	return nil
 }
 
 type ByteWrapper struct {
