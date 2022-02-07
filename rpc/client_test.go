@@ -354,10 +354,11 @@ func TestClient_GetBlock(t *testing.T) {
 	// TODO:
 	// - test also when requesting only signatures
 
+	blockTime := solana.UnixTimeSeconds(1625227950)
 	assert.Equal(t,
 		&GetBlockResult{
 			BlockHeight:       pointer.ToUint64(69213636),
-			BlockTime:         pointer.ToInt64(1625227950),
+			BlockTime:         &blockTime,
 			Blockhash:         solana.MustHashFromBase58("5M77sHdwzH6rckuQwF8HL1w52n7hjrh4GVTFiF6T8QyB"),
 			ParentSlot:        83987983,
 			PreviousBlockhash: solana.MustHashFromBase58("Aq9jSXe1jRzfiaBcRFLe4wm7j499vWVEeFQrq5nnXfZN"),
@@ -1864,7 +1865,7 @@ func TestClient_GetSupply(t *testing.T) {
 			"method":  "getSupply",
 			"params": []interface{}{
 				map[string]interface{}{
-					"commitment": string(CommitmentFinalized),
+					"commitment":                        string(CommitmentFinalized),
 					"excludeNonCirculatingAccountsList": false,
 				},
 			},
@@ -1888,7 +1889,7 @@ func TestClient_GetSupply_CommitmentMax(t *testing.T) {
 	out, err := client.GetSupplyWithOpts(
 		context.Background(),
 		&GetSupplyOpts{
-			Commitment: CommitmentMax,
+			Commitment:                        CommitmentMax,
 			ExcludeNonCirculatingAccountsList: false,
 		},
 	)
@@ -1901,7 +1902,7 @@ func TestClient_GetSupply_CommitmentMax(t *testing.T) {
 			"method":  "getSupply",
 			"params": []interface{}{
 				map[string]interface{}{
-					"commitment": string(CommitmentMax),
+					"commitment":                        string(CommitmentMax),
 					"excludeNonCirculatingAccountsList": false,
 				},
 			},
@@ -1926,7 +1927,7 @@ func TestClient_GetSupply_ExcludeNonCirculatingAccounts(t *testing.T) {
 	out, err := client.GetSupplyWithOpts(
 		context.Background(),
 		&GetSupplyOpts{
-			Commitment: CommitmentConfirmed,
+			Commitment:                        CommitmentConfirmed,
 			ExcludeNonCirculatingAccountsList: true,
 		},
 	)
@@ -1939,7 +1940,7 @@ func TestClient_GetSupply_ExcludeNonCirculatingAccounts(t *testing.T) {
 			"method":  "getSupply",
 			"params": []interface{}{
 				map[string]interface{}{
-					"commitment": string(CommitmentConfirmed),
+					"commitment":                        string(CommitmentConfirmed),
 					"excludeNonCirculatingAccountsList": true,
 				},
 			},

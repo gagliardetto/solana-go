@@ -57,11 +57,11 @@ type GetConfirmedBlockResult struct {
 	// could be zeroes if ledger was clean-up and this is unavailable
 	PreviousBlockhash solana.Hash `json:"previousBlockhash"`
 
-	ParentSlot   uint64                `json:"parentSlot"`
-	Transactions []TransactionWithMeta `json:"transactions"`
-	Signatures   []solana.Signature    `json:"signatures"`
-	Rewards      []BlockReward         `json:"rewards"`
-	BlockTime    *uint64               `json:"blockTime,omitempty"`
+	ParentSlot   uint64                  `json:"parentSlot"`
+	Transactions []TransactionWithMeta   `json:"transactions"`
+	Signatures   []solana.Signature      `json:"signatures"`
+	Rewards      []BlockReward           `json:"rewards"`
+	BlockTime    *solana.UnixTimeSeconds `json:"blockTime,omitempty"`
 }
 
 type BlockReward struct {
