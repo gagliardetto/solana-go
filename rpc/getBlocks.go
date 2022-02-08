@@ -30,7 +30,7 @@ func (cl *Client) GetBlocks(
 	startSlot uint64,
 	endSlot *uint64, // optional
 	commitment CommitmentType, // optional
-) (out *BlocksResult, err error) {
+) (out BlocksResult, err error) {
 	params := []interface{}{startSlot}
 	if endSlot != nil {
 		params = append(params, endSlot)

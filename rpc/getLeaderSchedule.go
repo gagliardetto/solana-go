@@ -23,7 +23,7 @@ import (
 // GetLeaderSchedule returns the leader schedule for current epoch.
 func (cl *Client) GetLeaderSchedule(
 	ctx context.Context,
-) (out *GetLeaderScheduleResult, err error) {
+) (out GetLeaderScheduleResult, err error) {
 	return cl.GetLeaderScheduleWithOpts(
 		ctx,
 		nil,
@@ -46,7 +46,7 @@ type GetLeaderScheduleOpts struct {
 func (cl *Client) GetLeaderScheduleWithOpts(
 	ctx context.Context,
 	opts *GetLeaderScheduleOpts,
-) (out *GetLeaderScheduleResult, err error) {
+) (out GetLeaderScheduleResult, err error) {
 	params := []interface{}{}
 	if opts != nil {
 		if opts.Epoch != nil {
