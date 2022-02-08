@@ -356,7 +356,7 @@ func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
 // To disable colors, set "github.com/gagliardetto/solana-go/text".DisableColors = true
 func (tx *Transaction) String() string {
 	buf := new(bytes.Buffer)
-	_, err := tx.EncodeTree(text.NewTreeEncoder(buf, text.Bold("")))
+	_, err := tx.EncodeTree(text.NewTreeEncoder(buf, ""))
 	if err != nil {
 		panic(err)
 	}
