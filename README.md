@@ -91,7 +91,7 @@ $ go get github.com/gagliardetto/solana-go@v1.1.0
 
 ![pretty-printed](https://user-images.githubusercontent.com/15271561/136708519-399c9498-3d20-48d6-89fa-bdf43aac6d83.png)
 
-Instructions can be pretty-printed with the `EncodeTree` method on a `Transaction`:
+Instructions can be pretty-printed with the `String()` method on a `Transaction`:
 
 ```go
 tx, err := solana.NewTransaction(
@@ -109,7 +109,9 @@ tx, err := solana.NewTransaction(
 ...
 
 // Pretty print the transaction:
-tx.EncodeTree(text.NewTreeEncoder(os.Stdout, "Transfer SOL"))
+fmt.Println(tx.String())
+// OR you can choose a destination and a title:
+// tx.EncodeTree(text.NewTreeEncoder(os.Stdout, "Transfer SOL"))
 ```
 
 ## SendAndConfirmTransaction
