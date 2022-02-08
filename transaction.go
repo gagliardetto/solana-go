@@ -18,6 +18,7 @@
 package solana
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"sort"
@@ -349,6 +350,15 @@ func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
 	}
 	tx.EncodeToTree(encoder)
 	return encoder.WriteString(encoder.Tree.String())
+}
+
+func (tx *Transaction) String() string {
+	buf := new(bytes.Buffer)
+	_, err := tx.EncodeTree(text.NewTreeEncoder(buf, text.Bold("")))
+	if err != nil {
+		panic(err)
+	}
+	return buf.String()
 }
 
 func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
