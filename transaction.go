@@ -30,6 +30,70 @@ import (
 	"go.uber.org/zap"
 )
 
+type Transaction struct {
+	// A list of base-58 encoded signatures applied to the transaction.
+	// The list is always of length `message.header.numRequiredSignatures` and not empty.
+	// The signature at index `i` corresponds to the public key at index
+	// `i` in `message.account_keys`. The first one is used as the transaction id.
+	Signatures []Signature `json:"signatures"`
+
+	// Defines the content of the transaction.
+	Message Message `json:"message"`
+}
+
+var _ bin.EncoderDecoder = &Transaction{}
+
+func (t *Transaction) TouchAccount(account PublicKey) bool   { return t.Message.TouchAccount(account) }
+func (t *Transaction) IsSigner(account PublicKey) bool       { return t.Message.IsSigner(account) }
+func (t *Transaction) IsWritable(account PublicKey) bool     { return t.Message.IsWritable(account) }
+func (t *Transaction) AccountMetaList() (out []*AccountMeta) { return t.Message.AccountMetaList() }
+func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, error) {
+	return t.Message.ResolveProgramIDIndex(programIDIndex)
+}
+
+func TransactionFromDecoder(decoder *bin.Decoder) (*Transaction, error) {
+	var out *Transaction
+	err := decoder.Decode(&out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func MustTransactionFromDecoder(decoder *bin.Decoder) *Transaction {
+	out, err := TransactionFromDecoder(decoder)
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
+
+type CompiledInstruction struct {
+	// Index into the message.accountKeys array indicating the program account that executes this instruction.
+	// NOTE: it is actually a uint8, but using a uint16 because uint8 is treated as a byte everywhere,
+	// and that can be an issue.
+	ProgramIDIndex uint16 `json:"programIdIndex"`
+
+	AccountCount bin.Varuint16 `json:"-" bin:"sizeof=Accounts"`
+	DataLength   bin.Varuint16 `json:"-" bin:"sizeof=Data"`
+
+	// List of ordered indices into the message.accountKeys array indicating which accounts to pass to the program.
+	// NOTE: it is actually a []uint8, but using a uint16 because []uint8 is treated as a []byte everywhere,
+	// and that can be an issue.
+	Accounts []uint16 `json:"accounts"`
+
+	// The program input data encoded in a base-58 string.
+	Data Base58 `json:"data"`
+}
+
+func (ci *CompiledInstruction) ResolveInstructionAccounts(message *Message) (out []*AccountMeta) {
+	metas := message.AccountMetaList()
+	for _, acct := range ci.Accounts {
+		out = append(out, metas[acct])
+	}
+	return
+}
+
 type Instruction interface {
 	ProgramID() PublicKey     // the programID the instruction acts on
 	Accounts() []*AccountMeta // returns the list of accounts the instructions requires
