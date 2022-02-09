@@ -110,8 +110,8 @@ func (slice *AccountMetaSlice) SetAccounts(accounts []*AccountMeta) error {
 	return nil
 }
 
-func (slice AccountMetaSlice) GetAccounts() (out []*AccountMeta) {
-	out = make([]*AccountMeta, 0)
+func (slice AccountMetaSlice) GetAccounts() []*AccountMeta {
+	out := make([]*AccountMeta, 0, len(slice))
 	for i := range slice {
 		if slice[i] != nil {
 			out = append(out, slice[i])
@@ -131,13 +131,22 @@ func (slice AccountMetaSlice) Get(index int) *AccountMeta {
 
 // GetSigners returns the accounts that are signers.
 func (slice AccountMetaSlice) GetSigners() []*AccountMeta {
-	signers := make([]*AccountMeta, 0)
+	signers := make([]*AccountMeta, 0, len(slice))
 	for _, ac := range slice {
 		if ac.IsSigner {
 			signers = append(signers, ac)
 		}
 	}
 	return signers
+}
+
+// GetKeys returns the pubkeys of all AccountMeta.
+func (slice AccountMetaSlice) GetKeys() PublicKeySlice {
+	keys := make(PublicKeySlice, 0, len(slice))
+	for _, ac := range slice {
+		keys = append(keys, ac.PublicKey)
+	}
+	return keys
 }
 
 func (slice AccountMetaSlice) Len() int {

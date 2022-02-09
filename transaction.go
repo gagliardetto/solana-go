@@ -463,3 +463,30 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 		}
 	})
 }
+
+// VerifySignatures verifies all the signatures in the transaction
+// against the pubkeys of the signers.
+func (tx *Transaction) VerifySignatures() error {
+	msg, err := tx.Message.MarshalBinary()
+	if err != nil {
+		return err
+	}
+
+	signers := tx.Message.Signers()
+
+	if len(signers) != len(tx.Signatures) {
+		return fmt.Errorf(
+			"got %v signers, but %v signatures",
+			len(signers),
+			len(tx.Signatures),
+		)
+	}
+
+	for i, sig := range tx.Signatures {
+		if !sig.Verify(signers[i], msg) {
+			return fmt.Errorf("invalid signature by %s", signers[i].String())
+		}
+	}
+
+	return nil
+}

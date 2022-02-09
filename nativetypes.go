@@ -18,6 +18,7 @@
 package solana
 
 import (
+	"crypto/ed25519"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -151,6 +152,10 @@ func (p *Signature) UnmarshalJSON(data []byte) (err error) {
 	copy(target[:], dat)
 	*p = target
 	return
+}
+
+func (s Signature) Verify(pubkey PublicKey, msg []byte) bool {
+	return ed25519.Verify(pubkey[:], msg, s[:])
 }
 
 func (p Signature) String() string {

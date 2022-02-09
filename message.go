@@ -186,13 +186,35 @@ func (mx *Message) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	return nil
 }
 
-func (m *Message) AccountMetaList() (out []*AccountMeta) {
-	for _, a := range m.AccountKeys {
-		out = append(out, &AccountMeta{
+func (m *Message) AccountMetaList() AccountMetaSlice {
+	out := make(AccountMetaSlice, len(m.AccountKeys))
+	for i, a := range m.AccountKeys {
+		out[i] = &AccountMeta{
 			PublicKey:  a,
 			IsSigner:   m.IsSigner(a),
 			IsWritable: m.IsWritable(a),
-		})
+		}
+	}
+	return out
+}
+
+// Signers returns the pubkeys of all accounts that are signers.
+func (m *Message) Signers() PublicKeySlice {
+	out := make(PublicKeySlice, 0, len(m.AccountKeys))
+	for _, a := range m.AccountKeys {
+		if m.IsSigner(a) {
+			out = append(out, a)
+		}
+	}
+	return out
+}
+
+// Writable returns the pubkeys of all accounts that are writable.
+func (m *Message) Writable() (out PublicKeySlice) {
+	for _, a := range m.AccountKeys {
+		if m.IsWritable(a) {
+			out = append(out, a)
+		}
 	}
 	return out
 }

@@ -166,5 +166,74 @@ func TestTransactionDecode(t *testing.T) {
 		},
 		tx.Message.Instructions,
 	)
+}
 
+func TestTransactionVerifySignatures(t *testing.T) {
+	type testCase struct {
+		Transaction string
+	}
+
+	testCases := []testCase{
+		{
+			Transaction: "AVBFwRrn4wroV9+NVQfgg/GbjFtQFodLnNI5oTpDMQiQ4HfZNyFzcFamHSSFW4p5wc3efeEKvykbmk8jzf2LCQwBAAIGjYddInd/DSl2KJCP18GhEDlaJyPKVrgBGGsr3TF6jSYPgr3AdITNKr2UQVQ5I+Wh5StQv/a5XdLr6VN4Y21My1M/Y1FNK5wQLKJa1LYfN/HAudufFVtc0fRPR6AMUJ9UrkRI7sjY/PnpcXLF7A7SBvJrWu+o8+7QIaD8sL9aXkGFDy1uAqR6+CTQmradxC1wyyjL+iSft+5XudJWwSdi7wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAi+i1vCST+HNO0DEchpEJImMHhZ1BReuf7poRqmXpeA8CBAUBAgMCAgcAAwAAAAEABQIAAAwCAAAA6w0AAAAAAAA=",
+		},
+		{
+			Transaction: "AWwhMTxKhl9yZOlidY0u3gYmy+J/6V3kFSXU7GgK5zwN+SwljR2dOlHgKtUDRX8uee2HtfeyL3t4lB3n749L4QQBAAIEFg+6wTr33dgF0xcKPeDGvZcSah4CwNJZ0Khu+CHW5cehpkZfTC6/JEwx2AvJXCc0WjQk5CjC3vM+ztnpDT9wGwan1RcYx3TJKFZjmGkdXraLXrijm0ttXHNVWyEAAAAA3OXr4eScO58RTLVUTFCpnsDWktY/Vnla4Cmsg9nqi+Jr/+AAgahV8wmBK4mnz9WwJSryq8x2Ic0asytADGhLZAEDAwABAigCAAAABwAAAAEAAAAAAAAAz+dyuQIAAAAIn18BAAAAAPsVKAcAAAAA",
+		},
+		{
+			Transaction: "ARZsk8+AvvT9onUT8FU1VRaiC8Sp+FKveOwhdPoigWHA+MGNcIOqbow6mwSILEYvvyOB/fi3UQ/xKQCjEtxBRgIBAAIFKIX92BRrkgEfrLEXAvXtw7OgPPhHU+62C8DB5QPoMgNSbKXgdub0sr7Yp3Nvdrsp6SDoJ4gdoyRad2AV+Japj0dRtYW4OxE78FvRZTeqHFy2My/m12/afGIPS8iUnMGlBqfVFxjHdMkoVmOYaR1etoteuKObS21cc1VbIQAAAAC/jt8clGtWu0PSX5i4e2vlERcwCmEmGvn5+U7telqAiK4hdAN78GteFjqtJrxLXxpVNKsu1lfdcFPXa/Kcg4e5AQQEAQADAicmMiQQAiGujz0xoTQSQCgAMPOroDk5F0hQ/BgzEkBBvVKWIY41EkA=",
+		},
+		{
+			Transaction: "Ad7TPpYTvSpO//KNA5YTZVojVwz4NlH4gH9ktl+rTObJcgo8QkqmHK4t6DQr9dD58B/A/5/N7v9K+0j6y1TVCAsBAAMFA9maY4S727Z/lOSb08nHehVFsC32kTKMMPjPJp111bKM0Fl1Dg04vV2x9nL2TCqSHmjT8xg6wUAzjZa1+6YCBQan1RcZLwqvxvJl4/t3zHragsUp0L47E24tAFUgAAAABqfVFxjHdMkoVmOYaR1etoteuKObS21cc1VbIQAAAAAHYUgdNXR0u3xNdiTr072z2DVec9EQQ/wNo1OAAAAAAJDQfslK1yQFkGqDXWu6cthRNuYGlajYMOmtoSJB6hmPAQQEAQIDAE0CAAAAAwAAAAAAAAD5FSgHAAAAAPoVKAcAAAAA+xUoBwAAAADECMJOPX7e7fOF5Hrq9xhdch2Uqhg8vQOYyZM/6V983gHQ0gNiAAAAAA==",
+		},
+		{
+			Transaction: "Ak8jvC3ch5hq3lhOHPkACoFepIUON2zEN4KRcw4lDS6GBsQfnSdzNGPETm/yi0hPKk75/i2VXFj0FLUWnGR64ADyUbqnirFjFtaSNgcGi02+Tm7siT4CPpcaTq0jxfYQK/h9FdxXXPnLry74J+RE8yji/BtJ/Cjxbx+TIHigeIYJAgEBBByE1Y6EqCJKsr7iEupU6lsBHtBdtI4SK3yWMCFA0iEKeFPgnGmtp+1SIX1Ak+sN65iBaR7v4Iim5m1OEuFQTgi9N57UnhNpCNuUePaTt7HJaFBmyeZB3deXeKWVudpY3gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWVECK/n3a7QR6OKWYR4DuAVjS6FXgZj82W0dJpSIPnEBAwQAAgEDDAIAAABAQg8AAAAAAA==",
+		},
+	}
+
+	for _, tc := range testCases {
+		txBin, err := base64.StdEncoding.DecodeString(tc.Transaction)
+		require.NoError(t, err)
+		tx, err := TransactionFromDecoder(bin.NewBinDecoder(txBin))
+		require.NoError(t, err)
+		require.NoError(t, tx.VerifySignatures())
+		require.Equal(t, len(tx.Signatures), len(tx.Message.Signers()))
+	}
+
+}
+
+func BenchmarkTransactionFromDecoder(b *testing.B) {
+	txString := "Ak8jvC3ch5hq3lhOHPkACoFepIUON2zEN4KRcw4lDS6GBsQfnSdzNGPETm/yi0hPKk75/i2VXFj0FLUWnGR64ADyUbqnirFjFtaSNgcGi02+Tm7siT4CPpcaTq0jxfYQK/h9FdxXXPnLry74J+RE8yji/BtJ/Cjxbx+TIHigeIYJAgEBBByE1Y6EqCJKsr7iEupU6lsBHtBdtI4SK3yWMCFA0iEKeFPgnGmtp+1SIX1Ak+sN65iBaR7v4Iim5m1OEuFQTgi9N57UnhNpCNuUePaTt7HJaFBmyeZB3deXeKWVudpY3gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWVECK/n3a7QR6OKWYR4DuAVjS6FXgZj82W0dJpSIPnEBAwQAAgEDDAIAAABAQg8AAAAAAA=="
+	txBin, err := base64.StdEncoding.DecodeString(txString)
+	if err != nil {
+		b.Error(err)
+	}
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_, err := TransactionFromDecoder(bin.NewBinDecoder(txBin))
+		if err != nil {
+			b.Error(err)
+		}
+	}
+}
+
+func BenchmarkTransactionVerifySignatures(b *testing.B) {
+	txString := "Ak8jvC3ch5hq3lhOHPkACoFepIUON2zEN4KRcw4lDS6GBsQfnSdzNGPETm/yi0hPKk75/i2VXFj0FLUWnGR64ADyUbqnirFjFtaSNgcGi02+Tm7siT4CPpcaTq0jxfYQK/h9FdxXXPnLry74J+RE8yji/BtJ/Cjxbx+TIHigeIYJAgEBBByE1Y6EqCJKsr7iEupU6lsBHtBdtI4SK3yWMCFA0iEKeFPgnGmtp+1SIX1Ak+sN65iBaR7v4Iim5m1OEuFQTgi9N57UnhNpCNuUePaTt7HJaFBmyeZB3deXeKWVudpY3gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWVECK/n3a7QR6OKWYR4DuAVjS6FXgZj82W0dJpSIPnEBAwQAAgEDDAIAAABAQg8AAAAAAA=="
+	txBin, err := base64.StdEncoding.DecodeString(txString)
+	if err != nil {
+		b.Error(err)
+	}
+
+	tx, err := TransactionFromDecoder(bin.NewBinDecoder(txBin))
+	if err != nil {
+		b.Error(err)
+	}
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		tx.VerifySignatures()
+	}
 }
