@@ -409,9 +409,6 @@ func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error
 }
 
 func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
-	if len(encoder.Doc) == 0 {
-		encoder.Doc = "Transaction"
-	}
 	tx.EncodeToTree(encoder)
 	return encoder.WriteString(encoder.Tree.String())
 }

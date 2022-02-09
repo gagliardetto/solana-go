@@ -199,7 +199,6 @@ func TestTransactionVerifySignatures(t *testing.T) {
 		require.NoError(t, tx.VerifySignatures())
 		require.Equal(t, len(tx.Signatures), len(tx.Message.Signers()))
 	}
-
 }
 
 func BenchmarkTransactionFromDecoder(b *testing.B) {
