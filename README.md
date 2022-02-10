@@ -425,7 +425,7 @@ func main() {
   out, err := client.RequestAirdrop(
     context.TODO(),
     account.PublicKey(),
-    solana.LAMPORTS_PER_SOL*5,
+    solana.LAMPORTS_PER_SOL*1,
     rpc.CommitmentFinalized,
   )
   if err != nil {
@@ -553,7 +553,7 @@ func main() {
     out, err := rpcClient.RequestAirdrop(
       context.TODO(),
       accountFrom.PublicKey(),
-      solana.LAMPORTS_PER_SOL*5,
+      solana.LAMPORTS_PER_SOL*1,
       rpc.CommitmentFinalized,
     )
     if err != nil {
