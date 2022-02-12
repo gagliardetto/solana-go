@@ -43,7 +43,7 @@ type Transaction struct {
 
 var _ bin.EncoderDecoder = &Transaction{}
 
-func (t *Transaction) TouchAccount(account PublicKey) bool   { return t.Message.TouchAccount(account) }
+func (t *Transaction) HasAccount(account PublicKey) bool     { return t.Message.HasAccount(account) }
 func (t *Transaction) IsSigner(account PublicKey) bool       { return t.Message.IsSigner(account) }
 func (t *Transaction) IsWritable(account PublicKey) bool     { return t.Message.IsWritable(account) }
 func (t *Transaction) AccountMetaList() (out []*AccountMeta) { return t.Message.AccountMetaList() }

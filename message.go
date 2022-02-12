@@ -226,7 +226,7 @@ func (m *Message) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, error
 	return PublicKey{}, fmt.Errorf("programID index not found %d", programIDIndex)
 }
 
-func (m *Message) TouchAccount(account PublicKey) bool {
+func (m *Message) HasAccount(account PublicKey) bool {
 	for _, a := range m.AccountKeys {
 		if a.Equals(account) {
 			return true
