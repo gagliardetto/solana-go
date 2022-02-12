@@ -21,6 +21,35 @@ const (
 	protocolWSS   = "wss://"
 )
 
+type Cluster struct {
+	Name string
+	RPC  string
+	WS   string
+}
+
+var (
+	MainNetBeta = Cluster{
+		Name: "mainnet-beta",
+		RPC:  MainNetBeta_RPC,
+		WS:   MainNetBeta_WS,
+	}
+	TestNet = Cluster{
+		Name: "testnet",
+		RPC:  TestNet_RPC,
+		WS:   TestNet_WS,
+	}
+	DevNet = Cluster{
+		Name: "devnet",
+		RPC:  DevNet_RPC,
+		WS:   DevNet_WS,
+	}
+	LocalNet = Cluster{
+		Name: "localnet",
+		RPC:  LocalNet_RPC,
+		WS:   LocalNet_WS,
+	}
+)
+
 const (
 	hostDevNet           = "api.devnet.solana.com"
 	hostTestNet          = "api.testnet.solana.com"
