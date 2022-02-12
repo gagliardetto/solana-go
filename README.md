@@ -76,6 +76,12 @@ There is currently **no stable release**. The SDK is actively developed and late
 
 The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/dff9c88193da142693cabebfcd3bf68fa8e8b873/docs/src/developing/clients/jsonrpc-api.md).
 
+Note
+----
+
+- solana-go is in active development, so all APIs are subject to change.
+- This code is unaudited. Use at your own risk.
+
 ## Requirements
 
 - Go 1.16 or later
