@@ -86,12 +86,13 @@ type CompiledInstruction struct {
 	Data Base58 `json:"data"`
 }
 
-func (ci *CompiledInstruction) ResolveInstructionAccounts(message *Message) (out []*AccountMeta) {
+func (ci *CompiledInstruction) ResolveInstructionAccounts(message *Message) []*AccountMeta {
+	out := make([]*AccountMeta, len(ci.Accounts), len(ci.Accounts))
 	metas := message.AccountMetaList()
-	for _, acct := range ci.Accounts {
-		out = append(out, metas[acct])
+	for i, acct := range ci.Accounts {
+		out[i] = metas[acct]
 	}
-	return
+	return out
 }
 
 type Instruction interface {
@@ -443,7 +444,8 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 
 			progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
 			if err == nil {
-				decodedInstruction, err := DecodeInstruction(progKey, inst.ResolveInstructionAccounts(&tx.Message), inst.Data)
+				accounts := inst.ResolveInstructionAccounts(&tx.Message)
+				decodedInstruction, err := DecodeInstruction(progKey, accounts, inst.Data)
 				if err == nil {
 					if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
 						enToTree.EncodeToTree(message)
@@ -452,13 +454,53 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 					}
 				} else {
 					// TODO: log error?
-					message.Child(fmt.Sprintf(text.RedBG("cannot decode instruction for %s program: %s"), progKey, err))
+					message.Child(fmt.Sprintf(text.RedBG("cannot decode instruction for %s program: %s"), progKey, err)).
+						Child(text.IndigoBG("Program") + ": " + text.Bold("<unknown>") + " " + text.ColorizeBG(progKey.String())).
+						//
+						ParentFunc(func(programBranch treeout.Branches) {
+							programBranch.Child(text.Purple(text.Bold("Instruction")) + ": " + text.Bold("<unknown>")).
+								//
+								ParentFunc(func(instructionBranch treeout.Branches) {
+
+									// Data of the instruction call:
+									instructionBranch.Child(text.Sf("data[len=%v bytes]", len(inst.Data))).ParentFunc(func(paramsBranch treeout.Branches) {
+										paramsBranch.Child(bin.FormatByteSlice(inst.Data))
+									})
+
+									// Accounts of the instruction call:
+									instructionBranch.Child(text.Sf("accounts[len=%v]", len(accounts))).ParentFunc(func(accountsBranch treeout.Branches) {
+										for i := range accounts {
+											accountsBranch.Child(formatMeta(text.Sf("accounts[%v]", i), accounts[i]))
+										}
+									})
+
+								})
+						})
 				}
 			} else {
 				message.Child(fmt.Sprintf(text.RedBG("cannot ResolveProgramIDIndex: %s"), err))
 			}
 		}
 	})
+}
+
+func formatMeta(name string, meta *AccountMeta) string {
+	if meta == nil {
+		return text.Shakespeare(name) + ": " + "<nil>"
+	}
+	out := text.Shakespeare(name) + ": " + text.ColorizeBG(meta.PublicKey.String())
+	out += " ["
+	if meta.IsWritable {
+		out += "WRITE"
+	}
+	if meta.IsSigner {
+		if meta.IsWritable {
+			out += ", "
+		}
+		out += "SIGN"
+	}
+	out += "] "
+	return out
 }
 
 // VerifySignatures verifies all the signatures in the transaction
