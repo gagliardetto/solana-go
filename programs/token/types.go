@@ -16,7 +16,6 @@ package token
 
 import (
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
 )
 
 type AuthorityType ag_binary.BorshEnum
@@ -49,17 +48,3 @@ const (
 	// the delegate are able to perform operations on this account.
 	Frozen
 )
-
-type Multisig struct {
-	// Number of signers required
-	M uint8
-
-	// Number of valid signers
-	N uint8
-
-	// Is `true` if this structure has been initialized
-	IsInitialized bool
-
-	// Signer public keys
-	Signers [11]ag_solanago.PublicKey
-}

@@ -18,7 +18,9 @@ import (
 	"context"
 
 	"github.com/davecgh/go-spew/spew"
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
+	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/gagliardetto/solana-go/rpc"
 )
 
@@ -31,7 +33,7 @@ func main() {
 		context.TODO(),
 		pubKey,
 		&rpc.GetTokenAccountsConfig{
-			Mint: solana.MustPublicKeyFromBase58("So11111111111111111111111111111111111111112").ToPointer(),
+			Mint: solana.WrappedSol.ToPointer(),
 		},
 		&rpc.GetTokenAccountsOpts{
 			Encoding: solana.EncodingBase64Zstd,
@@ -41,4 +43,20 @@ func main() {
 		panic(err)
 	}
 	spew.Dump(out)
+
+	{
+		tokenAccounts := make([]token.Account, 0)
+		for _, rawAccount := range out.Value {
+			var tokAcc token.Account
+
+			data := rawAccount.Account.Data.GetBinary()
+			dec := bin.NewBinDecoder(data)
+			err := dec.Decode(&tokAcc)
+			if err != nil {
+				panic(err)
+			}
+			tokenAccounts = append(tokenAccounts, tokAcc)
+		}
+		spew.Dump(tokenAccounts)
+	}
 }

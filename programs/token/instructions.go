@@ -28,6 +28,7 @@ import (
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
+// Maximum number of multisignature signers (max N)
 const MAX_SIGNERS = 11
 
 var ProgramID ag_solanago.PublicKey = ag_solanago.TokenProgramID
