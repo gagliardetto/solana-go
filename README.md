@@ -680,7 +680,7 @@ func main() {
   - [GetMultipleAccounts](#index--rpc--getmultipleaccounts)
   - [GetProgramAccounts](#index--rpc--getprogramaccounts)
   - [GetRecentBlockhash](#index--rpc--getrecentblockhash)
-    - **DEPRECATED: Please use [GetFeeForMessage](#index--rpc--getfeeformessage) instead** (This method is expected to be removed in **solana-core v2.0**)
+    - **DEPRECATED: Please use [GetLatestBlockhash](#index--rpc--getlatestblockhash) instead** (This method is expected to be removed in **solana-core v2.0**)
   - [GetRecentPerformanceSamples](#index--rpc--getrecentperformancesamples)
   - [GetSignatureStatuses](#index--rpc--getsignaturestatuses)
   - [GetSignaturesForAddress](#index--rpc--getsignaturesforaddress)
