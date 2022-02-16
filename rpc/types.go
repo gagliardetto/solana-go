@@ -18,9 +18,11 @@
 package rpc
 
 import (
+	"encoding/base64"
 	stdjson "encoding/json"
 	"fmt"
 
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -92,9 +94,26 @@ const (
 )
 
 type TransactionWithMeta struct {
+	Transaction *DataBytesOrJSON `json:"transaction"`
 	// Transaction status metadata object
-	Meta        *TransactionMeta    `json:"meta,omitempty"`
-	Transaction *solana.Transaction `json:"transaction"`
+	Meta *TransactionMeta `json:"meta,omitempty"`
+}
+
+func (twm TransactionWithMeta) MustGetTransaction() *solana.Transaction {
+	tx, err := twm.GetTransaction()
+	if err != nil {
+		panic(err)
+	}
+	return tx
+}
+
+func (twm TransactionWithMeta) GetTransaction() (*solana.Transaction, error) {
+	tx := new(solana.Transaction)
+	err := tx.UnmarshalWithDecoder(bin.NewBinDecoder(twm.Transaction.GetBinary()))
+	if err != nil {
+		return nil, err
+	}
+	return tx, nil
 }
 
 type TransactionParsed struct {
@@ -105,6 +124,9 @@ type TransactionParsed struct {
 type TokenBalance struct {
 	// Index of the account in which the token balance is provided for.
 	AccountIndex uint16 `json:"accountIndex"`
+
+	// Pubkey of token balance's owner.
+	Owner *solana.PublicKey `json:"owner,omitempty"`
 
 	// Pubkey of the token's mint.
 	Mint          solana.PublicKey `json:"mint"`
@@ -202,7 +224,7 @@ type GetAccountInfoResult struct {
 
 type IsValidBlockhashResult struct {
 	RPCContext
-	Value bool `json:"value"`
+	Value bool `json:"value"` // True if the blockhash is still valid.
 }
 
 type Account struct {
@@ -226,6 +248,20 @@ type DataBytesOrJSON struct {
 	rawDataEncoding solana.EncodingType
 	asDecodedBinary solana.Data
 	asJSON          stdjson.RawMessage
+}
+
+func DataBytesOrJSONFromBase64(stringBase64 string) (*DataBytesOrJSON, error) {
+	decoded, err := base64.StdEncoding.DecodeString(stringBase64)
+	if err != nil {
+		return nil, err
+	}
+	return &DataBytesOrJSON{
+		rawDataEncoding: solana.EncodingBase64,
+		asDecodedBinary: solana.Data{
+			Encoding: solana.EncodingBase64,
+			Content:  decoded,
+		},
+	}, nil
 }
 
 func (dt DataBytesOrJSON) MarshalJSON() ([]byte, error) {
@@ -346,7 +382,7 @@ const (
 	// - This confirmation level also upholds "optimistic confirmation" guarantees in release 1.3 and onwards.
 	CommitmentConfirmed CommitmentType = "confirmed"
 
-	// The node will query its most recent block. Note that the block may not be complete.
+	// The node will query its most recent block. Note that the block may still be skipped by the cluster.
 	CommitmentProcessed CommitmentType = "processed"
 )
 

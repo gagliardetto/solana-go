@@ -74,7 +74,7 @@ More contracts to come.
 
 There is currently **no stable release**. The SDK is actively developed and latest is `v1.2.1` which is an `alpha` release.
 
-The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/dff9c88193da142693cabebfcd3bf68fa8e8b873/docs/src/developing/clients/jsonrpc-api.md).
+The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/c2435363f39723cef59b91322f3b6a815008af29/docs/src/developing/clients/jsonrpc-api.md).
 
 Note
 ----
@@ -645,19 +645,22 @@ func main() {
   - [GetBlocks](#index--rpc--getblocks)
   - [GetBlocksWithLimit](#index--rpc--getblockswithlimit)
   - [GetClusterNodes](#index--rpc--getclusternodes)
-  - [GetConfirmedBlock](#index--rpc--getconfirmedblock)
-  - [GetConfirmedBlocks](#index--rpc--getconfirmedblocks)
-  - [GetConfirmedBlocksWithLimit](#index--rpc--getconfirmedblockswithlimit)
-  - [GetConfirmedSignaturesForAddress2](#index--rpc--getconfirmedsignaturesforaddress2)
-  - [GetConfirmedTransaction](#index--rpc--getconfirmedtransaction)
+  - [GetConfirmedBlock](#index--rpc--getconfirmedblock) **DEPRECATED: Please use [GetBlock](#index--rpc--getblock) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetConfirmedBlocks](#index--rpc--getconfirmedblocks) **DEPRECATED: Please use [GetBlocks](#index--rpc--getblocks) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetConfirmedBlocksWithLimit](#index--rpc--getconfirmedblockswithlimit) **DEPRECATED: Please use [GetBlocksWithLimit](#index--rpc--getblockswithlimit) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetConfirmedSignaturesForAddress2](#index--rpc--getconfirmedsignaturesforaddress2) **DEPRECATED: Please use [GetSignaturesForAddress](#index--rpc--getsignaturesforaddress) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetConfirmedTransaction](#index--rpc--getconfirmedtransaction) **DEPRECATED: Please use [GetTransaction](#index--rpc--gettransaction) instead** (This method is expected to be removed in **solana-core v2.0**)
   - [GetEpochInfo](#index--rpc--getepochinfo)
   - [GetEpochSchedule](#index--rpc--getepochschedule)
-  - [GetFeeCalculatorForBlockhash](#index--rpc--getfeecalculatorforblockhash)
-  - [GetFeeRateGovernor](#index--rpc--getfeerategovernor)
-  - [GetFees](#index--rpc--getfees)
+  - [GetFeeCalculatorForBlockhash](#index--rpc--getfeecalculatorforblockhash) **DEPRECATED: Please use [IsBlockhashValid](#index--rpc--isblockhashvalid) or [GetFeeForMessage](#index--rpc--getfeeformessage) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetFeeRateGovernor](#index--rpc--getfeerategovernor) **DEPRECATED**
+  - [GetFees](#index--rpc--getfees) **DEPRECATED: Please use [GetFeeForMessage](#index--rpc--getfeeformessage) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetFeeForMessage](#index--rpc--getfeeformessage)
   - [GetFirstAvailableBlock](#index--rpc--getfirstavailableblock)
   - [GetGenesisHash](#index--rpc--getgenesishash)
   - [GetHealth](#index--rpc--gethealth)
+  - [GetHighestSnapshotSlot](#index--rpc--gethighestsnapshotslot)
+  - [GetLatestBlockhash](#index--rpc--getlatestblockhash)
   - [GetIdentity](#index--rpc--getidentity)
   - [GetInflationGovernor](#index--rpc--getinflationgovernor)
   - [GetInflationRate](#index--rpc--getinflationrate)
@@ -669,14 +672,14 @@ func main() {
   - [GetMinimumBalanceForRentExemption](#index--rpc--getminimumbalanceforrentexemption)
   - [GetMultipleAccounts](#index--rpc--getmultipleaccounts)
   - [GetProgramAccounts](#index--rpc--getprogramaccounts)
-  - [GetRecentBlockhash](#index--rpc--getrecentblockhash)
+  - [GetRecentBlockhash](#index--rpc--getrecentblockhash) **DEPRECATED: Please use [GetFeeForMessage](#index--rpc--getfeeformessage) instead** (This method is expected to be removed in **solana-core v2.0**)
   - [GetRecentPerformanceSamples](#index--rpc--getrecentperformancesamples)
   - [GetSignatureStatuses](#index--rpc--getsignaturestatuses)
   - [GetSignaturesForAddress](#index--rpc--getsignaturesforaddress)
   - [GetSlot](#index--rpc--getslot)
   - [GetSlotLeader](#index--rpc--getslotleader)
   - [GetSlotLeaders](#index--rpc--getslotleaders)
-  - [GetSnapshotSlot](#index--rpc--getsnapshotslot)
+  - [GetSnapshotSlot](#index--rpc--getsnapshotslot) **DEPRECATED: Please use [GetHighestSnapshotSlot](#index--rpc--gethighestsnapshotslot) instead** (This method is expected to be removed in **solana-core v2.0**)
   - [GetStakeActivation](#index--rpc--getstakeactivation)
   - [GetSupply](#index--rpc--getsupply)
   - [GetTokenAccountBalance](#index--rpc--gettokenaccountbalance)
@@ -688,6 +691,7 @@ func main() {
   - [GetTransactionCount](#index--rpc--gettransactioncount)
   - [GetVersion](#index--rpc--getversion)
   - [GetVoteAccounts](#index--rpc--getvoteaccounts)
+  - [IsBlockhashValid](#index--rpc--isblockhashvalid)
   - [MinimumLedgerSlot](#index--rpc--minimumledgerslot)
   - [RequestAirdrop](#index--rpc--requestairdrop)
   - [SendTransaction](#index--rpc--sendtransaction)
@@ -1497,6 +1501,35 @@ func main() {
 }
 ```
 
+
+#### [index](#contents) > [RPC](#rpc-methods) > GetFeeForMessage
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetFeeForMessage(
+    context.Background(),
+    "AQABAgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQAA",
+    rpc.CommitmentProcessed,
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(example)
+}
+```
+
 #### [index](#contents) > [RPC](#rpc-methods) > GetFirstAvailableBlock
 
 ```go
@@ -1573,6 +1606,59 @@ func main() {
   }
   spew.Dump(out)
   spew.Dump(out == rpc.HealthOk)
+}
+```
+
+#### [index](#contents) > [RPC](#rpc-methods) > GetHighestSnapshotSlot
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetHighestSnapshotSlot(
+    context.Background(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(example)
+}
+```
+
+#### [index](#contents) > [RPC](#rpc-methods) > GetLatestBlockhash
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  example, err := client.GetLatestBlockhash(
+    context.Background(),
+    rpc.CommitmentFinalized,
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(example)
 }
 ```
 
@@ -2504,6 +2590,39 @@ func main() {
     panic(err)
   }
   spew.Dump(out)
+}
+```
+
+#### [index](#contents) > [RPC](#rpc-methods) > IsBlockhashValid
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.MainNetBeta_RPC
+  client := rpc.New(endpoint)
+
+  blockHash := solana.MustHashFromBase58("J7rBdM6AecPDEZp8aPq5iPSNKVkU5Q76F3oAV4eW5wsW")
+  out, err := client.IsBlockhashValid(
+    context.TODO(),
+    blockHash,
+    rpc.CommitmentFinalized,
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+  spew.Dump(out.Value) // true or false
+
+  fmt.Println("is blockhash valid:", out.Value)
 }
 ```
 

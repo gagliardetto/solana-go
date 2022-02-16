@@ -28,7 +28,7 @@ type GetInflationRewardOpts struct {
 	Epoch *uint64
 }
 
-// GetInflationReward returns the inflation reward for a list of addresses for an epoch.
+// GetInflationReward returns the inflation / staking reward for a list of addresses for an epoch.
 func (cl *Client) GetInflationReward(
 	ctx context.Context,
 

@@ -19,6 +19,7 @@ package solana
 
 import (
 	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"sort"
@@ -73,9 +74,6 @@ type CompiledInstruction struct {
 	// NOTE: it is actually a uint8, but using a uint16 because uint8 is treated as a byte everywhere,
 	// and that can be an issue.
 	ProgramIDIndex uint16 `json:"programIdIndex"`
-
-	AccountCount bin.Varuint16 `json:"-" bin:"sizeof=Accounts"`
-	DataLength   bin.Varuint16 `json:"-" bin:"sizeof=Data"`
 
 	// List of ordered indices into the message.accountKeys array indicating which accounts to pass to the program.
 	// NOTE: it is actually a []uint8, but using a uint16 because []uint8 is treated as a []byte everywhere,
@@ -315,9 +313,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 		}
 		message.Instructions = append(message.Instructions, CompiledInstruction{
 			ProgramIDIndex: accountKeyIndex[instruction.ProgramID().String()],
-			AccountCount:   bin.Varuint16(uint16(len(accountIndex))),
 			Accounts:       accountIndex,
-			DataLength:     bin.Varuint16(uint16(len(data))),
 			Data:           data,
 		})
 	}
@@ -423,6 +419,22 @@ func (tx *Transaction) String() string {
 		panic(err)
 	}
 	return buf.String()
+}
+
+func (tx Transaction) ToBase64() (string, error) {
+	out, err := tx.MarshalBinary()
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(out), nil
+}
+
+func (tx Transaction) MustToBase64() string {
+	out, err := tx.ToBase64()
+	if err != nil {
+		panic(err)
+	}
+	return out
 }
 
 func (tx *Transaction) EncodeToTree(parent treeout.Branches) {

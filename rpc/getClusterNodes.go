@@ -30,24 +30,24 @@ type GetClusterNodesResult struct {
 	// Node public key.
 	Pubkey solana.PublicKey `json:"pubkey"`
 
-	// Gossip network address for the node.
-	Gossip *string `json:"gossip"`
-
-	// TPU network address for the node.
-	TPU *string `json:"tpu"`
-
 	// TODO: "" or nil ?
 
+	// Gossip network address for the node.
+	Gossip *string `json:"gossip,omitempty"`
+
+	// TPU network address for the node.
+	TPU *string `json:"tpu,omitempty"`
+
 	// JSON RPC network address for the node, or empty if the JSON RPC service is not enabled.
-	RPC *string `json:"rpc"`
+	RPC *string `json:"rpc,omitempty"`
 
 	// The software version of the node, or empty if the version information is not available.
-	Version *string `json:"version"`
+	Version *string `json:"version,omitempty"`
 
 	// TODO: what type is this?
 	// The unique identifier of the node's feature set.
-	FeatureSet int64 `json:"featureSet"`
+	FeatureSet uint32 `json:"featureSet,omitempty"`
 
 	// The shred version the node has been configured to use.
-	ShredVersion int64 `json:"shredVersion"`
+	ShredVersion uint16 `json:"shredVersion,omitempty"`
 }

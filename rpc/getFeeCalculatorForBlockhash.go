@@ -22,6 +22,8 @@ import (
 
 // GetFeeCalculatorForBlockhash returns the fee calculator
 // associated with the query blockhash, or null if the blockhash has expired.
+//
+// NOTE: DEPRECATED
 func (cl *Client) GetFeeCalculatorForBlockhash(
 	ctx context.Context,
 	hash solana.Hash, // query blockhash
