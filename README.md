@@ -680,7 +680,8 @@ func main() {
   - [GetMultipleAccounts](#index--rpc--getmultipleaccounts)
   - [GetProgramAccounts](#index--rpc--getprogramaccounts)
   - [GetRecentBlockhash](#index--rpc--getrecentblockhash)
-    - **DEPRECATED: Please use [GetLatestBlockhash](#index--rpc--getlatestblockhash) instead** (This method is expected to be removed in **solana-core v2.0**)
+    - To be used with **solana v1.8**
+    - For solana v1.9 or newer: **DEPRECATED: Please use [GetLatestBlockhash](#index--rpc--getlatestblockhash) instead** (This method is expected to be removed in **solana-core v2.0**)
   - [GetRecentPerformanceSamples](#index--rpc--getrecentperformancesamples)
   - [GetSignatureStatuses](#index--rpc--getsignaturestatuses)
   - [GetSignaturesForAddress](#index--rpc--getsignaturesforaddress)
@@ -1645,6 +1646,8 @@ func main() {
 ```
 
 #### [index](#contents) > [RPC](#rpc-methods) > GetLatestBlockhash
+
+NEW: This method is only available in solana-core v1.9 or newer. Please use getRecentBlockhash for solana-core v1.8
 
 ```go
 package main
