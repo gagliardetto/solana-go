@@ -21,6 +21,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
+	"flag"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -157,6 +158,20 @@ func TestPublicKey_MarshalText(t *testing.T) {
 		},
 		payload,
 	)
+}
+
+func TestPublicKey_Flag(t *testing.T) {
+	flagSet := flag.NewFlagSet("", flag.ContinueOnError)
+	var key PublicKey
+	flagSet.Var(&key, "account", "Public key")
+	err := flagSet.Parse([]string{"--account", "7cVfgArCheMR6Cs4t6vz5rfnqd56vZq4ndaBrY5xkxXy"})
+	require.NoError(t, err)
+	assert.Equal(t, PublicKey{
+		0x62, 0x3d, 0xdd, 0x11, 0x7e, 0x7c, 0xc5, 0x62,
+		0xf6, 0x63, 0x15, 0x05, 0x25, 0x8c, 0xd1, 0xdc,
+		0xee, 0x81, 0x94, 0x9f, 0x8a, 0xfd, 0x1e, 0xa2,
+		0x94, 0xdc, 0x47, 0xbe, 0x6e, 0xcf, 0xf3, 0xa8,
+	}, key)
 }
 
 func TestPublicKeySlice(t *testing.T) {
