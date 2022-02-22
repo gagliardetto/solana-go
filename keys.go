@@ -144,12 +144,8 @@ func (p PublicKey) MarshalText() ([]byte, error) {
 	return []byte(base58.Encode(p[:])), nil
 }
 
-func (p *PublicKey) UnmarshalText(data []byte) (err error) {
-	*p, err = PublicKeyFromBase58(string(data))
-	if err != nil {
-		return fmt.Errorf("invalid public key %q: %w", data, err)
-	}
-	return
+func (p *PublicKey) UnmarshalText(data []byte) error {
+	return p.Set(string(data))
 }
 
 func (p PublicKey) MarshalJSON() ([]byte, error) {
@@ -193,6 +189,14 @@ var zeroPublicKey = PublicKey{}
 // NOTE: the System Program public key is also zero.
 func (p PublicKey) IsZero() bool {
 	return p == zeroPublicKey
+}
+
+func (p *PublicKey) Set(s string) (err error) {
+	*p, err = PublicKeyFromBase58(s)
+	if err != nil {
+		return fmt.Errorf("invalid public key %s: %w", s, err)
+	}
+	return
 }
 
 func (p PublicKey) String() string {
