@@ -33,9 +33,10 @@ var ErrNotFound = errors.New("not found")
 var ErrNotConfirmed = errors.New("not confirmed")
 
 type Client struct {
-	rpcURL    string
-	rpcClient JSONRPCClient
-	headers   http.Header
+	rpcURL        string
+	rpcClient     JSONRPCClient
+	headers       http.Header
+	defaultHeader http.Header
 }
 
 type JSONRPCClient interface {
@@ -44,9 +45,17 @@ type JSONRPCClient interface {
 }
 
 // New creates a new Solana JSON RPC client.
-func New(rpcEndpoint string) *Client {
+func New(rpcEndpoint string, defaultHeader http.Header) *Client {
+
 	opts := &jsonrpc.RPCClientOpts{
 		HTTPClient: newHTTP(),
+	}
+	if defaultHeader != nil {
+		customHeaders := make(map[string]string)
+		for k, v := range defaultHeader {
+			customHeaders[k] = v[0]
+		}
+		opts.CustomHeaders = customHeaders
 	}
 	rpcClient := jsonrpc.NewClientWithOpts(rpcEndpoint, opts)
 	return NewWithCustomRPCClient(rpcClient)

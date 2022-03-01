@@ -32,7 +32,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type result interface{}
+type Result interface{}
 
 type Client struct {
 	rpcURL                  string
@@ -53,7 +53,8 @@ const (
 )
 
 // Connect creates a new websocket client connecting to the provided endpoint.
-func Connect(ctx context.Context, rpcEndpoint string) (c *Client, err error) {
+func Connect(ctx context.Context, rpcEndpoint string, defaultHeader http.Header) (c *Client, err error) {
+
 	c = &Client{
 		rpcURL:                  rpcEndpoint,
 		subscriptionByRequestID: map[uint64]*Subscription{},
@@ -66,7 +67,7 @@ func Connect(ctx context.Context, rpcEndpoint string) (c *Client, err error) {
 		EnableCompression: true,
 	}
 
-	c.conn, _, err = dialer.DialContext(ctx, rpcEndpoint, nil)
+	c.conn, _, err = dialer.DialContext(ctx, rpcEndpoint, defaultHeader)
 	if err != nil {
 		return nil, fmt.Errorf("new ws client: dial: %w", err)
 	}

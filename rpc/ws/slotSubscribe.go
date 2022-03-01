@@ -54,6 +54,14 @@ func (sw *SlotSubscription) Recv() (*SlotResult, error) {
 	}
 }
 
+func (sw *SlotSubscription) RecvStream() <-chan Result {
+	return sw.sub.stream
+}
+
+func (sw *SlotSubscription) CloseSignal() <-chan error {
+	return sw.sub.err
+}
+
 func (sw *SlotSubscription) Unsubscribe() {
 	sw.sub.Unsubscribe()
 }

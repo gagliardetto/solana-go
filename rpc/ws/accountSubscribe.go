@@ -92,6 +92,14 @@ func (sw *AccountSubscription) Recv() (*AccountResult, error) {
 	}
 }
 
+func (sw *AccountSubscription) RecvStream() <-chan Result {
+	return sw.sub.stream
+}
+
+func (sw *AccountSubscription) RecvErr() <-chan error {
+	return sw.sub.err
+}
+
 func (sw *AccountSubscription) Unsubscribe() {
 	sw.sub.Unsubscribe()
 }

@@ -18,6 +18,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70
 	github.com/fatih/color v1.9.0
+	github.com/goji/httpauth v0.0.0-20160601135302-2da839ab0f4d
 	github.com/google/go-cmp v0.5.1
 	github.com/gorilla/rpc v1.2.0
 	github.com/gorilla/websocket v1.4.2
