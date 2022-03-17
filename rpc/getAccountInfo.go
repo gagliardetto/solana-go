@@ -124,7 +124,7 @@ func (cl *Client) GetAccountInfoWithOpts(
 	if err != nil {
 		return nil, err
 	}
-	if out.Value == nil {
+	if out == nil || out.Value == nil {
 		return nil, ErrNotFound
 	}
 
