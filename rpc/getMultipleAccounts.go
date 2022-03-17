@@ -74,7 +74,7 @@ func (cl *Client) GetMultipleAccountsWithOpts(
 	if err != nil {
 		return nil, err
 	}
-	if out.Value == nil {
+	if out == nil || out.Value == nil {
 		return nil, ErrNotFound
 	}
 	return
