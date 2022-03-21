@@ -20,6 +20,7 @@ package serum
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"testing"
 
@@ -41,7 +42,7 @@ func TestFetchMarket(t *testing.T) {
 
 	//
 
-	client := rpc.New(rpcURL)
+	client := rpc.New(rpcURL, http.Header{})
 	ctx := context.Background()
 
 	openOrderAdd, err := solana.PublicKeyFromBase58("jFoHUkNDC767PyK11cZM4zyNcpjLqFnSjaqEYp5GVBr")
@@ -63,7 +64,7 @@ func TestStreamOpenOrders(t *testing.T) {
 		t.Skip("Setup 'RPC_URL' to run test i.e. 'wss://api.mainnet-beta.solana.com'")
 		return
 	}
-	client, err := ws.Connect(context.Background(), rpcURL)
+	client, err := ws.Connect(context.Background(), rpcURL, http.Header{})
 	require.NoError(t, err)
 
 	err = StreamOpenOrders(client)

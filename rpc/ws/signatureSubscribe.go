@@ -65,6 +65,14 @@ type SignatureSubscription struct {
 	sub *Subscription
 }
 
+func (sw *SignatureSubscription) RecvStream() <-chan Result {
+	return sw.sub.stream
+}
+
+func (sw *SignatureSubscription) CloseSignal() <-chan error {
+	return sw.sub.err
+}
+
 func (sw *SignatureSubscription) Recv() (*SignatureResult, error) {
 	select {
 	case d := <-sw.sub.stream:

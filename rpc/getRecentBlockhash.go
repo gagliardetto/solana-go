@@ -34,3 +34,16 @@ func (cl *Client) GetRecentBlockhash(
 	err = cl.rpcClient.CallForInto(ctx, &out, "getRecentBlockhash", params)
 	return
 }
+
+func (cl *Client) GetLatestBlockhash(
+	ctx context.Context,
+	commitment CommitmentType, // optional
+) (out *GetLatestBlockhashResult, err error) {
+	params := []interface{}{}
+	if commitment != "" {
+		params = append(params, M{"commitment": commitment})
+	}
+
+	err = cl.rpcClient.CallForInto(ctx, &out, "getLatestBlockhash", params)
+	return
+}
