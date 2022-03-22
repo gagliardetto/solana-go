@@ -124,6 +124,9 @@ func (cl *Client) GetAccountInfoWithOpts(
 	if err != nil {
 		return nil, err
 	}
+	if out == nil {
+		return nil, errors.New("expected a value, got null result")
+	}
 	if out.Value == nil {
 		return nil, ErrNotFound
 	}
