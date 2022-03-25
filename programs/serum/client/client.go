@@ -108,3 +108,14 @@ func getBinaryDataFromAccountInfo(result *rpc.GetAccountInfoResult) ([]byte, err
 	}
 	return data.GetBinary(), nil
 }
+
+func getBinaryDataFromAccount(v *rpc.Account) ([]byte, error) {
+	if v == nil {
+		return nil, errors.New("no value")
+	}
+	data := v.Data
+	if data == nil {
+		return nil, errors.New("no data")
+	}
+	return data.GetBinary(), nil
+}

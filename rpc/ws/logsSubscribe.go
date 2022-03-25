@@ -107,6 +107,14 @@ type LogSubscription struct {
 	sub *Subscription
 }
 
+func (sw *LogSubscription) RecvStream() <-chan Result {
+	return sw.sub.stream
+}
+
+func (sw *LogSubscription) CloseSignal() <-chan error {
+	return sw.sub.err
+}
+
 func (sw *LogSubscription) Recv() (*LogResult, error) {
 	select {
 	case d := <-sw.sub.stream:

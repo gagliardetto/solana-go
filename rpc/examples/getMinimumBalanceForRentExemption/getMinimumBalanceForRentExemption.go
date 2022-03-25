@@ -23,7 +23,7 @@ import (
 
 func main() {
 	endpoint := rpc.TestNet_RPC
-	client := rpc.New(endpoint)
+	client := rpc.New(endpoint, nil)
 
 	dataSize := uint64(1024 * 9)
 	out, err := client.GetMinimumBalanceForRentExemption(

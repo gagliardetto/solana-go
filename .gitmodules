@@ -1,0 +1,3 @@
+[submodule "contrib/serum-dex"]
+	path = contrib/serum-dex
+	url = ssh://git@gitlab.com/eflam/serum-dex

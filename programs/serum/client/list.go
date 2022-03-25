@@ -1,9 +1,7 @@
 package client
 
 import (
-	"bytes"
 	"encoding/binary"
-	"log"
 
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
@@ -84,15 +82,9 @@ type ListArgs struct {
 	QuoteDustThreshold uint64
 }
 
-type ListResult struct {
-	Market     *serum.MarketV2
-	BaseVault  *solana.PrivateKey
-	QuoteVault *solana.PrivateKey
-}
-
 // List a new token pair on Serum
-func (c *Client) List(args *ListArgs) (result *ListResult, err error) {
-	result = new(ListResult)
+func (c *Client) List(args *ListArgs) (result *Market, err error) {
+	result = new(Market)
 	m := new(marketInfo)
 	payer := args.Payer.PublicKey()
 
@@ -153,7 +145,7 @@ func (c *Client) List(args *ListArgs) (result *ListResult, err error) {
 	inst_base_vault_initialize := c.initialize_token_account(m.baseVault.PublicKey(), args.BaseMint, *vaultOwner)
 	inst_quote_vault_initialize := c.initialize_token_account(m.quoteVault.PublicKey(), args.QuoteMint, *vaultOwner)
 
-	err = c.send_tx(m, []solana.Instruction{
+	err = c.send_tx_for_listing(m, []solana.Instruction{
 		inst_base_vault, inst_quote_vault, inst_base_vault_initialize, inst_quote_vault_initialize,
 	})
 	if err != nil {
@@ -216,7 +208,7 @@ func (c *Client) List(args *ListArgs) (result *ListResult, err error) {
 		/// 12. `[]` crank authority (optional, requires prune authority)
 		//solana.NewAccountMeta(authority_crank, false, false),
 	}
-	mi := &marketInstruction{
+	mi := &genericInstruction{
 		programId: args.DEX_PID,
 		list:      list,
 		instruction: &serum.Instruction{
@@ -228,16 +220,20 @@ func (c *Client) List(args *ListArgs) (result *ListResult, err error) {
 		},
 	}
 
-	err = c.send_tx(m, []solana.Instruction{
+	err = c.send_tx_for_listing(m, []solana.Instruction{
 		inst_market, inst_request_queue, inst_event_queue, inst_bid, inst_ask, mi,
 	})
 	if err != nil {
 		return
 	}
 
+	marketAddress := marketPrivateKey.PublicKey()
+
+	result.client = c
+	result.DexPID = args.DEX_PID
+	result.MarketAddress = marketAddress
 	result.BaseVault = &baseVault
 	result.QuoteVault = &quoteVault
-
 	result.Market, err = c.GetMarket(m.market)
 	if err != nil {
 		return
@@ -283,31 +279,11 @@ func (c *Client) GetMarket(market solana.PublicKey) (*serum.MarketV2, error) {
 	return ans, nil
 }
 
-type marketInstruction struct {
-	programId   solana.PublicKey
-	list        []*solana.AccountMeta
-	instruction *serum.Instruction
+func (c *Client) send_tx_for_listing(m *marketInfo, instructions []solana.Instruction) error {
+	return c.send_tx_generic(m.privateKeyMap, instructions)
 }
 
-func (mi *marketInstruction) Data() ([]byte, error) {
-	buf := new(bytes.Buffer)
-	err := bin.NewBinEncoder(buf).Encode(mi.instruction)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-func (mi *marketInstruction) ProgramID() solana.PublicKey {
-	log.Printf("dex program id=%s", mi.programId.String())
-	return mi.programId
-}
-
-func (mi *marketInstruction) Accounts() []*solana.AccountMeta {
-	return mi.list
-}
-
-func (c *Client) send_tx(m *marketInfo, instructions []solana.Instruction) error {
+func (c *Client) send_tx_generic(keyMap map[string]*solana.PrivateKey, instructions []solana.Instruction) error {
 	blockhash, err := c.latest_blockhash()
 	if err != nil {
 		return err
@@ -321,7 +297,7 @@ func (c *Client) send_tx(m *marketInfo, instructions []solana.Instruction) error
 		return err
 	}
 	_, err = tx.Sign(func(key solana.PublicKey) *solana.PrivateKey {
-		otherKey, present := m.privateKeyMap[key.String()]
+		otherKey, present := keyMap[key.String()]
 		if present {
 			return otherKey
 		}

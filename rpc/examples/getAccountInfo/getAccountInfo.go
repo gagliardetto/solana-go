@@ -26,7 +26,7 @@ import (
 
 func main() {
 	endpoint := rpc.MainNetBeta_RPC
-	client := rpc.New(endpoint)
+	client := rpc.New(endpoint, nil)
 
 	{
 		pubKey := solana.MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt") // serum token

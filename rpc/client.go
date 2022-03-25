@@ -95,9 +95,17 @@ func (wr *clientWithRateLimiting) CallWithCallback(
 func NewWithRateLimit(
 	rpcEndpoint string,
 	rps int, // requests per second
+	defaultHeader http.Header,
 ) JSONRPCClient {
 	opts := &jsonrpc.RPCClientOpts{
 		HTTPClient: newHTTP(),
+	}
+	if defaultHeader != nil {
+		customHeaders := make(map[string]string)
+		for k, v := range defaultHeader {
+			customHeaders[k] = v[0]
+		}
+		opts.CustomHeaders = customHeaders
 	}
 
 	rpcClient := jsonrpc.NewClientWithOpts(rpcEndpoint, opts)

@@ -24,7 +24,7 @@ import (
 
 func main() {
 	endpoint := rpc.MainNetBeta_RPC
-	client := rpc.New(endpoint)
+	client := rpc.New(endpoint, nil)
 
 	{
 		out, err := client.GetMultipleAccounts(

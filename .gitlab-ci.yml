@@ -1,0 +1,18 @@
+stages:
+  - test
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  #TARGET_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA
+  TARGET_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_BRANCH 
+
+anchor-test:
+  stage: test
+  image: registry.gitlab.com/eflam/builder:main
+  variables:
+    KEYPAIR_FILE_PATH: /tmp/test.json
+  script:
+    - source $HOME/.profile
+    - envsubst <Anchor.env.toml >Anchor.toml
+    - cat Anchor.toml
+    - ./contrib/setup.sh
