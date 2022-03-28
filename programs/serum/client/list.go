@@ -90,43 +90,50 @@ func (c *Client) List(args *ListArgs) (result *Market, err error) {
 
 	m.privateKeyMap = make(map[string]*solana.PrivateKey)
 
+	m.privateKeyMap[payer.String()] = &args.Payer
+
 	marketPrivateKey, err := m.create_private_key()
 	if err != nil {
 		return
 	}
 	m.market = marketPrivateKey.PublicKey()
+
 	requestQueuePrivateKey, err := m.create_private_key()
 	if err != nil {
 		return
 	}
 	m.requestQueue = requestQueuePrivateKey.PublicKey()
+
 	eventQueuePrivateKey, err := m.create_private_key()
 	if err != nil {
 		return
 	}
 	m.eventQueue = eventQueuePrivateKey.PublicKey()
+
 	bidsPrivateKey, err := m.create_private_key()
 	if err != nil {
 		return
 	}
 	m.bids = bidsPrivateKey.PublicKey()
+
 	asksPrivateKey, err := m.create_private_key()
 	if err != nil {
 		return
 	}
 	m.asks = asksPrivateKey.PublicKey()
+	m.privateKeyMap[m.asks.String()] = asksPrivateKey
 
-	baseVault, err := solana.NewRandomPrivateKey()
+	baseVault, err := m.create_private_key()
 	if err != nil {
 		return
 	}
-	m.baseVault = &baseVault
+	m.baseVault = baseVault
 
-	quoteVault, err := solana.NewRandomPrivateKey()
+	quoteVault, err := m.create_private_key()
 	if err != nil {
 		return
 	}
-	m.quoteVault = &quoteVault
+	m.quoteVault = quoteVault
 
 	vaultOwner, vaultNonce, err := getVaultOwnerAndNonce(args.DEX_PID, m.market)
 	if err != nil {
@@ -232,8 +239,8 @@ func (c *Client) List(args *ListArgs) (result *Market, err error) {
 	result.client = c
 	result.DexPID = args.DEX_PID
 	result.MarketAddress = marketAddress
-	result.BaseVault = &baseVault
-	result.QuoteVault = &quoteVault
+	result.BaseVault = baseVault
+	result.QuoteVault = quoteVault
 	result.Market, err = c.GetMarket(m.market)
 	if err != nil {
 		return

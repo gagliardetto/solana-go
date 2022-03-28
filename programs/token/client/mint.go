@@ -49,8 +49,13 @@ type TokenArgs struct {
 	FreezeAuthority solana.PublicKey
 }
 
+type MintWithAddress struct {
+	Address solana.PublicKey
+	State   *tkn.Mint
+}
+
 // create a token; optionally mint tokens to a destination
-func (c *Client) CreateToken(args *TokenArgs, payerPrivateKey solana.PrivateKey, owner solana.PublicKey) (*tkn.Mint, error) {
+func (c *Client) CreateToken(args *TokenArgs, payerPrivateKey solana.PrivateKey, owner solana.PublicKey) (*MintWithAddress, error) {
 	keyMap := make(map[string]*solana.PrivateKey)
 
 	payer := payerPrivateKey.PublicKey()
@@ -142,7 +147,11 @@ func (c *Client) CreateToken(args *TokenArgs, payerPrivateKey solana.PrivateKey,
 		return nil, err
 	}
 
-	return c.GetMint(mint)
+	state, err := c.GetMint(mint)
+	if err != nil {
+		return nil, err
+	}
+	return &MintWithAddress{Address: mint, State: state}, nil
 }
 
 // spl_token::instruction::mint_to

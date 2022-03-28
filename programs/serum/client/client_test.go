@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gagliardetto/solana-go"
+	"github.com/gagliardetto/solana-go/programs/serum/client"
 	tknclient "github.com/gagliardetto/solana-go/programs/token/client"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/gagliardetto/solana-go/rpc/ws"
@@ -139,18 +140,24 @@ func TestMintToken(t *testing.T) {
 	if !present {
 		t.Fatal("no bpf")
 	}
-	walletFilePath, present := os.LookupEnv("SERUM_DEX_WALLET")
+	programWalletFilePath, present := os.LookupEnv("SERUM_DEX_WALLET")
 	if !present {
 		t.Fatal("no bpf")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	tv, err := util.SetupTestValidator(ctx, rpc.CommitmentFinalized, bpf, walletFilePath, false)
+	tv, err := util.SetupTestValidator(ctx, rpc.CommitmentFinalized, bpf, programWalletFilePath, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
 		cancel()
 	})
+
+	programIdPrivateKey, err := solana.PrivateKeyFromSolanaKeygenFile(programWalletFilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dexId := programIdPrivateKey.PublicKey()
 
 	bal := 100 * solana.LAMPORTS_PER_SOL
 	err = tv.Airdrop(bal)
@@ -178,7 +185,7 @@ func TestMintToken(t *testing.T) {
 	}
 
 	log.Printf("mint usd=%+v", mint_USD)
-	if mint_USD.MintAuthority == nil {
+	if mint_USD.State.MintAuthority == nil {
 		t.Fatal("no mint authority")
 	}
 
@@ -191,10 +198,23 @@ func TestMintToken(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Printf("mint jpy=%+v", mint_JPY)
+	log.Printf("mint jpy=%+v", mint_JPY.State)
 
-	//serumClient := client.Create(ctx, rpcClient, wsClient, rpc.CommitmentFinalized)
+	serumClient := client.Create(ctx, tv.Rpc, tv.Ws, rpc.CommitmentFinalized)
 
-	//serumClient.List(&client.ListArgs{})
+	result, err := serumClient.List(&client.ListArgs{
+		DEX_PID:            dexId,
+		Payer:              tv.PrivateKey,
+		BaseMint:           mint_USD.Address,
+		QuoteMint:          mint_JPY.Address,
+		BaseLotSize:        1000,
+		QuoteLotSize:       10,
+		FeeRateBps:         10,
+		QuoteDustThreshold: 1,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	log.Printf("market address=%s", result.MarketAddress.String())
 
 }
