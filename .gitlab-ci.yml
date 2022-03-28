@@ -9,6 +9,7 @@ variables:
 token-test:
   stage: test
   image: registry.gitlab.com/eflam/builder:main
+  tags: ["flamingo", "google", "kubernetes" ]
   variables:
     SERUM_DEX_BPF_FILE_PATH: contrib/serum-dex/dex/target/deploy/serum_dex.so
     SERUM_DEX_WALLET: contrib/serum-dex/dex/target/deploy/serum_dex-keypair.json
