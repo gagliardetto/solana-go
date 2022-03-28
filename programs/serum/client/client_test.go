@@ -129,7 +129,7 @@ func TestBasic(t *testing.T) {
 
 }
 
-func TestList(t *testing.T) {
+func TestMintToken(t *testing.T) {
 	err := godotenv.Load("../../../.env")
 	if err != nil {
 		t.Fatal(err)

@@ -6,13 +6,12 @@ variables:
   #TARGET_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHA
   TARGET_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_BRANCH 
 
-anchor-test:
+token-test:
   stage: test
   image: registry.gitlab.com/eflam/builder:main
   variables:
-    KEYPAIR_FILE_PATH: /tmp/test.json
+    SERUM_DEX_BPF_FILE_PATH: contrib/serum-dex/dex/target/deploy/serum_dex.so
+    SERUM_DEX_WALLET: contrib/serum-dex/dex/target/deploy/serum_dex-keypair.json
   script:
-    - source $HOME/.profile
-    - envsubst <Anchor.env.toml >Anchor.toml
-    - cat Anchor.toml
-    - ./contrib/setup.sh
+    - ( cd contrib/serum-dex/dex && anchor build )
+    - go test -timeout 30s -run ^TestMintToken$ github.com/gagliardetto/solana-go/programs/serum/client
