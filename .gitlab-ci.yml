@@ -14,5 +14,5 @@ token-test:
     SERUM_DEX_BPF_FILE_PATH: contrib/serum-dex/dex/target/deploy/serum_dex.so
     SERUM_DEX_WALLET: contrib/serum-dex/dex/target/deploy/serum_dex-keypair.json
   script:
-    - ( cd contrib/serum-dex/dex && cargo build-bpf )
+    - ( cd contrib/serum-dex/dex && cargo install && anchor build )
     - go test -timeout 30s -run ^TestMintToken$ github.com/gagliardetto/solana-go/programs/serum/client
