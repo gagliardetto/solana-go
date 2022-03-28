@@ -58,9 +58,11 @@ out:
 			if !ok {
 				err = errors.New("bad type")
 			}
+
 			if x.Value.Err != nil {
 				err = fmt.Errorf("%+v", x.Value.Err)
 			}
+
 			break out
 		}
 	}

@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 
+	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/system"
 	tkn "github.com/gagliardetto/solana-go/programs/token"
@@ -18,8 +19,11 @@ func (c *Client) GetMint(mint solana.PublicKey) (*tkn.Mint, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	tokenInfo := new(tkn.Mint)
-	err = tokenInfo.Decode(data)
+
+	err = tokenInfo.UnmarshalWithDecoder(bin.NewBinDecoder(data))
+	//err = tokenInfo.Decode(data)
 	if err != nil {
 		return nil, err
 	}
@@ -46,43 +50,66 @@ type TokenArgs struct {
 }
 
 // create a token; optionally mint tokens to a destination
-func (c *Client) CreateToken(args *TokenArgs, payerPrivateKey solana.PrivateKey, destination solana.PublicKey, supply uint64) (*tkn.Mint, error) {
+func (c *Client) CreateToken(args *TokenArgs, payerPrivateKey solana.PrivateKey, owner solana.PublicKey) (*tkn.Mint, error) {
+	keyMap := make(map[string]*solana.PrivateKey)
+
 	payer := payerPrivateKey.PublicKey()
+	keyMap[payer.String()] = &payerPrivateKey
+
+	destinationForTokensPrivateKey, err := solana.NewRandomPrivateKey()
+	if err != nil {
+		return nil, err
+	}
+	destination := destinationForTokensPrivateKey.PublicKey()
+	keyMap[destination.String()] = &destinationForTokensPrivateKey
 
 	mintPrivateKey, err := solana.NewRandomPrivateKey()
 	if err != nil {
 		return nil, err
 	}
 	mint := mintPrivateKey.PublicKey()
+	keyMap[mint.String()] = &mintPrivateKey
+
+	if payer == mint {
+		return nil, errors.New("payer cannot be the same as mint")
+	}
 
 	blockHash, err := c.latest_blockhash()
 	if err != nil {
 		return nil, err
 	}
+	list := []solana.Instruction{}
 
-	inst_1, err := c.create_token_instruction_create_account(payer, mint)
+	inst_1, err := c.instruction_create_account_for_mint(payer, mint)
 	if err != nil {
 		return nil, err
 	}
-	inst_2, err := c.create_token_instruction_initialize_mint(args.Decimals, mint, args.MintAuthority, args.FreezeAuthority)
+	list = append(list, inst_1)
+	// spl_token::instruction::initialize_mint
+	inst_2, err := c.instruction_initialize_mint(args.Decimals, mint, args.MintAuthority, args.FreezeAuthority)
 	if err != nil {
 		return nil, err
 	}
-	inst_3, err := c.create_token_create_account_destination(payer, destination)
-	if err != nil {
-		return nil, err
-	}
-	inst_4 := c.create_token_initialize_destination(mint, destination, payer)
+	list = append(list, inst_2)
 
-	var list []solana.Instruction
-	if 0 < supply {
-		list = []solana.Instruction{
-			inst_1, inst_2, inst_3, inst_4, c.create_token_mint(mint, args.MintAuthority, destination, supply),
+	inst_3, err := c.instruction_create_account_for_token(payer, destination)
+	if err != nil {
+		return nil, err
+	}
+	list = append(list, inst_3)
+	// spl_token::instruction::initialize_account
+	inst_4, err := c.instruction_initialize_account_for_token(mint, destination, owner)
+	if err != nil {
+		return nil, err
+	}
+	list = append(list, inst_4)
+
+	if 0 < args.InitialSupply {
+		inst_n, err := c.instruction_mint_to(mint, args.MintAuthority, destination, args.InitialSupply)
+		if err != nil {
+			return nil, err
 		}
-	} else {
-		list = []solana.Instruction{
-			inst_1, inst_2, inst_3, inst_4,
-		}
+		list = append(list, inst_n)
 	}
 
 	tx, err := solana.NewTransaction(
@@ -95,13 +122,17 @@ func (c *Client) CreateToken(args *TokenArgs, payerPrivateKey solana.PrivateKey,
 	}
 
 	_, err = tx.Sign(func(key solana.PublicKey) *solana.PrivateKey {
+		k, present := keyMap[key.String()]
+		if present {
+			return k
+		}
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	sig, err := c.rpc.SendTransactionWithOpts(c.ctx, tx, true, c.commitment)
+	sig, err := c.rpc.SendTransactionWithOpts(c.ctx, tx, false, c.commitment)
 	if err != nil {
 		return nil, err
 	}
@@ -114,32 +145,34 @@ func (c *Client) CreateToken(args *TokenArgs, payerPrivateKey solana.PrivateKey,
 	return c.GetMint(mint)
 }
 
-func (c *Client) create_token_mint(mint solana.PublicKey, mintAuthority solana.PublicKey, destination solana.PublicKey, supply uint64) *tkn.Instruction {
-	return tkn.NewMintToInstructionBuilder().SetAmount(supply).SetDestinationAccount(destination).SetMintAccount(mint).SetAuthorityAccount(mintAuthority).Build()
+// spl_token::instruction::mint_to
+func (c *Client) instruction_mint_to(mint solana.PublicKey, mintAuthority solana.PublicKey, destination solana.PublicKey, supply uint64) (*tkn.Instruction, error) {
+	return tkn.NewMintToInstructionBuilder().SetAmount(supply).SetDestinationAccount(destination).SetMintAccount(mint).SetAuthorityAccount(mintAuthority).ValidateAndBuild()
 }
 
-func (c *Client) create_token_instruction_create_account(payer solana.PublicKey, mint solana.PublicKey) (*system.Instruction, error) {
-	space := uint64(82)
+// system program; create an account with space to initialize a mint
+func (c *Client) instruction_create_account_for_mint(payer solana.PublicKey, mint solana.PublicKey) (*system.Instruction, error) {
+	return c.instruction_create_generic_account(82, payer, tkn.ProgramID, mint)
+}
+
+// spl_token::instruction::initialize_mint
+func (c *Client) instruction_initialize_mint(decimals uint8, mint solana.PublicKey, mintAuthority solana.PublicKey, freezeAuthority solana.PublicKey) (*tkn.Instruction, error) {
+	return tkn.NewInitializeMintInstructionBuilder().SetDecimals(decimals).SetMintAccount(mint).SetMintAuthority(mintAuthority).SetFreezeAuthority(freezeAuthority).ValidateAndBuild()
+}
+
+func (c *Client) instruction_create_generic_account(space uint64, payer solana.PublicKey, owner solana.PublicKey, destination solana.PublicKey) (*system.Instruction, error) {
 	minLamports, err := c.rpc.GetMinimumBalanceForRentExemption(c.ctx, space, c.commitment)
 	if err != nil {
 		return nil, err
 	}
-	return system.NewCreateAccountInstructionBuilder().SetSpace(space).SetLamports(minLamports).SetOwner(tkn.ProgramID).SetFundingAccount(payer).SetNewAccount(mint).Build(), nil
+	return system.NewCreateAccountInstructionBuilder().SetSpace(space).SetLamports(minLamports).SetOwner(owner).SetFundingAccount(payer).SetNewAccount(destination).ValidateAndBuild()
 }
 
-func (c *Client) create_token_instruction_initialize_mint(decimals uint8, mint solana.PublicKey, mintAuthority solana.PublicKey, freezeAuthority solana.PublicKey) (*tkn.Instruction, error) {
-	return tkn.NewInitializeMintInstructionBuilder().SetDecimals(decimals).SetMintAccount(mint).SetMintAuthority(mintAuthority).SetFreezeAuthority(freezeAuthority).Build(), nil
+// system program; create an account with space to initialize an account that receives tokens
+func (c *Client) instruction_create_account_for_token(payer solana.PublicKey, destination solana.PublicKey) (*system.Instruction, error) {
+	return c.instruction_create_generic_account(165, payer, tkn.ProgramID, destination)
 }
 
-func (c *Client) create_token_create_account_destination(payer solana.PublicKey, destination solana.PublicKey) (*system.Instruction, error) {
-	destinationSpace := uint64(165)
-	destinationLamports, err := c.rpc.GetMinimumBalanceForRentExemption(c.ctx, destinationSpace, c.commitment)
-	if err != nil {
-		return nil, err
-	}
-	return system.NewCreateAccountInstructionBuilder().SetSpace(destinationSpace).SetLamports(destinationLamports).SetOwner(tkn.ProgramID).SetNewAccount(destination).SetFundingAccount(payer).Build(), nil
-}
-
-func (c *Client) create_token_initialize_destination(mint solana.PublicKey, destination solana.PublicKey, owner solana.PublicKey) *tkn.Instruction {
-	return tkn.NewInitializeAccountInstructionBuilder().SetSysVarRentPubkeyAccount(solana.SysVarRentPubkey).SetAccount(destination).SetMintAccount(mint).SetOwnerAccount(owner).Build()
+func (c *Client) instruction_initialize_account_for_token(mint solana.PublicKey, destination solana.PublicKey, owner solana.PublicKey) (*tkn.Instruction, error) {
+	return tkn.NewInitializeAccountInstructionBuilder().SetSysVarRentPubkeyAccount(solana.SysVarRentPubkey).SetAccount(destination).SetMintAccount(mint).SetOwnerAccount(owner).ValidateAndBuild()
 }

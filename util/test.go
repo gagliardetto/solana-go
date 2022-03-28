@@ -16,12 +16,12 @@ type TestValidatorConfig struct {
 	ctx               context.Context
 	Rpc               *rpc.Client
 	Ws                *ws.Client
-	Wallet            solana.PrivateKey
+	PrivateKey        solana.PrivateKey
 	defaultCommitment rpc.CommitmentType
 }
 
 func (c *TestValidatorConfig) PublicKey() solana.PublicKey {
-	return c.Wallet.PublicKey()
+	return c.PrivateKey.PublicKey()
 }
 
 func (c *TestValidatorConfig) Airdrop(supply uint64) error {
@@ -45,7 +45,7 @@ func (c *TestValidatorConfig) Balance() (uint64, error) {
 }
 
 // run a test valdiator in a random directory
-func SetupTestValidator(ctx context.Context, defaultCommitment rpc.CommitmentType, bpfProgram string) (config *TestValidatorConfig, err error) {
+func SetupTestValidator(ctx context.Context, defaultCommitment rpc.CommitmentType, bpfProgram string, walletFilePath string, printLog bool) (config *TestValidatorConfig, err error) {
 	config = &TestValidatorConfig{ctx: ctx, defaultCommitment: defaultCommitment}
 	err = nil
 	var tmpdir string
@@ -53,10 +53,29 @@ func SetupTestValidator(ctx context.Context, defaultCommitment rpc.CommitmentTyp
 	if err != nil {
 		return
 	}
-	config.Wallet, err = solana.NewRandomPrivateKey()
+	config.PrivateKey, err = solana.NewRandomPrivateKey()
 	if err != nil {
 		return
 	}
+
+	cmd := exec.Command(
+		"solana-test-validator",
+		"--bind-address", "127.0.0.1",
+		"--ledger", tmpdir+"/test-ledger",
+		"--bpf-program", walletFilePath, bpfProgram,
+	)
+	if printLog {
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return
+	}
+
+	log.Printf("pid=%d", cmd.Process.Pid)
+	time.Sleep(10 * time.Second)
 
 	config.Rpc = rpc.New(
 		"http://127.0.0.1:8899",
@@ -66,21 +85,7 @@ func SetupTestValidator(ctx context.Context, defaultCommitment rpc.CommitmentTyp
 	if err != nil {
 		return
 	}
-	cmd := exec.Command(
-		"solana-test-validator",
-		"--bind-address", "127.0.0.1",
-		"--ledger", tmpdir+"/test-ledger",
-		"--bpf-program", bpfProgram,
-	)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	err = cmd.Start()
-	if err != nil {
-		return
-	}
-	log.Printf("pid=%d", cmd.Process.Pid)
 
-	log.Printf("tmpdir=%s", tmpdir)
 	doneC := ctx.Done()
 	go func() {
 		<-doneC
