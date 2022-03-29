@@ -69,3 +69,42 @@ out:
 
 	return err
 }
+
+func (c *Client) send_tx_generic(keyMap map[string]*solana.PrivateKey, payer solana.PublicKey, list []solana.Instruction) error {
+	blockHash, err := c.latest_blockhash()
+	if err != nil {
+		return err
+	}
+
+	tx, err := solana.NewTransaction(
+		list,
+		blockHash,
+		solana.TransactionPayer(payer),
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Sign(func(key solana.PublicKey) *solana.PrivateKey {
+		k, present := keyMap[key.String()]
+		if present {
+			return k
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	sig, err := c.rpc.SendTransactionWithOpts(c.ctx, tx, false, c.commitment)
+	if err != nil {
+		return err
+	}
+
+	err = c.block_on_tx_processing(sig)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

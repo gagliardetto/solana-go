@@ -9,6 +9,7 @@ import (
 
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/serum/client"
+	"github.com/gagliardetto/solana-go/programs/serum/client/fake"
 	tknclient "github.com/gagliardetto/solana-go/programs/token/client"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/gagliardetto/solana-go/rpc/ws"
@@ -18,7 +19,7 @@ import (
 
 func TestExternal(t *testing.T) {
 	ctx := context.Background()
-	wsClient, err := ws.Connect(ctx, "ws://127.0.0.1:48899", nil)
+	wsClient, err := ws.Connect(ctx, "ws://127.0.0.1:48899")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +74,7 @@ out:
 }
 
 func printBlock(ctx context.Context, slot uint64, diff int64) {
-	rpcClient := rpc.New("http://127.0.0.1:48899", nil)
+	rpcClient := rpc.New("http://127.0.0.1:48899")
 	result, err := rpcClient.GetBlock(ctx, slot)
 	if err != nil {
 		log.Print(err)
@@ -130,7 +131,7 @@ func TestBasic(t *testing.T) {
 
 }
 
-func TestMintToken(t *testing.T) {
+func TestListTradingPair(t *testing.T) {
 	err := godotenv.Load("../../../.env")
 	if err != nil {
 		t.Fatal(err)
@@ -199,6 +200,22 @@ func TestMintToken(t *testing.T) {
 		t.Fatal(err)
 	}
 	log.Printf("mint jpy=%+v", mint_JPY.State)
+
+	state, err := fake.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = state.IterateParticipants(func(p *fake.Participant) error {
+		_, err2 := tokenClient.CreateAccountAndIssue(tv.PrivateKey, mint_JPY, p.PublicKey(), 1000000)
+		if err2 != nil {
+			return err2
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	serumClient := client.Create(ctx, tv.Rpc, tv.Ws, rpc.CommitmentFinalized)
 

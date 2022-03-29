@@ -42,7 +42,7 @@ func TestFetchMarket(t *testing.T) {
 
 	//
 
-	client := rpc.New(rpcURL, http.Header{})
+	client := rpc.NewWithHeaders(rpcURL, http.Header{})
 	ctx := context.Background()
 
 	openOrderAdd, err := solana.PublicKeyFromBase58("jFoHUkNDC767PyK11cZM4zyNcpjLqFnSjaqEYp5GVBr")
@@ -64,7 +64,7 @@ func TestStreamOpenOrders(t *testing.T) {
 		t.Skip("Setup 'RPC_URL' to run test i.e. 'wss://api.mainnet-beta.solana.com'")
 		return
 	}
-	client, err := ws.Connect(context.Background(), rpcURL, http.Header{})
+	client, err := ws.ConnectWithHeaders(context.Background(), rpcURL, http.Header{})
 	require.NoError(t, err)
 
 	err = StreamOpenOrders(client)

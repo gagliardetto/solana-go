@@ -23,7 +23,7 @@ import (
 
 func main() {
 	endpoint := rpc.TestNet_RPC
-	client := rpc.New(endpoint, nil)
+	client := rpc.New(endpoint)
 
 	limit := uint(3)
 	out, err := client.GetRecentPerformanceSamples(

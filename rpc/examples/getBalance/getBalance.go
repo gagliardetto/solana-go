@@ -26,7 +26,7 @@ import (
 
 func main() {
 	endpoint := rpc.MainNetBeta_RPC
-	client := rpc.New(endpoint, nil)
+	client := rpc.New(endpoint)
 
 	pubKey := solana.MustPublicKeyFromBase58("7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932")
 	out, err := client.GetBalance(

@@ -77,11 +77,11 @@ func SetupTestValidator(ctx context.Context, defaultCommitment rpc.CommitmentTyp
 	log.Printf("pid=%d", cmd.Process.Pid)
 	time.Sleep(10 * time.Second)
 
-	config.Rpc = rpc.New(
+	config.Rpc = rpc.NewWithHeaders(
 		"http://127.0.0.1:8899",
 		map[string][]string{},
 	)
-	config.Ws, err = ws.Connect(ctx, "ws://127.0.0.1:8900", map[string][]string{})
+	config.Ws, err = ws.ConnectWithHeaders(ctx, "ws://127.0.0.1:8900", map[string][]string{})
 	if err != nil {
 		return
 	}

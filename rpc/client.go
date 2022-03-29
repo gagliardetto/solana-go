@@ -45,8 +45,12 @@ type JSONRPCClient interface {
 }
 
 // New creates a new Solana JSON RPC client.
-func New(rpcEndpoint string, defaultHeader http.Header) *Client {
+func New(rpcEndpoint string) *Client {
 
+	return NewWithHeaders(rpcEndpoint, nil)
+}
+
+func NewWithHeaders(rpcEndpoint string, defaultHeader http.Header) *Client {
 	opts := &jsonrpc.RPCClientOpts{
 		HTTPClient: newHTTP(),
 	}
@@ -57,6 +61,11 @@ func New(rpcEndpoint string, defaultHeader http.Header) *Client {
 		}
 		opts.CustomHeaders = customHeaders
 	}
+	return NewWithOpts(rpcEndpoint, opts)
+}
+
+func NewWithOpts(rpcEndpoint string, opts *jsonrpc.RPCClientOpts) *Client {
+
 	rpcClient := jsonrpc.NewClientWithOpts(rpcEndpoint, opts)
 	return NewWithCustomRPCClient(rpcClient)
 }
