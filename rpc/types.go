@@ -44,16 +44,6 @@ type GetRecentBlockhashResult struct {
 	Value *BlockhashResult `json:"value"`
 }
 
-type GetLatestBlockhashResult struct {
-	RPCContext
-	Value *LatestBlockhashResult `json:"value"`
-}
-
-type LatestBlockhashResult struct {
-	Blockhash            solana.Hash `json:"blockhash"`
-	LastValidBlockHeight int64       `json:"lastValidBlockHeight"`
-}
-
 type BlockhashResult struct {
 	Blockhash     solana.Hash   `json:"blockhash"`
 	FeeCalculator FeeCalculator `json:"feeCalculator"`
