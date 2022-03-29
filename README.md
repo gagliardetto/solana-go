@@ -1,6 +1,6 @@
 # Solana SDK library for Go
 
-[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v1.1.0?tab=doc)
+[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v1.2.0?tab=doc)
 [![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/gagliardetto/solana-go?include_prereleases&label=release-tag)](https://github.com/gagliardetto/solana-go/releases)
 [![Build Status](https://github.com/gagliardetto/solana-go/workflows/tests/badge.svg?branch=main)](https://github.com/gagliardetto/solana-go/actions?query=branch%3Amain)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/gagliardetto/solana-go/main)](https://www.tickgit.com/browse?repo=github.com/gagliardetto/solana-go&branch=main)
@@ -72,9 +72,15 @@ More contracts to come.
 
 ## Current development status
 
-There is currently **no stable release**. The SDK is actively developed and latest is `v1.1.0` which is an `alpha` release.
+There is currently **no stable release**. The SDK is actively developed and latest is `v1.2.0` which is an `alpha` release.
 
 The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/dff9c88193da142693cabebfcd3bf68fa8e8b873/docs/src/developing/clients/jsonrpc-api.md).
+
+Note
+----
+
+- solana-go is in active development, so all APIs are subject to change.
+- This code is unaudited. Use at your own risk.
 
 ## Requirements
 
@@ -84,14 +90,14 @@ The RPC and WS client implementation is based on [this RPC spec](https://github.
 
 ```bash
 $ cd my-project
-$ go get github.com/gagliardetto/solana-go@v1.1.0
+$ go get github.com/gagliardetto/solana-go@v1.2.0
 ```
 
 ## Pretty-Print transactions/instructions
 
 ![pretty-printed](https://user-images.githubusercontent.com/15271561/136708519-399c9498-3d20-48d6-89fa-bdf43aac6d83.png)
 
-Instructions can be pretty-printed with the `EncodeTree` method on a `Transaction`:
+Instructions can be pretty-printed with the `String()` method on a `Transaction`:
 
 ```go
 tx, err := solana.NewTransaction(
@@ -109,7 +115,9 @@ tx, err := solana.NewTransaction(
 ...
 
 // Pretty print the transaction:
-tx.EncodeTree(text.NewTreeEncoder(os.Stdout, "Transfer SOL"))
+fmt.Println(tx.String())
+// OR you can choose a destination and a title:
+// tx.EncodeTree(text.NewTreeEncoder(os.Stdout, "Transfer SOL"))
 ```
 
 ## SendAndConfirmTransaction
@@ -423,7 +431,7 @@ func main() {
   out, err := client.RequestAirdrop(
     context.TODO(),
     account.PublicKey(),
-    solana.LAMPORTS_PER_SOL*5,
+    solana.LAMPORTS_PER_SOL*1,
     rpc.CommitmentFinalized,
   )
   if err != nil {
@@ -551,7 +559,7 @@ func main() {
     out, err := rpcClient.RequestAirdrop(
       context.TODO(),
       accountFrom.PublicKey(),
-      solana.LAMPORTS_PER_SOL*5,
+      solana.LAMPORTS_PER_SOL*1,
       rpc.CommitmentFinalized,
     )
     if err != nil {

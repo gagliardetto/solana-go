@@ -151,7 +151,7 @@ type GetBlockResult struct {
 
 	// Estimated production time, as Unix timestamp (seconds since the Unix epoch).
 	// Nil if not available.
-	BlockTime *int64 `json:"blockTime"`
+	BlockTime *solana.UnixTimeSeconds `json:"blockTime"`
 
 	// The number of blocks beneath this block.
 	BlockHeight *uint64 `json:"blockHeight"`

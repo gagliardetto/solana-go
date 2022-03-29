@@ -18,6 +18,7 @@
 package solana
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"sort"
@@ -28,6 +29,71 @@ import (
 	"github.com/gagliardetto/treeout"
 	"go.uber.org/zap"
 )
+
+type Transaction struct {
+	// A list of base-58 encoded signatures applied to the transaction.
+	// The list is always of length `message.header.numRequiredSignatures` and not empty.
+	// The signature at index `i` corresponds to the public key at index
+	// `i` in `message.account_keys`. The first one is used as the transaction id.
+	Signatures []Signature `json:"signatures"`
+
+	// Defines the content of the transaction.
+	Message Message `json:"message"`
+}
+
+var _ bin.EncoderDecoder = &Transaction{}
+
+func (t *Transaction) HasAccount(account PublicKey) bool     { return t.Message.HasAccount(account) }
+func (t *Transaction) IsSigner(account PublicKey) bool       { return t.Message.IsSigner(account) }
+func (t *Transaction) IsWritable(account PublicKey) bool     { return t.Message.IsWritable(account) }
+func (t *Transaction) AccountMetaList() (out []*AccountMeta) { return t.Message.AccountMetaList() }
+func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, error) {
+	return t.Message.ResolveProgramIDIndex(programIDIndex)
+}
+
+func TransactionFromDecoder(decoder *bin.Decoder) (*Transaction, error) {
+	var out *Transaction
+	err := decoder.Decode(&out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func MustTransactionFromDecoder(decoder *bin.Decoder) *Transaction {
+	out, err := TransactionFromDecoder(decoder)
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
+
+type CompiledInstruction struct {
+	// Index into the message.accountKeys array indicating the program account that executes this instruction.
+	// NOTE: it is actually a uint8, but using a uint16 because uint8 is treated as a byte everywhere,
+	// and that can be an issue.
+	ProgramIDIndex uint16 `json:"programIdIndex"`
+
+	AccountCount bin.Varuint16 `json:"-" bin:"sizeof=Accounts"`
+	DataLength   bin.Varuint16 `json:"-" bin:"sizeof=Data"`
+
+	// List of ordered indices into the message.accountKeys array indicating which accounts to pass to the program.
+	// NOTE: it is actually a []uint8, but using a uint16 because []uint8 is treated as a []byte everywhere,
+	// and that can be an issue.
+	Accounts []uint16 `json:"accounts"`
+
+	// The program input data encoded in a base-58 string.
+	Data Base58 `json:"data"`
+}
+
+func (ci *CompiledInstruction) ResolveInstructionAccounts(message *Message) []*AccountMeta {
+	out := make([]*AccountMeta, len(ci.Accounts), len(ci.Accounts))
+	metas := message.AccountMetaList()
+	for i, acct := range ci.Accounts {
+		out[i] = metas[acct]
+	}
+	return out
+}
 
 type Instruction interface {
 	ProgramID() PublicKey     // the programID the instruction acts on
@@ -344,11 +410,19 @@ func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error
 }
 
 func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
-	if len(encoder.Doc) == 0 {
-		encoder.Doc = "Transaction"
-	}
 	tx.EncodeToTree(encoder)
 	return encoder.WriteString(encoder.Tree.String())
+}
+
+// String returns a human-readable string representation of the transaction data.
+// To disable colors, set "github.com/gagliardetto/solana-go/text".DisableColors = true
+func (tx *Transaction) String() string {
+	buf := new(bytes.Buffer)
+	_, err := tx.EncodeTree(text.NewTreeEncoder(buf, ""))
+	if err != nil {
+		panic(err)
+	}
+	return buf.String()
 }
 
 func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
@@ -370,7 +444,8 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 
 			progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
 			if err == nil {
-				decodedInstruction, err := DecodeInstruction(progKey, inst.ResolveInstructionAccounts(&tx.Message), inst.Data)
+				accounts := inst.ResolveInstructionAccounts(&tx.Message)
+				decodedInstruction, err := DecodeInstruction(progKey, accounts, inst.Data)
 				if err == nil {
 					if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
 						enToTree.EncodeToTree(message)
@@ -379,11 +454,78 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 					}
 				} else {
 					// TODO: log error?
-					message.Child(fmt.Sprintf(text.RedBG("cannot decode instruction for %s program: %s"), progKey, err))
+					message.Child(fmt.Sprintf(text.RedBG("cannot decode instruction for %s program: %s"), progKey, err)).
+						Child(text.IndigoBG("Program") + ": " + text.Bold("<unknown>") + " " + text.ColorizeBG(progKey.String())).
+						//
+						ParentFunc(func(programBranch treeout.Branches) {
+							programBranch.Child(text.Purple(text.Bold("Instruction")) + ": " + text.Bold("<unknown>")).
+								//
+								ParentFunc(func(instructionBranch treeout.Branches) {
+
+									// Data of the instruction call:
+									instructionBranch.Child(text.Sf("data[len=%v bytes]", len(inst.Data))).ParentFunc(func(paramsBranch treeout.Branches) {
+										paramsBranch.Child(bin.FormatByteSlice(inst.Data))
+									})
+
+									// Accounts of the instruction call:
+									instructionBranch.Child(text.Sf("accounts[len=%v]", len(accounts))).ParentFunc(func(accountsBranch treeout.Branches) {
+										for i := range accounts {
+											accountsBranch.Child(formatMeta(text.Sf("accounts[%v]", i), accounts[i]))
+										}
+									})
+
+								})
+						})
 				}
 			} else {
 				message.Child(fmt.Sprintf(text.RedBG("cannot ResolveProgramIDIndex: %s"), err))
 			}
 		}
 	})
+}
+
+func formatMeta(name string, meta *AccountMeta) string {
+	if meta == nil {
+		return text.Shakespeare(name) + ": " + "<nil>"
+	}
+	out := text.Shakespeare(name) + ": " + text.ColorizeBG(meta.PublicKey.String())
+	out += " ["
+	if meta.IsWritable {
+		out += "WRITE"
+	}
+	if meta.IsSigner {
+		if meta.IsWritable {
+			out += ", "
+		}
+		out += "SIGN"
+	}
+	out += "] "
+	return out
+}
+
+// VerifySignatures verifies all the signatures in the transaction
+// against the pubkeys of the signers.
+func (tx *Transaction) VerifySignatures() error {
+	msg, err := tx.Message.MarshalBinary()
+	if err != nil {
+		return err
+	}
+
+	signers := tx.Message.Signers()
+
+	if len(signers) != len(tx.Signatures) {
+		return fmt.Errorf(
+			"got %v signers, but %v signatures",
+			len(signers),
+			len(tx.Signatures),
+		)
+	}
+
+	for i, sig := range tx.Signatures {
+		if !sig.Verify(signers[i], msg) {
+			return fmt.Errorf("invalid signature by %s", signers[i].String())
+		}
+	}
+
+	return nil
 }

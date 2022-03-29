@@ -68,7 +68,8 @@ var (
 
 var (
 	// The Mint for native SOL Token accounts
-	SolMint = MustPublicKeyFromBase58("So11111111111111111111111111111111111111112")
+	SolMint    = MustPublicKeyFromBase58("So11111111111111111111111111111111111111112")
+	WrappedSol = SolMint
 )
 
 var (

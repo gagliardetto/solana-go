@@ -67,11 +67,11 @@ type GetConfirmedBlockResult struct {
 	// could be zeroes if ledger was clean-up and this is unavailable
 	PreviousBlockhash solana.Hash `json:"previousBlockhash"`
 
-	ParentSlot   uint64                `json:"parentSlot"`
-	Transactions []TransactionWithMeta `json:"transactions"`
-	Signatures   []solana.Signature    `json:"signatures"`
-	Rewards      []BlockReward         `json:"rewards"`
-	BlockTime    *uint64               `json:"blockTime,omitempty"`
+	ParentSlot   uint64                  `json:"parentSlot"`
+	Transactions []TransactionWithMeta   `json:"transactions"`
+	Signatures   []solana.Signature      `json:"signatures"`
+	Rewards      []BlockReward           `json:"rewards"`
+	BlockTime    *solana.UnixTimeSeconds `json:"blockTime,omitempty"`
 }
 
 type BlockReward struct {
@@ -152,7 +152,7 @@ type TransactionMeta struct {
 
 	// List of inner instructions or omitted if inner instruction recording
 	// was not yet enabled during this transaction
-	InnerInstructions []InnerInstruction `json:"innerInstructions,omitempty"`
+	InnerInstructions []InnerInstruction `json:"innerInstructions"`
 
 	// List of token balances from before the transaction was processed
 	// or omitted if token balance recording was not yet enabled during this transaction
@@ -169,7 +169,7 @@ type TransactionMeta struct {
 	// DEPRECATED: Transaction status.
 	Status DeprecatedTransactionMetaStatus `json:"status"`
 
-	Rewards []BlockReward `json:"rewards,omitempty"`
+	Rewards []BlockReward `json:"rewards"`
 }
 
 type InnerInstruction struct {

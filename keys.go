@@ -323,6 +323,9 @@ const (
 	MaxSeedLength = 32
 	// Maximum number of seeds.
 	MaxSeeds = 16
+	/// Number of bytes in a signature.
+	SignatureLength = 64
+
 	// // Maximum string length of a base58 encoded pubkey.
 	// MaxBase58Length = 44
 )

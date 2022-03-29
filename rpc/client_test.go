@@ -354,10 +354,11 @@ func TestClient_GetBlock(t *testing.T) {
 	// TODO:
 	// - test also when requesting only signatures
 
+	blockTime := solana.UnixTimeSeconds(1625227950)
 	assert.Equal(t,
 		&GetBlockResult{
 			BlockHeight:       pointer.ToUint64(69213636),
-			BlockTime:         pointer.ToInt64(1625227950),
+			BlockTime:         &blockTime,
 			Blockhash:         solana.MustHashFromBase58("5M77sHdwzH6rckuQwF8HL1w52n7hjrh4GVTFiF6T8QyB"),
 			ParentSlot:        83987983,
 			PreviousBlockhash: solana.MustHashFromBase58("Aq9jSXe1jRzfiaBcRFLe4wm7j499vWVEeFQrq5nnXfZN"),
