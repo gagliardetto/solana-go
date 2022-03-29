@@ -645,16 +645,23 @@ func main() {
   - [GetBlocks](#index--rpc--getblocks)
   - [GetBlocksWithLimit](#index--rpc--getblockswithlimit)
   - [GetClusterNodes](#index--rpc--getclusternodes)
-  - [GetConfirmedBlock](#index--rpc--getconfirmedblock) **DEPRECATED: Please use [GetBlock](#index--rpc--getblock) instead** (This method is expected to be removed in **solana-core v2.0**)
-  - [GetConfirmedBlocks](#index--rpc--getconfirmedblocks) **DEPRECATED: Please use [GetBlocks](#index--rpc--getblocks) instead** (This method is expected to be removed in **solana-core v2.0**)
-  - [GetConfirmedBlocksWithLimit](#index--rpc--getconfirmedblockswithlimit) **DEPRECATED: Please use [GetBlocksWithLimit](#index--rpc--getblockswithlimit) instead** (This method is expected to be removed in **solana-core v2.0**)
-  - [GetConfirmedSignaturesForAddress2](#index--rpc--getconfirmedsignaturesforaddress2) **DEPRECATED: Please use [GetSignaturesForAddress](#index--rpc--getsignaturesforaddress) instead** (This method is expected to be removed in **solana-core v2.0**)
-  - [GetConfirmedTransaction](#index--rpc--getconfirmedtransaction) **DEPRECATED: Please use [GetTransaction](#index--rpc--gettransaction) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetConfirmedBlock](#index--rpc--getconfirmedblock)
+    - **DEPRECATED: Please use [GetBlock](#index--rpc--getblock) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetConfirmedBlocks](#index--rpc--getconfirmedblocks)
+    - **DEPRECATED: Please use [GetBlocks](#index--rpc--getblocks) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetConfirmedBlocksWithLimit](#index--rpc--getconfirmedblockswithlimit)
+    - **DEPRECATED: Please use [GetBlocksWithLimit](#index--rpc--getblockswithlimit) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetConfirmedSignaturesForAddress2](#index--rpc--getconfirmedsignaturesforaddress2)
+    - **DEPRECATED: Please use [GetSignaturesForAddress](#index--rpc--getsignaturesforaddress) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetConfirmedTransaction](#index--rpc--getconfirmedtransaction)
+    - **DEPRECATED: Please use [GetTransaction](#index--rpc--gettransaction) instead** (This method is expected to be removed in **solana-core v2.0**)
   - [GetEpochInfo](#index--rpc--getepochinfo)
   - [GetEpochSchedule](#index--rpc--getepochschedule)
-  - [GetFeeCalculatorForBlockhash](#index--rpc--getfeecalculatorforblockhash) **DEPRECATED: Please use [IsBlockhashValid](#index--rpc--isblockhashvalid) or [GetFeeForMessage](#index--rpc--getfeeformessage) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetFeeCalculatorForBlockhash](#index--rpc--getfeecalculatorforblockhash)
+    - **DEPRECATED: Please use [IsBlockhashValid](#index--rpc--isblockhashvalid) or [GetFeeForMessage](#index--rpc--getfeeformessage) instead** (This method is expected to be removed in **solana-core v2.0**)
   - [GetFeeRateGovernor](#index--rpc--getfeerategovernor) **DEPRECATED**
-  - [GetFees](#index--rpc--getfees) **DEPRECATED: Please use [GetFeeForMessage](#index--rpc--getfeeformessage) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetFees](#index--rpc--getfees)
+    - **DEPRECATED: Please use [GetFeeForMessage](#index--rpc--getfeeformessage) instead** (This method is expected to be removed in **solana-core v2.0**)
   - [GetFeeForMessage](#index--rpc--getfeeformessage)
   - [GetFirstAvailableBlock](#index--rpc--getfirstavailableblock)
   - [GetGenesisHash](#index--rpc--getgenesishash)
@@ -672,14 +679,17 @@ func main() {
   - [GetMinimumBalanceForRentExemption](#index--rpc--getminimumbalanceforrentexemption)
   - [GetMultipleAccounts](#index--rpc--getmultipleaccounts)
   - [GetProgramAccounts](#index--rpc--getprogramaccounts)
-  - [GetRecentBlockhash](#index--rpc--getrecentblockhash) **DEPRECATED: Please use [GetFeeForMessage](#index--rpc--getfeeformessage) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetRecentBlockhash](#index--rpc--getrecentblockhash)
+    - To be used with **solana v1.8**
+    - For solana v1.9 or newer: **DEPRECATED: Please use [GetLatestBlockhash](#index--rpc--getlatestblockhash) instead** (This method is expected to be removed in **solana-core v2.0**)
   - [GetRecentPerformanceSamples](#index--rpc--getrecentperformancesamples)
   - [GetSignatureStatuses](#index--rpc--getsignaturestatuses)
   - [GetSignaturesForAddress](#index--rpc--getsignaturesforaddress)
   - [GetSlot](#index--rpc--getslot)
   - [GetSlotLeader](#index--rpc--getslotleader)
   - [GetSlotLeaders](#index--rpc--getslotleaders)
-  - [GetSnapshotSlot](#index--rpc--getsnapshotslot) **DEPRECATED: Please use [GetHighestSnapshotSlot](#index--rpc--gethighestsnapshotslot) instead** (This method is expected to be removed in **solana-core v2.0**)
+  - [GetSnapshotSlot](#index--rpc--getsnapshotslot)
+    - **DEPRECATED: Please use [GetHighestSnapshotSlot](#index--rpc--gethighestsnapshotslot) instead** (This method is expected to be removed in **solana-core v2.0**)
   - [GetStakeActivation](#index--rpc--getstakeactivation)
   - [GetSupply](#index--rpc--getsupply)
   - [GetTokenAccountBalance](#index--rpc--gettokenaccountbalance)
@@ -1636,6 +1646,8 @@ func main() {
 ```
 
 #### [index](#contents) > [RPC](#rpc-methods) > GetLatestBlockhash
+
+NEW: This method is only available in solana-core v1.9 or newer. Please use getRecentBlockhash for solana-core v1.8
 
 ```go
 package main
