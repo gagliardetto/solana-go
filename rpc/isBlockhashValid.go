@@ -2,12 +2,14 @@ package rpc
 
 import (
 	"context"
+
 	"github.com/gagliardetto/solana-go"
 )
 
-// IsBlockhashValid returns the balance of the account of provided publicKey.
+// Returns whether a blockhash is still valid or not
 //
-// NEW: This method is only available in solana-core v1.9 or newer. Please use getFeeCalculatorForBlockhash for solana-core v1.8
+// **NEW: This method is only available in solana-core v1.9 or newer. Please use
+// `getFeeCalculatorForBlockhash` for solana-core v1.8**
 func (cl *Client) IsBlockhashValid(
 	ctx context.Context,
 	// Blockhash to be queried. Required.

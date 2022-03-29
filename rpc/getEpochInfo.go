@@ -47,5 +47,5 @@ type GetEpochInfoResult struct {
 	// The number of slots in this epoch.
 	SlotsInEpoch uint64 `json:"slotsInEpoch"`
 
-	TransactionCount uint64 `json:"transactionCount"`
+	TransactionCount *uint64 `json:"transactionCount,omitempty"`
 }

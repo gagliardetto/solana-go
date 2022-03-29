@@ -21,9 +21,6 @@ import (
 // GetBlocksWithLimit returns a list of confirmed blocks starting at the given slot.
 // The result field will be an array of u64 integers listing
 // confirmed blocks starting at startSlot for up to limit blocks, inclusive.
-//
-// NEW: This method is only available in solana-core v1.7 or newer.
-// Please use getConfirmedBlocksWithLimit for solana-core v1.6
 func (cl *Client) GetBlocksWithLimit(
 	ctx context.Context,
 	startSlot uint64,

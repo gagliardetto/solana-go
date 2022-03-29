@@ -18,6 +18,7 @@
 package solana
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	bin "github.com/gagliardetto/binary"
@@ -101,6 +102,11 @@ func (mx *Message) MarshalWithEncoder(encoder *bin.Encoder) error {
 	return encoder.WriteBytes(out, false)
 }
 
+func (mx Message) ToBase64() string {
+	out, _ := mx.MarshalBinary()
+	return base64.StdEncoding.EncodeToString(out)
+}
+
 func (mx *Message) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	{
 		mx.Header.NumRequiredSignatures, err = decoder.ReadUint8()
@@ -158,7 +164,6 @@ func (mx *Message) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 				if err != nil {
 					return err
 				}
-				compInst.AccountCount = bin.Varuint16(numAccounts)
 				for i := 0; i < numAccounts; i++ {
 					accountIndex, err := decoder.ReadUint8()
 					if err != nil {
@@ -176,7 +181,6 @@ func (mx *Message) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 				if err != nil {
 					return err
 				}
-				compInst.DataLength = bin.Varuint16(dataLen)
 				compInst.Data = Base58(dataBytes)
 			}
 			mx.Instructions = append(mx.Instructions, compInst)

@@ -75,7 +75,7 @@ var getTransactionsCmd = &cobra.Command{
 				return fmt.Errorf("unable to get confirmed transaction with signature %q: %s", cs.Signature, ct.Meta.Err)
 			}
 
-			_, err = ct.Transaction.EncodeTree(text.NewTreeEncoder(os.Stdout, text.Bold("INSTRUCTIONS")))
+			_, err = ct.MustGetTransaction().EncodeTree(text.NewTreeEncoder(os.Stdout, text.Bold("INSTRUCTIONS")))
 			if err != nil {
 				panic(err)
 			}

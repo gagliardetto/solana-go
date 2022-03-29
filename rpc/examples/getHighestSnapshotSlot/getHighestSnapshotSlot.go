@@ -1,4 +1,4 @@
-// Copyright 2021 github.com/gagliardetto
+// Copyright 2022 github.com/gagliardetto
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,28 +16,20 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 )
 
 func main() {
-	endpoint := rpc.MainNetBeta_RPC
+	endpoint := rpc.TestNet_RPC
 	client := rpc.New(endpoint)
 
-	blockHash := solana.MustHashFromBase58("J7rBdM6AecPDEZp8aPq5iPSNKVkU5Q76F3oAV4eW5wsW")
-	out, err := client.IsBlockhashValid(
-		context.TODO(),
-		blockHash,
-		rpc.CommitmentFinalized,
+	example, err := client.GetHighestSnapshotSlot(
+		context.Background(),
 	)
 	if err != nil {
 		panic(err)
 	}
-	spew.Dump(out)
-	spew.Dump(out.Value) // true or false
-
-	fmt.Println("is blockhash valid:", out.Value)
+	spew.Dump(example)
 }

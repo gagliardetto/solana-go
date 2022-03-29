@@ -1,7 +1,4 @@
-// Copyright 2021 github.com/gagliardetto
-// This file has been modified by github.com/gagliardetto
-//
-// Copyright 2020 dfuse Platform Inc.
+// Copyright 2022 github.com/gagliardetto
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,22 +11,33 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package rpc
 
 import (
 	"context"
 )
 
-// GetSlot returns the slot that has reached the given or default commitment level.
-func (cl *Client) GetSlot(
+// Get the fee the network will charge for a particular Message.
+//
+// **NEW**: This method is only available in solana-core v1.9 or newer. Please use
+// `getFees` for solana-core v1.8.
+func (cl *Client) GetFeeForMessage(
 	ctx context.Context,
+	message string, // Base-64 encoded Message
 	commitment CommitmentType, // optional
-) (out uint64, err error) {
-	params := []interface{}{}
+) (out *GetFeeForMessageResult, err error) {
+	params := []interface{}{message}
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}
-
-	err = cl.rpcClient.CallForInto(ctx, &out, "getSlot", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getFeeForMessage", params)
 	return
+}
+
+type GetFeeForMessageResult struct {
+	RPCContext
+
+	// Fee corresponding to the message at the specified blockhash.
+	Value *uint64 `json:"value"`
 }

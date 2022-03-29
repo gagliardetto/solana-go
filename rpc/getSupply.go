@@ -47,7 +47,7 @@ func (cl *Client) GetSupplyWithOpts(
 type GetSupplyOpts struct {
 	Commitment CommitmentType `json:"commitment,omitempty"`
 
-	ExcludeNonCirculatingAccountsList bool `json:"excludeNonCirculatingAccountsList,omitempty"`
+	ExcludeNonCirculatingAccountsList bool `json:"excludeNonCirculatingAccountsList,omitempty"` // exclude non circulating accounts list from response
 }
 
 type GetSupplyResult struct {
@@ -66,5 +66,6 @@ type SupplyResult struct {
 	NonCirculating uint64 `json:"nonCirculating"`
 
 	// An array of account addresses of non-circulating accounts.
+	// If `excludeNonCirculatingAccountsList` is enabled, the returned array will be empty.
 	NonCirculatingAccounts []solana.PublicKey `json:"nonCirculatingAccounts"`
 }

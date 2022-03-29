@@ -18,18 +18,33 @@ package rpc
 
 import (
 	"context"
+
+	"github.com/gagliardetto/solana-go"
 )
 
-// GetSlot returns the slot that has reached the given or default commitment level.
-func (cl *Client) GetSlot(
+// Returns the latest blockhash.
+//
+// **NEW: This method is only available in solana-core v1.9 or newer. Please use
+// `getRecentBlockhash` for solana-core v1.8**
+func (cl *Client) GetLatestBlockhash(
 	ctx context.Context,
 	commitment CommitmentType, // optional
-) (out uint64, err error) {
+) (out *GetLatestBlockhashResult, err error) {
 	params := []interface{}{}
 	if commitment != "" {
 		params = append(params, M{"commitment": commitment})
 	}
 
-	err = cl.rpcClient.CallForInto(ctx, &out, "getSlot", params)
+	err = cl.rpcClient.CallForInto(ctx, &out, "getLatestBlockhash", params)
 	return
+}
+
+type GetLatestBlockhashResult struct {
+	RPCContext
+	Value *LatestBlockhashResult `json:"value"`
+}
+
+type LatestBlockhashResult struct {
+	Blockhash            solana.Hash `json:"blockhash"`
+	LastValidBlockHeight uint64      `json:"lastValidBlockHeight"` // Slot.
 }

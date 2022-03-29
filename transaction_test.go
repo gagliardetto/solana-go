@@ -96,16 +96,12 @@ func TestNewTransaction(t *testing.T) {
 	assert.Equal(t, trx.Message.Instructions, []CompiledInstruction{
 		{
 			ProgramIDIndex: 5,
-			AccountCount:   2,
 			Accounts:       []uint16{0, 01},
-			DataLength:     2,
 			Data:           []byte{0xaa, 0xbb},
 		},
 		{
 			ProgramIDIndex: 6,
-			AccountCount:   4,
 			Accounts:       []uint16{4, 3, 1, 2},
-			DataLength:     2,
 			Data:           []byte{0xcc, 0xdd},
 		},
 	})
@@ -155,8 +151,6 @@ func TestTransactionDecode(t *testing.T) {
 		[]CompiledInstruction{
 			{
 				ProgramIDIndex: 2,
-				AccountCount:   2,
-				DataLength:     12,
 				Accounts: []uint16{
 					0,
 					1,

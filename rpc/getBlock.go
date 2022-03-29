@@ -60,9 +60,6 @@ type GetBlockOpts struct {
 }
 
 // GetBlock returns identity and transaction information about a confirmed block in the ledger.
-//
-// NEW: This method is only available in solana-core v1.7 or newer.
-// Please use `getConfirmedBlock` for solana-core v1.6
 func (cl *Client) GetBlock(
 	ctx context.Context,
 	slot uint64,
@@ -85,7 +82,7 @@ func (cl *Client) GetBlockWithOpts(
 ) (out *GetBlockResult, err error) {
 
 	obj := M{
-		"encoding": solana.EncodingJSON,
+		"encoding": solana.EncodingBase64,
 	}
 
 	if opts != nil {
@@ -102,10 +99,11 @@ func (cl *Client) GetBlockWithOpts(
 			if !solana.IsAnyOfEncodingType(
 				opts.Encoding,
 				// Valid encodings:
-				solana.EncodingJSON,
-				solana.EncodingJSONParsed,
+				// solana.EncodingJSON, // TODO
+				// solana.EncodingJSONParsed, // TODO
 				solana.EncodingBase58,
 				solana.EncodingBase64,
+				solana.EncodingBase64Zstd,
 			) {
 				return nil, fmt.Errorf("provided encoding is not supported: %s", opts.Encoding)
 			}

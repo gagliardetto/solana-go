@@ -208,13 +208,13 @@ func (p PublicKey) Short(n int) string {
 }
 
 func formatShortPubkey(n int, pubkey PublicKey) string {
-	if n > 10 {
-		n = 10
-	}
-	if n < 3 {
-		n = 3
-	}
 	str := pubkey.String()
+	if n > (len(str)/2)-1 {
+		n = (len(str) / 2) - 1
+	}
+	if n < 2 {
+		n = 2
+	}
 	return str[:n] + "..." + str[len(str)-n:]
 }
 
