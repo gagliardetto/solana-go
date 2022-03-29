@@ -1,3 +1,0 @@
-[submodule "contrib/serum-dex"]
-	path = contrib/serum-dex
-	url = ../../eflam/serum-dex
