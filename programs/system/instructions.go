@@ -190,7 +190,7 @@ func (inst *Instruction) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error 
 	return inst.BaseVariant.UnmarshalBinaryVariant(decoder, InstructionImplDef)
 }
 
-func (inst *Instruction) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+func (inst Instruction) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
 	err := encoder.WriteUint32(inst.TypeID.Uint32(), binary.LittleEndian)
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)

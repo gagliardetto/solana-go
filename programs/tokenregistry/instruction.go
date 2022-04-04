@@ -114,7 +114,7 @@ func (i *Instruction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	return i.BaseVariant.UnmarshalBinaryVariant(decoder, InstructionDefVariant)
 }
 
-func (i *Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
+func (i Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
 	err := encoder.WriteUint32(i.TypeID.Uint32(), binary.LittleEndian)
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)

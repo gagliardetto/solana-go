@@ -86,7 +86,7 @@ func (q *RequestQueue) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 }
 
 // TODO: fill up later
-func (q *RequestQueue) MarshalWithEncoder(encoder *bin.Encoder) error {
+func (q RequestQueue) MarshalWithEncoder(encoder *bin.Encoder) error {
 	return nil
 }
 
@@ -241,7 +241,7 @@ func (q *EventQueue) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 }
 
 // TODO: fill up later
-func (q *EventQueue) MarshalWithEncoder(encoder *bin.Encoder) error {
+func (q EventQueue) MarshalWithEncoder(encoder *bin.Encoder) error {
 	return nil
 }
 

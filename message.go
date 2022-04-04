@@ -94,7 +94,7 @@ func (mx *Message) MarshalBinary() ([]byte, error) {
 	return buf, nil
 }
 
-func (mx *Message) MarshalWithEncoder(encoder *bin.Encoder) error {
+func (mx Message) MarshalWithEncoder(encoder *bin.Encoder) error {
 	out, err := mx.MarshalBinary()
 	if err != nil {
 		return err

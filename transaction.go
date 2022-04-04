@@ -347,7 +347,7 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 	return output, nil
 }
 
-func (tx *Transaction) MarshalWithEncoder(encoder *bin.Encoder) error {
+func (tx Transaction) MarshalWithEncoder(encoder *bin.Encoder) error {
 	out, err := tx.MarshalBinary()
 	if err != nil {
 		return err

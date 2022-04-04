@@ -78,7 +78,7 @@ func (inst *Instruction) UnmarshalWithDecoder(decoder *bin.Decoder) error {
 	return inst.BaseVariant.UnmarshalBinaryVariant(decoder, InstructionImplDef)
 }
 
-func (inst *Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
+func (inst Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
 	return encoder.Encode(inst.Impl)
 }
 
