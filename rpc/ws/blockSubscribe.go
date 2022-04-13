@@ -84,15 +84,9 @@ func (cl *Client) BlockSubscribe(
 	if filter != nil {
 		switch v := filter.(type) {
 		case BlockSubscribeFilterAll:
-			params = append(params, rpc.M{
-				"filter": "all",
-			})
+			params = append(params, "all")
 		case *BlockSubscribeFilterMentionsAccountOrProgram:
-			params = append(params, rpc.M{
-				"filter": rpc.M{
-					"mentionsAccountOrProgram": v.Pubkey,
-				},
-			})
+			params = append(params, rpc.M{"mentionsAccountOrProgram": v.Pubkey})
 		}
 	}
 	if opts != nil {
