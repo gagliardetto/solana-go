@@ -422,4 +422,34 @@ func (p *ParsedInstruction) IsParsed() bool {
 	return p.Parsed != nil
 }
 
+type TransactionOpts struct {
+	Encoding            string         `json:"encoding,omitempty"`
+	SkipPreflight       bool           `json:"skipPreflight,omitempty"`
+	PreflightCommitment CommitmentType `json:"preflightCommitment,omitempty"`
+	MaxRetries          *uint          `json:"maxRetries"`
+}
+
+func (opts *TransactionOpts) GetRPCInput() M {
+	obj := M{}
+
+	if opts.Encoding == "" {
+		// default to base64 encoding
+		obj["encoding"] = "base64"
+	} else {
+		obj["encoding"] = opts.Encoding
+	}
+
+	obj["skipPreflight"] = opts.SkipPreflight
+
+	if opts.PreflightCommitment != "" {
+		obj["preflightCommitment"] = opts.PreflightCommitment
+	}
+
+	if opts.MaxRetries != nil {
+		obj["maxRetries"] = *opts.MaxRetries
+	}
+
+	return obj
+}
+
 type M map[string]interface{}
