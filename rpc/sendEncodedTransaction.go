@@ -46,7 +46,7 @@ func (cl *Client) SendEncodedTransactionWithOpts(
 	encodedTx string,
 	opts TransactionOpts,
 ) (signature solana.Signature, err error) {
-	obj := opts.GetRPCInput()
+	obj := opts.ToMap()
 	params := []interface{}{
 		encodedTx,
 		obj,

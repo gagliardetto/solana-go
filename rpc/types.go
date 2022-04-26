@@ -429,7 +429,7 @@ type TransactionOpts struct {
 	MaxRetries          *uint          `json:"maxRetries"`
 }
 
-func (opts *TransactionOpts) GetRPCInput() M {
+func (opts *TransactionOpts) ToMap() M {
 	obj := M{}
 
 	if opts.Encoding == "" {
