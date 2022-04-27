@@ -118,6 +118,9 @@ func (inst *CreateAccountWithSeed) SetBaseAccount(baseAccount ag_solanago.Public
 }
 
 func (inst *CreateAccountWithSeed) GetBaseAccount() *ag_solanago.AccountMeta {
+	if len(inst.AccountMetaSlice) <= 2 {
+		return nil
+	}
 	return inst.AccountMetaSlice[2]
 }
 

@@ -92,5 +92,18 @@ func TestEncDec(t *testing.T) {
 			ag_require.NoError(t, err)
 			ag_require.Equal(t, instruction, got)
 		}
+
+		{
+			got := new(CreateAccountWithSeed)
+			err = decodeT(got, instr)
+			got.AccountMetaSlice = solana.AccountMetaSlice{
+				solana.Meta(payerAccount.PublicKey()).WRITE().SIGNER(),
+				solana.Meta(newSubAccount).WRITE(),
+			}
+			ag_require.NoError(t, err)
+			ag_require.Equal(t, got.AccountMetaSlice[0], got.GetFundingAccount())
+			ag_require.Equal(t, got.AccountMetaSlice[1], got.GetCreatedAccount())
+			ag_require.Nil(t, got.GetBaseAccount())
+		}
 	}
 }
