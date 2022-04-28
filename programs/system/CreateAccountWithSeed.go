@@ -199,7 +199,9 @@ func (inst *CreateAccountWithSeed) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("Funding", inst.AccountMetaSlice[0]))
 						accountsBranch.Child(ag_format.Meta("Created", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("   Base", inst.AccountMetaSlice[2]))
+						if len(inst.AccountMetaSlice) > 2 {
+							accountsBranch.Child(ag_format.Meta("   Base", inst.AccountMetaSlice[2]))
+						}
 					})
 				})
 		})
