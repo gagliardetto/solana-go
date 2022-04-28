@@ -25,6 +25,11 @@ import (
 )
 
 type SimulateTransactionResponse struct {
+	RPCContext
+	Value *SimulateTransactionResult `json:"value"`
+}
+
+type SimulateTransactionResult struct {
 	// Error if transaction failed, null if transaction succeeded.
 	Err interface{} `json:"err,omitempty"`
 
