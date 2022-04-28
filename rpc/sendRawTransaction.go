@@ -29,11 +29,15 @@ func (cl *Client) SendRawTransaction(
 	ctx context.Context,
 	rawTx []byte,
 ) (signature solana.Signature, err error) {
+	opts := TransactionOpts{
+		SkipPreflight:       false,
+		PreflightCommitment: "",
+	}
+
 	return cl.SendRawTransactionWithOpts(
 		ctx,
 		rawTx,
-		false,
-		"",
+		opts,
 	)
 }
 
@@ -41,13 +45,11 @@ func (cl *Client) SendRawTransaction(
 func (cl *Client) SendRawTransactionWithOpts(
 	ctx context.Context,
 	rawTx []byte,
-	skipPreflight bool, // if true, skip the preflight transaction checks (default: false)
-	preflightCommitment CommitmentType, // optional; Commitment level to use for preflight (default: "finalized").
+	opts TransactionOpts,
 ) (signature solana.Signature, err error) {
 	return cl.SendEncodedTransactionWithOpts(
 		ctx,
 		base64.StdEncoding.EncodeToString(rawTx),
-		skipPreflight,
-		preflightCommitment,
+		opts,
 	)
 }
