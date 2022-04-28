@@ -104,12 +104,11 @@ func TestEncDec(t *testing.T) {
 				solana.Meta(payerAccount.PublicKey()).WRITE().SIGNER(),
 				solana.Meta(newSubAccount).WRITE(),
 				// base account is optional
-				// ref: https://docs.rs/solana-program/1.10.8/solana_program/system_instruction/enum.SystemInstruction.html#variant.CreateAccountWithSeed
 			}
 			ag_require.NoError(t, err)
 			ag_require.Equal(t, got.AccountMetaSlice[0], got.GetFundingAccount())
 			ag_require.Equal(t, got.AccountMetaSlice[1], got.GetCreatedAccount())
-			ag_require.Nil(t, got.GetBaseAccount())
+			ag_require.Equal(t, got.AccountMetaSlice[0], got.GetBaseAccount())
 
 			got.EncodeToTree(text.NewTreeEncoder(ioutil.Discard, ""))
 		}

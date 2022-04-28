@@ -119,7 +119,9 @@ func (inst *CreateAccountWithSeed) SetBaseAccount(baseAccount ag_solanago.Public
 
 func (inst *CreateAccountWithSeed) GetBaseAccount() *ag_solanago.AccountMeta {
 	if len(inst.AccountMetaSlice) <= 2 {
-		return nil
+		// Base account is optional. It may be the same as the funding account and provided as account 0.
+		// Ref: https://docs.rs/solana-program/1.10.8/solana_program/system_instruction/enum.SystemInstruction.html#variant.CreateAccountWithSeed
+		return inst.AccountMetaSlice[0]
 	}
 	return inst.AccountMetaSlice[2]
 }
@@ -197,11 +199,9 @@ func (inst *CreateAccountWithSeed) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("Funding", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("Created", inst.AccountMetaSlice[1]))
-						if len(inst.AccountMetaSlice) > 2 {
-							accountsBranch.Child(ag_format.Meta("   Base", inst.AccountMetaSlice[2]))
-						}
+						accountsBranch.Child(ag_format.Meta("Funding", inst.GetFundingAccount()))
+						accountsBranch.Child(ag_format.Meta("Created", inst.GetCreatedAccount()))
+						accountsBranch.Child(ag_format.Meta("   Base", inst.GetBaseAccount()))
 					})
 				})
 		})
