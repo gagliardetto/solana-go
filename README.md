@@ -8,11 +8,11 @@
 
 Go library to interface with Solana JSON RPC and WebSocket interfaces.
 
-Clients for Solana native programs, Solana Program Library (SPL), and [Serum DEX](https://dex.projectserum.com) **are in development**.
-
 More contracts to come.
 
 **If you're using/developing Solana programs written in [Anchor Framework](https://github.com/project-serum/anchor), you can use [anchor-go](https://github.com/gagliardetto/anchor-go) to generate Golang clients**
+
+If you're looking for a serum library, you can check out https://github.com/gagliardetto/serum-go ; [/programs/serum](https://github.com/gagliardetto/solana-go/tree/main/programs/serum) is deprecated.
 
 <div align="center">
     <img src="https://user-images.githubusercontent.com/15271561/128235229-1d2d9116-23bb-464e-b2cc-8fb6355e3b55.png" margin="auto" height="175"/>
