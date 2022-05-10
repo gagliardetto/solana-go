@@ -28,11 +28,15 @@ func (cl *Client) SendEncodedTransaction(
 	ctx context.Context,
 	encodedTx string,
 ) (signature solana.Signature, err error) {
+	opts := TransactionOpts{
+		SkipPreflight:       false,
+		PreflightCommitment: "",
+	}
+
 	return cl.SendEncodedTransactionWithOpts(
 		ctx,
 		encodedTx,
-		false,
-		"",
+		opts,
 	)
 }
 
@@ -40,21 +44,9 @@ func (cl *Client) SendEncodedTransaction(
 func (cl *Client) SendEncodedTransactionWithOpts(
 	ctx context.Context,
 	encodedTx string,
-	skipPreflight bool, // if true, skip the preflight transaction checks (default: false)
-	preflightCommitment CommitmentType, // optional; Commitment level to use for preflight (default: "finalized").
+	opts TransactionOpts,
 ) (signature solana.Signature, err error) {
-
-	obj := M{
-		"encoding": "base64",
-	}
-
-	if skipPreflight {
-		obj["skipPreflight"] = skipPreflight
-	}
-	if preflightCommitment != "" {
-		obj["preflightCommitment"] = preflightCommitment
-	}
-
+	obj := opts.ToMap()
 	params := []interface{}{
 		encodedTx,
 		obj,

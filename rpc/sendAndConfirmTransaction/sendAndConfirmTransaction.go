@@ -30,13 +30,17 @@ func SendAndConfirmTransaction(
 	wsClient *ws.Client,
 	transaction *solana.Transaction,
 ) (signature solana.Signature, err error) {
+	opts := rpc.TransactionOpts{
+		SkipPreflight: false,
+		PreflightCommitment: rpc.CommitmentFinalized,
+	}
+
 	return SendAndConfirmTransactionWithOpts(
 		ctx,
 		rpcClient,
 		wsClient,
 		transaction,
-		false,
-		rpc.CommitmentFinalized,
+		opts,
 	)
 }
 
@@ -46,15 +50,13 @@ func SendAndConfirmTransactionWithOpts(
 	rpcClient *rpc.Client,
 	wsClient *ws.Client,
 	transaction *solana.Transaction,
-	skipPreflight bool, // if true, skip the preflight transaction checks (default: false)
-	preflightCommitment rpc.CommitmentType, // optional; Commitment level to use for preflight (default: "finalized").
+	opts rpc.TransactionOpts,
 ) (signature solana.Signature, err error) {
 
 	sig, err := rpcClient.SendTransactionWithOpts(
 		ctx,
 		transaction,
-		skipPreflight,
-		preflightCommitment,
+		opts,
 	)
 	if err != nil {
 		return sig, err
