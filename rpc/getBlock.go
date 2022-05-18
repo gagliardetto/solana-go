@@ -57,6 +57,10 @@ type GetBlockOpts struct {
 	//
 	// This parameter is optional.
 	Commitment CommitmentType
+
+	// Max transaction version to return in responses.
+	// If the requested block contains a transaction with a higher version, an error will be returned.
+	MaxSupportedTransactionVersion *uint64
 }
 
 // GetBlock returns identity and transaction information about a confirmed block in the ledger.
@@ -108,6 +112,9 @@ func (cl *Client) GetBlockWithOpts(
 				return nil, fmt.Errorf("provided encoding is not supported: %s", opts.Encoding)
 			}
 			obj["encoding"] = opts.Encoding
+		}
+		if opts.MaxSupportedTransactionVersion != nil {
+			obj["maxSupportedTransactionVersion"] = *opts.MaxSupportedTransactionVersion
 		}
 	}
 
