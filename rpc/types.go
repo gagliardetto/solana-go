@@ -393,10 +393,10 @@ type ParsedTransaction struct {
 }
 
 type Message struct {
-	AccountKeys     []solana.PublicKey   `json:"accountKeys"`
-	RecentBlockhash solana.Hash          `json:"recentBlockhash"`
-	Instructions    []ParsedInstruction  `json:"instructions"`
-	Header          solana.MessageHeader `json:"header"`
+	AccountKeys     []solana.PublicKey           `json:"accountKeys"`
+	RecentBlockhash solana.Hash                  `json:"recentBlockhash"`
+	Instructions    []solana.CompiledInstruction `json:"instructions"` //gt change
+	Header          solana.MessageHeader         `json:"header"`
 }
 
 type AccountKey struct {

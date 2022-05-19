@@ -190,23 +190,23 @@ func (mx *Message) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	return nil
 }
 
-func (m *Message) AccountMetaList() AccountMetaSlice {
-	out := make(AccountMetaSlice, len(m.AccountKeys))
-	for i, a := range m.AccountKeys {
+func (mx *Message) AccountMetaList() AccountMetaSlice {
+	out := make(AccountMetaSlice, len(mx.AccountKeys))
+	for i, a := range mx.AccountKeys {
 		out[i] = &AccountMeta{
 			PublicKey:  a,
-			IsSigner:   m.IsSigner(a),
-			IsWritable: m.IsWritable(a),
+			IsSigner:   mx.IsSigner(a),
+			IsWritable: mx.IsWritable(a),
 		}
 	}
 	return out
 }
 
 // Signers returns the pubkeys of all accounts that are signers.
-func (m *Message) Signers() PublicKeySlice {
-	out := make(PublicKeySlice, 0, len(m.AccountKeys))
-	for _, a := range m.AccountKeys {
-		if m.IsSigner(a) {
+func (mx *Message) Signers() PublicKeySlice {
+	out := make(PublicKeySlice, 0, len(mx.AccountKeys))
+	for _, a := range mx.AccountKeys {
+		if mx.IsSigner(a) {
 			out = append(out, a)
 		}
 	}
@@ -214,24 +214,24 @@ func (m *Message) Signers() PublicKeySlice {
 }
 
 // Writable returns the pubkeys of all accounts that are writable.
-func (m *Message) Writable() (out PublicKeySlice) {
-	for _, a := range m.AccountKeys {
-		if m.IsWritable(a) {
+func (mx *Message) Writable() (out PublicKeySlice) {
+	for _, a := range mx.AccountKeys {
+		if mx.IsWritable(a) {
 			out = append(out, a)
 		}
 	}
 	return out
 }
 
-func (m *Message) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, error) {
-	if int(programIDIndex) < len(m.AccountKeys) {
-		return m.AccountKeys[programIDIndex], nil
+func (mx *Message) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, error) {
+	if int(programIDIndex) < len(mx.AccountKeys) {
+		return mx.AccountKeys[programIDIndex], nil
 	}
 	return PublicKey{}, fmt.Errorf("programID index not found %d", programIDIndex)
 }
 
-func (m *Message) HasAccount(account PublicKey) bool {
-	for _, a := range m.AccountKeys {
+func (mx *Message) HasAccount(account PublicKey) bool {
+	for _, a := range mx.AccountKeys {
 		if a.Equals(account) {
 			return true
 		}
@@ -239,19 +239,28 @@ func (m *Message) HasAccount(account PublicKey) bool {
 	return false
 }
 
-func (m *Message) IsSigner(account PublicKey) bool {
-	for idx, acc := range m.AccountKeys {
+func (mx *Message) IndexAccount(account PublicKey) int {
+	for i, a := range mx.AccountKeys {
+		if a.Equals(account) {
+			return i
+		}
+	}
+	return -1
+}
+
+func (mx *Message) IsSigner(account PublicKey) bool {
+	for idx, acc := range mx.AccountKeys {
 		if acc.Equals(account) {
-			return idx < int(m.Header.NumRequiredSignatures)
+			return idx < int(mx.Header.NumRequiredSignatures)
 		}
 	}
 	return false
 }
 
-func (m *Message) IsWritable(account PublicKey) bool {
+func (mx *Message) IsWritable(account PublicKey) bool {
 	index := 0
 	found := false
-	for idx, acc := range m.AccountKeys {
+	for idx, acc := range mx.AccountKeys {
 		if acc.Equals(account) {
 			found = true
 			index = idx
@@ -260,13 +269,13 @@ func (m *Message) IsWritable(account PublicKey) bool {
 	if !found {
 		return false
 	}
-	h := m.Header
+	h := mx.Header
 	return (index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)) ||
-		((index >= int(h.NumRequiredSignatures)) && (index < len(m.AccountKeys)-int(h.NumReadonlyUnsignedAccounts)))
+		((index >= int(h.NumRequiredSignatures)) && (index < len(mx.AccountKeys)-int(h.NumReadonlyUnsignedAccounts)))
 }
 
-func (m *Message) signerKeys() []PublicKey {
-	return m.AccountKeys[0:m.Header.NumRequiredSignatures]
+func (mx *Message) signerKeys() []PublicKey {
+	return mx.AccountKeys[0:mx.Header.NumRequiredSignatures]
 }
 
 type MessageHeader struct {
