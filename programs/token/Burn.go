@@ -19,9 +19,9 @@ import (
 	"fmt"
 
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
+	ag_solanago "github.com/olegfomenko/solana-go"
+	ag_format "github.com/olegfomenko/solana-go/text/format"
 )
 
 // Burns tokens by removing them from an account.  `Burn` does not support
