@@ -391,8 +391,10 @@ func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error
 
 	for _, key := range signerKeys {
 		privateKey := getter(key)
+
 		if privateKey == nil {
-			return nil, fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
+			tx.Signatures = append(tx.Signatures, Signature{})
+			continue
 		}
 
 		s, err := privateKey.Sign(messageContent)
