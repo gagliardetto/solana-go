@@ -347,6 +347,32 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 	return output, nil
 }
 
+type MarshallOpts struct {
+	RequireAllSignatures bool
+}
+
+func (tx *Transaction) MarshalBinaryWitOpts(opts MarshallOpts) ([]byte, error) {
+	if opts.RequireAllSignatures && (len(tx.Signatures) == 0 || len(tx.Signatures) != int(tx.Message.Header.NumRequiredSignatures)) {
+		return nil, errors.New("signature verification failed")
+	}
+
+	messageContent, err := tx.Message.MarshalBinary()
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode tx.Message to binary: %w", err)
+	}
+
+	var signatureCount []byte
+	bin.EncodeCompactU16Length(&signatureCount, len(tx.Signatures))
+	output := make([]byte, 0, len(signatureCount)+len(signatureCount)*64+len(messageContent))
+	output = append(output, signatureCount...)
+	for _, sig := range tx.Signatures {
+		output = append(output, sig[:]...)
+	}
+	output = append(output, messageContent...)
+
+	return output, nil
+}
+
 func (tx Transaction) MarshalWithEncoder(encoder *bin.Encoder) error {
 	out, err := tx.MarshalBinary()
 	if err != nil {
@@ -391,9 +417,7 @@ func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error
 
 	for _, key := range signerKeys {
 		privateKey := getter(key)
-
 		if privateKey == nil {
-			tx.Signatures = append(tx.Signatures, Signature{})
 			continue
 		}
 
