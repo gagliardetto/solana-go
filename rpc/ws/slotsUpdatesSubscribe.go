@@ -25,6 +25,15 @@ type SlotsUpdatesResult struct {
 	Timestamp *solana.UnixTimeSeconds `json:"timestamp"`
 	// The update type.
 	Type SlotsUpdatesType `json:"type"`
+	// Extra stats provided when a bank is frozen.
+	Stats *BankStats `json:"stats"`
+}
+
+type BankStats struct {
+	NumTransactionEntries     uint64 `json:"numTransactionEntries"`
+	NumSuccessfulTransactions uint64 `json:"numSuccessfulTransactions"`
+	NumFailedTransactions     uint64 `json:"numFailedTransactions"`
+	MaxTransactionsPerEntry   uint64 `json:"maxTransactionsPerEntry"`
 }
 
 type SlotsUpdatesType string
