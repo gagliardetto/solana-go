@@ -32,6 +32,17 @@ func (res UnixTimeSeconds) String() string {
 	return res.Time().String()
 }
 
+// UnixTimeMilliseconds represents a UNIX millisecond-resolution timestamp.
+type UnixTimeMilliseconds int64
+
+func (res UnixTimeMilliseconds) Time() time.Time {
+	return time.Unix(0, int64(res)*int64(time.Millisecond))
+}
+
+func (res UnixTimeMilliseconds) String() string {
+	return res.Time().String()
+}
+
 type DurationSeconds int64
 
 func (res DurationSeconds) Duration() time.Duration {
