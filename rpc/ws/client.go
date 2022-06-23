@@ -54,6 +54,14 @@ const (
 
 // Connect creates a new websocket client connecting to the provided endpoint.
 func Connect(ctx context.Context, rpcEndpoint string) (c *Client, err error) {
+	return ConnectWithOptions(ctx, rpcEndpoint, nil)
+}
+
+// ConnectWithOptions creates a new websocket client connecting to the provided
+// endpoint with a http header if available The http header can be helpful to
+// pass basic authentication params as prescribed
+// ref https://github.com/gorilla/websocket/issues/209
+func ConnectWithOptions(ctx context.Context, rpcEndpoint string, requestHeader http.Header) (c *Client, err error) {
 	c = &Client{
 		rpcURL:                  rpcEndpoint,
 		subscriptionByRequestID: map[uint64]*Subscription{},
@@ -66,7 +74,7 @@ func Connect(ctx context.Context, rpcEndpoint string) (c *Client, err error) {
 		EnableCompression: true,
 	}
 
-	c.conn, _, err = dialer.DialContext(ctx, rpcEndpoint, nil)
+	c.conn, _, err = dialer.DialContext(ctx, rpcEndpoint, requestHeader)
 	if err != nil {
 		return nil, fmt.Errorf("new ws client: dial: %w", err)
 	}
