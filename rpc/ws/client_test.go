@@ -63,13 +63,15 @@ func Test_AccountSubscribeWithHttpHeader(t *testing.T) {
 	// Pass in bogus websocket authentication credentials
 	wssUser := "john"
 	wssPass := "do not use me"
-	httpHeader := http.Header{
-		"Authorization": []string{
-			"Basic " + base64.StdEncoding.EncodeToString([]byte(wssUser+":"+wssPass)),
+	opt := &options{
+		httpHeader: http.Header{
+			"Authorization": []string{
+				"Basic " + base64.StdEncoding.EncodeToString([]byte(wssUser+":"+wssPass)),
+			},
 		},
 	}
 
-	c, err := ConnectWithOptions(context.TODO(), "ws://api.mainnet-beta.solana.com:80", httpHeader)
+	c, err := ConnectWithOptions(context.TODO(), "ws://api.mainnet-beta.solana.com:80", opt)
 	defer c.Close()
 	require.NoError(t, err)
 
