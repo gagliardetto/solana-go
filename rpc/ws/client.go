@@ -74,7 +74,11 @@ func ConnectWithOptions(ctx context.Context, rpcEndpoint string, opt *options) (
 		EnableCompression: true,
 	}
 
-	c.conn, _, err = dialer.DialContext(ctx, rpcEndpoint, opt.httpHeader)
+	var httpHeader http.Header = nil
+	if opt != nil && opt.httpHeader != nil && len(opt.httpHeader) > 0 {
+		httpHeader = opt.httpHeader
+	}
+	c.conn, _, err = dialer.DialContext(ctx, rpcEndpoint, httpHeader)
 	if err != nil {
 		return nil, fmt.Errorf("new ws client: dial: %w", err)
 	}
