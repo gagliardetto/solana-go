@@ -62,6 +62,6 @@ type params struct {
 	Subscription int                 `json:"subscription"`
 }
 
-type options struct {
-	httpHeader http.Header
+type Options struct {
+	HttpHeader http.Header
 }

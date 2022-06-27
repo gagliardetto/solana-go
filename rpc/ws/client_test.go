@@ -63,8 +63,8 @@ func Test_AccountSubscribeWithHttpHeader(t *testing.T) {
 	// Pass in bogus websocket authentication credentials
 	wssUser := "john"
 	wssPass := "do not use me"
-	opt := &options{
-		httpHeader: http.Header{
+	opt := &Options{
+		HttpHeader: http.Header{
 			"Authorization": []string{
 				"Basic " + base64.StdEncoding.EncodeToString([]byte(wssUser+":"+wssPass)),
 			},
