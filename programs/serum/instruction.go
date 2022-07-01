@@ -55,23 +55,44 @@ func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instructio
 	return &inst, nil
 }
 
-var InstructionDefVariant = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
-	{Name: "initialize_market", Type: (*InstructionInitializeMarket)(nil)},
-	{Name: "new_order", Type: (*InstructionNewOrder)(nil)},
-	{Name: "match_orders", Type: (*InstructionMatchOrder)(nil)},
-	{Name: "consume_events", Type: (*InstructionConsumeEvents)(nil)},
-	{Name: "cancel_order", Type: (*InstructionCancelOrder)(nil)},
-	{Name: "settle_funds", Type: (*InstructionSettleFunds)(nil)},
-	{Name: "cancel_order_by_client_id", Type: (*InstructionCancelOrderByClientId)(nil)},
-	{Name: "disable_market", Type: (*InstructionDisableMarketAccounts)(nil)},
-	{Name: "sweep_fees", Type: (*InstructionSweepFees)(nil)},
-	{Name: "new_order_v2", Type: (*InstructionNewOrderV2)(nil)},
+type InstructionName = string
+
+const (
+	Instruction_InitializeMarket      InstructionName = "initialize_market"
+	Instruction_NewOrder              InstructionName = "new_order"
+	Instruction_MatchOrder            InstructionName = "match_orders"
+	Instruction_ConsumeEvents         InstructionName = "consume_events"
+	Instruction_CancelOrder           InstructionName = "cancel_order"
+	Instruction_SettleFunds           InstructionName = "settle_funds"
+	Instruction_CancelOrderByClientId InstructionName = "cancel_order_by_client_id"
+	Instruction_DisableMarket         InstructionName = "disable_market"
+	Instruction_SweepFees             InstructionName = "sweep_fees"
+	Instruction_NewOrderV2            InstructionName = "new_order_v2"
 
 	// Added in DEX V3
-	{Name: "new_order_v3", Type: (*InstructionNewOrderV3)(nil)},
-	{Name: "cancel_order_v2", Type: (*InstructionCancelOrderV2)(nil)},
-	{Name: "cancel_order_by_client_id_v2", Type: (*InstructionCancelOrderByClientIdV2)(nil)},
-	{Name: "send_take", Type: (*InstructionSendTake)(nil)},
+	Instruction_NewOrderV3              InstructionName = "new_order_v2"
+	Instruction_CanceOrderV2            InstructionName = "cancel_order_v2"
+	Instruction_CancelOrderByClientIdV2 InstructionName = "cancel_order_by_client_id_v2"
+	Instruction_SendTake                InstructionName = "send_take"
+)
+
+var InstructionDefVariant = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
+	{Name: Instruction_InitializeMarket, Type: (*InstructionInitializeMarket)(nil)},
+	{Name: Instruction_NewOrder, Type: (*InstructionNewOrder)(nil)},
+	{Name: Instruction_MatchOrder, Type: (*InstructionMatchOrder)(nil)},
+	{Name: Instruction_ConsumeEvents, Type: (*InstructionConsumeEvents)(nil)},
+	{Name: Instruction_CancelOrder, Type: (*InstructionCancelOrder)(nil)},
+	{Name: Instruction_SettleFunds, Type: (*InstructionSettleFunds)(nil)},
+	{Name: Instruction_CancelOrderByClientId, Type: (*InstructionCancelOrderByClientId)(nil)},
+	{Name: Instruction_DisableMarket, Type: (*InstructionDisableMarketAccounts)(nil)},
+	{Name: Instruction_SweepFees, Type: (*InstructionSweepFees)(nil)},
+	{Name: Instruction_NewOrderV2, Type: (*InstructionNewOrderV2)(nil)},
+
+	// Added in DEX V3
+	{Name: Instruction_NewOrderV3, Type: (*InstructionNewOrderV3)(nil)},
+	{Name: Instruction_CanceOrderV2, Type: (*InstructionCancelOrderV2)(nil)},
+	{Name: Instruction_CancelOrderByClientIdV2, Type: (*InstructionCancelOrderByClientIdV2)(nil)},
+	{Name: Instruction_SendTake, Type: (*InstructionSendTake)(nil)},
 })
 
 type Instruction struct {
@@ -79,9 +100,8 @@ type Instruction struct {
 	Version uint8
 }
 
-var _ bin.EncoderDecoder = &Instruction{}
-
 func (i *Instruction) TextEncode(encoder *text.Encoder, option *text.Option) error {
+
 	return encoder.Encode(i.Impl, option)
 }
 

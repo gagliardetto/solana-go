@@ -33,9 +33,10 @@ var ErrNotFound = errors.New("not found")
 var ErrNotConfirmed = errors.New("not confirmed")
 
 type Client struct {
-	rpcURL    string
-	rpcClient JSONRPCClient
-	headers   http.Header
+	rpcURL        string
+	rpcClient     JSONRPCClient
+	headers       http.Header
+	defaultHeader http.Header
 }
 
 type JSONRPCClient interface {
@@ -45,9 +46,26 @@ type JSONRPCClient interface {
 
 // New creates a new Solana JSON RPC client.
 func New(rpcEndpoint string) *Client {
+
+	return NewWithHeaders(rpcEndpoint, nil)
+}
+
+func NewWithHeaders(rpcEndpoint string, defaultHeader http.Header) *Client {
 	opts := &jsonrpc.RPCClientOpts{
 		HTTPClient: newHTTP(),
 	}
+	if defaultHeader != nil {
+		customHeaders := make(map[string]string)
+		for k, v := range defaultHeader {
+			customHeaders[k] = v[0]
+		}
+		opts.CustomHeaders = customHeaders
+	}
+	return NewWithOpts(rpcEndpoint, opts)
+}
+
+func NewWithOpts(rpcEndpoint string, opts *jsonrpc.RPCClientOpts) *Client {
+
 	rpcClient := jsonrpc.NewClientWithOpts(rpcEndpoint, opts)
 	return NewWithCustomRPCClient(rpcClient)
 }
@@ -86,9 +104,17 @@ func (wr *clientWithRateLimiting) CallWithCallback(
 func NewWithRateLimit(
 	rpcEndpoint string,
 	rps int, // requests per second
+	defaultHeader http.Header,
 ) JSONRPCClient {
 	opts := &jsonrpc.RPCClientOpts{
 		HTTPClient: newHTTP(),
+	}
+	if defaultHeader != nil {
+		customHeaders := make(map[string]string)
+		for k, v := range defaultHeader {
+			customHeaders[k] = v[0]
+		}
+		opts.CustomHeaders = customHeaders
 	}
 
 	rpcClient := jsonrpc.NewClientWithOpts(rpcEndpoint, opts)
