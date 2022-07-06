@@ -302,16 +302,17 @@ func (e EventFlag) String() string {
 const EVENT_BYTE_SIZE = uint(88)
 
 type Event struct {
-	Flag              EventFlag
-	OwnerSlot         uint8
-	FeeTier           uint8
-	Padding           [5]uint8
-	NativeQtyReleased uint64 // the amount you should release (free to settle)
-	NativeQtyPaid     uint64 // The amount out of your account
-	NativeFeeOrRebate uint64 // maker etc...
-	OrderID           OrderID
-	Owner             solana.PublicKey // OpenOrder Account address NOT trader
-	ClientOrderID     uint64
+	Flag                 EventFlag
+	OwnerSlot            uint8
+	FeeTier              uint8
+	Padding              [5]uint8
+	NativeQtyReleased    uint64 // the amount you should release (free to settle)
+	NativeQtyPaid        uint64 // The amount out of your account
+	NativeQtyStillLocked uint64 // The amount still in the orderbook (0 after Filled)
+	NativeFeeOrRebate    uint64 // maker etc...
+	OrderID              OrderID
+	Owner                solana.PublicKey // OpenOrder Account address NOT trader
+	ClientOrderID        uint64
 }
 
 /* Fill Event*/
