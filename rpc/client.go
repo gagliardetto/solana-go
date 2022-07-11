@@ -20,6 +20,7 @@ package rpc
 import (
 	"context"
 	"errors"
+	"io"
 	"net"
 	"net/http"
 	"time"
@@ -42,10 +43,6 @@ type JSONRPCClient interface {
 	CallWithCallback(ctx context.Context, method string, params []interface{}, callback func(*http.Request, *http.Response) error) error
 }
 
-type closer interface {
-	Close() error
-}
-
 // New creates a new Solana JSON RPC client.
 // Client is safe for concurrent use by multiple goroutines.
 func New(rpcEndpoint string) *Client {
@@ -59,7 +56,10 @@ func New(rpcEndpoint string) *Client {
 
 // Close closes the client.
 func (cl *Client) Close() error {
-	if c, ok := cl.rpcClient.(closer); ok {
+	if cl.rpcClient == nil {
+		return nil
+	}
+	if c, ok := cl.rpcClient.(io.Closer); ok {
 		return c.Close()
 	}
 	return nil
