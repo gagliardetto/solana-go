@@ -170,13 +170,13 @@ func (inst *Create) EncodeToTree(parent treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts[len=7").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.MetaIfSetByIndex("                 payer", inst.AccountMetaSlice, 0))
-						accountsBranch.Child(format.MetaIfSetByIndex("associatedTokenAddress", inst.AccountMetaSlice, 1))
-						accountsBranch.Child(format.MetaIfSetByIndex("                wallet", inst.AccountMetaSlice, 2))
-						accountsBranch.Child(format.MetaIfSetByIndex("             tokenMint", inst.AccountMetaSlice, 3))
-						accountsBranch.Child(format.MetaIfSetByIndex("         systemProgram", inst.AccountMetaSlice, 4))
-						accountsBranch.Child(format.MetaIfSetByIndex("          tokenProgram", inst.AccountMetaSlice, 5))
-						accountsBranch.Child(format.MetaIfSetByIndex("            sysVarRent", inst.AccountMetaSlice, 6))
+						accountsBranch.Child(format.Meta("                 payer", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(format.Meta("associatedTokenAddress", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(format.Meta("                wallet", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(format.Meta("             tokenMint", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(format.Meta("         systemProgram", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(format.Meta("          tokenProgram", inst.AccountMetaSlice.Get(5)))
+						accountsBranch.Child(format.Meta("            sysVarRent", inst.AccountMetaSlice.Get(6)))
 					})
 				})
 		})
