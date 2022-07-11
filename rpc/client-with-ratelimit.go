@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"io"
 	"net/http"
 
 	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
@@ -49,7 +50,7 @@ func (wr *clientWithRateLimiting) CallWithCallback(
 
 // Close closes clientWithRateLimiting.
 func (cl *clientWithRateLimiting) Close() error {
-	if c, ok := cl.rpcClient.(closer); ok {
+	if c, ok := cl.rpcClient.(io.Closer); ok {
 		return c.Close()
 	}
 	return nil
