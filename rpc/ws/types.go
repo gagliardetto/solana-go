@@ -21,6 +21,7 @@ import (
 	stdjson "encoding/json"
 	"fmt"
 	"math/rand"
+	"net/http"
 )
 
 type request struct {
@@ -59,4 +60,8 @@ type response struct {
 type params struct {
 	Result       *stdjson.RawMessage `json:"result"`
 	Subscription int                 `json:"subscription"`
+}
+
+type Options struct {
+	HttpHeader http.Header
 }
