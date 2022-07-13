@@ -255,11 +255,15 @@ func DataBytesOrJSONFromBase64(stringBase64 string) (*DataBytesOrJSON, error) {
 	if err != nil {
 		return nil, err
 	}
+	return DataBytesOrJSONFromBase64Bytes(decoded)
+}
+
+func DataBytesOrJSONFromBase64Bytes(data []byte) (*DataBytesOrJSON, error) {
 	return &DataBytesOrJSON{
 		rawDataEncoding: solana.EncodingBase64,
 		asDecodedBinary: solana.Data{
 			Encoding: solana.EncodingBase64,
-			Content:  decoded,
+			Content:  data,
 		},
 	}, nil
 }
