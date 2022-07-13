@@ -22,9 +22,18 @@ type SlotsUpdatesResult struct {
 	// The newly updated slot.
 	Slot uint64 `json:"slot"`
 	// The Unix timestamp of the update.
-	Timestamp *solana.UnixTimeSeconds `json:"timestamp"`
+	Timestamp *solana.UnixTimeMilliseconds `json:"timestamp"`
 	// The update type.
 	Type SlotsUpdatesType `json:"type"`
+	// Extra stats provided when a bank is frozen.
+	Stats *BankStats `json:"stats"`
+}
+
+type BankStats struct {
+	NumTransactionEntries     uint64 `json:"numTransactionEntries"`
+	NumSuccessfulTransactions uint64 `json:"numSuccessfulTransactions"`
+	NumFailedTransactions     uint64 `json:"numFailedTransactions"`
+	MaxTransactionsPerEntry   uint64 `json:"maxTransactionsPerEntry"`
 }
 
 type SlotsUpdatesType string

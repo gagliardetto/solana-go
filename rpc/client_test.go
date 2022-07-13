@@ -489,13 +489,15 @@ func TestClient_GetBlockWithOpts(t *testing.T) {
 
 	block := 33
 	rewards := true
+	maxSupportedTransactionVersion := uint64(0)
 	_, err := client.GetBlockWithOpts(
 		context.Background(),
 		uint64(block),
 		&GetBlockOpts{
-			TransactionDetails: TransactionDetailsSignatures,
-			Rewards:            &rewards,
-			Commitment:         CommitmentMax,
+			TransactionDetails:             TransactionDetailsSignatures,
+			Rewards:                        &rewards,
+			Commitment:                     CommitmentMax,
+			MaxSupportedTransactionVersion: &maxSupportedTransactionVersion,
 		},
 	)
 	require.NoError(t, err)
@@ -508,10 +510,11 @@ func TestClient_GetBlockWithOpts(t *testing.T) {
 			"params": []interface{}{
 				float64(block),
 				map[string]interface{}{
-					"encoding":           string(solana.EncodingBase64),
-					"transactionDetails": string(TransactionDetailsSignatures),
-					"rewards":            rewards,
-					"commitment":         string(CommitmentMax),
+					"encoding":                       string(solana.EncodingBase64),
+					"transactionDetails":             string(TransactionDetailsSignatures),
+					"rewards":                        rewards,
+					"commitment":                     string(CommitmentMax),
+					"maxSupportedTransactionVersion": float64(maxSupportedTransactionVersion),
 				},
 			},
 		},

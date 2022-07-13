@@ -47,6 +47,16 @@ func Account(name string, pubKey solana.PublicKey) string {
 	return Shakespeare(name) + ": " + text.ColorizeBG(pubKey.String())
 }
 
+func MetaIfSetByIndex(name string, metaSlice solana.AccountMetaSlice, index int) string {
+	if metaSlice == nil {
+		return Meta(name, nil)
+	}
+	if index >= len(metaSlice) {
+		return Meta(name, nil)
+	}
+	return Meta(name, metaSlice[index])
+}
+
 func Meta(name string, meta *solana.AccountMeta) string {
 	if meta == nil {
 		return Shakespeare(name) + ": " + "<nil>"
