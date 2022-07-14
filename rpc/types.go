@@ -264,7 +264,7 @@ func DataBytesOrJSONFromBase64Bytes(b64Data []byte) (*DataBytesOrJSON, error) {
 		rawDataEncoding: solana.EncodingBase64,
 		asDecodedBinary: solana.Data{
 			Encoding: solana.EncodingBase64,
-			Content:  data,
+			Content:  b64Data,
 		},
 	}, nil
 }
