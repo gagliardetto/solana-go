@@ -258,7 +258,8 @@ func DataBytesOrJSONFromBase64(stringBase64 string) (*DataBytesOrJSON, error) {
 	return DataBytesOrJSONFromBase64Bytes(decoded)
 }
 
-func DataBytesOrJSONFromBase64Bytes(data []byte) (*DataBytesOrJSON, error) {
+// DataBytesOrJSONFromBase64Bytes creates a new `DataBytesOrJSON` from the provided base64 bytes.
+func DataBytesOrJSONFromBase64Bytes(b64Data []byte) (*DataBytesOrJSON, error) {
 	return &DataBytesOrJSON{
 		rawDataEncoding: solana.EncodingBase64,
 		asDecodedBinary: solana.Data{
