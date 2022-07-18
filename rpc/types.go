@@ -251,11 +251,11 @@ type DataBytesOrJSON struct {
 }
 
 func DataBytesOrJSONFromBase64(stringBase64 string) (*DataBytesOrJSON, error) {
-	b64Data, err := base64.StdEncoding.DecodeString(stringBase64)
+	decodedData, err := base64.StdEncoding.DecodeString(stringBase64)
 	if err != nil {
 		return nil, err
 	}
-	return DataBytesOrJSONFromBytes(b64Data), nil
+	return DataBytesOrJSONFromBytes(decodedData), nil
 }
 
 // DataBytesOrJSONFromBytes creates a new `DataBytesOrJSON` from the provided base64 bytes.
