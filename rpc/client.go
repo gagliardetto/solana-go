@@ -35,7 +35,6 @@ var ErrNotConfirmed = errors.New("not confirmed")
 type Client struct {
 	rpcURL    string
 	rpcClient JSONRPCClient
-	headers   http.Header
 }
 
 type JSONRPCClient interface {
@@ -47,6 +46,17 @@ type JSONRPCClient interface {
 func New(rpcEndpoint string) *Client {
 	opts := &jsonrpc.RPCClientOpts{
 		HTTPClient: newHTTP(),
+	}
+	rpcClient := jsonrpc.NewClientWithOpts(rpcEndpoint, opts)
+	return NewWithCustomRPCClient(rpcClient)
+}
+
+// New creates a new Solana JSON RPC client with the provided custom headers.
+// The provided headers will be added to each RPC request sent via this RPC client.
+func NewWithHeaders(rpcEndpoint string, headers map[string]string) *Client {
+	opts := &jsonrpc.RPCClientOpts{
+		HTTPClient:    newHTTP(),
+		CustomHeaders: headers,
 	}
 	rpcClient := jsonrpc.NewClientWithOpts(rpcEndpoint, opts)
 	return NewWithCustomRPCClient(rpcClient)
@@ -97,13 +107,6 @@ func NewWithRateLimit(
 		rpcClient:   rpcClient,
 		rateLimiter: ratelimit.New(rps),
 	}
-}
-
-func (c *Client) SetHeader(k, v string) {
-	if c.headers == nil {
-		c.headers = http.Header{}
-	}
-	c.headers.Set(k, v)
 }
 
 var (
