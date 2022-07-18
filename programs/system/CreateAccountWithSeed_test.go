@@ -16,12 +16,14 @@ package system
 
 import (
 	"bytes"
+	"io/ioutil"
 	"strconv"
 	"testing"
 
 	bin "github.com/gagliardetto/binary"
 	ag_gofuzz "github.com/gagliardetto/gofuzz"
 	"github.com/gagliardetto/solana-go"
+	"github.com/gagliardetto/solana-go/text"
 	ag_require "github.com/stretchr/testify/require"
 )
 
@@ -91,6 +93,24 @@ func TestEncDec(t *testing.T) {
 			}
 			ag_require.NoError(t, err)
 			ag_require.Equal(t, instruction, got)
+
+			got.EncodeToTree(text.NewTreeEncoder(ioutil.Discard, ""))
+		}
+
+		{
+			got := new(CreateAccountWithSeed)
+			err = decodeT(got, instr)
+			got.AccountMetaSlice = solana.AccountMetaSlice{
+				solana.Meta(payerAccount.PublicKey()).WRITE().SIGNER(),
+				solana.Meta(newSubAccount).WRITE(),
+				// base account is optional
+			}
+			ag_require.NoError(t, err)
+			ag_require.Equal(t, got.AccountMetaSlice[0], got.GetFundingAccount())
+			ag_require.Equal(t, got.AccountMetaSlice[1], got.GetCreatedAccount())
+			ag_require.Equal(t, got.AccountMetaSlice[0], got.GetBaseAccount())
+
+			got.EncodeToTree(text.NewTreeEncoder(ioutil.Discard, ""))
 		}
 	}
 }
