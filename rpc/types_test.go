@@ -15,7 +15,6 @@
 package rpc
 
 import (
-	"encoding/base64"
 	stdjson "encoding/json"
 	"testing"
 
@@ -108,17 +107,9 @@ func TestData_jsonParsed_empty(t *testing.T) {
 	)
 }
 
-func TestData_DataBytesOrJSONFromBase64Bytes(t *testing.T) {
-	testString := "test"
-	in := make([]byte, base64.StdEncoding.EncodedLen(len(testString)))
-	base64.StdEncoding.Encode(in, []byte(testString))
-
-	dataBytesOrJSON, err := DataBytesOrJSONFromBase64Bytes(in)
-	assert.NoError(t, err)
-
+func TestData_DataBytesOrJSONFromBytes(t *testing.T) {
+	in := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	dataBytesOrJSON := DataBytesOrJSONFromBytes(in)
 	out := dataBytesOrJSON.GetBinary()
-	decoded, err := base64.StdEncoding.DecodeString(string(out))
-	assert.NoError(t, err)
-	assert.Equal(t, testString, string(decoded))
-
+	assert.Equal(t, in, out)
 }
