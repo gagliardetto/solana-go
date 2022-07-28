@@ -20,13 +20,13 @@ package rpc
 import (
 	"context"
 	"errors"
+	"io"
 	"net"
 	"net/http"
 	"time"
 
 	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
 	"github.com/klauspost/compress/gzhttp"
-	"go.uber.org/ratelimit"
 )
 
 var ErrNotFound = errors.New("not found")
@@ -43,10 +43,12 @@ type JSONRPCClient interface {
 }
 
 // New creates a new Solana JSON RPC client.
+// Client is safe for concurrent use by multiple goroutines.
 func New(rpcEndpoint string) *Client {
 	opts := &jsonrpc.RPCClientOpts{
 		HTTPClient: newHTTP(),
 	}
+
 	rpcClient := jsonrpc.NewClientWithOpts(rpcEndpoint, opts)
 	return NewWithCustomRPCClient(rpcClient)
 }
@@ -62,50 +64,22 @@ func NewWithHeaders(rpcEndpoint string, headers map[string]string) *Client {
 	return NewWithCustomRPCClient(rpcClient)
 }
 
+// Close closes the client.
+func (cl *Client) Close() error {
+	if cl.rpcClient == nil {
+		return nil
+	}
+	if c, ok := cl.rpcClient.(io.Closer); ok {
+		return c.Close()
+	}
+	return nil
+}
+
 // NewWithCustomRPCClient creates a new Solana RPC client
 // with the provided RPC client.
 func NewWithCustomRPCClient(rpcClient JSONRPCClient) *Client {
 	return &Client{
 		rpcClient: rpcClient,
-	}
-}
-
-var _ JSONRPCClient = &clientWithRateLimiting{}
-
-type clientWithRateLimiting struct {
-	rpcClient   jsonrpc.RPCClient
-	rateLimiter ratelimit.Limiter
-}
-
-func (wr *clientWithRateLimiting) CallForInto(ctx context.Context, out interface{}, method string, params []interface{}) error {
-	wr.rateLimiter.Take()
-	return wr.rpcClient.CallForInto(ctx, &out, method, params)
-}
-
-func (wr *clientWithRateLimiting) CallWithCallback(
-	ctx context.Context,
-	method string,
-	params []interface{},
-	callback func(*http.Request, *http.Response) error,
-) error {
-	wr.rateLimiter.Take()
-	return wr.rpcClient.CallWithCallback(ctx, method, params, callback)
-}
-
-// NewWithRateLimit creates a new rate-limitted Solana RPC client.
-func NewWithRateLimit(
-	rpcEndpoint string,
-	rps int, // requests per second
-) JSONRPCClient {
-	opts := &jsonrpc.RPCClientOpts{
-		HTTPClient: newHTTP(),
-	}
-
-	rpcClient := jsonrpc.NewClientWithOpts(rpcEndpoint, opts)
-
-	return &clientWithRateLimiting{
-		rpcClient:   rpcClient,
-		rateLimiter: ratelimit.New(rps),
 	}
 }
 
