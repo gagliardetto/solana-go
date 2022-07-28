@@ -319,7 +319,8 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 	}
 
 	return &Transaction{
-		Message: message,
+		Signatures: make([]Signature, message.Header.NumRequiredSignatures),
+		Message:    message,
 	}, nil
 }
 
@@ -389,19 +390,43 @@ func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error
 
 	signerKeys := tx.Message.signerKeys()
 
-	for _, key := range signerKeys {
+	for index, key := range signerKeys {
 		privateKey := getter(key)
+
 		if privateKey == nil {
 			return nil, fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
 		}
 
-		s, err := privateKey.Sign(messageContent)
+		tx.Signatures[index], err = privateKey.Sign(messageContent)
 		if err != nil {
 			return nil, fmt.Errorf("failed to signed with key %q: %w", key.String(), err)
 		}
-
-		tx.Signatures = append(tx.Signatures, s)
 	}
+	return tx.Signatures, nil
+}
+
+func (tx *Transaction) AddSignature(keys ...PrivateKey) (out []Signature, err error) {
+	messageContent, err := tx.Message.MarshalBinary()
+	if err != nil {
+		return nil, fmt.Errorf("unable to encode message for signing: %w", err)
+	}
+
+	signerKeys := tx.Message.signerKeys()
+
+	uniqueKeys := make(map[PublicKey]PrivateKey, len(keys))
+	for _, key := range keys {
+		uniqueKeys[key.PublicKey()] = key
+	}
+
+	for index, key := range signerKeys {
+		if privateKey, ok := uniqueKeys[key]; ok {
+			tx.Signatures[index], err = privateKey.Sign(messageContent)
+			if err != nil {
+				return nil, fmt.Errorf("failed to signed with key %q: %w", key.String(), err)
+			}
+		}
+	}
+
 	return tx.Signatures, nil
 }
 
