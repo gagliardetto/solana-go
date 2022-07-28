@@ -78,6 +78,14 @@ There is currently **no stable release**. The SDK is actively developed and late
 
 The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/c2435363f39723cef59b91322f3b6a815008af29/docs/src/developing/clients/jsonrpc-api.md).
 
+## Future Development
+
+`solana-go` is exclusively supported by my own time (which is money).
+
+If my work has been useful in building your for-profit services/infra, consider donating at DkP56dVfmTTN58oy6hDpRLtw4RMEFMmEWs8umN3Kg8vp
+
+Thanks!
+
 Note
 ----
 
