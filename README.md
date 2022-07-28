@@ -209,14 +209,27 @@ func exampleFromGetTransaction() {
 func decodeSystemTransfer(tx *solana.Transaction) {
   spew.Dump(tx)
 
-  // we know that the first instruction of the transaction is a `system` program instruction:
+  // Get (for example) the first instruction of this transaction
+  // which we know is a `system` program instruction:
   i0 := tx.Message.Instructions[0]
 
-  // parse a system program instruction:
-  inst, err := system.DecodeInstruction(i0.ResolveInstructionAccounts(&tx.Message), i0.Data)
+  // Find the program address of this instruction:
+  progKey, err := tx.ResolveProgramIDIndex(i0.ProgramIDIndex)
+  if if err != nil {
+    panic(err)
+  }
+
+  // FInd the accounts of this instruction:
+  accounts := i0.ResolveInstructionAccounts(&tx.Message)
+
+  // Feed the accounts and data to the system program parser
+  // OR see below for alternative parsing when you DON'T know
+  // what program the instruction is for / you don't have a parser.
+  inst, err := system.DecodeInstruction(accounts, i0.Data)
   if err != nil {
     panic(err)
   }
+
   // inst.Impl contains the specific instruction type (in this case, `inst.Impl` is a `*system.Transfer`)
   spew.Dump(inst)
   if _, ok := inst.Impl.(*system.Transfer); !ok {
@@ -230,13 +243,14 @@ func decodeSystemTransfer(tx *solana.Transaction) {
     // you must register a decoder for each program ID beforehand
     // by using `solana.RegisterInstructionDecoder` (all solana-go program clients do it automatically with the default program IDs).
     decodedInstruction, err := solana.DecodeInstruction(
-      system.ProgramID,
-      i0.ResolveInstructionAccounts(&tx.Message),
+      progKey,
+      accounts,
       i0.Data,
     )
     if err != nil {
       panic(err)
     }
+    // The returned `decodedInstruction` is the decoded instruction.
     spew.Dump(decodedInstruction)
 
     // decodedInstruction == inst
@@ -319,6 +333,38 @@ if err != nil {
 }
 spew.Dump(mint)
 ```
+
+## Working with rate-limited RPC providers
+
+```go
+package main
+
+import (
+  "context"
+
+  "golang.org/x/time/rate"
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  cluster := rpc.MainNetBeta
+  client := rpc.NewWithLimiter(
+    cluster.RPC,
+    rate.Every(time.Second), // time frame
+    5, // limit of requests per time frame
+  )
+
+  out, err := client.GetVersion(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
 
 The data will **AUTOMATICALLY get decoded** and returned (**the right decoder will be used**) when you call the `resp.Value.Data.GetBinary()` method.
 
