@@ -41,5 +41,6 @@ require (
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	google.golang.org/api v0.29.0
 )
