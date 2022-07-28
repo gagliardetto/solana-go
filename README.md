@@ -365,6 +365,38 @@ func main() {
 }
 ```
 
+## Custom Headers for authenticating with RPC providers
+
+```go
+package main
+
+import (
+  "context"
+
+  "golang.org/x/time/rate"
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  cluster := rpc.MainNetBeta
+  client := rpc.NewWithHeaders(
+    cluster.RPC,
+    map[string]string{
+      "x-api-key": "...",
+    },
+  )
+
+  out, err := client.GetVersion(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
 
 The data will **AUTOMATICALLY get decoded** and returned (**the right decoder will be used**) when you call the `resp.Value.Data.GetBinary()` method.
 
