@@ -27,7 +27,6 @@ import (
 
 func getClient() *rpc.Client {
 	httpHeaders := viper.GetStringSlice("global-http-header")
-	api := rpc.New(sanitizeAPIURL(viper.GetString("global-rpc-url")))
 
 	for i := 0; i < 25; i++ {
 		if val := os.Getenv(fmt.Sprintf("SLNC_GLOBAL_HTTP_HEADER_%d", i)); val != "" {
@@ -35,13 +34,15 @@ func getClient() *rpc.Client {
 		}
 	}
 
+	headers := make(map[string]string)
 	for _, header := range httpHeaders {
 		headerArray := strings.SplitN(header, ": ", 2)
 		if len(headerArray) != 2 || strings.Contains(headerArray[0], " ") {
 			errorCheck("validating http headers", fmt.Errorf("invalid HTTP Header format"))
 		}
-		api.SetHeader(headerArray[0], headerArray[1])
+		headers[headerArray[0]] = headerArray[1]
 	}
+	api := rpc.NewWithHeaders(sanitizeAPIURL(viper.GetString("global-rpc-url")), headers)
 	return api
 }
 

@@ -23,8 +23,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/dfuse-io/logging"
 	"github.com/klauspost/compress/zstd"
+	"github.com/streamingfast/logging"
 	"github.com/stretchr/testify/require"
 )
 

@@ -1,6 +1,6 @@
 # Solana SDK library for Go
 
-[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v1.4.0?tab=doc)
+[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v1.5.0?tab=doc)
 [![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/gagliardetto/solana-go?include_prereleases&label=release-tag)](https://github.com/gagliardetto/solana-go/releases)
 [![Build Status](https://github.com/gagliardetto/solana-go/workflows/tests/badge.svg?branch=main)](https://github.com/gagliardetto/solana-go/actions?query=branch%3Amain)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/gagliardetto/solana-go/main)](https://www.tickgit.com/browse?repo=github.com/gagliardetto/solana-go&branch=main)
@@ -12,11 +12,19 @@ More contracts to come.
 
 **If you're using/developing Solana programs written in [Anchor Framework](https://github.com/project-serum/anchor), you can use [anchor-go](https://github.com/gagliardetto/anchor-go) to generate Golang clients**
 
-**If you're looking for a SERUM library, you can check out [gagliardetto/serum-go](https://github.com/gagliardetto/serum-go) ; [/programs/serum](https://github.com/gagliardetto/solana-go/tree/main/programs/serum) is deprecated.**
+**If you're looking for a SERUM library, you can check out [gagliardetto/serum-go](https://github.com/gagliardetto/serum-go) ([./programs/serum](https://github.com/gagliardetto/solana-go/tree/main/programs/serum) is deprecated.**)
 
 <div align="center">
     <img src="https://user-images.githubusercontent.com/15271561/128235229-1d2d9116-23bb-464e-b2cc-8fb6355e3b55.png" margin="auto" height="175"/>
 </div>
+
+## Future Development
+
+`solana-go` is exclusively supported by my own time (which is money).
+
+If my work has been useful in building your for-profit services/infra/bots/etc., consider donating at DkP56dVfmTTN58oy6hDpRLtw4RMEFMmEWs8umN3Kg8vp
+
+Thanks!
 
 ## Contents
 
@@ -30,7 +38,9 @@ More contracts to come.
   - [SendAndConfirmTransaction](#sendandconfirmtransaction)
   - [Decode an instruction data](#parsedecode-an-instruction-from-a-transaction)
   - [Borsh encoding/decoding](#borsh-encodingdecoding)
-  - [ZSTD encoding](#zstd-account-data-encoding)
+  - [ZSTD account data encoding](#zstd-account-data-encoding)
+  - [Custom Headers for authenticating with RPC providers](#custom-headers-for-authenticating-with-rpc-providers)
+  - [Working with rate-limited RPC providers](#working-with-rate-limited-rpc-providers)
   - [Timeouts and Custom HTTP Clients](#timeouts-and-custom-http-clients)
   - [Examples](#examples)
     - [Create Account/Wallet](#create-account-wallet)
@@ -72,7 +82,7 @@ More contracts to come.
 
 ## Current development status
 
-There is currently **no stable release**. The SDK is actively developed and latest is `v1.4.0` which is an `alpha` release.
+There is currently **no stable release**. The SDK is actively developed and latest is `v1.5.0` which is an `alpha` release.
 
 The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/c2435363f39723cef59b91322f3b6a815008af29/docs/src/developing/clients/jsonrpc-api.md).
 
@@ -90,7 +100,7 @@ Note
 
 ```bash
 $ cd my-project
-$ go get github.com/gagliardetto/solana-go@v1.4.0
+$ go get github.com/gagliardetto/solana-go@v1.5.0
 ```
 
 ## Pretty-Print transactions/instructions
@@ -209,14 +219,27 @@ func exampleFromGetTransaction() {
 func decodeSystemTransfer(tx *solana.Transaction) {
   spew.Dump(tx)
 
-  // we know that the first instruction of the transaction is a `system` program instruction:
+  // Get (for example) the first instruction of this transaction
+  // which we know is a `system` program instruction:
   i0 := tx.Message.Instructions[0]
 
-  // parse a system program instruction:
-  inst, err := system.DecodeInstruction(i0.ResolveInstructionAccounts(&tx.Message), i0.Data)
+  // Find the program address of this instruction:
+  progKey, err := tx.ResolveProgramIDIndex(i0.ProgramIDIndex)
+  if if err != nil {
+    panic(err)
+  }
+
+  // FInd the accounts of this instruction:
+  accounts := i0.ResolveInstructionAccounts(&tx.Message)
+
+  // Feed the accounts and data to the system program parser
+  // OR see below for alternative parsing when you DON'T know
+  // what program the instruction is for / you don't have a parser.
+  inst, err := system.DecodeInstruction(accounts, i0.Data)
   if err != nil {
     panic(err)
   }
+
   // inst.Impl contains the specific instruction type (in this case, `inst.Impl` is a `*system.Transfer`)
   spew.Dump(inst)
   if _, ok := inst.Impl.(*system.Transfer); !ok {
@@ -230,13 +253,14 @@ func decodeSystemTransfer(tx *solana.Transaction) {
     // you must register a decoder for each program ID beforehand
     // by using `solana.RegisterInstructionDecoder` (all solana-go program clients do it automatically with the default program IDs).
     decodedInstruction, err := solana.DecodeInstruction(
-      system.ProgramID,
-      i0.ResolveInstructionAccounts(&tx.Message),
+      progKey,
+      accounts,
       i0.Data,
     )
     if err != nil {
       panic(err)
     }
+    // The returned `decodedInstruction` is the decoded instruction.
     spew.Dump(decodedInstruction)
 
     // decodedInstruction == inst
@@ -319,6 +343,70 @@ if err != nil {
 }
 spew.Dump(mint)
 ```
+
+## Working with rate-limited RPC providers
+
+```go
+package main
+
+import (
+  "context"
+
+  "golang.org/x/time/rate"
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  cluster := rpc.MainNetBeta
+  client := rpc.NewWithLimiter(
+    cluster.RPC,
+    rate.Every(time.Second), // time frame
+    5, // limit of requests per time frame
+  )
+
+  out, err := client.GetVersion(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+## Custom Headers for authenticating with RPC providers
+
+```go
+package main
+
+import (
+  "context"
+
+  "golang.org/x/time/rate"
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  cluster := rpc.MainNetBeta
+  client := rpc.NewWithHeaders(
+    cluster.RPC,
+    map[string]string{
+      "x-api-key": "...",
+    },
+  )
+
+  out, err := client.GetVersion(
+    context.TODO(),
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
 
 The data will **AUTOMATICALLY get decoded** and returned (**the right decoder will be used**) when you call the `resp.Value.Data.GetBinary()` method.
 

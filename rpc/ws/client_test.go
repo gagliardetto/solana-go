@@ -19,9 +19,12 @@ package ws
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/text"
@@ -51,6 +54,61 @@ func Test_AccountSubscribe(t *testing.T) {
 	fmt.Println("OpenOrders: ", data.Value.Account.Owner)
 	fmt.Println("data: ", data.Value.Account.Data)
 	return
+}
+
+func Test_AccountSubscribeWithHttpHeader(t *testing.T) {
+	t.Skip("Never ending test, revisit me to not depend on actual network calls, or hide between env flag")
+	zlog, _ = zap.NewDevelopment()
+
+	// Pass in bogus websocket authentication credentials
+	wssUser := "john"
+	wssPass := "do not use me"
+	opt := &Options{
+		HttpHeader: http.Header{
+			"Authorization": []string{
+				"Basic " + base64.StdEncoding.EncodeToString([]byte(wssUser+":"+wssPass)),
+			},
+		},
+	}
+
+	c, err := ConnectWithOptions(context.TODO(), "ws://api.mainnet-beta.solana.com:80", opt)
+	defer c.Close()
+	require.NoError(t, err)
+
+	accountID := solana.MustPublicKeyFromBase58("SqJP6vrvMad5XBQK5PCFEZjeuQSFi959sdpqtSNvnsX")
+	sub, err := c.AccountSubscribe(accountID, "")
+	require.NoError(t, err)
+
+	// seconds waiting before disconnecting from socket
+	const timeoutSeconds = 3
+	go func(sub *AccountSubscription) {
+		ticker := time.NewTicker(1 * time.Second)
+		secs := 0
+		for range ticker.C {
+			secs++
+			t.Logf("%d...", secs)
+			if secs == timeoutSeconds {
+				ticker.Stop()
+				break
+			}
+		}
+		sub.Unsubscribe()
+	}(sub)
+
+	data, err := sub.Recv()
+	if err != nil {
+		t.Errorf("Received an error: %v", err)
+	}
+	if data == nil {
+		return
+	}
+
+	if err := text.NewEncoder(os.Stdout).Encode(data, nil); err != nil {
+		t.Errorf("encoding error: %v", err)
+	}
+
+	t.Log("OpenOrders: ", data.Value.Account.Owner)
+	t.Log("data: ", data.Value.Account.Data)
 }
 
 func Test_ProgramSubscribe(t *testing.T) {

@@ -251,17 +251,22 @@ type DataBytesOrJSON struct {
 }
 
 func DataBytesOrJSONFromBase64(stringBase64 string) (*DataBytesOrJSON, error) {
-	decoded, err := base64.StdEncoding.DecodeString(stringBase64)
+	decodedData, err := base64.StdEncoding.DecodeString(stringBase64)
 	if err != nil {
 		return nil, err
 	}
+	return DataBytesOrJSONFromBytes(decodedData), nil
+}
+
+// DataBytesOrJSONFromBytes creates a new `DataBytesOrJSON` from the provided bytes.
+func DataBytesOrJSONFromBytes(data []byte) *DataBytesOrJSON {
 	return &DataBytesOrJSON{
 		rawDataEncoding: solana.EncodingBase64,
 		asDecodedBinary: solana.Data{
 			Encoding: solana.EncodingBase64,
-			Content:  decoded,
+			Content:  data,
 		},
-	}, nil
+	}
 }
 
 func (dt DataBytesOrJSON) MarshalJSON() ([]byte, error) {

@@ -120,6 +120,7 @@ type RPCClient interface {
 
 	CallForInto(ctx context.Context, out interface{}, method string, params []interface{}) error
 	CallWithCallback(ctx context.Context, method string, params []interface{}, callback func(*http.Request, *http.Response) error) error
+	Close() error
 }
 
 // RPCRequest represents a JSON-RPC request object.
@@ -237,6 +238,7 @@ type HTTPError struct {
 // HTTPClient is an abstraction for a HTTP client
 type HTTPClient interface {
 	Do(*http.Request) (*http.Response, error)
+	CloseIdleConnections()
 }
 
 func NewHTTPError(code int, err error) *HTTPError {
@@ -351,6 +353,13 @@ func (client *rpcClient) Call(ctx context.Context, method string, params ...inte
 	}
 
 	return client.doCall(ctx, request)
+}
+
+func (client *rpcClient) Close() error {
+	if client.httpClient != nil {
+		client.httpClient.CloseIdleConnections()
+	}
+	return nil
 }
 
 func (client *rpcClient) CallForInto(

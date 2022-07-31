@@ -106,3 +106,10 @@ func TestData_jsonParsed_empty(t *testing.T) {
 		mustJSONToInterface(mustAnyToJSON(data)),
 	)
 }
+
+func TestData_DataBytesOrJSONFromBytes(t *testing.T) {
+	in := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	dataBytesOrJSON := DataBytesOrJSONFromBytes(in)
+	out := dataBytesOrJSON.GetBinary()
+	assert.Equal(t, in, out)
+}
