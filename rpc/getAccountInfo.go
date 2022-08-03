@@ -90,6 +90,21 @@ func (cl *Client) GetAccountInfoWithOpts(
 	ctx context.Context,
 	account solana.PublicKey,
 	opts *GetAccountInfoOpts,
+) (*GetAccountInfoResult, error) {
+	out, err := cl.getAccountInfoWithOpts(ctx, account, opts)
+	if err != nil {
+		return nil, err
+	}
+	if out.Value == nil {
+		return nil, ErrNotFound
+	}
+	return out, nil
+}
+
+func (cl *Client) getAccountInfoWithOpts(
+	ctx context.Context,
+	account solana.PublicKey,
+	opts *GetAccountInfoOpts,
 ) (out *GetAccountInfoResult, err error) {
 
 	obj := M{
@@ -127,9 +142,5 @@ func (cl *Client) GetAccountInfoWithOpts(
 	if out == nil {
 		return nil, errors.New("expected a value, got null result")
 	}
-	if out.Value == nil {
-		return nil, ErrNotFound
-	}
-
 	return out, nil
 }
