@@ -88,54 +88,6 @@ func TestClient_GetAccountInfoWithRpcContext(t *testing.T) {
 	}
 }
 
-func TestClient_GetAccountInfoWithRpcContext_exsting(t *testing.T) {
-	responseBody := `{"context":{"slot":83986105},"value":{"data":["dGVzdA==","base64"],"executable":true,"lamports":999999,"owner":"11111111111111111111111111111111","rentEpoch":207}}`
-	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
-	defer closer()
-	client := New(server.URL)
-
-	offset := uint64(22)
-	length := uint64(33)
-
-	pubkeyString := "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
-	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
-
-	opts := &GetAccountInfoOpts{
-		Encoding:   solana.EncodingJSON,
-		Commitment: CommitmentMax,
-		DataSlice: &DataSlice{
-			Offset: &offset,
-			Length: &length,
-		},
-	}
-	_, _, err := client.GetAccountInfoWithRpcContext(
-		context.Background(),
-		pubKey,
-		opts,
-	)
-	require.NoError(t, err)
-
-	assert.Equal(t,
-		map[string]interface{}{
-			"id":      float64(0),
-			"jsonrpc": "2.0",
-			"method":  "getAccountInfo",
-			"params": []interface{}{
-				pubkeyString,
-				map[string]interface{}{
-					"encoding":   string(solana.EncodingJSON),
-					"commitment": string(CommitmentMax),
-					"dataSlice": map[string]interface{}{
-						"offset": float64(offset),
-						"length": float64(length),
-					},
-				},
-			},
-		},
-		server.RequestBody(t),
-	)
-}
-
 func uint64Ptr(in uint64) *uint64 {
 	return &in
 }
