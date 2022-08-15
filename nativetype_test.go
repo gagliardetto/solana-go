@@ -30,6 +30,18 @@ func TestMustHashFromBase58(t *testing.T) {
 	})
 }
 
+func TestHash_UnmarshalText(t *testing.T) {
+	in := MustHashFromBase58("uoEAQCWCKjV9ecsBvngctJ7upNBZX7hpN4SfdR6TaUz")
+
+	out, err := in.MarshalText()
+	assert.NoError(t, err)
+
+	var ha Hash
+	err = ha.UnmarshalText(out)
+	assert.NoError(t, err)
+	assert.Equal(t, in, ha)
+}
+
 func TestHashFromBase58(t *testing.T) {
 	in := "uoEAQCWCKjV9ecsBvngctJ7upNBZX7hpN4SfdR6TaUz"
 	out, err := HashFromBase58(in)
@@ -48,6 +60,18 @@ func TestHashFromBase58(t *testing.T) {
 	assert.True(t, out.Equals(ha))
 	assert.False(t, out.Equals(Hash{}))
 	assert.False(t, out.IsZero())
+}
+
+func TestSignature_UnmarshalText(t *testing.T) {
+	in := MustSignatureFromBase58("gD3jeeaPNiyuJvTKXNEv1gntazWEkvpocofEmrz2rL6Fi4prWSsBH6a9SrwyZEatAozyMsnK2fnk3APXNFxD2Mq")
+
+	out, err := in.MarshalText()
+	assert.NoError(t, err)
+
+	var sig Signature
+	err = sig.UnmarshalText(out)
+	assert.NoError(t, err)
+	assert.Equal(t, in, sig)
 }
 
 func TestSignatureFromBase58(t *testing.T) {
