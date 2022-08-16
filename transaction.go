@@ -26,8 +26,8 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go/text"
 	"github.com/gagliardetto/treeout"
+	"github.com/olegfomenko/solana-go/text"
 	"go.uber.org/zap"
 )
 
@@ -347,6 +347,32 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 	return output, nil
 }
 
+type MarshallOpts struct {
+	RequireAllSignatures bool
+}
+
+func (tx *Transaction) MarshalBinaryWitOpts(opts MarshallOpts) ([]byte, error) {
+	if opts.RequireAllSignatures && (len(tx.Signatures) == 0 || len(tx.Signatures) != int(tx.Message.Header.NumRequiredSignatures)) {
+		return nil, errors.New("signature verification failed")
+	}
+
+	messageContent, err := tx.Message.MarshalBinary()
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode tx.Message to binary: %w", err)
+	}
+
+	var signatureCount []byte
+	bin.EncodeCompactU16Length(&signatureCount, len(tx.Signatures))
+	output := make([]byte, 0, len(signatureCount)+len(signatureCount)*64+len(messageContent))
+	output = append(output, signatureCount...)
+	for _, sig := range tx.Signatures {
+		output = append(output, sig[:]...)
+	}
+	output = append(output, messageContent...)
+
+	return output, nil
+}
+
 func (tx Transaction) MarshalWithEncoder(encoder *bin.Encoder) error {
 	out, err := tx.MarshalBinary()
 	if err != nil {
@@ -392,7 +418,7 @@ func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error
 	for _, key := range signerKeys {
 		privateKey := getter(key)
 		if privateKey == nil {
-			return nil, fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
+			continue
 		}
 
 		s, err := privateKey.Sign(messageContent)
@@ -411,7 +437,7 @@ func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
 }
 
 // String returns a human-readable string representation of the transaction data.
-// To disable colors, set "github.com/gagliardetto/solana-go/text".DisableColors = true
+// To disable colors, set "github.com/olegfomenko/solana-go/text".DisableColors = true
 func (tx *Transaction) String() string {
 	buf := new(bytes.Buffer)
 	_, err := tx.EncodeTree(text.NewTreeEncoder(buf, ""))

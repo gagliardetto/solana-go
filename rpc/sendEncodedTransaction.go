@@ -19,7 +19,7 @@ package rpc
 import (
 	"context"
 
-	"github.com/gagliardetto/solana-go"
+	"github.com/olegfomenko/solana-go"
 )
 
 // SendEncodedTransaction submits a signed base64 encoded transaction to the cluster for processing.

@@ -19,7 +19,7 @@ package rpc
 import (
 	"context"
 
-	"github.com/gagliardetto/solana-go"
+	"github.com/olegfomenko/solana-go"
 )
 
 // GetProgramAccounts returns all accounts owned by the provided program publicKey.
