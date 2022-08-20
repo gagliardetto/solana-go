@@ -2068,7 +2068,7 @@ func TestClient_GetTransaction(t *testing.T) {
 			"params": []interface{}{
 				tx,
 				map[string]interface{}{
-					"encoding":   string(solana.EncodingBase64),
+					"encoding":   string(solana.EncodingJSONParsed),
 					"commitment": string(CommitmentMax),
 				},
 			},
@@ -2082,7 +2082,7 @@ func TestClient_GetTransaction(t *testing.T) {
 		Slot:      83311386,
 		BlockTime: &blockTime,
 		Transaction: &TransactionResultEnvelope{
-			asParsedTransaction: &ParsedTransaction{
+			asParsedTransaction: &CompiledTransaction{
 				Signatures: []solana.Signature{
 					solana.MustSignatureFromBase58("QPzWhnwHnCwk3nj1zVCcjz1VP7EcAKouPg9Joietje3GnQTVQ5XyWxyPC3zHby8K5ahSn9SbQupauDbVRvv5DuL"),
 				},
@@ -2095,7 +2095,7 @@ func TestClient_GetTransaction(t *testing.T) {
 						solana.MustPublicKeyFromBase58("Vote111111111111111111111111111111111111111"),
 					},
 					RecentBlockhash: solana.MustHashFromBase58("6o9C27iJ5rPi7wEpvQu1cFbB1WnRudtsPnbY8GvFWrgR"),
-					Instructions: []ParsedInstruction{
+					Instructions: []CompiledInstruction{
 						{
 							Accounts: []int64{
 								1,
@@ -2149,6 +2149,60 @@ func TestClient_GetTransaction(t *testing.T) {
 	}
 
 	assert.Equal(t, expected, out, "both deserialized values must be equal")
+}
+
+func TestClient_GetParsedTransaction(t *testing.T) {
+	responseBody := `{"blockTime":1660570006,"meta":{"err":null,"fee":10000,"innerInstructions":[{"index":2,"instructions":[{"parsed":{"info":{"account":"BMnsyyG6S6zkaE3K5X3nbRMKdvBS5dT6HhcMozBVL7Ly","amount":"47444666","authority":"7oPa2PHQdZmjSPqvpZN7MQxnC7Dcf3uL4oLqknGLk2S3","mint":"E942z7FnS7GpswTvF5Vggvo7cMTbvZojjLbFgsrDVff1"},"type":"burn"},"program":"spl-token","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"},{"parsed":{"info":{"destination":"9bFNrXNb2WTx8fMHXCheaZqkLZ3YCCaiqTftHxeintHy","lamports":100,"source":"G7Hf2J55BAkHtbbXPh94UTGRCQioKPpnb5oKQMBteXo"},"type":"transfer"},"program":"system","programId":"11111111111111111111111111111111"},{"accounts":["2yVjuQwpsvdsrywzsJJVs9Ueh4zayyo5DYJbBNc3DDpn","3KEmPDRc6WEvhomG8awhfv2k33HgeqfGJmE1dptFmzhR"],"data":"2Af7uakYAFq8MGzDZQhLpcgRrAP9WHnAaA61z8nFafM8rFGNsKkksFcD6dDnAebHD6LCZBXqP6iyo8mX8XnteCsiEagZSqRLbe1QTRBpzZmwtFBVwY4SLyqBMxXKX35SM7zKVA7GYiTa2UDCaDvqQ3SQdHvRNaF5AED3HcJpYC1eFGhPpSjESVZHPN2rYYZXwma","programId":"worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth"}]}],"loadedAddresses":{"readonly":[],"writable":[]},"logMessages":["Program 11111111111111111111111111111111 invoke [1]","Program 11111111111111111111111111111111 success"],"postBalances":[72226420],"postTokenBalances":[{"accountIndex":4,"mint":"E942z7FnS7GpswTvF5Vggvo7cMTbvZojjLbFgsrDVff1","owner":"G7Hf2J55BAkHtbbXPh94UTGRCQioKPpnb5oKQMBteXo","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"0","decimals":6,"uiAmount":null,"uiAmountString":"0"}}],"preBalances":[74714380],"preTokenBalances":[{"accountIndex":4,"mint":"E942z7FnS7GpswTvF5Vggvo7cMTbvZojjLbFgsrDVff1","owner":"G7Hf2J55BAkHtbbXPh94UTGRCQioKPpnb5oKQMBteXo","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"47444666","decimals":6,"uiAmount":47.444666,"uiAmountString":"47.444666"}}],"rewards":[],"status":{"Ok":null}},"slot":146099091,"transaction":{"message":{"accountKeys":[{"pubkey":"G7Hf2J55BAkHtbbXPh94UTGRCQioKPpnb5oKQMBteXo","signer":true,"writable":true}],"addressTableLookups":null,"instructions":[{"parsed":{"info":{"destination":"9bFNrXNb2WTx8fMHXCheaZqkLZ3YCCaiqTftHxeintHy","lamports":100,"source":"G7Hf2J55BAkHtbbXPh94UTGRCQioKPpnb5oKQMBteXo"},"type":"transfer"},"program":"system","programId":"11111111111111111111111111111111"},{"parsed":{"info":{"amount":"47444666","delegate":"7oPa2PHQdZmjSPqvpZN7MQxnC7Dcf3uL4oLqknGLk2S3","owner":"G7Hf2J55BAkHtbbXPh94UTGRCQioKPpnb5oKQMBteXo","source":"BMnsyyG6S6zkaE3K5X3nbRMKdvBS5dT6HhcMozBVL7Ly"},"type":"approve"},"program":"spl-token","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"},{"accounts":["G7Hf2J55BAkHtbbXPh94UTGRCQioKPpnb5oKQMBteXo"],"data":"2dmnzvSCNoP8bNbUnUtk7FTYod5czhUfk4E7LSPNMtK4V1FHgQVYeQ2GnsEtCKZCyLLHXvnkReP","programId":"wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb"}],"recentBlockhash":"9L8FEB81LfZ67ejxpMaaZmC9EmXBpV38dhNaiF9UbzZi"},"signatures":["2x1QBpfcEQetAx7zETLEmvVvjue9311s9AWroEvMAboFkqaHZVp1sUpTFXroc5Q6tkPmZK5pYfmPFteoZPVRLF89"]}}`
+	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+	client := New(server.URL)
+
+	tx := "KBVcTWwgEhVzwywtunhAXRKjXYYEdPcSCpuEkg484tiE3dFGzHDu9LKKH23uBMdfYt3JCPHeaVeDTZWecboyTrd"
+
+	opts := GetParsedTransactionOpts{
+		Commitment: CommitmentMax,
+	}
+	out, err := client.GetParsedTransaction(
+		context.Background(),
+		solana.MustSignatureFromBase58(tx),
+		&opts,
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t,
+		map[string]interface{}{
+			"id":      float64(0),
+			"jsonrpc": "2.0",
+			"method":  "getTransaction",
+			"params": []interface{}{
+				tx,
+				map[string]interface{}{
+					"encoding":   string(solana.EncodingJSONParsed),
+					"commitment": string(CommitmentMax),
+				},
+			},
+		},
+		server.RequestBody(t),
+	)
+
+	assert.Equal(t, uint64(2), out.Meta.InnerInstructions[0].Index)
+	assert.Equal(t, &InstructionInfo{
+		Info: map[string]interface{}{
+			"account":   "BMnsyyG6S6zkaE3K5X3nbRMKdvBS5dT6HhcMozBVL7Ly",
+			"amount":    "47444666",
+			"authority": "7oPa2PHQdZmjSPqvpZN7MQxnC7Dcf3uL4oLqknGLk2S3",
+			"mint":      "E942z7FnS7GpswTvF5Vggvo7cMTbvZojjLbFgsrDVff1",
+		},
+		InstructionType: "burn",
+	}, out.Meta.InnerInstructions[0].Instructions[0].Parsed.asInstructionInfo)
+	assert.Equal(t, &InstructionInfo{
+		Info: map[string]interface{}{
+			"destination": "9bFNrXNb2WTx8fMHXCheaZqkLZ3YCCaiqTftHxeintHy",
+			"lamports":    float64(100),
+			"source":      "G7Hf2J55BAkHtbbXPh94UTGRCQioKPpnb5oKQMBteXo",
+		},
+		InstructionType: "transfer",
+	}, out.Transaction.Message.Instructions[0].Parsed.asInstructionInfo)
 }
 
 func TestClient_GetTransactionCount(t *testing.T) {

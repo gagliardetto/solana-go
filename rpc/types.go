@@ -117,8 +117,8 @@ func (twm TransactionWithMeta) GetTransaction() (*solana.Transaction, error) {
 }
 
 type TransactionParsed struct {
-	Meta        *TransactionMeta   `json:"meta,omitempty"`
-	Transaction *ParsedTransaction `json:"transaction"`
+	Meta        *TransactionMeta     `json:"meta,omitempty"`
+	Transaction *CompiledTransaction `json:"transaction"`
 }
 
 type TokenBalance struct {
@@ -190,7 +190,12 @@ type InnerInstruction struct {
 	Index uint16 `json:"index"`
 
 	// Ordered list of inner program instructions that were invoked during a single transaction instruction.
-	Instructions []solana.CompiledInstruction `json:"instructions"`
+	Instructions []CompiledInstructionEnvelope `json:"instructions"`
+}
+
+type CompiledInstructionEnvelope struct {
+	asCompiledInstruction solana.CompiledInstruction
+	asParsedInstruction   *CompiledInstruction
 }
 
 // 	Ok  interface{} `json:"Ok"`  // <null> Transaction was successful
@@ -392,25 +397,66 @@ const (
 )
 
 // Parsed Transaction
-type ParsedTransaction struct {
+type CompiledTransaction struct {
 	Signatures []solana.Signature `json:"signatures"`
 	Message    Message            `json:"message"`
 }
 
-type Message struct {
-	AccountKeys     []solana.PublicKey   `json:"accountKeys"`
-	RecentBlockhash solana.Hash          `json:"recentBlockhash"`
-	Instructions    []ParsedInstruction  `json:"instructions"`
-	Header          solana.MessageHeader `json:"header"`
+type ParsedTransaction struct {
+	Signatures []solana.Signature `json:"signatures"`
+	Message    ParsedMessage      `json:"message"`
 }
 
-type AccountKey struct {
+type ParsedTransactionMeta struct {
+	// Error if transaction failed, null if transaction succeeded.
+	// https://github.com/solana-labs/solana/blob/master/sdk/src/transaction.rs#L24
+	Err interface{} `json:"err"`
+
+	// Fee this transaction was charged
+	Fee uint64 `json:"fee"`
+
+	// Array of u64 account balances from before the transaction was processed
+	PreBalances []uint64 `json:"preBalances"`
+
+	// Array of u64 account balances after the transaction was processed
+	PostBalances []uint64 `json:"postBalances"`
+
+	// List of inner instructions or omitted if inner instruction recording
+	// was not yet enabled during this transaction
+	InnerInstructions []ParsedInnerInstruction `json:"innerInstructions"`
+
+	// List of token balances from before the transaction was processed
+	// or omitted if token balance recording was not yet enabled during this transaction
+	PreTokenBalances []TokenBalance `json:"preTokenBalances"`
+
+	// List of token balances from after the transaction was processed
+	// or omitted if token balance recording was not yet enabled during this transaction
+	PostTokenBalances []TokenBalance `json:"postTokenBalances"`
+
+	// Array of string log messages or omitted if log message
+	// recording was not yet enabled during this transaction
+	LogMessages []string `json:"logMessages"`
+}
+
+type ParsedInnerInstruction struct {
+	Index        uint64               `json:"index"`
+	Instructions []*ParsedInstruction `json:"instructions"`
+}
+
+type Message struct {
+	AccountKeys     []solana.PublicKey    `json:"accountKeys"`
+	RecentBlockhash solana.Hash           `json:"recentBlockhash"`
+	Instructions    []CompiledInstruction `json:"instructions"`
+	Header          solana.MessageHeader  `json:"header"`
+}
+
+type ParsedMessageAccount struct {
 	PublicKey solana.PublicKey `json:"pubkey"`
 	Signer    bool             `json:"signer"`
 	Writable  bool             `json:"writable"`
 }
 
-type ParsedInstruction struct {
+type CompiledInstruction struct {
 	Accounts       []int64          `json:"accounts,omitempty"`
 	Data           solana.Base58    `json:"data,omitempty"`
 	Parsed         *InstructionInfo `json:"parsed,omitempty"`
@@ -418,12 +464,42 @@ type ParsedInstruction struct {
 	ProgramIDIndex uint16           `json:"programIdIndex"`
 }
 
+type ParsedMessage struct {
+	AccountKeys     []ParsedMessageAccount `json:"accountKeys"`
+	Instructions    []*ParsedInstruction   `json:"instructions"`
+	RecentBlockHash string                 `json:"recentBlockhash"`
+}
+
+type ParsedInstructionEnvelope struct {
+	asParsedInstruction           *ParsedInstruction
+	asPartiallyDecodedInstruction *PartiallyDecodedInstruction
+}
+
+type PartiallyDecodedInstruction struct {
+	ProgramId solana.PublicKey   `json:"programId"`
+	Accounts  []solana.PublicKey `json:"accounts"`
+	Data      string             `json:"data"`
+}
+
+type ParsedInstruction struct {
+	Program   string                   `json:"program,omitempty"`
+	ProgramId solana.PublicKey         `json:"programId,omitempty"`
+	Parsed    *InstructionInfoEnvelope `json:"parsed,omitempty"`
+	Data      string                   `json:"data,omitempty"`
+	Accounts  []solana.PublicKey       `json:"accounts,omitempty"`
+}
+
+type InstructionInfoEnvelope struct {
+	asString          string
+	asInstructionInfo *InstructionInfo
+}
+
 type InstructionInfo struct {
 	Info            map[string]interface{} `json:"info"`
 	InstructionType string                 `json:"type"`
 }
 
-func (p *ParsedInstruction) IsParsed() bool {
+func (p *CompiledInstruction) IsParsed() bool {
 	return p.Parsed != nil
 }
 
