@@ -54,7 +54,10 @@ func (mint *Mint) UnmarshalWithDecoder(dec *bin.Decoder) (err error) {
 			mint.MintAuthority = solana.PublicKeyFromBytes(v).ToPointer()
 		} else {
 			// discard:
-			dec.ReadNBytes(32)
+			_, err := dec.ReadNBytes(32)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	{
@@ -91,7 +94,10 @@ func (mint *Mint) UnmarshalWithDecoder(dec *bin.Decoder) (err error) {
 			mint.FreezeAuthority = solana.PublicKeyFromBytes(v).ToPointer()
 		} else {
 			// discard:
-			dec.ReadNBytes(32)
+			_, err := dec.ReadNBytes(32)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -221,7 +227,10 @@ func (mint *Account) UnmarshalWithDecoder(dec *bin.Decoder) (err error) {
 			mint.Delegate = solana.PublicKeyFromBytes(v).ToPointer()
 		} else {
 			// discard:
-			dec.ReadNBytes(32)
+			_, err := dec.ReadNBytes(32)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	{
@@ -244,7 +253,10 @@ func (mint *Account) UnmarshalWithDecoder(dec *bin.Decoder) (err error) {
 			mint.IsNative = &v
 		} else {
 			// discard:
-			dec.ReadUint64(bin.LE)
+			_, err := dec.ReadUint64(bin.LE)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	{
@@ -267,7 +279,10 @@ func (mint *Account) UnmarshalWithDecoder(dec *bin.Decoder) (err error) {
 			mint.CloseAuthority = solana.PublicKeyFromBytes(v).ToPointer()
 		} else {
 			// discard:
-			dec.ReadNBytes(32)
+			_, err := dec.ReadNBytes(32)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
