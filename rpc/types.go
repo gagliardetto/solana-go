@@ -190,12 +190,7 @@ type InnerInstruction struct {
 	Index uint16 `json:"index"`
 
 	// Ordered list of inner program instructions that were invoked during a single transaction instruction.
-	Instructions []CompiledInstructionEnvelope `json:"instructions"`
-}
-
-type CompiledInstructionEnvelope struct {
-	asCompiledInstruction solana.CompiledInstruction
-	asParsedInstruction   *CompiledInstruction
+	Instructions []CompiledInstruction `json:"instructions"`
 }
 
 // 	Ok  interface{} `json:"Ok"`  // <null> Transaction was successful
@@ -468,17 +463,6 @@ type ParsedMessage struct {
 	AccountKeys     []ParsedMessageAccount `json:"accountKeys"`
 	Instructions    []*ParsedInstruction   `json:"instructions"`
 	RecentBlockHash string                 `json:"recentBlockhash"`
-}
-
-type ParsedInstructionEnvelope struct {
-	asParsedInstruction           *ParsedInstruction
-	asPartiallyDecodedInstruction *PartiallyDecodedInstruction
-}
-
-type PartiallyDecodedInstruction struct {
-	ProgramId solana.PublicKey   `json:"programId"`
-	Accounts  []solana.PublicKey `json:"accounts"`
-	Data      string             `json:"data"`
 }
 
 type ParsedInstruction struct {

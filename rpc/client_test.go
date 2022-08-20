@@ -2068,7 +2068,7 @@ func TestClient_GetTransaction(t *testing.T) {
 			"params": []interface{}{
 				tx,
 				map[string]interface{}{
-					"encoding":   string(solana.EncodingJSONParsed),
+					"encoding":   string(solana.EncodingBase64),
 					"commitment": string(CommitmentMax),
 				},
 			},
