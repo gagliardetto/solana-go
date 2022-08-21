@@ -469,7 +469,7 @@ type ParsedInstruction struct {
 	Program   string                   `json:"program,omitempty"`
 	ProgramId solana.PublicKey         `json:"programId,omitempty"`
 	Parsed    *InstructionInfoEnvelope `json:"parsed,omitempty"`
-	Data      string                   `json:"data,omitempty"`
+	Data      solana.Base58            `json:"data,omitempty"`
 	Accounts  []solana.PublicKey       `json:"accounts,omitempty"`
 }
 
