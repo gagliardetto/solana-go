@@ -26,9 +26,9 @@ import (
 	"time"
 
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/diff"
-	"github.com/gagliardetto/solana-go/rpc"
+	"github.com/olegfomenko/solana-go"
+	"github.com/olegfomenko/solana-go/diff"
+	"github.com/olegfomenko/solana-go/rpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

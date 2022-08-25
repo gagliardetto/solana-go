@@ -23,7 +23,7 @@ import (
 	"math/big"
 
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
+	"github.com/olegfomenko/solana-go"
 	"go.uber.org/zap"
 )
 

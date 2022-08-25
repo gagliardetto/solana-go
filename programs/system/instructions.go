@@ -24,9 +24,9 @@ import (
 
 	ag_spew "github.com/davecgh/go-spew/spew"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_text "github.com/gagliardetto/solana-go/text"
 	ag_treeout "github.com/gagliardetto/treeout"
+	ag_solanago "github.com/olegfomenko/solana-go"
+	ag_text "github.com/olegfomenko/solana-go/text"
 )
 
 var ProgramID ag_solanago.PublicKey = ag_solanago.SystemProgramID
