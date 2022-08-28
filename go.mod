@@ -3,7 +3,7 @@ module github.com/gagliardetto/solana-go
 go 1.16
 
 require (
-	github.com/gagliardetto/binary v0.6.1
+	github.com/gagliardetto/binary v0.7.1
 	github.com/gagliardetto/gofuzz v1.2.2
 	github.com/gagliardetto/treeout v0.1.4
 )
