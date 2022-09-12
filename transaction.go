@@ -402,7 +402,7 @@ func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error
 	signerKeys := tx.Message.signerKeys()
 	for _, key := range signerKeys {
 		if getter(key) == nil {
-			return nil, fmt.Errorf("failed to signed with key %q: %w", key.String(), err)
+			return nil, fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
 		}
 	}
 	return tx.PartialSign(getter)
