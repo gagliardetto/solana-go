@@ -20,7 +20,6 @@ package solana
 import (
 	"bytes"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"sort"
 
@@ -326,10 +325,6 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 type privateKeyGetter func(key PublicKey) *PrivateKey
 
 func (tx *Transaction) MarshalBinary() ([]byte, error) {
-	if len(tx.Signatures) == 0 || len(tx.Signatures) != int(tx.Message.Header.NumRequiredSignatures) {
-		return nil, errors.New("signature verification failed")
-	}
-
 	messageContent, err := tx.Message.MarshalBinary()
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode tx.Message to binary: %w", err)
@@ -381,28 +376,36 @@ func (tx *Transaction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	return nil
 }
 
-func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error) {
+func (tx *Transaction) PartialSign(getter privateKeyGetter) (out []Signature, err error) {
 	messageContent, err := tx.Message.MarshalBinary()
 	if err != nil {
 		return nil, fmt.Errorf("unable to encode message for signing: %w", err)
 	}
-
 	signerKeys := tx.Message.signerKeys()
 
+	signedSignatures := []Signature{}
 	for _, key := range signerKeys {
 		privateKey := getter(key)
-		if privateKey == nil {
-			return nil, fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
+		if privateKey != nil {
+			s, err := privateKey.Sign(messageContent)
+			if err != nil {
+				return nil, fmt.Errorf("failed to signed with key %q: %w", key.String(), err)
+			}
+			signedSignatures = append(signedSignatures, s)
 		}
+	}
+	tx.Signatures = append(tx.Signatures, signedSignatures...)
+	return tx.Signatures, nil
+}
 
-		s, err := privateKey.Sign(messageContent)
-		if err != nil {
+func (tx *Transaction) Sign(getter privateKeyGetter) (out []Signature, err error) {
+	signerKeys := tx.Message.signerKeys()
+	for _, key := range signerKeys {
+		if getter(key) == nil {
 			return nil, fmt.Errorf("failed to signed with key %q: %w", key.String(), err)
 		}
-
-		tx.Signatures = append(tx.Signatures, s)
 	}
-	return tx.Signatures, nil
+	return tx.PartialSign(getter)
 }
 
 func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
