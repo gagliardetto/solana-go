@@ -145,7 +145,9 @@ func (o *Orderbook) Items(descending bool, f func(node *SlabLeafNode) error) err
 			if traceEnabled {
 				zlog.Debug("found leaf", zap.Int("leaf", int(index)))
 			}
-			f(s)
+			if err := f(s); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
