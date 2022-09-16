@@ -48,6 +48,20 @@ func HashFromBytes(in []byte) Hash {
 	return Hash(PublicKeyFromBytes(in))
 }
 
+func (ha Hash) MarshalText() ([]byte, error) {
+	s := base58.Encode(ha[:])
+	return []byte(s), nil
+}
+
+func (ha *Hash) UnmarshalText(data []byte) (err error) {
+	tmp, err := HashFromBase58(string(data))
+	if err != nil {
+		return fmt.Errorf("invalid hash %q: %w", string(data), err)
+	}
+	*ha = tmp
+	return
+}
+
 func (ha Hash) MarshalJSON() ([]byte, error) {
 	return json.Marshal(base58.Encode(ha[:]))
 }
@@ -58,11 +72,11 @@ func (ha *Hash) UnmarshalJSON(data []byte) (err error) {
 		return err
 	}
 
-	tmp, err := PublicKeyFromBase58(s)
+	tmp, err := HashFromBase58(s)
 	if err != nil {
-		return fmt.Errorf("invalid public key %q: %w", s, err)
+		return fmt.Errorf("invalid hash %q: %w", s, err)
 	}
-	*ha = Hash(tmp)
+	*ha = tmp
 	return
 }
 
@@ -125,6 +139,20 @@ func SignatureFromBytes(in []byte) (out Signature) {
 	}
 
 	copy(out[:], in[0:max])
+	return
+}
+
+func (p Signature) MarshalText() ([]byte, error) {
+	s := base58.Encode(p[:])
+	return []byte(s), nil
+}
+
+func (p *Signature) UnmarshalText(data []byte) (err error) {
+	tmp, err := SignatureFromBase58(string(data))
+	if err != nil {
+		return fmt.Errorf("invalid signature %q: %w", string(data), err)
+	}
+	*p = tmp
 	return
 }
 

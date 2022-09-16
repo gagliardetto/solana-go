@@ -107,6 +107,88 @@ func TestNewTransaction(t *testing.T) {
 	})
 }
 
+func TestPartialSignTransaction(t *testing.T) {
+	signers := []PrivateKey{
+		NewWallet().PrivateKey,
+		NewWallet().PrivateKey,
+	}
+	instructions := []Instruction{
+		&testTransactionInstructions{
+			accounts: []*AccountMeta{
+				{PublicKey: signers[0].PublicKey(), IsSigner: true, IsWritable: false},
+				{PublicKey: signers[1].PublicKey(), IsSigner: true, IsWritable: true},
+			},
+			data:      []byte{0xaa, 0xbb},
+			programID: MustPublicKeyFromBase58("11111111111111111111111111111111"),
+		},
+	}
+
+	blockhash, err := HashFromBase58("A9QnpgfhCkmiBSjgBuWk76Wo3HxzxvDopUq9x6UUMmjn")
+	require.NoError(t, err)
+
+	trx, err := NewTransaction(instructions, blockhash)
+	require.NoError(t, err)
+
+	assert.Equal(t, trx.Message.Header.NumRequiredSignatures, uint8(2))
+
+	signatures, err := trx.PartialSign(func(key PublicKey) *PrivateKey {
+		if key.Equals(signers[0].PublicKey()) {
+			return &signers[0]
+		}
+		return nil
+	})
+	require.NoError(t, err)
+	assert.Equal(t, len(signatures), 1)
+}
+
+func TestSignTransaction(t *testing.T) {
+	signers := []PrivateKey{
+		NewWallet().PrivateKey,
+		NewWallet().PrivateKey,
+	}
+	instructions := []Instruction{
+		&testTransactionInstructions{
+			accounts: []*AccountMeta{
+				{PublicKey: signers[0].PublicKey(), IsSigner: true, IsWritable: false},
+				{PublicKey: signers[1].PublicKey(), IsSigner: true, IsWritable: true},
+			},
+			data:      []byte{0xaa, 0xbb},
+			programID: MustPublicKeyFromBase58("11111111111111111111111111111111"),
+		},
+	}
+
+	blockhash, err := HashFromBase58("A9QnpgfhCkmiBSjgBuWk76Wo3HxzxvDopUq9x6UUMmjn")
+	require.NoError(t, err)
+
+	trx, err := NewTransaction(instructions, blockhash)
+	require.NoError(t, err)
+
+	assert.Equal(t, trx.Message.Header.NumRequiredSignatures, uint8(2))
+
+	t.Run("should reject missing signer(s)", func(t *testing.T) {
+		_, err := trx.Sign(func(key PublicKey) *PrivateKey {
+			if key.Equals(signers[0].PublicKey()) {
+				return &signers[0]
+			}
+			return nil
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("should sign with signer(s)", func(t *testing.T) {
+		signatures, err := trx.Sign(func(key PublicKey) *PrivateKey {
+			for _, signer := range signers {
+				if key.Equals(signer.PublicKey()) {
+					return &signer
+				}
+			}
+			return nil
+		})
+		require.NoError(t, err)
+		assert.Equal(t, len(signatures), 2)
+	})
+}
+
 func TestTransactionDecode(t *testing.T) {
 	encoded := "AfjEs3XhTc3hrxEvlnMPkm/cocvAUbFNbCl00qKnrFue6J53AhEqIFmcJJlJW3EDP5RmcMz+cNTTcZHW/WJYwAcBAAEDO8hh4VddzfcO5jbCt95jryl6y8ff65UcgukHNLWH+UQGgxCGGpgyfQVQV02EQYqm4QwzUt2qf9f1gVLM7rI4hwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6ANIF55zOZWROWRkeh+lExxZBnKFqbvIxZDLE7EijjoBAgIAAQwCAAAAOTAAAAAAAAA="
 	data, err := base64.StdEncoding.DecodeString(encoded)

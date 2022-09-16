@@ -85,12 +85,12 @@ type GetTransactionResult struct {
 	Meta        *TransactionMeta           `json:"meta,omitempty" bin:"optional"`
 }
 
-// TransactionResultEnvelope will contain a *ParsedTransaction if the requested encoding is `solana.EncodingJSON`
+// TransactionResultEnvelope will contain a *CompiledTransaction if the requested encoding is `solana.EncodingJSON`
 // (which is also the default when the encoding is not specified),
 // or a `solana.Data` in case of EncodingBase58, EncodingBase64.
 type TransactionResultEnvelope struct {
 	asDecodedBinary     solana.Data
-	asParsedTransaction *ParsedTransaction
+	asParsedTransaction *CompiledTransaction
 }
 
 func (wrap TransactionResultEnvelope) MarshalJSON() ([]byte, error) {
@@ -140,9 +140,9 @@ func (dt *TransactionResultEnvelope) GetData() solana.Data {
 	return dt.asDecodedBinary
 }
 
-// GetRawJSON returns a *ParsedTransaction when the data
+// GetRawJSON returns a *CompiledTransaction when the data
 // encoding is EncodingJSON.
-func (dt *TransactionResultEnvelope) GetParsedTransaction() *ParsedTransaction {
+func (dt *TransactionResultEnvelope) GetParsedTransaction() *CompiledTransaction {
 	return dt.asParsedTransaction
 }
 
