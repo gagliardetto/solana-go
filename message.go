@@ -111,79 +111,74 @@ func (mx *Message) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	{
 		mx.Header.NumRequiredSignatures, err = decoder.ReadUint8()
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to decode mx.Header.NumRequiredSignatures: %w", err)
 		}
 		mx.Header.NumReadonlySignedAccounts, err = decoder.ReadUint8()
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to decode mx.Header.NumReadonlySignedAccounts: %w", err)
 		}
 		mx.Header.NumReadonlyUnsignedAccounts, err = decoder.ReadUint8()
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to decode mx.Header.NumReadonlyUnsignedAccounts: %w", err)
 		}
 	}
 	{
-		numAccountKeys, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
+		numAccountKeys, err := decoder.ReadCompactU16()
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to decode numAccountKeys: %w", err)
 		}
+		mx.AccountKeys = make([]PublicKey, numAccountKeys)
 		for i := 0; i < numAccountKeys; i++ {
-			pubkeyBytes, err := decoder.ReadNBytes(32)
+			_, err := decoder.Read(mx.AccountKeys[i][:])
 			if err != nil {
-				return err
+				return fmt.Errorf("unable to decode mx.AccountKeys[%d]: %w", i, err)
 			}
-			var sig PublicKey
-			copy(sig[:], pubkeyBytes)
-			mx.AccountKeys = append(mx.AccountKeys, sig)
 		}
 	}
 	{
-		recentBlockhashBytes, err := decoder.ReadNBytes(32)
+		_, err := decoder.Read(mx.RecentBlockhash[:])
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to decode mx.RecentBlockhash: %w", err)
 		}
-		var recentBlockhash Hash
-		copy(recentBlockhash[:], recentBlockhashBytes)
-		mx.RecentBlockhash = recentBlockhash
 	}
 	{
-		numInstructions, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
+		numInstructions, err := decoder.ReadCompactU16()
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to decode numInstructions: %w", err)
 		}
-		for i := 0; i < numInstructions; i++ {
+		mx.Instructions = make([]CompiledInstruction, numInstructions)
+		for instructionIndex := 0; instructionIndex < numInstructions; instructionIndex++ {
 			programIDIndex, err := decoder.ReadUint8()
 			if err != nil {
-				return err
+				return fmt.Errorf("unable to decode mx.Instructions[%d].ProgramIDIndex: %w", instructionIndex, err)
 			}
-			var compInst CompiledInstruction
-			compInst.ProgramIDIndex = uint16(programIDIndex)
+			mx.Instructions[instructionIndex].ProgramIDIndex = uint16(programIDIndex)
 
 			{
-				numAccounts, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
+				numAccounts, err := decoder.ReadCompactU16()
 				if err != nil {
-					return err
+					return fmt.Errorf("unable to decode numAccounts for ix[%d]: %w", instructionIndex, err)
 				}
+				mx.Instructions[instructionIndex].Accounts = make([]uint16, numAccounts)
 				for i := 0; i < numAccounts; i++ {
 					accountIndex, err := decoder.ReadUint8()
 					if err != nil {
-						return err
+						return fmt.Errorf("unable to decode accountIndex for ix[%d].Accounts[%d]: %w", instructionIndex, i, err)
 					}
-					compInst.Accounts = append(compInst.Accounts, uint16(accountIndex))
+					mx.Instructions[instructionIndex].Accounts[i] = uint16(accountIndex)
 				}
 			}
 			{
-				dataLen, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
+				dataLen, err := decoder.ReadCompactU16()
 				if err != nil {
-					return err
+					return fmt.Errorf("unable to decode dataLen for ix[%d]: %w", instructionIndex, err)
 				}
 				dataBytes, err := decoder.ReadNBytes(dataLen)
 				if err != nil {
-					return err
+					return fmt.Errorf("unable to decode dataBytes for ix[%d]: %w", instructionIndex, err)
 				}
-				compInst.Data = Base58(dataBytes)
+				mx.Instructions[instructionIndex].Data = (Base58)(dataBytes)
 			}
-			mx.Instructions = append(mx.Instructions, compInst)
 		}
 	}
 

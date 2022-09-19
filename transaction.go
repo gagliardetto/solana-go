@@ -352,25 +352,23 @@ func (tx Transaction) MarshalWithEncoder(encoder *bin.Encoder) error {
 
 func (tx *Transaction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	{
-		numSignatures, err := bin.DecodeCompactU16LengthFromByteReader(decoder)
+		numSignatures, err := decoder.ReadCompactU16()
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to read numSignatures: %w", err)
 		}
 
+		tx.Signatures = make([]Signature, numSignatures)
 		for i := 0; i < numSignatures; i++ {
-			sigBytes, err := decoder.ReadNBytes(64)
+			_, err := decoder.Read(tx.Signatures[i][:])
 			if err != nil {
-				return err
+				return fmt.Errorf("unable to read tx.Signatures[%d]: %w", i, err)
 			}
-			var sig Signature
-			copy(sig[:], sigBytes)
-			tx.Signatures = append(tx.Signatures, sig)
 		}
 	}
 	{
 		err := tx.Message.UnmarshalWithDecoder(decoder)
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to decode tx.Message: %w", err)
 		}
 	}
 	return nil
