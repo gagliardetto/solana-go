@@ -2049,9 +2049,11 @@ func TestClient_GetTransaction(t *testing.T) {
 
 	tx := "KBVcTWwgEhVzwywtunhAXRKjXYYEdPcSCpuEkg484tiE3dFGzHDu9LKKH23uBMdfYt3JCPHeaVeDTZWecboyTrd"
 
+	maxSupportedTransactionVersion := uint64(0)
 	opts := GetTransactionOpts{
-		Encoding:   solana.EncodingBase64,
-		Commitment: CommitmentMax,
+		Encoding:                       solana.EncodingBase64,
+		Commitment:                     CommitmentMax,
+		MaxSupportedTransactionVersion: &maxSupportedTransactionVersion,
 	}
 	out, err := client.GetTransaction(
 		context.Background(),
@@ -2068,8 +2070,9 @@ func TestClient_GetTransaction(t *testing.T) {
 			"params": []interface{}{
 				tx,
 				map[string]interface{}{
-					"encoding":   string(solana.EncodingBase64),
-					"commitment": string(CommitmentMax),
+					"encoding":                       string(solana.EncodingBase64),
+					"commitment":                     string(CommitmentMax),
+					"maxSupportedTransactionVersion": float64(maxSupportedTransactionVersion),
 				},
 			},
 		},
