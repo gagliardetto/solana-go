@@ -81,6 +81,10 @@ type GetAccountInfoOpts struct {
 	//
 	// This parameter is optional.
 	DataSlice *DataSlice
+
+	// The minimum slot that the request can be evaluated at.
+	// This parameter is optional.
+	MinContextSlot *uint64
 }
 
 // GetAccountInfoWithOpts returns all information associated with the account of provided publicKey.
@@ -112,6 +116,9 @@ func (cl *Client) GetAccountInfoWithOpts(
 			if opts.Encoding == solana.EncodingJSONParsed {
 				return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
 			}
+		}
+		if opts.MinContextSlot != nil {
+			obj["minContextSlot"] = *opts.MinContextSlot
 		}
 	}
 

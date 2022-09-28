@@ -87,6 +87,7 @@ func TestClient_GetAccountInfoWithOpts(t *testing.T) {
 
 	offset := uint64(22)
 	length := uint64(33)
+	minContextSlot := uint64(123456)
 
 	pubkeyString := "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
 	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
@@ -98,6 +99,7 @@ func TestClient_GetAccountInfoWithOpts(t *testing.T) {
 			Offset: &offset,
 			Length: &length,
 		},
+		MinContextSlot: &minContextSlot,
 	}
 	_, err := client.GetAccountInfoWithOpts(
 		context.Background(),
@@ -120,6 +122,7 @@ func TestClient_GetAccountInfoWithOpts(t *testing.T) {
 						"offset": float64(offset),
 						"length": float64(length),
 					},
+					"minContextSlot": float64(minContextSlot),
 				},
 			},
 		},
