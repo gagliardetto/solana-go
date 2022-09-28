@@ -34,6 +34,10 @@ type GetSignaturesForAddressOpts struct {
 	// (optional) Commitment; "processed" is not supported.
 	// If parameter not provided, the default is "finalized".
 	Commitment CommitmentType `json:"commitment,omitempty"`
+
+	// The minimum slot that the request can be evaluated at.
+	// This parameter is optional.
+	MinContextSlot *uint64
 }
 
 // GetSignaturesForAddress returns confirmed signatures for transactions
@@ -78,6 +82,9 @@ func (cl *Client) GetSignaturesForAddressWithOpts(
 		}
 		if opts.Commitment != "" {
 			obj["commitment"] = opts.Commitment
+		}
+		if opts.MinContextSlot != nil {
+			obj["minContextSlot"] = *opts.MinContextSlot
 		}
 		if len(obj) > 0 {
 			params = append(params, obj)
