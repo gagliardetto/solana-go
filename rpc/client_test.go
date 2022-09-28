@@ -1680,13 +1680,16 @@ func TestClient_GetSignaturesForAddress(t *testing.T) {
 	pubKey := solana.MustPublicKeyFromBase58(pubkeyString)
 
 	limit := 10
+	minContextSlot := uint64(123456)
+
 	before := solana.MustSignatureFromBase58("qN7RF6YSJT5QpVuhPNzjL8zNZ111NKVpJtBD53cxJHinorVW6AYLVE7bYtJnh42RjFfUTSKLrHhDBaG7AtEkymr")
 	until := solana.MustSignatureFromBase58("zJTw3PHXJRqpmR2bqnTChcySGET1pZTCQZebCtJbxRp3966MHttJgCgA75jwrjHRPa7mqeuWYceqxqo2jgVAtZa")
 	opts := GetSignaturesForAddressOpts{
-		Limit:      &limit,
-		Before:     before,
-		Until:      until,
-		Commitment: CommitmentMax,
+		Limit:          &limit,
+		Before:         before,
+		Until:          until,
+		Commitment:     CommitmentMax,
+		MinContextSlot: &minContextSlot,
 	}
 	out, err := client.GetSignaturesForAddressWithOpts(
 		context.Background(),
@@ -1703,10 +1706,11 @@ func TestClient_GetSignaturesForAddress(t *testing.T) {
 			"params": []interface{}{
 				pubkeyString,
 				map[string]interface{}{
-					"commitment": string(CommitmentMax),
-					"before":     before.String(),
-					"until":      until.String(),
-					"limit":      float64(limit),
+					"commitment":     string(CommitmentMax),
+					"before":         before.String(),
+					"until":          until.String(),
+					"limit":          float64(limit),
+					"minContextSlot": float64(minContextSlot),
 				},
 			},
 		},
