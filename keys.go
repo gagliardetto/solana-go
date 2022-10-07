@@ -101,6 +101,14 @@ func (k PrivateKey) PublicKey() PublicKey {
 	return publicKey
 }
 
+// PK is a convenience alias for PublicKey
+type PK = PublicKey
+
+func (p PublicKey) Verify(message []byte, signature Signature) bool {
+	pub := ed25519.PublicKey(p[:])
+	return ed25519.Verify(pub, message, signature[:])
+}
+
 type PublicKey [PublicKeyLength]byte
 
 func PublicKeyFromBytes(in []byte) (out PublicKey) {
@@ -116,6 +124,11 @@ func PublicKeyFromBytes(in []byte) (out PublicKey) {
 
 	copy(out[:], in[0:max])
 	return
+}
+
+// MPK is a convenience alias for MustPublicKeyFromBase58
+func MPK(in string) PublicKey {
+	return MustPublicKeyFromBase58(in)
 }
 
 func MustPublicKeyFromBase58(in string) PublicKey {

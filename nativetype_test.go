@@ -373,6 +373,7 @@ func TestSignatureVerify(t *testing.T) {
 		for _, tcs := range tc.Signers {
 			require.True(t, tcs.Sig.Verify(tcs.Signer, msg))
 			require.False(t, tcs.Sig.Verify(BPFLoaderDeprecatedProgramID, msg))
+			require.True(t, tcs.Signer.Verify(msg, tcs.Sig))
 		}
 	}
 }
