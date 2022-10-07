@@ -193,8 +193,8 @@ type InnerInstruction struct {
 	Instructions []CompiledInstruction `json:"instructions"`
 }
 
-// 	Ok  interface{} `json:"Ok"`  // <null> Transaction was successful
-// 	Err interface{} `json:"Err"` // Transaction failed with TransactionError
+// Ok  interface{} `json:"Ok"`  // <null> Transaction was successful
+// Err interface{} `json:"Err"` // Transaction failed with TransactionError
 type DeprecatedTransactionMetaStatus M
 
 type TransactionSignature struct {
@@ -277,7 +277,6 @@ func (dt DataBytesOrJSON) MarshalJSON() ([]byte, error) {
 }
 
 func (wrap *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
-
 	if len(data) == 0 || (len(data) == 4 && string(data) == "null") {
 		// TODO: is this an error?
 		return nil
@@ -488,10 +487,11 @@ func (p *CompiledInstruction) IsParsed() bool {
 }
 
 type TransactionOpts struct {
-	Encoding            string         `json:"encoding,omitempty"`
-	SkipPreflight       bool           `json:"skipPreflight,omitempty"`
-	PreflightCommitment CommitmentType `json:"preflightCommitment,omitempty"`
-	MaxRetries          *uint          `json:"maxRetries"`
+	Encoding            solana.EncodingType `json:"encoding,omitempty"`
+	SkipPreflight       bool                `json:"skipPreflight,omitempty"`
+	PreflightCommitment CommitmentType      `json:"preflightCommitment,omitempty"`
+	MaxRetries          *uint               `json:"maxRetries"`
+	MinContextSlot      *uint64             `json:"minContextSlot"`
 }
 
 func (opts *TransactionOpts) ToMap() M {
@@ -512,6 +512,10 @@ func (opts *TransactionOpts) ToMap() M {
 
 	if opts.MaxRetries != nil {
 		obj["maxRetries"] = *opts.MaxRetries
+	}
+
+	if opts.MinContextSlot != nil {
+		obj["minContextSlot"] = *opts.MinContextSlot
 	}
 
 	return obj
