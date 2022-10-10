@@ -41,6 +41,14 @@ type Transaction struct {
 	Message Message `json:"message"`
 }
 
+func (tx *Transaction) UnmarshalBase64(b64 string) error {
+	b, err := base64.StdEncoding.DecodeString(b64)
+	if err != nil {
+		return err
+	}
+	return tx.UnmarshalWithDecoder(bin.NewBinDecoder(b))
+}
+
 var _ bin.EncoderDecoder = &Transaction{}
 
 func (t *Transaction) HasAccount(account PublicKey) bool     { return t.Message.HasAccount(account) }
@@ -191,9 +199,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 	programIDs := make(PublicKeySlice, 0)
 	accounts := []*AccountMeta{}
 	for _, instruction := range instructions {
-		for _, key := range instruction.Accounts() {
-			accounts = append(accounts, key)
-		}
+		accounts = append(accounts, instruction.Accounts()...)
 		programIDs.UniqueAppend(instruction.ProgramID())
 	}
 
@@ -439,7 +445,6 @@ func (tx Transaction) MustToBase64() string {
 }
 
 func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
-
 	parent.ParentFunc(func(txTree treeout.Branches) {
 		txTree.Child(fmt.Sprintf("Signatures[len=%v]", len(tx.Signatures))).ParentFunc(func(signaturesBranch treeout.Branches) {
 			for _, sig := range tx.Signatures {
@@ -474,7 +479,6 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 							programBranch.Child(text.Purple(text.Bold("Instruction")) + ": " + text.Bold("<unknown>")).
 								//
 								ParentFunc(func(instructionBranch treeout.Branches) {
-
 									// Data of the instruction call:
 									instructionBranch.Child(text.Sf("data[len=%v bytes]", len(inst.Data))).ParentFunc(func(paramsBranch treeout.Branches) {
 										paramsBranch.Child(bin.FormatByteSlice(inst.Data))
@@ -486,7 +490,6 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 											accountsBranch.Child(formatMeta(text.Sf("accounts[%v]", i), accounts[i]))
 										}
 									})
-
 								})
 						})
 				}
