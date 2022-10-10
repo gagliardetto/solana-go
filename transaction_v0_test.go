@@ -1,7 +1,6 @@
 package solana
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -66,10 +65,6 @@ func TestTransactionV0(t *testing.T) {
 				WritableIndexes: []uint8{1, 2},
 				ReadonlyIndexes: []uint8{0},
 			}, first)
-	}
-	if true {
-		fmt.Println(tx.String())
-		t.FailNow()
 	}
 
 	{
