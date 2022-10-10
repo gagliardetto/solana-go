@@ -13,20 +13,22 @@ func TestTransactionV0(t *testing.T) {
 	tx := new(Transaction)
 	err := tx.UnmarshalBase64(txB64)
 	require.NoError(t, err)
+	require.True(t, tx.Message.IsVersioned())
 
-	{
-		// set the address tables
-		tx.Message.SetAddressTables(
-			map[PublicKey][]PublicKey{
-				MPK("9WWfC3y4uCNofr2qEFHSVUXkCxW99JiYkMWmSZvVt8j3"): {
-					MPK("2jGpE3ADYRoJPMjyGC4tvqqDfobvdvwGr3vhd66zA1rc"),
-					MPK("FKN5imdi7yadX4axe4hxaqBET4n6DBDRF5LKo5aBF53j"),
-					MPK("3or4uF7ZyuQW5GGmcmdXDJasNiSZUURF2az1UrRPYQTg"),
-					MPK("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"),
-				},
-			},
-		)
+	tables := map[PublicKey][]PublicKey{
+		MPK("9WWfC3y4uCNofr2qEFHSVUXkCxW99JiYkMWmSZvVt8j3"): {
+			MPK("2jGpE3ADYRoJPMjyGC4tvqqDfobvdvwGr3vhd66zA1rc"),
+			MPK("FKN5imdi7yadX4axe4hxaqBET4n6DBDRF5LKo5aBF53j"),
+			MPK("3or4uF7ZyuQW5GGmcmdXDJasNiSZUURF2az1UrRPYQTg"),
+			MPK("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"),
+		},
 	}
+	// set the address tables
+	err = tx.Message.SetAddressTables(
+		tables,
+	)
+	require.NoError(t, err)
+	require.Equal(t, tables, tx.Message.addressTables)
 
 	require.Equal(t, MessageVersionV0, tx.Message.GetVersion())
 	require.Equal(t, uint8(2), tx.Message.Header.NumRequiredSignatures)

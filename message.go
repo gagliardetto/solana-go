@@ -39,6 +39,18 @@ func (lookups MessageAddressTableLookupSlice) NumLookups() int {
 	return count
 }
 
+// GetTableIDs returns the list of all address table IDs.
+func (lookups MessageAddressTableLookupSlice) GetTableIDs() PublicKeySlice {
+	if lookups == nil {
+		return nil
+	}
+	ids := make([]PublicKey, len(lookups))
+	for i, lookup := range lookups {
+		ids[i] = lookup.AccountKey
+	}
+	return ids
+}
+
 type MessageAddressTableLookup struct {
 	AccountKey      PublicKey // The account key of the address table.
 	WritableIndexes []uint8
@@ -73,6 +85,9 @@ type Message struct {
 	// List of address table lookups used to load additional accounts for this transaction.
 	addressTableLookups MessageAddressTableLookupSlice
 
+	// The actual tables that contain the list of account pubkeys.
+	// NOTE: you need to fetch these from the chain, and then call `SetAddressTables`
+	// before you use this transaction -- otherwise, you will get a panic.
 	addressTables map[PublicKey][]PublicKey
 }
 
@@ -84,9 +99,9 @@ func (mx *Message) SetAddressTables(tables map[PublicKey][]PublicKey) error {
 	return mx.resolveLookups(tables)
 }
 
-// GetTables returns the address tables used by this message.
+// GetAddressTables returns the address tables used by this message.
 // NOTE: you must have called `SetAddressTable` one or more times before being able to use this method.
-func (mx *Message) GetTables() map[PublicKey][]PublicKey {
+func (mx *Message) GetAddressTables() map[PublicKey][]PublicKey {
 	return mx.addressTables
 }
 
@@ -123,7 +138,7 @@ func (mx *Message) AddAddressTableLookup(lookup MessageAddressTableLookup) *Mess
 	return mx
 }
 
-func (mx *Message) GetAddressTableLookups() []MessageAddressTableLookup {
+func (mx *Message) GetAddressTableLookups() MessageAddressTableLookupSlice {
 	return mx.addressTableLookups
 }
 
