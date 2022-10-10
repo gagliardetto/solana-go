@@ -44,9 +44,9 @@ func (lookups MessageAddressTableLookupSlice) GetTableIDs() PublicKeySlice {
 	if lookups == nil {
 		return nil
 	}
-	ids := make([]PublicKey, len(lookups))
-	for i, lookup := range lookups {
-		ids[i] = lookup.AccountKey
+	ids := make(PublicKeySlice, 0)
+	for _, lookup := range lookups {
+		ids.UniqueAppend(lookup.AccountKey)
 	}
 	return ids
 }

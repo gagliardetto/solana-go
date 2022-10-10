@@ -14,7 +14,9 @@ func TestTransactionV0(t *testing.T) {
 	err := tx.UnmarshalBase64(txB64)
 	require.NoError(t, err)
 	require.True(t, tx.Message.IsVersioned())
+	require.Equal(t, PublicKeySlice{MPK("9WWfC3y4uCNofr2qEFHSVUXkCxW99JiYkMWmSZvVt8j3")}, tx.Message.GetAddressTableLookups().GetTableIDs())
 
+	// You would fetch the tables from the chain.
 	tables := map[PublicKey][]PublicKey{
 		MPK("9WWfC3y4uCNofr2qEFHSVUXkCxW99JiYkMWmSZvVt8j3"): {
 			MPK("2jGpE3ADYRoJPMjyGC4tvqqDfobvdvwGr3vhd66zA1rc"),
