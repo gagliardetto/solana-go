@@ -41,6 +41,7 @@ type Transaction struct {
 	Message Message `json:"message"`
 }
 
+// UnmarshalBase64 decodes a base64 encoded transaction.
 func (tx *Transaction) UnmarshalBase64(b64 string) error {
 	b, err := base64.StdEncoding.DecodeString(b64)
 	if err != nil {
@@ -59,6 +60,7 @@ func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, e
 	return t.Message.ResolveProgramIDIndex(programIDIndex)
 }
 
+// TransactionFromDecoder decodes a transaction from a decoder.
 func TransactionFromDecoder(decoder *bin.Decoder) (*Transaction, error) {
 	var out *Transaction
 	err := decoder.Decode(&out)
@@ -68,6 +70,8 @@ func TransactionFromDecoder(decoder *bin.Decoder) (*Transaction, error) {
 	return out, nil
 }
 
+// MustTransactionFromDecoder decodes a transaction from a decoder.
+// Panics on error.
 func MustTransactionFromDecoder(decoder *bin.Decoder) *Transaction {
 	out, err := TransactionFromDecoder(decoder)
 	if err != nil {
@@ -92,7 +96,7 @@ type CompiledInstruction struct {
 }
 
 func (ci *CompiledInstruction) ResolveInstructionAccounts(message *Message) []*AccountMeta {
-	out := make([]*AccountMeta, len(ci.Accounts), len(ci.Accounts))
+	out := make([]*AccountMeta, len(ci.Accounts))
 	metas := message.AccountMetaList()
 	for i, acct := range ci.Accounts {
 		out[i] = metas[acct]

@@ -32,10 +32,13 @@ type Padding []byte
 
 type Hash PublicKey
 
+// MustHashFromBase58 decodes a base58 string into a Hash.
+// Panics on error.
 func MustHashFromBase58(in string) Hash {
 	return Hash(MustPublicKeyFromBase58(in))
 }
 
+// HashFromBase58 decodes a base58 string into a Hash.
 func HashFromBase58(in string) (Hash, error) {
 	tmp, err := PublicKeyFromBase58(in)
 	if err != nil {
@@ -44,15 +47,18 @@ func HashFromBase58(in string) (Hash, error) {
 	return Hash(tmp), nil
 }
 
+// HashFromBytes decodes a byte slice into a Hash.
 func HashFromBytes(in []byte) Hash {
 	return Hash(PublicKeyFromBytes(in))
 }
 
+// MarshalText implements encoding.TextMarshaler.
 func (ha Hash) MarshalText() ([]byte, error) {
 	s := base58.Encode(ha[:])
 	return []byte(s), nil
 }
 
+// UnmarshalText implements encoding.TextUnmarshaler.
 func (ha *Hash) UnmarshalText(data []byte) (err error) {
 	tmp, err := HashFromBase58(string(data))
 	if err != nil {
@@ -101,10 +107,12 @@ var zeroSignature = Signature{}
 func (sig Signature) IsZero() bool {
 	return sig == zeroSignature
 }
+
 func (sig Signature) Equals(pb Signature) bool {
 	return sig == pb
 }
 
+// SignatureFromBase58 decodes a base58 string into a Signature.
 func SignatureFromBase58(in string) (out Signature, err error) {
 	val, err := base58.Decode(in)
 	if err != nil {
@@ -119,6 +127,8 @@ func SignatureFromBase58(in string) (out Signature, err error) {
 	return
 }
 
+// MustSignatureFromBase58 decodes a base58 string into a Signature.
+// Panics on error.
 func MustSignatureFromBase58(in string) Signature {
 	out, err := SignatureFromBase58(in)
 	if err != nil {
@@ -127,6 +137,7 @@ func MustSignatureFromBase58(in string) Signature {
 	return out
 }
 
+// SignatureFromBytes decodes a byte slice into a Signature.
 func SignatureFromBytes(in []byte) (out Signature) {
 	byteCount := len(in)
 	if byteCount == 0 {
@@ -182,6 +193,7 @@ func (p *Signature) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
+// Verify checks that the signature is valid for the given public key and message.
 func (s Signature) Verify(pubkey PublicKey, msg []byte) bool {
 	return ed25519.Verify(pubkey[:], msg, s[:])
 }
