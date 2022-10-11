@@ -27,9 +27,10 @@ import (
 
 	"github.com/AlekSi/pointer"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/gagliardetto/solana-go"
 )
 
 func TestClient_GetAccountInfo(t *testing.T) {
@@ -2096,7 +2097,7 @@ func TestClient_GetTransaction(t *testing.T) {
 				Signatures: []solana.Signature{
 					solana.MustSignatureFromBase58("QPzWhnwHnCwk3nj1zVCcjz1VP7EcAKouPg9Joietje3GnQTVQ5XyWxyPC3zHby8K5ahSn9SbQupauDbVRvv5DuL"),
 				},
-				Message: Message{
+				Message: solana.Message{
 					AccountKeys: []solana.PublicKey{
 						solana.MustPublicKeyFromBase58("2ZZkgKcBfp4tW8qCLj2yjxRYh9CuvEVJWb6e2KKS91Mj"),
 						solana.MustPublicKeyFromBase58("53R9tmVrTQwJAgaUCWEA7SiVf7eWAbaQarZ159ixt2D9"),
@@ -2105,17 +2106,15 @@ func TestClient_GetTransaction(t *testing.T) {
 						solana.MustPublicKeyFromBase58("Vote111111111111111111111111111111111111111"),
 					},
 					RecentBlockhash: solana.MustHashFromBase58("6o9C27iJ5rPi7wEpvQu1cFbB1WnRudtsPnbY8GvFWrgR"),
-					Instructions: []CompiledInstruction{
+					Instructions: []solana.CompiledInstruction{
 						{
-							Accounts: []int64{
+							Accounts: []uint16{
 								1,
 								2,
 								3,
 								0,
 							},
 							Data:           solana.Base58([]byte{0x74, 0x65, 0x73, 0x74}),
-							Parsed:         nil,
-							Program:        "",
 							ProgramIDIndex: 4,
 						},
 					},
