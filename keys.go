@@ -18,6 +18,7 @@
 package solana
 
 import (
+	"bytes"
 	"crypto"
 	"crypto/ed25519"
 	crypto_rand "crypto/rand"
@@ -26,6 +27,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"sort"
 
 	"filippo.io/edwards25519"
 	"github.com/mr-tron/base58"
@@ -259,6 +261,141 @@ func (slice PublicKeySlice) Has(pubkey PublicKey) bool {
 		}
 	}
 	return false
+}
+
+func (slice PublicKeySlice) Len() int {
+	return len(slice)
+}
+
+func (slice PublicKeySlice) Less(i, j int) bool {
+	return bytes.Compare(slice[i][:], slice[j][:]) < 0
+}
+
+func (slice PublicKeySlice) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
+}
+
+// Sort sorts the slice.
+func (slice PublicKeySlice) Sort() {
+	sort.Sort(slice)
+}
+
+// Dedupe returns a new slice with all duplicate pubkeys removed.
+func (slice PublicKeySlice) Dedupe() PublicKeySlice {
+	slice.Sort()
+	var deduped PublicKeySlice
+	for i := 0; i < len(slice); i++ {
+		if i == 0 || !slice[i].Equals(slice[i-1]) {
+			deduped = append(deduped, slice[i])
+		}
+	}
+	return deduped
+}
+
+// Contains returns true if the slice contains the provided pubkey.
+func (slice PublicKeySlice) Contains(pubkey PublicKey) bool {
+	for _, key := range slice {
+		if key.Equals(pubkey) {
+			return true
+		}
+	}
+	return false
+}
+
+// ContainsAll returns true if all the provided pubkeys are present in the slice.
+func (slice PublicKeySlice) ContainsAll(pubkeys PublicKeySlice) bool {
+	for _, pubkey := range pubkeys {
+		if !slice.Contains(pubkey) {
+			return false
+		}
+	}
+	return true
+}
+
+// ContainsAny returns true if any of the provided pubkeys are present in the slice.
+func (slice PublicKeySlice) ContainsAny(pubkeys PublicKeySlice) bool {
+	for _, pubkey := range pubkeys {
+		if slice.Contains(pubkey) {
+			return true
+		}
+	}
+	return false
+}
+
+func (slice PublicKeySlice) ToBase58() []string {
+	out := make([]string, len(slice))
+	for i, pubkey := range slice {
+		out[i] = pubkey.String()
+	}
+	return out
+}
+
+func (slice PublicKeySlice) ToBytes() [][]byte {
+	out := make([][]byte, len(slice))
+	for i, pubkey := range slice {
+		out[i] = pubkey.Bytes()
+	}
+	return out
+}
+
+func (slice PublicKeySlice) ToPointers() []*PublicKey {
+	out := make([]*PublicKey, len(slice))
+	for i, pubkey := range slice {
+		out[i] = pubkey.ToPointer()
+	}
+	return out
+}
+
+// Diff returns the difference between two PublicKeySlice, i.e. the elements
+// that are in the first PublicKeySlice but not in the second.
+func (slice PublicKeySlice) Diff(other PublicKeySlice) PublicKeySlice {
+	var diff PublicKeySlice
+	for _, pubkey := range slice {
+		if !other.Contains(pubkey) {
+			diff = append(diff, pubkey)
+		}
+	}
+	return diff.Dedupe()
+}
+
+// Intersect returns the intersection of two PublicKeySlices, i.e. the elements
+// that are in both PublicKeySlices.
+// The returned PublicKeySlice is sorted and deduped.
+func (slice PublicKeySlice) Intersect(other PublicKeySlice) PublicKeySlice {
+	var intersect PublicKeySlice
+	for _, pubkey := range slice {
+		if other.Contains(pubkey) {
+			intersect = append(intersect, pubkey)
+		}
+	}
+	return intersect.Dedupe()
+}
+
+// Equals returns true if the two PublicKeySlices are equal (same order of same keys).
+func (slice PublicKeySlice) Equals(other PublicKeySlice) bool {
+	if len(slice) != len(other) {
+		return false
+	}
+	for i, pubkey := range slice {
+		if !pubkey.Equals(other[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// Same returns true if the two slices contain the same public keys,
+// but not necessarily in the same order.
+func (slice PublicKeySlice) Same(other PublicKeySlice) bool {
+	if len(slice) != len(other) {
+		return false
+	}
+	for _, pubkey := range slice {
+		if !other.Contains(pubkey) {
+			return false
+		}
+	}
+	return true
 }
 
 // Split splits the slice into chunks of the specified size.

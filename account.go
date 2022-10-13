@@ -89,7 +89,7 @@ func NewAccountMeta(
 	}
 }
 
-func (a *AccountMeta) less(act *AccountMeta) bool {
+func (a AccountMeta) less(act *AccountMeta) bool {
 	if a.IsSigner != act.IsSigner {
 		return a.IsSigner
 	}
