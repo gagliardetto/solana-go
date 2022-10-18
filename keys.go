@@ -421,6 +421,24 @@ func (slice PublicKeySlice) Split(chunkSize int) []PublicKeySlice {
 	return divided
 }
 
+// Last returns the last element of the slice.
+// Returns nil if the slice is empty.
+func (slice PublicKeySlice) Last() *PublicKey {
+	if len(slice) == 0 {
+		return nil
+	}
+	return slice[len(slice)-1].ToPointer()
+}
+
+// First returns the first element of the slice.
+// Returns nil if the slice is empty.
+func (slice PublicKeySlice) First() *PublicKey {
+	if len(slice) == 0 {
+		return nil
+	}
+	return slice[0].ToPointer()
+}
+
 // GetAddedRemovedPubkeys accepts two slices of pubkeys (`previous` and `next`), and returns
 // two slices:
 // - `added` is the slice of pubkeys that are present in `next` but NOT present in `previous`.
