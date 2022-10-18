@@ -15,6 +15,9 @@
 package ws
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 )
@@ -35,7 +38,6 @@ func (cl *Client) SignatureSubscribe(
 	signature solana.Signature, // Transaction Signature.
 	commitment rpc.CommitmentType, // (optional)
 ) (*SignatureSubscription, error) {
-
 	params := []interface{}{signature.String()}
 	conf := map[string]interface{}{}
 	if commitment != "" {
@@ -67,6 +69,39 @@ type SignatureSubscription struct {
 
 func (sw *SignatureSubscription) Recv() (*SignatureResult, error) {
 	select {
+	case d := <-sw.sub.stream:
+		return d.(*SignatureResult), nil
+	case err := <-sw.sub.err:
+		return nil, err
+	}
+}
+
+func (sw *SignatureSubscription) Err() <-chan error {
+	return sw.sub.err
+}
+
+func (sw *SignatureSubscription) Response() <-chan *SignatureResult {
+	ch := make(chan *SignatureResult)
+	go func(chan *SignatureResult) {
+		for {
+			select {
+			case d := <-sw.sub.stream:
+				ch <- d.(*SignatureResult)
+			case err := <-sw.sub.err:
+				close(ch)
+				panic(err)
+			}
+		}
+	}(ch)
+	return ch
+}
+
+var ErrTimeout = fmt.Errorf("timeout waiting for confirmation")
+
+func (sw *SignatureSubscription) RecvWithTimeout(timeout time.Duration) (*SignatureResult, error) {
+	select {
+	case <-time.After(timeout):
+		return nil, ErrTimeout
 	case d := <-sw.sub.stream:
 		return d.(*SignatureResult), nil
 	case err := <-sw.sub.err:
