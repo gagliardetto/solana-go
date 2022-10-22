@@ -346,25 +346,29 @@ func (slice PublicKeySlice) ToPointers() []*PublicKey {
 	return out
 }
 
-// Diff returns the difference between two PublicKeySlice, i.e. the elements
-// that are in the first PublicKeySlice but not in the second.
-func (slice PublicKeySlice) Diff(other PublicKeySlice) PublicKeySlice {
+// Removed returns the elements that are present in `a` but not in `b`.
+func (a PublicKeySlice) Removed(b PublicKeySlice) PublicKeySlice {
 	var diff PublicKeySlice
-	for _, pubkey := range slice {
-		if !other.Contains(pubkey) {
+	for _, pubkey := range a {
+		if !b.Contains(pubkey) {
 			diff = append(diff, pubkey)
 		}
 	}
 	return diff.Dedupe()
 }
 
+// Added returns the elements that are present in `b` but not in `a`.
+func (a PublicKeySlice) Added(b PublicKeySlice) PublicKeySlice {
+	return b.Removed(a)
+}
+
 // Intersect returns the intersection of two PublicKeySlices, i.e. the elements
 // that are in both PublicKeySlices.
 // The returned PublicKeySlice is sorted and deduped.
-func (slice PublicKeySlice) Intersect(other PublicKeySlice) PublicKeySlice {
+func (prev PublicKeySlice) Intersect(next PublicKeySlice) PublicKeySlice {
 	var intersect PublicKeySlice
-	for _, pubkey := range slice {
-		if other.Contains(pubkey) {
+	for _, pubkey := range prev {
+		if next.Contains(pubkey) {
 			intersect = append(intersect, pubkey)
 		}
 	}
@@ -437,6 +441,10 @@ func (slice PublicKeySlice) First() *PublicKey {
 		return nil
 	}
 	return slice[0].ToPointer()
+}
+
+func (prev PublicKeySlice) GetAddedRemoved(next PublicKeySlice) (added PublicKeySlice, removed PublicKeySlice) {
+	return next.Removed(prev), prev.Removed(next)
 }
 
 // GetAddedRemovedPubkeys accepts two slices of pubkeys (`previous` and `next`), and returns
