@@ -95,7 +95,7 @@ func (inst *Vote) EncodeToTree(parent treeout.Branches) {
 				ParentFunc(func(instructionBranch treeout.Branches) {
 					// Parameters of the instruction:
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch treeout.Branches) {
-						paramsBranch.Child(format.Param("Slots", fmt.Sprintf("%v", inst.Slots)))
+						paramsBranch.Child(format.Param("Slots", inst.Slots))
 						paramsBranch.Child(format.Param("Hash", inst.Hash.String()))
 						var ts time.Time
 						if inst.Timestamp != nil {
