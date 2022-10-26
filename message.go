@@ -373,9 +373,12 @@ func (mx *Message) UnmarshalV0(decoder *bin.Decoder) (err error) {
 			}
 
 			// read writable indexes
-			writableIndexesLen, err := decoder.ReadCompactU16Length()
+			writableIndexesLen, err := decoder.ReadCompactU16()
 			if err != nil {
 				return fmt.Errorf("failed to read writable indexes length: %w", err)
+			}
+			if writableIndexesLen > decoder.Remaining() {
+				return fmt.Errorf("writable indexes length is too large: %d", writableIndexesLen)
 			}
 			mx.addressTableLookups[i].WritableIndexes = make([]byte, writableIndexesLen)
 			_, err = decoder.Read(mx.addressTableLookups[i].WritableIndexes)
@@ -384,9 +387,12 @@ func (mx *Message) UnmarshalV0(decoder *bin.Decoder) (err error) {
 			}
 
 			// read readonly indexes
-			readonlyIndexesLen, err := decoder.ReadCompactU16Length()
+			readonlyIndexesLen, err := decoder.ReadCompactU16()
 			if err != nil {
 				return fmt.Errorf("failed to read readonly indexes length: %w", err)
+			}
+			if readonlyIndexesLen > decoder.Remaining() {
+				return fmt.Errorf("readonly indexes length is too large: %d", readonlyIndexesLen)
 			}
 			mx.addressTableLookups[i].ReadonlyIndexes = make([]byte, readonlyIndexesLen)
 			_, err = decoder.Read(mx.addressTableLookups[i].ReadonlyIndexes)
@@ -418,6 +424,9 @@ func (mx *Message) UnmarshalLegacy(decoder *bin.Decoder) (err error) {
 		if err != nil {
 			return fmt.Errorf("unable to decode numAccountKeys: %w", err)
 		}
+		if numAccountKeys > decoder.Remaining()/32 {
+			return fmt.Errorf("numAccountKeys %d is too large for remaining bytes %d", numAccountKeys, decoder.Remaining())
+		}
 		mx.AccountKeys = make([]PublicKey, numAccountKeys)
 		for i := 0; i < numAccountKeys; i++ {
 			_, err := decoder.Read(mx.AccountKeys[i][:])
@@ -437,6 +446,9 @@ func (mx *Message) UnmarshalLegacy(decoder *bin.Decoder) (err error) {
 		if err != nil {
 			return fmt.Errorf("unable to decode numInstructions: %w", err)
 		}
+		if numInstructions > decoder.Remaining() {
+			return fmt.Errorf("numInstructions %d is greater than remaining bytes %d", numInstructions, decoder.Remaining())
+		}
 		mx.Instructions = make([]CompiledInstruction, numInstructions)
 		for instructionIndex := 0; instructionIndex < numInstructions; instructionIndex++ {
 			programIDIndex, err := decoder.ReadUint8()
@@ -449,6 +461,9 @@ func (mx *Message) UnmarshalLegacy(decoder *bin.Decoder) (err error) {
 				numAccounts, err := decoder.ReadCompactU16()
 				if err != nil {
 					return fmt.Errorf("unable to decode numAccounts for ix[%d]: %w", instructionIndex, err)
+				}
+				if numAccounts > decoder.Remaining() {
+					return fmt.Errorf("ix[%v]: numAccounts %d is greater than remaining bytes %d", instructionIndex, numAccounts, decoder.Remaining())
 				}
 				mx.Instructions[instructionIndex].Accounts = make([]uint16, numAccounts)
 				for i := 0; i < numAccounts; i++ {
@@ -464,7 +479,10 @@ func (mx *Message) UnmarshalLegacy(decoder *bin.Decoder) (err error) {
 				if err != nil {
 					return fmt.Errorf("unable to decode dataLen for ix[%d]: %w", instructionIndex, err)
 				}
-				dataBytes, err := decoder.ReadNBytes(dataLen)
+				if dataLen > decoder.Remaining() {
+					return fmt.Errorf("ix[%v]: dataLen %d is greater than remaining bytes %d", instructionIndex, dataLen, decoder.Remaining())
+				}
+				dataBytes, err := decoder.ReadBytes(dataLen)
 				if err != nil {
 					return fmt.Errorf("unable to decode dataBytes for ix[%d]: %w", instructionIndex, err)
 				}
