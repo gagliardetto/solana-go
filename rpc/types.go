@@ -151,8 +151,8 @@ type UiTokenAmount struct {
 }
 
 type LoadedAddresses struct {
-	ReadOnly []solana.PublicKey `json:"readOnly"`
-	Writable []solana.PublicKey `json:"writable"`
+	ReadOnly solana.PublicKeySlice `json:"readOnly"`
+	Writable solana.PublicKeySlice `json:"writable"`
 }
 
 type TransactionMeta struct {
