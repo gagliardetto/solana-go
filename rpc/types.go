@@ -150,6 +150,11 @@ type UiTokenAmount struct {
 	UiAmountString string `json:"uiAmountString"`
 }
 
+type LoadedAddresses struct {
+	ReadOnly []solana.PublicKey `json:"readOnly"`
+	Writable []solana.PublicKey `json:"writable"`
+}
+
 type TransactionMeta struct {
 	// Error if transaction failed, null if transaction succeeded.
 	// https://github.com/solana-labs/solana/blob/master/sdk/src/transaction.rs#L24
@@ -184,6 +189,8 @@ type TransactionMeta struct {
 	Status DeprecatedTransactionMetaStatus `json:"status"`
 
 	Rewards []BlockReward `json:"rewards"`
+
+	LoadedAddresses LoadedAddresses `json:"loadedAddresses"`
 }
 
 type InnerInstruction struct {
