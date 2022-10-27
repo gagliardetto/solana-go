@@ -7,7 +7,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -94,6 +94,21 @@ func (cl *Client) GetAccountInfoWithOpts(
 	ctx context.Context,
 	account solana.PublicKey,
 	opts *GetAccountInfoOpts,
+) (*GetAccountInfoResult, error) {
+	out, err := cl.getAccountInfoWithOpts(ctx, account, opts)
+	if err != nil {
+		return nil, err
+	}
+	if out.Value == nil {
+		return nil, ErrNotFound
+	}
+	return out, nil
+}
+
+func (cl *Client) getAccountInfoWithOpts(
+	ctx context.Context,
+	account solana.PublicKey,
+	opts *GetAccountInfoOpts,
 ) (out *GetAccountInfoResult, err error) {
 
 	obj := M{
@@ -134,9 +149,5 @@ func (cl *Client) GetAccountInfoWithOpts(
 	if out == nil {
 		return nil, errors.New("expected a value, got null result")
 	}
-	if out.Value == nil {
-		return nil, ErrNotFound
-	}
-
 	return out, nil
 }
