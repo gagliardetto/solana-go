@@ -81,16 +81,16 @@ func (sw *SignatureSubscription) Err() <-chan error {
 }
 
 func (sw *SignatureSubscription) Response() <-chan *SignatureResult {
-	ch := make(chan *SignatureResult)
-	go func(chan *SignatureResult) {
+	typedChan := make(chan *SignatureResult, 1)
+	go func(ch chan *SignatureResult) {
 		// TODO: will this subscription yield more than one result?
 		d, ok := <-sw.sub.stream
 		if !ok {
 			return
 		}
 		ch <- d.(*SignatureResult)
-	}(ch)
-	return ch
+	}(typedChan)
+	return typedChan
 }
 
 var ErrTimeout = fmt.Errorf("timeout waiting for confirmation")
