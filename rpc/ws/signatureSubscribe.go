@@ -83,15 +83,12 @@ func (sw *SignatureSubscription) Err() <-chan error {
 func (sw *SignatureSubscription) Response() <-chan *SignatureResult {
 	ch := make(chan *SignatureResult)
 	go func(chan *SignatureResult) {
-		for {
-			select {
-			case d := <-sw.sub.stream:
-				ch <- d.(*SignatureResult)
-			case err := <-sw.sub.err:
-				close(ch)
-				panic(err)
-			}
+		// TODO: will this subscription yield more than one result?
+		d, ok := <-sw.sub.stream
+		if !ok {
+			return
 		}
+		ch <- d.(*SignatureResult)
 	}(ch)
 	return ch
 }
