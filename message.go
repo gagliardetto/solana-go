@@ -22,8 +22,9 @@ import (
 	"fmt"
 
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go/text"
 	"github.com/gagliardetto/treeout"
+
+	"github.com/gagliardetto/solana-go/text"
 )
 
 type MessageAddressTableLookupSlice []MessageAddressTableLookup
@@ -32,8 +33,14 @@ type MessageAddressTableLookupSlice []MessageAddressTableLookup
 func (lookups MessageAddressTableLookupSlice) NumLookups() int {
 	count := 0
 	for _, lookup := range lookups {
-		// TODO: check if this is correct.
 		count += len(lookup.ReadonlyIndexes)
+		count += len(lookup.WritableIndexes)
+	}
+	return count
+}
+func (lookups MessageAddressTableLookupSlice) NumWritableLookups() int {
+	count := 0
+	for _, lookup := range lookups {
 		count += len(lookup.WritableIndexes)
 	}
 	return count
@@ -69,7 +76,7 @@ type Message struct {
 	// List of base-58 encoded public keys used by the transaction,
 	// including by the instructions and for signatures.
 	// The first `message.header.numRequiredSignatures` public keys must sign the transaction.
-	AccountKeys []PublicKey `json:"accountKeys"`
+	AccountKeys []PublicKey `json:"accountKeys"` // static keys
 
 	// Details the account types and signatures required by the transaction.
 	Header MessageHeader `json:"header"`
@@ -96,7 +103,8 @@ func (mx *Message) SetAddressTables(tables map[PublicKey][]PublicKey) error {
 		return fmt.Errorf("address tables already set")
 	}
 	mx.addressTables = tables
-	return mx.resolveLookups(tables)
+
+	return nil
 }
 
 // GetAddressTables returns the address tables used by this message.
@@ -153,13 +161,18 @@ func (mx *Message) EncodeToTree(txTree treeout.Branches) {
 	}
 	txTree.Child(text.Sf("RecentBlockhash: %s", mx.RecentBlockhash))
 
-	txTree.Child(fmt.Sprintf("AccountKeys[len=%v]", len(mx.AccountKeys))).ParentFunc(func(accountKeysBranch treeout.Branches) {
-		for keyIndex, key := range mx.AccountKeys {
-			isFromTable := mx.IsVersioned() && keyIndex >= len(mx.AccountKeys)-mx.addressTableLookups.NumLookups()
-			if isFromTable {
-				accountKeysBranch.Child(text.Sf("%s (from Address Table Lookup)", text.ColorizeBG(key.String())))
-			} else {
-				accountKeysBranch.Child(text.ColorizeBG(key.String()))
+	txTree.Child(fmt.Sprintf("AccountKeys[len=%v]", len(mx.AccountKeys)+mx.addressTableLookups.NumLookups())).ParentFunc(func(accountKeysBranch treeout.Branches) {
+		accountKeys, err := mx.AccountMetaList()
+		if err != nil {
+			accountKeysBranch.Child(text.RedBG(fmt.Sprintf("AccountMetaList: %s", err)))
+		} else {
+			for keyIndex, key := range accountKeys {
+				isFromTable := mx.IsVersioned() && keyIndex >= len(mx.AccountKeys)
+				if isFromTable {
+					accountKeysBranch.Child(text.Sf("%s (from Address Table Lookup)", text.ColorizeBG(key.PublicKey.String())))
+				} else {
+					accountKeysBranch.Child(text.ColorizeBG(key.PublicKey.String()))
+				}
 			}
 		}
 	})
@@ -233,9 +246,8 @@ func (mx *Message) MarshalV0() ([]byte, error) {
 	}
 	{
 
-		numHardcodedKeys := len(mx.AccountKeys) - mx.addressTableLookups.NumLookups()
-		bin.EncodeCompactU16Length(&buf, numHardcodedKeys)
-		for _, key := range mx.AccountKeys[:numHardcodedKeys] {
+		bin.EncodeCompactU16Length(&buf, len(mx.AccountKeys))
+		for _, key := range mx.AccountKeys {
 			buf = append(buf, key[:]...)
 		}
 
@@ -321,26 +333,39 @@ func (mx *Message) UnmarshalBase64(b64 string) error {
 	return mx.UnmarshalWithDecoder(bin.NewBinDecoder(b))
 }
 
-func (mx *Message) resolveLookups(tables map[PublicKey][]PublicKey) (err error) {
-	// add accounts from the address table lookups
+func (mx Message) GetAddressTableLookupAccounts() ([]PublicKey, error) {
+	var writable []PublicKey
+	var readonly []PublicKey
+
 	for _, lookup := range mx.addressTableLookups {
-		table, ok := tables[lookup.AccountKey]
+		table, ok := mx.addressTables[lookup.AccountKey]
 		if !ok {
-			return fmt.Errorf("address table lookup not found for account: %v", lookup.AccountKey)
+			return writable, fmt.Errorf("address table lookup not found for account: %s", lookup.AccountKey)
 		}
 		for _, idx := range lookup.WritableIndexes {
 			if int(idx) >= len(table) {
-				return fmt.Errorf("address table lookup index out of range: %v", idx)
+				return writable, fmt.Errorf("address table lookup index out of range: %d", idx)
 			}
-			mx.AccountKeys = append(mx.AccountKeys, table[idx])
+			writable = append(writable, table[idx])
 		}
 		for _, idx := range lookup.ReadonlyIndexes {
 			if int(idx) >= len(table) {
-				return fmt.Errorf("address table lookup index out of range: %v", idx)
+				return writable, fmt.Errorf("address table lookup index out of range: %d", idx)
 			}
-			mx.AccountKeys = append(mx.AccountKeys, table[idx])
+			readonly = append(readonly, table[idx])
 		}
 	}
+
+	return append(writable, readonly...), nil
+}
+func (mx *Message) ResolveLookups() (err error) {
+	// add accounts from the address table lookups
+	atlAccounts, err := mx.GetAddressTableLookupAccounts()
+	if err != nil {
+		return err
+	}
+	mx.AccountKeys = append(mx.AccountKeys, atlAccounts...)
+
 	return nil
 }
 
@@ -494,28 +519,44 @@ func (mx *Message) UnmarshalLegacy(decoder *bin.Decoder) (err error) {
 	return nil
 }
 
-func (m Message) checkPreconditions() {
+func (m Message) checkPreconditions() error {
 	// if this is versioned,
 	// and there are > 0 lookups,
 	// but the address table is empty,
 	// then we can't build the account meta list:
 	if m.IsVersioned() && m.addressTableLookups.NumLookups() > 0 && (m.addressTables == nil || len(m.addressTables) == 0) {
-		panic("cannot build account meta list without address tables")
+		return fmt.Errorf("cannot build account meta list without address tables")
 	}
+
+	return nil
 }
 
-func (m Message) AccountMetaList() AccountMetaSlice {
-	m.checkPreconditions()
-	out := make(AccountMetaSlice, len(m.AccountKeys))
-	for i, a := range m.AccountKeys {
+func (m Message) AccountMetaList() (AccountMetaSlice, error) {
+	err := m.checkPreconditions()
+	if err != nil {
+		return nil, err
+	}
+	atlAccounts, err := m.GetAddressTableLookupAccounts()
+	if err != nil {
+		return nil, err
+	}
+
+	out := make(AccountMetaSlice, len(m.AccountKeys)+len(atlAccounts))
+	accountKeys := append(m.AccountKeys, atlAccounts...)
+	for i, a := range accountKeys {
+		isWritable, err := m.IsWritable(a)
+		if err != nil {
+			return nil, err
+		}
+
 		out[i] = &AccountMeta{
 			PublicKey:  a,
 			IsSigner:   m.IsSigner(a),
-			IsWritable: m.IsWritable(a),
+			IsWritable: isWritable,
 		}
 	}
-	// TODO: include accounts from lookup tables
-	return out
+
+	return out, nil
 }
 
 func (m Message) IsVersioned() bool {
@@ -524,71 +565,120 @@ func (m Message) IsVersioned() bool {
 
 // Signers returns the pubkeys of all accounts that are signers.
 func (m Message) Signers() PublicKeySlice {
-	m.checkPreconditions()
+	// signers always in AccountKeys
 	out := make(PublicKeySlice, 0, len(m.AccountKeys))
 	for _, a := range m.AccountKeys {
 		if m.IsSigner(a) {
 			out = append(out, a)
 		}
 	}
+
 	return out
 }
 
 // Writable returns the pubkeys of all accounts that are writable.
-func (m Message) Writable() (out PublicKeySlice) {
-	m.checkPreconditions()
-	for _, a := range m.AccountKeys {
-		if m.IsWritable(a) {
+func (m Message) Writable() (out PublicKeySlice, err error) {
+	err = m.checkPreconditions()
+	if err != nil {
+		return nil, err
+	}
+	atlAccounts, err := m.GetAddressTableLookupAccounts()
+	if err != nil {
+		return nil, err
+	}
+
+	accountKeys := append(m.AccountKeys, atlAccounts...)
+	for _, a := range accountKeys {
+		isWritable, err := m.IsWritable(a)
+		if err != nil {
+			return nil, err
+		}
+
+		if isWritable {
 			out = append(out, a)
 		}
 	}
-	return out
+
+	return out, nil
 }
 
 func (m Message) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, error) {
-	m.checkPreconditions()
+	// programIDIndex always in AccountKeys
 	if int(programIDIndex) < len(m.AccountKeys) {
 		return m.AccountKeys[programIDIndex], nil
 	}
+
 	return PublicKey{}, fmt.Errorf("programID index not found %d", programIDIndex)
 }
 
-func (m Message) HasAccount(account PublicKey) bool {
-	m.checkPreconditions()
+func (m Message) HasAccount(account PublicKey) (bool, error) {
+	err := m.checkPreconditions()
+	if err != nil {
+		return false, err
+	}
+	atlAccounts, err := m.GetAddressTableLookupAccounts()
+	if err != nil {
+		return false, err
+	}
+
 	for _, a := range m.AccountKeys {
 		if a.Equals(account) {
-			return true
+			return true, nil
 		}
 	}
-	return false
+	for _, a := range atlAccounts {
+		if a.Equals(account) {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func (m Message) IsSigner(account PublicKey) bool {
-	m.checkPreconditions()
+	// signers always in AccountKeys
 	for idx, acc := range m.AccountKeys {
 		if acc.Equals(account) {
 			return idx < int(m.Header.NumRequiredSignatures)
 		}
 	}
+
 	return false
 }
 
-func (m Message) IsWritable(account PublicKey) bool {
-	m.checkPreconditions()
+func (m Message) IsWritable(account PublicKey) (bool, error) {
+	err := m.checkPreconditions()
+	if err != nil {
+		return false, err
+	}
+	atlAccounts, err := m.GetAddressTableLookupAccounts()
+	if err != nil {
+		return false, err
+	}
+
 	index := 0
 	found := false
-	for idx, acc := range m.AccountKeys {
+	accountKeys := append(m.AccountKeys, atlAccounts...)
+	for idx, acc := range accountKeys {
 		if acc.Equals(account) {
 			found = true
 			index = idx
+			break
 		}
 	}
 	if !found {
-		return false
+		return false, nil
 	}
+
 	h := m.Header
-	return (index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)) ||
-		((index >= int(h.NumRequiredSignatures)) && (index < len(m.AccountKeys)-int(h.NumReadonlyUnsignedAccounts)))
+	if index >= len(m.AccountKeys) {
+		return index-len(m.AccountKeys) < m.addressTableLookups.NumWritableLookups(), nil
+	} else if index >= int(h.NumRequiredSignatures) {
+		// unsignedAccountIndex < numWritableUnsignedAccounts
+		return index-int(h.NumRequiredSignatures) < (len(m.AccountKeys)-int(h.NumRequiredSignatures))-int(h.NumReadonlyUnsignedAccounts), nil
+	}
+
+	return index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts), nil
 }
 
 func (m Message) signerKeys() []PublicKey {
