@@ -38,7 +38,7 @@ func main() {
 			panic(err)
 		}
 		spew.Dump(out)
-		spew.Dump(out.Transaction.GetParsedTransaction())
+		spew.Dump(out.Transaction.GetTransaction())
 	}
 	{
 		out, err := client.GetTransaction(
@@ -52,7 +52,7 @@ func main() {
 			panic(err)
 		}
 		spew.Dump(out)
-		spew.Dump(out.Transaction.GetParsedTransaction())
+		spew.Dump(out.Transaction.GetTransaction())
 	}
 	{
 		out, err := client.GetTransaction(

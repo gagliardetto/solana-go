@@ -110,14 +110,14 @@ type TransactionWithMeta struct {
 	Version TransactionVersion `json:"version"`
 }
 
-func (dt TransactionWithMeta) GetParsedTransaction() (*CompiledTransaction, error) {
+func (dt TransactionWithMeta) GetParsedTransaction() (*solana.Transaction, error) {
 	if dt.Transaction == nil {
 		return nil, fmt.Errorf("transaction is nil")
 	}
 	if dt.Transaction.rawDataEncoding != solana.EncodingJSONParsed {
 		return nil, fmt.Errorf("data is not in JSONParsed encoding")
 	}
-	var parsedTransaction CompiledTransaction
+	var parsedTransaction solana.Transaction
 	if err := json.Unmarshal(dt.Transaction.asJSON, &parsedTransaction); err != nil {
 		return nil, err
 	}
@@ -142,8 +142,8 @@ func (twm TransactionWithMeta) GetTransaction() (*solana.Transaction, error) {
 }
 
 type TransactionParsed struct {
-	Meta        *TransactionMeta     `json:"meta,omitempty"`
-	Transaction *CompiledTransaction `json:"transaction"`
+	Meta        *TransactionMeta    `json:"meta,omitempty"`
+	Transaction *solana.Transaction `json:"transaction"`
 }
 
 type TokenBalance struct {
@@ -435,12 +435,6 @@ const (
 	// The node will query its most recent block. Note that the block may still be skipped by the cluster.
 	CommitmentProcessed CommitmentType = "processed"
 )
-
-// Parsed Transaction
-type CompiledTransaction struct {
-	Signatures []solana.Signature `json:"signatures"`
-	Message    solana.Message     `json:"message"`
-}
 
 type ParsedTransaction struct {
 	Signatures []solana.Signature `json:"signatures"`

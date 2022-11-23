@@ -93,12 +93,12 @@ type GetTransactionResult struct {
 	Version     TransactionVersion         `json:"version"`
 }
 
-// TransactionResultEnvelope will contain a *CompiledTransaction if the requested encoding is `solana.EncodingJSON`
+// TransactionResultEnvelope will contain a *solana.Transaction if the requested encoding is `solana.EncodingJSON`
 // (which is also the default when the encoding is not specified),
 // or a `solana.Data` in case of EncodingBase58, EncodingBase64.
 type TransactionResultEnvelope struct {
 	asDecodedBinary     solana.Data
-	asParsedTransaction *CompiledTransaction
+	asParsedTransaction *solana.Transaction
 }
 
 func (wrap TransactionResultEnvelope) MarshalJSON() ([]byte, error) {
@@ -148,10 +148,18 @@ func (dt *TransactionResultEnvelope) GetData() solana.Data {
 	return dt.asDecodedBinary
 }
 
-// GetRawJSON returns a *CompiledTransaction when the data
+// GetRawJSON returns a *solana.Transaction when the data
 // encoding is EncodingJSON.
-func (dt *TransactionResultEnvelope) GetParsedTransaction() *CompiledTransaction {
-	return dt.asParsedTransaction
+func (dt *TransactionResultEnvelope) GetTransaction() (*solana.Transaction, error) {
+	if dt.asDecodedBinary.Content != nil {
+		tx := new(solana.Transaction)
+		err := tx.UnmarshalWithDecoder(bin.NewBinDecoder(dt.asDecodedBinary.Content))
+		if err != nil {
+			return nil, err
+		}
+		return tx, nil
+	}
+	return dt.asParsedTransaction, nil
 }
 
 func (obj TransactionResultEnvelope) MarshalWithEncoder(encoder *bin.Encoder) (err error) {
