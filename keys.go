@@ -293,7 +293,7 @@ func (slice PublicKeySlice) Sort() {
 // Dedupe returns a new slice with all duplicate pubkeys removed.
 func (slice PublicKeySlice) Dedupe() PublicKeySlice {
 	slice.Sort()
-	var deduped PublicKeySlice
+	deduped := make(PublicKeySlice, 0)
 	for i := 0; i < len(slice); i++ {
 		if i == 0 || !slice[i].Equals(slice[i-1]) {
 			deduped = append(deduped, slice[i])
@@ -453,6 +453,10 @@ func (slice PublicKeySlice) First() *PublicKey {
 	return slice[0].ToPointer()
 }
 
+// GetAddedRemoved compares to the `next` pubkey slice, and returns
+// two slices:
+// - `added` is the slice of pubkeys that are present in `next` but NOT present in `previous`.
+// - `removed` is the slice of pubkeys that are present in `previous` but are NOT present in `next`.
 func (prev PublicKeySlice) GetAddedRemoved(next PublicKeySlice) (added PublicKeySlice, removed PublicKeySlice) {
 	return next.Removed(prev), prev.Removed(next)
 }

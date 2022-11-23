@@ -327,6 +327,75 @@ func TestGetAddedRemovedPubkeys(t *testing.T) {
 	}
 }
 
+func TestGetAddedRemoved(t *testing.T) {
+	{
+		previous := PublicKeySlice{}
+		next := PublicKeySlice{BPFLoaderProgramID}
+
+		added, removed := previous.GetAddedRemoved(next)
+		require.Equal(t,
+			PublicKeySlice{BPFLoaderProgramID},
+			added,
+		)
+		require.Equal(t,
+			PublicKeySlice{},
+			removed,
+		)
+	}
+	{
+		previous := PublicKeySlice{
+			SysVarClockPubkey,
+			SysVarEpochSchedulePubkey,
+			SysVarFeesPubkey,
+			SysVarInstructionsPubkey,
+			SysVarRecentBlockHashesPubkey,
+		}
+		next := PublicKeySlice{
+			SysVarClockPubkey,
+			SysVarEpochSchedulePubkey,
+			SysVarFeesPubkey,
+			SysVarInstructionsPubkey,
+			SysVarRecentBlockHashesPubkey,
+		}
+
+		added, removed := previous.GetAddedRemoved(next)
+		require.Equal(t,
+			PublicKeySlice{},
+			added,
+		)
+		require.Equal(t,
+			PublicKeySlice{},
+			removed,
+		)
+	}
+	{
+		previous := PublicKeySlice{
+			SysVarClockPubkey,
+			SysVarEpochSchedulePubkey,
+			SysVarFeesPubkey,
+			SysVarInstructionsPubkey,
+			SysVarRecentBlockHashesPubkey,
+		}
+		next := PublicKeySlice{
+			SysVarEpochSchedulePubkey,
+			SysVarFeesPubkey,
+			SysVarInstructionsPubkey,
+			SysVarRecentBlockHashesPubkey,
+			ConfigProgramID,
+		}
+
+		added, removed := previous.GetAddedRemoved(next)
+		require.Equal(t,
+			PublicKeySlice{ConfigProgramID},
+			added,
+		)
+		require.Equal(t,
+			PublicKeySlice{SysVarClockPubkey},
+			removed,
+		)
+	}
+}
+
 func TestIsNativeProgramID(t *testing.T) {
 	require.True(t, isNativeProgramID(ConfigProgramID))
 }
@@ -530,7 +599,7 @@ func TestFindProgramAddress(t *testing.T) {
 			[][]byte{
 				[]byte("Lil'"),
 				[]byte("Bits"),
-				[]byte{bump_seed},
+				{bump_seed},
 			},
 			program_id,
 		)
