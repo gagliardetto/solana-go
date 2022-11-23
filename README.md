@@ -36,7 +36,7 @@ Thanks!
   - [Installation](#installation)
   - [Pretty-Print transactions/instructions](#pretty-print-transactionsinstructions)
   - [SendAndConfirmTransaction](#sendandconfirmtransaction)
-  - [Address Lookup Tables](#addresslookuptables)
+  - [Address Lookup Tables](#address-lookup-tables)
   - [Decode an instruction data](#parsedecode-an-instruction-from-a-transaction)
   - [Borsh encoding/decoding](#borsh-encodingdecoding)
   - [ZSTD account data encoding](#zstd-account-data-encoding)
