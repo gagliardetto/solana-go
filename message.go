@@ -38,6 +38,7 @@ func (lookups MessageAddressTableLookupSlice) NumLookups() int {
 	}
 	return count
 }
+
 func (lookups MessageAddressTableLookupSlice) NumWritableLookups() int {
 	count := 0
 	for _, lookup := range lookups {
@@ -98,17 +99,19 @@ type Message struct {
 	addressTables map[PublicKey][]PublicKey
 }
 
+// SetAddressTables sets the actual address tables used by this message.
+// Use `mx.GetAddressTableLookups().GetTableIDs()` to get the list of all address table IDs.
+// NOTE: you can call this once.
 func (mx *Message) SetAddressTables(tables map[PublicKey][]PublicKey) error {
 	if mx.addressTables != nil {
 		return fmt.Errorf("address tables already set")
 	}
 	mx.addressTables = tables
-
 	return nil
 }
 
-// GetAddressTables returns the address tables used by this message.
-// NOTE: you must have called `SetAddressTable` one or more times before being able to use this method.
+// GetAddressTables returns the actual address tables used by this message.
+// NOTE: you must have called `SetAddressTable` before being able to use this method.
 func (mx *Message) GetAddressTables() map[PublicKey][]PublicKey {
 	return mx.addressTables
 }
@@ -134,18 +137,21 @@ func (m *Message) GetVersion() MessageVersion {
 	return m.version
 }
 
+// SetAddressTableLookups (re)sets the address table lookups used by this message.
 func (mx *Message) SetAddressTableLookups(lookups []MessageAddressTableLookup) *Message {
 	mx.addressTableLookups = lookups
 	mx.version = MessageVersionV0
 	return mx
 }
 
+// AddAddressTableLookup adds a new address table lookup to the message.
 func (mx *Message) AddAddressTableLookup(lookup MessageAddressTableLookup) *Message {
 	mx.addressTableLookups = append(mx.addressTableLookups, lookup)
 	mx.version = MessageVersionV0
 	return mx
 }
 
+// GetAddressTableLookups returns the address table lookups used by this message.
 func (mx *Message) GetAddressTableLookups() MessageAddressTableLookupSlice {
 	return mx.addressTableLookups
 }
@@ -333,7 +339,14 @@ func (mx *Message) UnmarshalBase64(b64 string) error {
 	return mx.UnmarshalWithDecoder(bin.NewBinDecoder(b))
 }
 
+// GetAddressTableLookupAccounts associates the lookups with the accounts
+// in the actual lookup tables.
+// NOTE: you need to call `SetAddressTables` before calling this method.
 func (mx Message) GetAddressTableLookupAccounts() ([]PublicKey, error) {
+	err := mx.checkPreconditions()
+	if err != nil {
+		return nil, err
+	}
 	var writable []PublicKey
 	var readonly []PublicKey
 
@@ -358,6 +371,7 @@ func (mx Message) GetAddressTableLookupAccounts() ([]PublicKey, error) {
 
 	return append(writable, readonly...), nil
 }
+
 func (mx *Message) ResolveLookups() (err error) {
 	// add accounts from the address table lookups
 	atlAccounts, err := mx.GetAddressTableLookupAccounts()
