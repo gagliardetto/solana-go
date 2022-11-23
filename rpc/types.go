@@ -95,10 +95,33 @@ const (
 )
 
 type TransactionWithMeta struct {
+	// The slot this transaction was processed in.
+	Slot uint64 `json:"slot"`
+
+	// Estimated production time, as Unix timestamp (seconds since the Unix epoch)
+	// of when the transaction was processed.
+	// Nil if not available.
+	BlockTime *solana.UnixTimeSeconds `json:"blockTime" bin:"optional"`
+
 	Transaction *DataBytesOrJSON `json:"transaction"`
+
 	// Transaction status metadata object
 	Meta    *TransactionMeta   `json:"meta,omitempty"`
 	Version TransactionVersion `json:"version"`
+}
+
+func (dt TransactionWithMeta) GetParsedTransaction() (*CompiledTransaction, error) {
+	if dt.Transaction == nil {
+		return nil, fmt.Errorf("transaction is nil")
+	}
+	if dt.Transaction.rawDataEncoding != solana.EncodingJSONParsed {
+		return nil, fmt.Errorf("data is not in JSONParsed encoding")
+	}
+	var parsedTransaction CompiledTransaction
+	if err := json.Unmarshal(dt.Transaction.asJSON, &parsedTransaction); err != nil {
+		return nil, err
+	}
+	return &parsedTransaction, nil
 }
 
 func (twm TransactionWithMeta) MustGetTransaction() *solana.Transaction {
@@ -231,6 +254,20 @@ type GetAccountInfoResult struct {
 	Value *Account `json:"value"`
 }
 
+// GetBinary returns the binary representation of the account data.
+func (a *GetAccountInfoResult) GetBinary() []byte {
+	if a == nil {
+		return nil
+	}
+	if a.Value == nil {
+		return nil
+	}
+	if a.Value.Data == nil {
+		return nil
+	}
+	return a.Value.Data.GetBinary()
+}
+
 type IsValidBlockhashResult struct {
 	RPCContext
 	Value bool `json:"value"` // True if the blockhash is still valid.
@@ -313,7 +350,7 @@ func (wrap *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
 			wrap.rawDataEncoding = solana.EncodingJSONParsed
 		}
 	default:
-		return fmt.Errorf("Unknown kind: %v", data)
+		return fmt.Errorf("unknown kind: %v", data)
 	}
 
 	return nil
