@@ -93,7 +93,7 @@ The RPC and WS client implementation is based on [this RPC spec](https://github.
 
 ## Requirements
 
-- Go 1.16 or later
+- Go 1.18 or later
 
 ## Installation
 
@@ -297,7 +297,7 @@ Decoder:
     panic(err)
   }
 
-  borshDec := bin.NewBorshDecoder(resp.Value.Data.GetBinary())
+  borshDec := bin.NewBorshDecoder(resp.GetBinary())
   var meta token_metadata.Metadata
   err = borshDec.Decode(&meta)
   if err != nil {
@@ -336,7 +336,7 @@ if err != nil {
 spew.Dump(resp)
 
 var mint token.Mint
-err = bin.NewDecoder(resp.Value.Data.GetBinary()).Decode(&mint)
+err = bin.NewDecoder(resp.GetBinary()).Decode(&mint)
 if err != nil {
   panic(err)
 }
@@ -406,7 +406,7 @@ func main() {
 }
 ```
 
-The data will **AUTOMATICALLY get decoded** and returned (**the right decoder will be used**) when you call the `resp.Value.Data.GetBinary()` method.
+The data will **AUTOMATICALLY get decoded** and returned (**the right decoder will be used**) when you call the `resp.GetBinary()` method.
 
 ## Timeouts and Custom HTTP Clients
 
@@ -837,7 +837,7 @@ func main() {
     var mint token.Mint
     // Account{}.Data.GetBinary() returns the *decoded* binary data
     // regardless the original encoding (it can handle them all).
-    err = bin.NewDecoder(resp.Value.Data.GetBinary()).Decode(&mint)
+    err = bin.NewDecoder(resp.GetBinary()).Decode(&mint)
     if err != nil {
       panic(err)
     }
@@ -899,7 +899,7 @@ func main() {
     spew.Dump(resp)
 
     var mint token.Mint
-    err = bin.NewDecoder(resp.Value.Data.GetBinary()).Decode(&mint)
+    err = bin.NewDecoder(resp.GetBinary()).Decode(&mint)
     if err != nil {
       panic(err)
     }
