@@ -184,6 +184,16 @@ func (p PublicKey) Equals(pb PublicKey) bool {
 	return p == pb
 }
 
+// IsAnyOf checks if p is equals to any of the provided keys.
+func (p PublicKey) IsAnyOf(keys ...PublicKey) bool {
+	for _, k := range keys {
+		if p.Equals(k) {
+			return true
+		}
+	}
+	return false
+}
+
 // ToPointer returns a pointer to the pubkey.
 func (p PublicKey) ToPointer() *PublicKey {
 	return &p
