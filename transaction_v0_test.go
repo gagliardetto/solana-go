@@ -3,6 +3,7 @@ package solana
 import (
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,6 +15,7 @@ func TestTransactionV0(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, tx.Message.IsVersioned())
 	require.Equal(t, PublicKeySlice{MPK("9WWfC3y4uCNofr2qEFHSVUXkCxW99JiYkMWmSZvVt8j3")}, tx.Message.GetAddressTableLookups().GetTableIDs())
+	require.False(t, tx.Message.resolved)
 
 	// You would fetch the tables from the chain.
 	tables := map[PublicKey]PublicKeySlice{
@@ -45,9 +47,9 @@ func TestTransactionV0(t *testing.T) {
 			MPK("81o7hHYN5a8fc5wdjjfznK9ziJ9wcuKXwbZnuYpanxMQ"),
 			MPK("11111111111111111111111111111111"),
 			MPK("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"),
-			MPK("FKN5imdi7yadX4axe4hxaqBET4n6DBDRF5LKo5aBF53j"), // from address table
-			MPK("3or4uF7ZyuQW5GGmcmdXDJasNiSZUURF2az1UrRPYQTg"), // from address table
-			MPK("2jGpE3ADYRoJPMjyGC4tvqqDfobvdvwGr3vhd66zA1rc"), // from address table
+			MPK("FKN5imdi7yadX4axe4hxaqBET4n6DBDRF5LKo5aBF53j"),
+			MPK("3or4uF7ZyuQW5GGmcmdXDJasNiSZUURF2az1UrRPYQTg"),
+			MPK("2jGpE3ADYRoJPMjyGC4tvqqDfobvdvwGr3vhd66zA1rc"),
 		},
 		tx.Message.AccountKeys,
 	)
@@ -55,6 +57,35 @@ func TestTransactionV0(t *testing.T) {
 		MustHashFromBase58("BAx74QRmMwhnTytrPoG5ogw2BQn4CdhB14jxJnbDMUS7"),
 		tx.Message.RecentBlockhash,
 	)
+
+	{
+		err = tx.Message.ResolveLookups()
+		require.NoError(t, err)
+		require.True(t, tx.Message.resolved)
+		// call again
+		err = tx.Message.ResolveLookups()
+		require.NoError(t, err)
+		{
+			spew.Dump(tx.Message.AccountKeys)
+			require.Equal(t,
+				[]PublicKey{
+					MPK("2m4eNwBVqu6SgFk23HgE3W5MW89yT5z1vspz2WsiFBHF"),
+					MPK("G6NDx85GM481GPjT5kUBAvjLxzDMsgRMQ1EAxzGswEJn"),
+					MPK("81o7hHYN5a8fc5wdjjfznK9ziJ9wcuKXwbZnuYpanxMQ"),
+					MPK("11111111111111111111111111111111"),
+					MPK("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"),
+					MPK("FKN5imdi7yadX4axe4hxaqBET4n6DBDRF5LKo5aBF53j"),
+					MPK("3or4uF7ZyuQW5GGmcmdXDJasNiSZUURF2az1UrRPYQTg"),
+					MPK("2jGpE3ADYRoJPMjyGC4tvqqDfobvdvwGr3vhd66zA1rc"),
+					// from tables:
+					MPK("FKN5imdi7yadX4axe4hxaqBET4n6DBDRF5LKo5aBF53j"),
+					MPK("3or4uF7ZyuQW5GGmcmdXDJasNiSZUURF2az1UrRPYQTg"),
+					MPK("2jGpE3ADYRoJPMjyGC4tvqqDfobvdvwGr3vhd66zA1rc"),
+				},
+				tx.Message.AccountKeys,
+			)
+		}
+	}
 	{
 		lookups := tx.Message.GetAddressTableLookups()
 		require.Equal(t, 1, len(lookups))

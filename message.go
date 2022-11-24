@@ -267,9 +267,14 @@ func (mx *Message) MarshalV0() ([]byte, error) {
 		mx.Header.NumReadonlyUnsignedAccounts,
 	}
 	{
-
-		bin.EncodeCompactU16Length(&buf, len(mx.AccountKeys))
-		for _, key := range mx.AccountKeys {
+		accountKeys, err := mx.GetAllKeys()
+		if err != nil {
+			return nil, err
+		}
+		// Encode only the keys that are not in the address table lookups.
+		accountKeys = accountKeys[:mx.numFixedAccounts()]
+		bin.EncodeCompactU16Length(&buf, len(accountKeys))
+		for _, key := range accountKeys {
 			buf = append(buf, key[:]...)
 		}
 
@@ -356,8 +361,9 @@ func (mx *Message) UnmarshalBase64(b64 string) error {
 }
 
 // GetAddressTableLookupAccounts associates the lookups with the accounts
-// in the actual lookup tables, and returns the accounts.
-// NOTE: you need to call `SetAddressTables` before calling this method.
+// in the actual address tables, and returns the accounts.
+// NOTE: you need to call `SetAddressTables` before calling this method,
+// so that the lookups can be associated with the accounts in the address tables.
 func (mx Message) GetAddressTableLookupAccounts() ([]PublicKey, error) {
 	err := mx.checkPreconditions()
 	if err != nil {
@@ -406,8 +412,8 @@ func (mx *Message) ResolveLookups() (err error) {
 	return nil
 }
 
-// GetKeys returns the message's account keys (including the keys from address lookup tables).
-func (mx Message) GetKeys() (keys PublicKeySlice, err error) {
+// GetAllKeys returns ALL the message's account keys (including the keys from resolved address lookup tables).
+func (mx Message) GetAllKeys() (keys PublicKeySlice, err error) {
 	if mx.resolved {
 		// If the message has been resolved, then the account keys have already
 		// been appended to the `AccountKeys` field of the message.
@@ -589,7 +595,7 @@ func (m Message) AccountMetaList() (AccountMetaSlice, error) {
 	if err != nil {
 		return nil, err
 	}
-	accountKeys, err := m.GetKeys()
+	accountKeys, err := m.GetAllKeys()
 	if err != nil {
 		return nil, err
 	}
@@ -634,7 +640,7 @@ func (m Message) Writable() (out PublicKeySlice, err error) {
 	if err != nil {
 		return nil, err
 	}
-	accountKeys, err := m.GetKeys()
+	accountKeys, err := m.GetAllKeys()
 	if err != nil {
 		return nil, err
 	}
@@ -654,7 +660,7 @@ func (m Message) Writable() (out PublicKeySlice, err error) {
 }
 
 // ResolveProgramIDIndex resolves the program ID index to a program ID.
-// DEPRECATED: use `Program` instead.
+// DEPRECATED: use `Program(index)` instead.
 func (m Message) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, error) {
 	return m.Program(programIDIndex)
 }
@@ -673,7 +679,7 @@ func (m Message) Account(index uint16) (PublicKey, error) {
 	if int(index) < len(m.AccountKeys) {
 		return m.AccountKeys[index], nil
 	}
-	allKeys, err := m.GetKeys()
+	allKeys, err := m.GetAllKeys()
 	if err != nil {
 		return PublicKey{}, err
 	}
@@ -688,7 +694,7 @@ func (m Message) HasAccount(account PublicKey) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	accountKeys, err := m.GetKeys()
+	accountKeys, err := m.GetAllKeys()
 	if err != nil {
 		return false, err
 	}
@@ -713,7 +719,7 @@ func (m Message) IsSigner(account PublicKey) bool {
 }
 
 // numFixedAccounts returns the number of accounts that are always present in the
-// account keys list (i.e. all the accounts that are NOT in the lookups table).
+// account keys list (i.e. all the accounts that are NOT in the lookup table).
 func (m Message) numFixedAccounts() int {
 	if !m.resolved {
 		return len(m.AccountKeys)
@@ -733,7 +739,7 @@ func (m Message) IsWritable(account PublicKey) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	accountKeys, err := m.GetKeys()
+	accountKeys, err := m.GetAllKeys()
 	if err != nil {
 		return false, err
 	}

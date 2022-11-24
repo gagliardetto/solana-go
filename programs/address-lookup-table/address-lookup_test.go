@@ -297,13 +297,15 @@ func TestDecodeTable(t *testing.T) {
 		require.Equal(t, buf.Bytes(), tableAccountBytes)
 	}
 	{
+		// https://explorer.solana.com/tx/24jRjMP3medE9iMqVSPRbkwfe9GdPmLfeftKPuwRHZdYTZJ6UyzNMGGKo4BHrTu2zVj4CgFF3CEuzS79QXUo2CMC
 		txBase64 := "ATU8IfVPwTFbXJvq0sO8w7Xc6/nc/4RFux7ehibunps+JjNSczZbue4bPn6uR9s6aWSZQCP8brf8RyYUwZQ0DQeAAQACBVTKAWVY3LzWDZTdfErhZpxix74Qyp+LjLmlvAPS/l4z4Rt91U7dxP1bjyHkoY3vBWo/XAqjvIzK8DTSvetevZWcVdOLU3j3+e/xY8bnWyZ3eMohRZiHw3bH7GrsEzYzowR51S3tv2vF7NCdhFNKNK6ll1BDs2/QKyRlC7WEQ1lcAwZGb+UhFzL/7K26csOb57yM5bvF9xJrLEObOkAAAACgpxPJ+57U2CTjvooWuPN91CltQch0oj/O5i3Fa45CgQMDIBMAARQTBRUGBwgWCQoLDA0OFwECABgTGRoAAg8QARESJOUXy5d6460qAAIAAAACBwIDgJaYAAAAAACAlpgAAAAAAAAAAAQABQLAJwkABAAJA0CcAAAAAAAAAaC/OwMGMFZGentK87meSfdqah4dRR/iw+wKg/yvZNw5DhIUFRYYGRobHB0MDQ4PCAEQExceAAoL"
 		tx := &solana.Transaction{}
 		err := tx.UnmarshalBase64(txBase64)
 		require.NoError(t, err)
-		tx.Message.SetAddressTables(map[solana.PublicKey]solana.PublicKeySlice{
+		err = tx.Message.SetAddressTables(map[solana.PublicKey]solana.PublicKeySlice{
 			solana.MPK("BpVMhYJB14QX5pXfbHRxB8vmpW4AFodWjBTDvfCJwsfv"): table.Addresses,
 		})
+		require.NoError(t, err)
 		require.True(t, tx.Message.IsSigner(solana.MPK("6hyuGqKQyhAEipjtaquiNHfd1dVjrNT3FzzanXurbK4W")))
 
 		require.Equal(t, solana.PublicKeySlice{
@@ -436,25 +438,100 @@ func TestDecodeTable(t *testing.T) {
 		}
 		require.True(t, tx.Message.IsVersioned())
 		{
-			got, err := tx.Message.GetKeys()
+			{
+				lookups := tx.Message.GetAddressTableLookups()
+				require.Equal(t, 1, len(lookups))
+				first := lookups[0]
+				require.Equal(t,
+					solana.MessageAddressTableLookup{
+						AccountKey:      solana.MPK("BpVMhYJB14QX5pXfbHRxB8vmpW4AFodWjBTDvfCJwsfv"),
+						WritableIndexes: []uint8{18, 20, 21, 22, 24, 25, 26, 27, 28, 29, 12, 13, 14, 15},
+						ReadonlyIndexes: []uint8{1, 16, 19, 23, 30, 0, 10, 11},
+					}, first)
+			}
+		}
+		{
+			got, err := tx.Message.GetAllKeys()
 			require.NoError(t, err)
 			require.Equal(t, metas.GetKeys(), got)
-		}
-		{
-			got, err := tx.ToBase64()
-			require.NoError(t, err)
-			require.Equal(t, txBase64, got)
-		}
-		{
-			buf := new(bytes.Buffer)
-			err := table.MarshalWithEncoder(bin.NewBinEncoder(buf))
-			require.NoError(t, err)
-			require.Equal(t, tableAccountBytes, buf.Bytes())
-		}
-		{
-			require.Equal(t, 14, tx.Message.GetAddressTableLookups().NumWritableLookups())
-			require.Equal(t, 22, tx.Message.GetAddressTableLookups().NumLookups())
-			require.Equal(t, 22, tx.Message.NumLookups())
+			{
+				// before resolution:
+				static := solana.PublicKeySlice{
+					solana.MPK("6hyuGqKQyhAEipjtaquiNHfd1dVjrNT3FzzanXurbK4W"),
+					solana.MPK("G9j3eZtj5pprqxvYz6v5WoyqhEMbnV6m9KTtoZuNrvCk"),
+					solana.MPK("BXGWMYBEsuXsqt4R19ihHsjhL81KvVXbDvw5TxTfD7sx"),
+					solana.MPK("JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB"),
+					solana.MPK("ComputeBudget111111111111111111111111111111"),
+				}
+				require.Equal(t, 5, len(tx.Message.AccountKeys))
+				for i, acc := range static {
+					require.Equal(t, acc, tx.Message.AccountKeys[i], "static key %d", i)
+				}
+				{ // serialization before resolution:
+					{
+						got, err := tx.ToBase64()
+						require.NoError(t, err)
+						require.Equal(t, txBase64, got)
+					}
+					{
+						buf := new(bytes.Buffer)
+						err := table.MarshalWithEncoder(bin.NewBinEncoder(buf))
+						require.NoError(t, err)
+						require.Equal(t, tableAccountBytes, buf.Bytes())
+					}
+					{
+						require.Equal(t, 14, tx.Message.GetAddressTableLookups().NumWritableLookups())
+						require.Equal(t, 22, tx.Message.GetAddressTableLookups().NumLookups())
+						require.Equal(t, 22, tx.Message.NumLookups())
+					}
+				}
+				// after resolution:
+				err = tx.Message.ResolveLookups()
+				require.NoError(t, err)
+				require.Equal(t, 27, len(tx.Message.AccountKeys))
+				{
+					// serialization after resolution:
+					{
+						got, err := tx.ToBase64()
+						require.NoError(t, err)
+						require.Equal(t, txBase64, got)
+					}
+					{
+						buf := new(bytes.Buffer)
+						err := table.MarshalWithEncoder(bin.NewBinEncoder(buf))
+						require.NoError(t, err)
+						require.Equal(t, tableAccountBytes, buf.Bytes())
+					}
+					{
+						require.Equal(t, 14, tx.Message.GetAddressTableLookups().NumWritableLookups())
+						require.Equal(t, 22, tx.Message.GetAddressTableLookups().NumLookups())
+						require.Equal(t, 22, tx.Message.NumLookups())
+					}
+				}
+				// after resolution:
+				err = tx.Message.ResolveLookups()
+				require.NoError(t, err)
+				require.Equal(t, 27, len(tx.Message.AccountKeys))
+				{
+					// same as before first resolution call:
+					{
+						got, err := tx.ToBase64()
+						require.NoError(t, err)
+						require.Equal(t, txBase64, got)
+					}
+					{
+						buf := new(bytes.Buffer)
+						err := table.MarshalWithEncoder(bin.NewBinEncoder(buf))
+						require.NoError(t, err)
+						require.Equal(t, tableAccountBytes, buf.Bytes())
+					}
+					{
+						require.Equal(t, 14, tx.Message.GetAddressTableLookups().NumWritableLookups())
+						require.Equal(t, 22, tx.Message.GetAddressTableLookups().NumLookups())
+						require.Equal(t, 22, tx.Message.NumLookups())
+					}
+				}
+			}
 		}
 	}
 }
