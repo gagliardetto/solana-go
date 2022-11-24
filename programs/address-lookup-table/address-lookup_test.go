@@ -17,14 +17,14 @@ func TestDecodeTable(t *testing.T) {
 	tableAccountBytes, err := base64.StdEncoding.DecodeString(tableAccountBase64)
 	require.NoError(t, err)
 
-	decoded, err := DecodeAddressLookupTableState(tableAccountBytes)
+	table, err := DecodeAddressLookupTableState(tableAccountBytes)
 	require.NoError(t, err)
 
-	require.Equal(t, uint64(math.MaxUint64), decoded.DeactivationSlot)
-	require.Equal(t, uint64(154742572), decoded.LastExtendedSlot)
-	require.Equal(t, uint8(232), decoded.LastExtendedSlotStartIndex)
-	require.Equal(t, solana.MPK("9FRhPDoDk9JrpCqc4r51qTWgdBTxM892TdjexeErQUNs"), *decoded.Authority)
-	require.Equal(t, uint8(232), decoded.LastExtendedSlotStartIndex)
+	require.Equal(t, uint64(math.MaxUint64), table.DeactivationSlot)
+	require.Equal(t, uint64(154742572), table.LastExtendedSlot)
+	require.Equal(t, uint8(232), table.LastExtendedSlotStartIndex)
+	require.Equal(t, solana.MPK("9FRhPDoDk9JrpCqc4r51qTWgdBTxM892TdjexeErQUNs"), *table.Authority)
+	require.Equal(t, uint8(232), table.LastExtendedSlotStartIndex)
 
 	expectedKeys := solana.PublicKeySlice{
 		solana.MPK("9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP"),
@@ -284,16 +284,177 @@ func TestDecodeTable(t *testing.T) {
 		solana.MPK("FPC75yXyJwF3NFEmgHrJRDNmXnukpVQgXayZVsmpEDKo"),
 	}
 
-	require.Equal(t, len(expectedKeys), len(decoded.Addresses), "decoded addresses length mismatch")
+	require.Equal(t, len(expectedKeys), len(table.Addresses), "decoded addresses length mismatch")
 
 	for i := range expectedKeys {
-		require.Equal(t, expectedKeys[i], decoded.Addresses[i], "key %d; extected %s, got %s", i, expectedKeys[i], decoded.Addresses[i])
+		require.Equal(t, expectedKeys[i], table.Addresses[i], "key %d; extected %s, got %s", i, expectedKeys[i], table.Addresses[i])
 	}
 	{
 		buf := new(bytes.Buffer)
 		enc := bin.NewBinEncoder(buf)
-		err := decoded.MarshalWithEncoder(enc)
+		err := table.MarshalWithEncoder(enc)
 		require.NoError(t, err)
 		require.Equal(t, buf.Bytes(), tableAccountBytes)
+	}
+	{
+		txBase64 := "ATU8IfVPwTFbXJvq0sO8w7Xc6/nc/4RFux7ehibunps+JjNSczZbue4bPn6uR9s6aWSZQCP8brf8RyYUwZQ0DQeAAQACBVTKAWVY3LzWDZTdfErhZpxix74Qyp+LjLmlvAPS/l4z4Rt91U7dxP1bjyHkoY3vBWo/XAqjvIzK8DTSvetevZWcVdOLU3j3+e/xY8bnWyZ3eMohRZiHw3bH7GrsEzYzowR51S3tv2vF7NCdhFNKNK6ll1BDs2/QKyRlC7WEQ1lcAwZGb+UhFzL/7K26csOb57yM5bvF9xJrLEObOkAAAACgpxPJ+57U2CTjvooWuPN91CltQch0oj/O5i3Fa45CgQMDIBMAARQTBRUGBwgWCQoLDA0OFwECABgTGRoAAg8QARESJOUXy5d6460qAAIAAAACBwIDgJaYAAAAAACAlpgAAAAAAAAAAAQABQLAJwkABAAJA0CcAAAAAAAAAaC/OwMGMFZGentK87meSfdqah4dRR/iw+wKg/yvZNw5DhIUFRYYGRobHB0MDQ4PCAEQExceAAoL"
+		tx := &solana.Transaction{}
+		err := tx.UnmarshalBase64(txBase64)
+		require.NoError(t, err)
+		tx.Message.SetAddressTables(map[solana.PublicKey]solana.PublicKeySlice{
+			solana.MPK("BpVMhYJB14QX5pXfbHRxB8vmpW4AFodWjBTDvfCJwsfv"): table.Addresses,
+		})
+		require.True(t, tx.Message.IsSigner(solana.MPK("6hyuGqKQyhAEipjtaquiNHfd1dVjrNT3FzzanXurbK4W")))
+
+		require.Equal(t, solana.PublicKeySlice{
+			solana.MPK("BpVMhYJB14QX5pXfbHRxB8vmpW4AFodWjBTDvfCJwsfv"),
+		}, tx.Message.GetAddressTableLookups().GetTableIDs())
+
+		metas, err := tx.Message.AccountMetaList()
+		require.NoError(t, err)
+
+		{
+			writable := solana.PublicKeySlice{
+				//
+				solana.MPK("G9j3eZtj5pprqxvYz6v5WoyqhEMbnV6m9KTtoZuNrvCk"),
+				solana.MPK("BXGWMYBEsuXsqt4R19ihHsjhL81KvVXbDvw5TxTfD7sx"),
+				// from lookups:
+				solana.MPK("ABrn4ED4AvkQ79VAXqf7ooqicJPHhZDAbC9rqcQ8ePzz"),
+				solana.MPK("D7CHbxSFSiEW3sPc486AGDwuwsmyZqhP7stG4Yo9ZHTC"),
+				solana.MPK("5o8dopjEKEy491bVHShtG6KSSHKm2JUugVqKEK7Jw7YF"),
+				solana.MPK("FN3wMZUuWkM65ZtcnAoYpsq773YxrnMfM5iAroSGttBo"),
+				solana.MPK("6uGUx583UHvFKKCnoMfnGNEFxhSWy5iXXyea4o5E9dx7"),
+				solana.MPK("Gp7wpKu9mXpxdykMD9JKW5SK2Jw1h2fttxukvcL2dnW6"),
+				solana.MPK("4mkSxT9MaUsUd5uSkZxohf1pbPByk7b5ptWpu4ZABvto"),
+				solana.MPK("4dDEjb4JZejtweFEJjjqqC5wwZi3jqtzoS7cPNRyPoT6"),
+				solana.MPK("Geoh8p8j48Efupens8TqJKj491aqk5VhPXABFAqGtAjr"),
+				solana.MPK("EVv4jPvUxbugw8EHTDwkNBboE26DiN4Zy1CQrd5j3Sd4"),
+				solana.MPK("ErcxwkPgLdyoVL6j2SsekZ5iysPZEDRGfAggh282kQb8"),
+				solana.MPK("EFYW6YEiCGpavuMPS1zoXhgfNkPisWkQ3bQz1b4UfKek"),
+				solana.MPK("BVWwyiHVHZQMPHsiW7dZH7bnBVKmbxdeEjWqVRciHCyo"),
+				solana.MPK("E6aTzkZKdCECgpDtBZtVpqiGjxRDSAFh1SC9CdSoVK7a"),
+			}
+			for _, acc := range writable {
+				is, err := tx.Message.IsWritable(acc)
+				require.NoError(t, err, "account %s", acc)
+				require.True(t, is, "account %s must be writable", acc)
+			}
+			for _, acc := range writable {
+				has, err := tx.Message.HasAccount(acc)
+				require.NoError(t, err)
+				require.True(t, has)
+			}
+		}
+		{
+			readonly := solana.PublicKeySlice{
+				solana.MPK("JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB"),
+				solana.MPK("ComputeBudget111111111111111111111111111111"),
+				// from lookups:
+				solana.MPK("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+				solana.MPK("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"),
+				solana.MPK("5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1"),
+				solana.MPK("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin"),
+				solana.MPK("3ceGkbGkqQwjJsZEYzjykDcWM1FjzHGMNTyKHD1c7kqW"),
+				solana.MPK("9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP"),
+				solana.MPK("8JPid6GtND2tU3A7x7GDfPPEWwS36rMtzF7YoHU44UoA"),
+				solana.MPK("749y4fXb9SzqmrLEetQdui5iDucnNiMgCJ2uzc3y7cou"),
+			}
+			for _, acc := range readonly {
+				is, err := tx.Message.IsWritable(acc)
+				require.NoError(t, err, "account %s", acc)
+				require.False(t, is, "account %s must be readonly", acc)
+			}
+			for _, acc := range readonly {
+				has, err := tx.Message.HasAccount(acc)
+				require.NoError(t, err)
+				require.True(t, has)
+			}
+		}
+		{
+			ix := tx.Message.Instructions[0]
+			got, err := tx.Message.ResolveProgramIDIndex(ix.ProgramIDIndex)
+			require.NoError(t, err)
+			require.Equal(t, solana.MPK("JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB"), got)
+		}
+		{
+			ix := tx.Message.Instructions[1]
+			got, err := tx.Message.ResolveProgramIDIndex(ix.ProgramIDIndex)
+			require.NoError(t, err)
+			require.Equal(t, solana.MPK("ComputeBudget111111111111111111111111111111"), got)
+		}
+		{
+			ix := tx.Message.Instructions[2]
+			got, err := tx.Message.Program(ix.ProgramIDIndex)
+			require.NoError(t, err)
+			require.Equal(t, solana.MPK("ComputeBudget111111111111111111111111111111"), got)
+		}
+		{
+			has, err := tx.Message.HasAccount(solana.SysVarClockPubkey)
+			require.NoError(t, err)
+			require.False(t, has)
+		}
+		{
+			acc, err := tx.Message.Account(0)
+			require.NoError(t, err)
+			require.Equal(t, solana.MPK("6hyuGqKQyhAEipjtaquiNHfd1dVjrNT3FzzanXurbK4W"), acc)
+			require.Equal(t, solana.MPK("6hyuGqKQyhAEipjtaquiNHfd1dVjrNT3FzzanXurbK4W"), metas[0].PublicKey)
+		}
+		{
+			acc, err := tx.Message.Account(1)
+			require.NoError(t, err)
+			require.Equal(t, solana.MPK("G9j3eZtj5pprqxvYz6v5WoyqhEMbnV6m9KTtoZuNrvCk"), acc)
+			require.Equal(t, solana.MPK("G9j3eZtj5pprqxvYz6v5WoyqhEMbnV6m9KTtoZuNrvCk"), metas[1].PublicKey)
+		}
+		{
+			acc, err := tx.Message.Account(15)
+			require.NoError(t, err)
+			require.Equal(t, solana.MPK("ErcxwkPgLdyoVL6j2SsekZ5iysPZEDRGfAggh282kQb8"), acc)
+			require.Equal(t, solana.MPK("ErcxwkPgLdyoVL6j2SsekZ5iysPZEDRGfAggh282kQb8"), metas[15].PublicKey)
+		}
+		{
+			acc, err := tx.Message.Account(18)
+			require.NoError(t, err)
+			require.Equal(t, solana.MPK("E6aTzkZKdCECgpDtBZtVpqiGjxRDSAFh1SC9CdSoVK7a"), acc)
+			require.Equal(t, solana.MPK("E6aTzkZKdCECgpDtBZtVpqiGjxRDSAFh1SC9CdSoVK7a"), metas[18].PublicKey)
+		}
+		{
+			acc, err := tx.Message.Account(21)
+			require.NoError(t, err)
+			require.Equal(t, solana.MPK("5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1"), acc)
+			require.Equal(t, solana.MPK("5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1"), metas[21].PublicKey)
+		}
+		{
+			acc, err := tx.Message.Account(26)
+			require.NoError(t, err)
+			require.Equal(t, solana.MPK("749y4fXb9SzqmrLEetQdui5iDucnNiMgCJ2uzc3y7cou"), acc)
+			require.Equal(t, solana.MPK("749y4fXb9SzqmrLEetQdui5iDucnNiMgCJ2uzc3y7cou"), metas[26].PublicKey)
+		}
+		{
+			acc, err := tx.Message.Account(9999)
+			require.Error(t, err)
+			require.Equal(t, solana.PublicKey{}, acc)
+		}
+		require.True(t, tx.Message.IsVersioned())
+		{
+			got, err := tx.Message.GetKeys()
+			require.NoError(t, err)
+			require.Equal(t, metas.GetKeys(), got)
+		}
+		{
+			got, err := tx.ToBase64()
+			require.NoError(t, err)
+			require.Equal(t, txBase64, got)
+		}
+		{
+			buf := new(bytes.Buffer)
+			err := table.MarshalWithEncoder(bin.NewBinEncoder(buf))
+			require.NoError(t, err)
+			require.Equal(t, tableAccountBytes, buf.Bytes())
+		}
+		{
+			require.Equal(t, 14, tx.Message.GetAddressTableLookups().NumWritableLookups())
+			require.Equal(t, 22, tx.Message.GetAddressTableLookups().NumLookups())
+			require.Equal(t, 22, tx.Message.NumLookups())
+		}
 	}
 }

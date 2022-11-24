@@ -157,6 +157,10 @@ func (a AddressLookupTableState) MarshalWithEncoder(encoder *bin.Encoder) error 
 	return nil
 }
 
+func (a AddressLookupTableState) IsActive() bool {
+	return a.DeactivationSlot == math.MaxUint64
+}
+
 type KeyedAddressLookupTable struct {
 	Key   solana.PublicKey
 	State AddressLookupTableState
@@ -166,10 +170,6 @@ func NewKeyedAddressLookupTable(key solana.PublicKey) *KeyedAddressLookupTable {
 	return &KeyedAddressLookupTable{
 		Key: key,
 	}
-}
-
-func (a AddressLookupTableState) IsActive() bool {
-	return a.DeactivationSlot == math.MaxUint64
 }
 
 func (a *KeyedAddressLookupTable) UnmarshalWithDecoder(decoder *bin.Decoder) error {

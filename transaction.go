@@ -56,15 +56,19 @@ var _ bin.EncoderDecoder = &Transaction{}
 func (t *Transaction) HasAccount(account PublicKey) (bool, error) {
 	return t.Message.HasAccount(account)
 }
+
 func (t *Transaction) IsSigner(account PublicKey) bool {
 	return t.Message.IsSigner(account)
 }
+
 func (t *Transaction) IsWritable(account PublicKey) (bool, error) {
 	return t.Message.IsWritable(account)
 }
+
 func (t *Transaction) AccountMetaList() ([]*AccountMeta, error) {
 	return t.Message.AccountMetaList()
 }
+
 func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, error) {
 	return t.Message.ResolveProgramIDIndex(programIDIndex)
 }
@@ -129,7 +133,7 @@ type TransactionOption interface {
 
 type transactionOptions struct {
 	payer         PublicKey
-	addressTables map[PublicKey][]PublicKey // [tablePubkey]addresses
+	addressTables map[PublicKey]PublicKeySlice // [tablePubkey]addresses
 }
 
 type transactionOptionFunc func(opts *transactionOptions)
@@ -142,7 +146,7 @@ func TransactionPayer(payer PublicKey) TransactionOption {
 	return transactionOptionFunc(func(opts *transactionOptions) { opts.payer = payer })
 }
 
-func TransactionAddressTables(tables map[PublicKey][]PublicKey) TransactionOption {
+func TransactionAddressTables(tables map[PublicKey]PublicKeySlice) TransactionOption {
 	return transactionOptionFunc(func(opts *transactionOptions) { opts.addressTables = tables })
 }
 
