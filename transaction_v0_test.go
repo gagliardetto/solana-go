@@ -16,7 +16,7 @@ func TestTransactionV0(t *testing.T) {
 	require.Equal(t, PublicKeySlice{MPK("9WWfC3y4uCNofr2qEFHSVUXkCxW99JiYkMWmSZvVt8j3")}, tx.Message.GetAddressTableLookups().GetTableIDs())
 
 	// You would fetch the tables from the chain.
-	tables := map[PublicKey][]PublicKey{
+	tables := map[PublicKey]PublicKeySlice{
 		MPK("9WWfC3y4uCNofr2qEFHSVUXkCxW99JiYkMWmSZvVt8j3"): {
 			MPK("2jGpE3ADYRoJPMjyGC4tvqqDfobvdvwGr3vhd66zA1rc"),
 			MPK("FKN5imdi7yadX4axe4hxaqBET4n6DBDRF5LKo5aBF53j"),
