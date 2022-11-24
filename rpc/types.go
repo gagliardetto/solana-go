@@ -268,6 +268,11 @@ func (a *GetAccountInfoResult) GetBinary() []byte {
 	return a.Value.Data.GetBinary()
 }
 
+// Bytes returns the binary representation of the account data.
+func (a *GetAccountInfoResult) Bytes() []byte {
+	return a.GetBinary()
+}
+
 type IsValidBlockhashResult struct {
 	RPCContext
 	Value bool `json:"value"` // True if the blockhash is still valid.
