@@ -214,7 +214,7 @@ func processTransactionWithAddressLookups(txx solana.Transaction, rpcClient *rpc
 	}
 	fmt.Println("num lookups:", numLookups)
 	fmt.Println("num tbl keys:", len(tblKeys))
-	resolutions := make(map[solana.PublicKey][]solana.PublicKey)
+	resolutions := make(map[solana.PublicKey]solana.PublicKeySlice)
 	for _, key := range tblKeys {
 		fmt.Println("Getting table", key)
 

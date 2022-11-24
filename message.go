@@ -165,6 +165,13 @@ func (mx Message) NumLookups() int {
 	return mx.addressTableLookups.NumLookups()
 }
 
+func (mx Message) NumWritableLookups() int {
+	if mx.addressTableLookups == nil {
+		return 0
+	}
+	return mx.addressTableLookups.NumWritableLookups()
+}
+
 func (mx *Message) EncodeToTree(txTree treeout.Branches) {
 	switch mx.version {
 	case MessageVersionV0:
