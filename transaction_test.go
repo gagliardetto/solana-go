@@ -22,8 +22,8 @@ import (
 	"testing"
 
 	bin "github.com/gagliardetto/binary"
-	"github.com/magiconair/properties/assert"
 	"github.com/mr-tron/base58"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -96,7 +96,7 @@ func TestNewTransaction(t *testing.T) {
 	assert.Equal(t, trx.Message.Instructions, []CompiledInstruction{
 		{
 			ProgramIDIndex: 5,
-			Accounts:       []uint16{0, 01},
+			Accounts:       []uint16{0, 0o1},
 			Data:           []byte{0xaa, 0xbb},
 		},
 		{

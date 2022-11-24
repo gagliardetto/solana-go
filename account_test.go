@@ -20,12 +20,11 @@ package solana
 import (
 	"testing"
 
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewAccount(t *testing.T) {
-
 	a := NewWallet()
 	privateKey := a.PrivateKey
 	public := a.PublicKey()
