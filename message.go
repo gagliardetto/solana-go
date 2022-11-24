@@ -668,7 +668,7 @@ func (m Message) Program(programIDIndex uint16) (PublicKey, error) {
 	return PublicKey{}, fmt.Errorf("programID index not found %d", programIDIndex)
 }
 
-// Account returns the account account at the given index.
+// Account returns the account at the given index.
 func (m Message) Account(index uint16) (PublicKey, error) {
 	if int(index) < len(m.AccountKeys) {
 		return m.AccountKeys[index], nil
@@ -680,7 +680,7 @@ func (m Message) Account(index uint16) (PublicKey, error) {
 	if int(index) < len(allKeys) {
 		return allKeys[index], nil
 	}
-	return PublicKey{}, fmt.Errorf("programID index not found %d", index)
+	return PublicKey{}, fmt.Errorf("account index not found %d", index)
 }
 
 func (m Message) HasAccount(account PublicKey) (bool, error) {
