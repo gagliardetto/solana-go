@@ -225,7 +225,7 @@ func processTransactionWithAddressLookups(txx solana.Transaction, rpcClient *rpc
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("got table "+key.String(), info)
+		fmt.Println("got table "+key.String())
 
 		tableContent, err := lookup.DecodeAddressLookupTableState(info.GetBinary())
 		if err != nil {
