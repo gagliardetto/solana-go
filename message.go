@@ -29,7 +29,7 @@ import (
 
 type MessageAddressTableLookupSlice []MessageAddressTableLookup
 
-// NumLookups returns the number of accounts in all the MessageAddressTableLookupSlice
+// NumLookups returns the number of accounts from all the lookups.
 func (lookups MessageAddressTableLookupSlice) NumLookups() int {
 	count := 0
 	for _, lookup := range lookups {
@@ -39,6 +39,8 @@ func (lookups MessageAddressTableLookupSlice) NumLookups() int {
 	return count
 }
 
+// NumWritableLookups returns the number of writable accounts
+// across all the lookups (all the address tables).
 func (lookups MessageAddressTableLookupSlice) NumWritableLookups() int {
 	count := 0
 	for _, lookup := range lookups {
@@ -77,7 +79,7 @@ type Message struct {
 	// List of base-58 encoded public keys used by the transaction,
 	// including by the instructions and for signatures.
 	// The first `message.header.numRequiredSignatures` public keys must sign the transaction.
-	AccountKeys []PublicKey `json:"accountKeys"` // static keys
+	AccountKeys []PublicKey `json:"accountKeys"` // static keys; static keys + dynamic keys if after resolution (i.e. call to `ResolveLookups()`)
 
 	// Details the account types and signatures required by the transaction.
 	Header MessageHeader `json:"header"`
@@ -98,7 +100,7 @@ type Message struct {
 	// before you use this transaction -- otherwise, you will get a panic.
 	addressTables map[PublicKey]PublicKeySlice
 
-	resolved bool
+	resolved bool // if true, the lookups have been resolved, and the `AccountKeys` slice contains all the accounts (static + dynamic).
 }
 
 // SetAddressTables sets the actual address tables used by this message.
@@ -272,7 +274,7 @@ func (mx *Message) MarshalV0() ([]byte, error) {
 			return nil, err
 		}
 		// Encode only the keys that are not in the address table lookups.
-		accountKeys = accountKeys[:mx.numFixedAccounts()]
+		accountKeys = accountKeys[:mx.numStaticAccounts()]
 		bin.EncodeCompactU16Length(&buf, len(accountKeys))
 		for _, key := range accountKeys {
 			buf = append(buf, key[:]...)
@@ -718,9 +720,9 @@ func (m Message) IsSigner(account PublicKey) bool {
 	return false
 }
 
-// numFixedAccounts returns the number of accounts that are always present in the
+// numStaticAccounts returns the number of accounts that are always present in the
 // account keys list (i.e. all the accounts that are NOT in the lookup table).
-func (m Message) numFixedAccounts() int {
+func (m Message) numStaticAccounts() int {
 	if !m.resolved {
 		return len(m.AccountKeys)
 	}
@@ -728,10 +730,10 @@ func (m Message) numFixedAccounts() int {
 }
 
 func (m Message) isWritableInLookups(idx int) bool {
-	if idx < m.numFixedAccounts() {
+	if idx < m.numStaticAccounts() {
 		return false
 	}
-	return idx-m.numFixedAccounts() < m.addressTableLookups.NumWritableLookups()
+	return idx-m.numStaticAccounts() < m.addressTableLookups.NumWritableLookups()
 }
 
 func (m Message) IsWritable(account PublicKey) (bool, error) {
@@ -757,11 +759,11 @@ func (m Message) IsWritable(account PublicKey) (bool, error) {
 	}
 	h := m.Header
 
-	if index >= m.numFixedAccounts() {
+	if index >= m.numStaticAccounts() {
 		return m.isWritableInLookups(index), nil
 	} else if index >= int(h.NumRequiredSignatures) {
 		// unsignedAccountIndex < numWritableUnsignedAccounts
-		return index-int(h.NumRequiredSignatures) < (m.numFixedAccounts()-int(h.NumRequiredSignatures))-int(h.NumReadonlyUnsignedAccounts), nil
+		return index-int(h.NumRequiredSignatures) < (m.numStaticAccounts()-int(h.NumRequiredSignatures))-int(h.NumReadonlyUnsignedAccounts), nil
 	}
 	return index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts), nil
 }
