@@ -185,13 +185,13 @@ func (mx *Message) EncodeToTree(txTree treeout.Branches) {
 	}
 	txTree.Child(text.Sf("RecentBlockhash: %s", mx.RecentBlockhash))
 
-	txTree.Child(fmt.Sprintf("AccountKeys[len=%v]", len(mx.AccountKeys)+mx.addressTableLookups.NumLookups())).ParentFunc(func(accountKeysBranch treeout.Branches) {
+	txTree.Child(fmt.Sprintf("AccountKeys[len=%v]", mx.numStaticAccounts()+mx.addressTableLookups.NumLookups())).ParentFunc(func(accountKeysBranch treeout.Branches) {
 		accountKeys, err := mx.AccountMetaList()
 		if err != nil {
 			accountKeysBranch.Child(text.RedBG(fmt.Sprintf("AccountMetaList: %s", err)))
 		} else {
 			for keyIndex, key := range accountKeys {
-				isFromTable := mx.IsVersioned() && keyIndex >= len(mx.AccountKeys)
+				isFromTable := mx.IsVersioned() && keyIndex >= mx.numStaticAccounts()
 				if isFromTable {
 					accountKeysBranch.Child(text.Sf("%s (from Address Table Lookup)", text.ColorizeBG(key.PublicKey.String())))
 				} else {
@@ -269,14 +269,14 @@ func (mx *Message) MarshalV0() ([]byte, error) {
 		mx.Header.NumReadonlyUnsignedAccounts,
 	}
 	{
-		accountKeys, err := mx.GetAllKeys()
+		staticAccountKeys, err := mx.getStaticKeys()
 		if err != nil {
 			return nil, err
 		}
 		// Encode only the keys that are not in the address table lookups.
-		accountKeys = accountKeys[:mx.numStaticAccounts()]
-		bin.EncodeCompactU16Length(&buf, len(accountKeys))
-		for _, key := range accountKeys {
+		staticAccountKeys = staticAccountKeys[:mx.numStaticAccounts()]
+		bin.EncodeCompactU16Length(&buf, len(staticAccountKeys))
+		for _, key := range staticAccountKeys {
 			buf = append(buf, key[:]...)
 		}
 
@@ -428,6 +428,15 @@ func (mx Message) GetAllKeys() (keys PublicKeySlice, err error) {
 	}
 	// ...and return the account keys with the lookups appended:
 	return append(mx.AccountKeys, atlAccounts...), nil
+}
+
+func (mx Message) getStaticKeys() (keys PublicKeySlice, err error) {
+	if mx.resolved {
+		// If the message has been resolved, then the account keys have already
+		// been appended to the `AccountKeys` field of the message.
+		return mx.AccountKeys[:mx.numStaticAccounts()], nil
+	}
+	return mx.AccountKeys, nil
 }
 
 func (mx *Message) UnmarshalV0(decoder *bin.Decoder) (err error) {
