@@ -13,6 +13,14 @@ func TestTransactionV0(t *testing.T) {
 	tx := new(Transaction)
 	err := tx.UnmarshalBase64(txB64)
 	require.NoError(t, err)
+
+	require.NotPanics(t, func() {
+		spew.Dump(tx.Message)
+	})
+	require.NotPanics(t, func() {
+		tx.MustToBase64()
+	})
+
 	require.True(t, tx.Message.IsVersioned())
 	require.Equal(t, PublicKeySlice{MPK("9WWfC3y4uCNofr2qEFHSVUXkCxW99JiYkMWmSZvVt8j3")}, tx.Message.GetAddressTableLookups().GetTableIDs())
 	require.False(t, tx.Message.resolved)
@@ -32,6 +40,7 @@ func TestTransactionV0(t *testing.T) {
 	)
 	require.NoError(t, err)
 	require.Equal(t, tables, tx.Message.addressTables)
+	require.Equal(t, tables, tx.Message.GetAddressTables())
 
 	require.Equal(t, MessageVersionV0, tx.Message.GetVersion())
 	require.Equal(t, uint8(2), tx.Message.Header.NumRequiredSignatures)
@@ -57,6 +66,12 @@ func TestTransactionV0(t *testing.T) {
 		MustHashFromBase58("BAx74QRmMwhnTytrPoG5ogw2BQn4CdhB14jxJnbDMUS7"),
 		tx.Message.RecentBlockhash,
 	)
+	require.NotPanics(t, func() {
+		spew.Dump(tx.Message)
+	})
+	require.NotPanics(t, func() {
+		tx.MustToBase64()
+	})
 
 	{
 		err = tx.Message.ResolveLookups()
