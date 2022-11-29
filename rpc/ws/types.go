@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"time"
 )
 
 type request struct {
@@ -63,5 +64,8 @@ type params struct {
 }
 
 type Options struct {
-	HttpHeader http.Header
+	HttpHeader       http.Header
+	HandshakeTimeout time.Duration
 }
+
+var DefaultHandshakeTimeout = 45 * time.Second

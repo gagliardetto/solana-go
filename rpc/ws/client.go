@@ -70,8 +70,12 @@ func ConnectWithOptions(ctx context.Context, rpcEndpoint string, opt *Options) (
 
 	dialer := &websocket.Dialer{
 		Proxy:             http.ProxyFromEnvironment,
-		HandshakeTimeout:  45 * time.Second,
+		HandshakeTimeout:  DefaultHandshakeTimeout,
 		EnableCompression: true,
+	}
+
+	if opt.HandshakeTimeout > 0 {
+		dialer.HandshakeTimeout = opt.HandshakeTimeout
 	}
 
 	var httpHeader http.Header = nil
