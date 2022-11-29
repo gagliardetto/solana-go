@@ -74,7 +74,7 @@ func ConnectWithOptions(ctx context.Context, rpcEndpoint string, opt *Options) (
 		EnableCompression: true,
 	}
 
-	if opt.HandshakeTimeout > 0 {
+	if opt != nil && opt.HandshakeTimeout > 0 {
 		dialer.HandshakeTimeout = opt.HandshakeTimeout
 	}
 
