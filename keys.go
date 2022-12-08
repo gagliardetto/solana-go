@@ -31,6 +31,8 @@ import (
 
 	"filippo.io/edwards25519"
 	"github.com/mr-tron/base58"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
 
 type PrivateKey []byte
@@ -178,6 +180,44 @@ func (p *PublicKey) UnmarshalJSON(data []byte) (err error) {
 		return fmt.Errorf("invalid public key %q: %w", s, err)
 	}
 	return
+}
+
+// MarshalBSON implements the bson.Marshaler interface.
+func (p PublicKey) MarshalBSON() ([]byte, error) {
+	return bson.Marshal(p.String())
+}
+
+// UnmarshalBSON implements the bson.Unmarshaler interface.
+func (p *PublicKey) UnmarshalBSON(data []byte) (err error) {
+	var s string
+	if err := bson.Unmarshal(data, &s); err != nil {
+		return err
+	}
+
+	*p, err = PublicKeyFromBase58(s)
+	if err != nil {
+		return fmt.Errorf("invalid public key %q: %w", s, err)
+	}
+	return nil
+}
+
+// MarshalBSONValue implements the bson.ValueMarshaler interface.
+func (p PublicKey) MarshalBSONValue() (bsontype.Type, []byte, error) {
+	return bson.MarshalValue(p.String())
+}
+
+// UnmarshalBSONValue implements the bson.ValueUnmarshaler interface.
+func (p *PublicKey) UnmarshalBSONValue(t bsontype.Type, data []byte) (err error) {
+	var s string
+	if err := bson.Unmarshal(data, &s); err != nil {
+		return err
+	}
+
+	*p, err = PublicKeyFromBase58(s)
+	if err != nil {
+		return fmt.Errorf("invalid public key %q: %w", s, err)
+	}
+	return nil
 }
 
 func (p PublicKey) Equals(pb PublicKey) bool {

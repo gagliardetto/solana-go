@@ -17,7 +17,7 @@ require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.9.0
-	github.com/google/go-cmp v0.5.1
+	github.com/google/go-cmp v0.5.2
 	github.com/gorilla/rpc v1.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/json-iterator/go v1.1.12
@@ -34,10 +34,11 @@ require (
 	github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75
 	github.com/stretchr/testify v1.7.0
 	github.com/teris-io/shortid v0.0.0-20201117134242-e59966efd125 // indirect
+	go.mongodb.org/mongo-driver v1.11.0
 	go.opencensus.io v0.22.5 // indirect
 	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.21.0
-	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
+	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
