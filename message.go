@@ -269,12 +269,8 @@ func (mx *Message) MarshalV0() ([]byte, error) {
 		mx.Header.NumReadonlyUnsignedAccounts,
 	}
 	{
-		staticAccountKeys, err := mx.getStaticKeys()
-		if err != nil {
-			return nil, err
-		}
 		// Encode only the keys that are not in the address table lookups.
-		staticAccountKeys = staticAccountKeys[:mx.numStaticAccounts()]
+		staticAccountKeys := mx.getStaticKeys()
 		bin.EncodeCompactU16Length(&buf, len(staticAccountKeys))
 		for _, key := range staticAccountKeys {
 			buf = append(buf, key[:]...)
@@ -430,13 +426,13 @@ func (mx Message) GetAllKeys() (keys PublicKeySlice, err error) {
 	return append(mx.AccountKeys, atlAccounts...), nil
 }
 
-func (mx Message) getStaticKeys() (keys PublicKeySlice, err error) {
+func (mx Message) getStaticKeys() (keys PublicKeySlice) {
 	if mx.resolved {
 		// If the message has been resolved, then the account keys have already
 		// been appended to the `AccountKeys` field of the message.
-		return mx.AccountKeys[:mx.numStaticAccounts()], nil
+		return mx.AccountKeys[:mx.numStaticAccounts()]
 	}
-	return mx.AccountKeys, nil
+	return mx.AccountKeys
 }
 
 func (mx *Message) UnmarshalV0(decoder *bin.Decoder) (err error) {
