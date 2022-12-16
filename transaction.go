@@ -229,7 +229,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 
 	addressLookupKeysMap := make(map[PublicKey]addressTablePubkeyWithIndex) // all accounts from tables as map
 	for addressTablePubKey, addressTable := range options.addressTables {
-		if len(addressTable) > 255 {
+		if len(addressTable) > 256 {
 			return nil, fmt.Errorf("max lookup table index exceeded for %s table", addressTablePubKey)
 		}
 
