@@ -21,8 +21,6 @@ import (
 	"math"
 	"strings"
 	"sync"
-
-	"github.com/aybabtme/rgbterm"
 )
 
 var DisableColors = false
@@ -30,9 +28,11 @@ var DisableColors = false
 func S(a ...interface{}) string {
 	return fmt.Sprint(a...)
 }
+
 func Sf(format string, a ...interface{}) string {
 	return fmt.Sprintf(format, a...)
 }
+
 func Ln(a ...interface{}) string {
 	return fmt.Sprintln(a...)
 }
@@ -56,81 +56,81 @@ func Black(str string) string {
 	if DisableColors {
 		return str
 	}
-	return rgbterm.FgString(str, 0, 0, 0)
+	return FgString(str, 0, 0, 0)
 }
 
 func White(str string) string {
 	if DisableColors {
 		return str
 	}
-	return rgbterm.FgString(str, 255, 255, 255)
+	return FgString(str, 255, 255, 255)
 }
 
 func BlackBG(str string) string {
 	if DisableColors {
 		return str
 	}
-	return rgbterm.BgString(str, 0, 0, 0)
+	return BgString(str, 0, 0, 0)
 }
 
 func WhiteBG(str string) string {
 	if DisableColors {
 		return str
 	}
-	return Black(rgbterm.BgString(str, 255, 255, 255))
+	return Black(BgString(str, 255, 255, 255))
 }
 
 func Lime(str string) string {
 	if DisableColors {
 		return str
 	}
-	return rgbterm.FgString(str, 252, 255, 43)
+	return FgString(str, 252, 255, 43)
 }
 
 func LimeBG(str string) string {
 	if DisableColors {
 		return str
 	}
-	return Black(rgbterm.BgString(str, 252, 255, 43))
+	return Black(BgString(str, 252, 255, 43))
 }
 
 func Yellow(str string) string {
 	if DisableColors {
 		return str
 	}
-	return BlackBG(rgbterm.FgString(str, 255, 255, 0))
+	return BlackBG(FgString(str, 255, 255, 0))
 }
 
 func YellowBG(str string) string {
-	return Black(rgbterm.BgString(str, 255, 255, 0))
+	return Black(BgString(str, 255, 255, 0))
 }
 
 func Orange(str string) string {
 	if DisableColors {
 		return str
 	}
-	return rgbterm.FgString(str, 255, 165, 0)
+	return FgString(str, 255, 165, 0)
 }
 
 func OrangeBG(str string) string {
 	if DisableColors {
 		return str
 	}
-	return Black(rgbterm.BgString(str, 255, 165, 0))
+	return Black(BgString(str, 255, 165, 0))
 }
 
 func Red(str string) string {
 	if DisableColors {
 		return str
 	}
-	return rgbterm.FgString(str, 255, 0, 0)
+	return FgString(str, 255, 0, 0)
 }
 
 func RedBG(str string) string {
 	if DisableColors {
 		return str
 	}
-	return White(rgbterm.BgString(str, 220, 20, 60))
+	return White(BgString(str, 220, 20, 60))
 }
 
 // light blue?
@@ -138,42 +138,42 @@ func Shakespeare(str string) string {
 	if DisableColors {
 		return str
 	}
-	return rgbterm.FgString(str, 82, 179, 217)
+	return FgString(str, 82, 179, 217)
 }
 
 func ShakespeareBG(str string) string {
 	if DisableColors {
 		return str
 	}
-	return White(rgbterm.BgString(str, 82, 179, 217))
+	return White(BgString(str, 82, 179, 217))
 }
 
 func Purple(str string) string {
 	if DisableColors {
 		return str
 	}
-	return rgbterm.FgString(str, 255, 0, 255)
+	return FgString(str, 255, 0, 255)
 }
 
 func PurpleBG(str string) string {
 	if DisableColors {
 		return str
 	}
-	return Black(rgbterm.BgString(str, 255, 0, 255))
+	return Black(BgString(str, 255, 0, 255))
 }
 
 func Indigo(str string) string {
 	if DisableColors {
 		return str
 	}
-	return rgbterm.FgString(str, 75, 0, 130)
+	return FgString(str, 75, 0, 130)
 }
 
 func IndigoBG(str string) string {
 	if DisableColors {
 		return str
 	}
-	return rgbterm.BgString(str, 75, 0, 130)
+	return BgString(str, 75, 0, 130)
 }
 
 func Bold(str string) string {
@@ -219,7 +219,7 @@ func StringToColor(str string) func(string) string {
 		bgColor = BlackBG
 	}
 	return func(str string) string {
-		return bgColor(rgbterm.FgString(str, uint8(r), uint8(g), uint8(b)))
+		return bgColor(FgString(str, uint8(r), uint8(g), uint8(b)))
 	}
 }
 
@@ -232,7 +232,7 @@ func StringToColorBG(str string) func(string) string {
 		textColor = Black
 	}
 	return func(str string) string {
-		return textColor(rgbterm.BgString(str, uint8(r), uint8(g), uint8(b)))
+		return textColor(BgString(str, uint8(r), uint8(g), uint8(b)))
 	}
 }
 
@@ -263,7 +263,6 @@ func calcColor(color uint64) (red, green, blue, alpha uint64) {
 
 // IsLight returns whether the color is perceived to be a light color
 func IsLight(rr, gg, bb uint64) bool {
-
 	r := float64(rr)
 	g := float64(gg)
 	b := float64(bb)

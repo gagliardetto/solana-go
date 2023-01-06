@@ -23,10 +23,12 @@ import (
 	"github.com/fatih/color"
 )
 
-var EncoderColorCyan = color.New(color.FgCyan)
-var EncoderColorYellow = color.New(color.FgYellow)
-var EncoderColorGreen = color.New(color.FgGreen)
-var EncoderColorWhite = color.New(color.FgWhite)
+var (
+	EncoderColorCyan   = color.New(36)
+	EncoderColorYellow = color.New(33)
+	EncoderColorGreen  = color.New(32)
+	EncoderColorWhite  = color.New(37)
+)
 
 type Encoder struct {
 	output      io.Writer
@@ -42,6 +44,7 @@ func NewEncoder(w io.Writer) *Encoder {
 func isZero(rv reflect.Value) (b bool) {
 	return rv.Kind() == 0
 }
+
 func isNil(rv reflect.Value) (b bool) {
 	defer func(b bool) {
 		if err := recover(); err != nil {
@@ -50,6 +53,7 @@ func isNil(rv reflect.Value) (b bool) {
 	}(b)
 	return rv.IsNil()
 }
+
 func (e *Encoder) Encode(v interface{}, option *Option) (err error) {
 	if option == nil {
 		option = &Option{}

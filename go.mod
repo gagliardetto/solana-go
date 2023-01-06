@@ -13,7 +13,6 @@ require (
 	filippo.io/edwards25519 v1.0.0-rc.1
 	github.com/AlekSi/pointer v1.1.0
 	github.com/GeertJohan/go.rice v1.0.0
-	github.com/aybabtme/rgbterm v0.0.0-20170906152045-cc83f3b3ce59
 	github.com/buger/jsonparser v1.1.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.9.0
