@@ -24,10 +24,10 @@ import (
 )
 
 var (
-	EncoderColorCyan   = color.New(36)
-	EncoderColorYellow = color.New(33)
-	EncoderColorGreen  = color.New(32)
-	EncoderColorWhite  = color.New(37)
+	EncoderColorCyan   = color.New(color.FgCyan)
+	EncoderColorYellow = color.New(color.FgYellow)
+	EncoderColorGreen  = color.New(color.FgGreen)
+	EncoderColorWhite  = color.New(color.FgWhite)
 )
 
 type Encoder struct {
