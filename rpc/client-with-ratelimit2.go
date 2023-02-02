@@ -57,6 +57,17 @@ func (wr *clientWithLimiter) CallWithCallback(
 	return wr.rpcClient.CallWithCallback(ctx, method, params, callback)
 }
 
+func (wr *clientWithLimiter) CallBatch(
+	ctx context.Context,
+	requests jsonrpc.RPCRequests,
+) (jsonrpc.RPCResponses, error) {
+	err := wr.limiter.Wait(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return wr.rpcClient.CallBatch(ctx, requests)
+}
+
 // Close closes clientWithLimiter.
 func (cl *clientWithLimiter) Close() error {
 	if c, ok := cl.rpcClient.(io.Closer); ok {

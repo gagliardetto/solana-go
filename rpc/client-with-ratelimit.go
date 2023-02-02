@@ -48,6 +48,14 @@ func (wr *clientWithRateLimiting) CallWithCallback(
 	return wr.rpcClient.CallWithCallback(ctx, method, params, callback)
 }
 
+func (wr *clientWithRateLimiting) CallBatch(
+	ctx context.Context,
+	requests jsonrpc.RPCRequests,
+) (jsonrpc.RPCResponses, error) {
+	wr.rateLimiter.Take()
+	return wr.rpcClient.CallBatch(ctx, requests)
+}
+
 // Close closes clientWithRateLimiting.
 func (cl *clientWithRateLimiting) Close() error {
 	if c, ok := cl.rpcClient.(io.Closer); ok {
