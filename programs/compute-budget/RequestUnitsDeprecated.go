@@ -80,7 +80,9 @@ func (inst *RequestUnitsDeprecated) Validate() error {
 		if inst.Units == 0 {
 			return errors.New("Units parameter is not set")
 		}
-
+		if inst.Units > MAX_COMPUTE_UNIT_LIMIT {
+			return errors.New("Units parameter exceeds the maximum compute unit")
+		}
 		if inst.AdditionalFee == 0 {
 			return errors.New("AdditionalFee parameter is not set")
 		}

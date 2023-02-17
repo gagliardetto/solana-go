@@ -21,7 +21,8 @@ import (
 )
 
 func TestSetComputeUnitPriceInstruction(t *testing.T) {
-	ix := NewSetComputeUnitPriceInstruction(1000).Build()
+	ix, err := NewSetComputeUnitPriceInstruction(1000).ValidateAndBuild()
+	require.Nil(t, err)
 
 	require.Equal(t, ProgramID, ix.ProgramID())
 	require.Equal(t, 0, len(ix.Accounts()))

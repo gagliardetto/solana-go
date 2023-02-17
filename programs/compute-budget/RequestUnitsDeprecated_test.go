@@ -21,12 +21,22 @@ import (
 )
 
 func TestNewRequestUnitsDeprecatedInstruction(t *testing.T) {
-	ix := NewRequestUnitsDeprecatedInstruction(1400000, 1000).Build()
 
-	require.Equal(t, ProgramID, ix.ProgramID())
-	require.Equal(t, 0, len(ix.Accounts()))
+	t.Run("should validate max units", func(t *testing.T) {
+		_, err := NewRequestUnitsDeprecatedInstruction(2000000, 1000).ValidateAndBuild()
+		require.Error(t, err)
+	})
 
-	data, err := ix.Data()
-	require.Nil(t, err)
-	require.Equal(t, []byte{0x0, 0xc0, 0x5c, 0x15, 0x0, 0xe8, 0x3, 0x0, 0x0}, data)
+	t.Run("should build request units ix", func(t *testing.T) {
+		ix, err := NewRequestUnitsDeprecatedInstruction(1400000, 1000).ValidateAndBuild()
+		require.Nil(t, err)
+
+		require.Equal(t, ProgramID, ix.ProgramID())
+		require.Equal(t, 0, len(ix.Accounts()))
+
+		data, err := ix.Data()
+		require.Nil(t, err)
+		require.Equal(t, []byte{0x0, 0xc0, 0x5c, 0x15, 0x0, 0xe8, 0x3, 0x0, 0x0}, data)
+	})
+
 }
