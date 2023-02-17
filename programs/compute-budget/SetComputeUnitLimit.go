@@ -23,7 +23,7 @@ import (
 )
 
 type SetComputeUnitLimit struct {
-	UnitLimit *uint32
+	Units uint32
 }
 
 // NewSetComputeUnitLimitInstructionBuilder creates a new `SetComputeUnitLimit` instruction builder.
@@ -33,8 +33,8 @@ func NewSetComputeUnitLimitInstructionBuilder() *SetComputeUnitLimit {
 }
 
 // Unit limit
-func (inst *SetComputeUnitLimit) SetUnitLimit(unitLimit uint32) *SetComputeUnitLimit {
-	inst.UnitLimit = &unitLimit
+func (inst *SetComputeUnitLimit) SetUnits(units uint32) *SetComputeUnitLimit {
+	inst.Units = units
 	return inst
 }
 
@@ -58,7 +58,7 @@ func (inst SetComputeUnitLimit) ValidateAndBuild() (*Instruction, error) {
 func (inst *SetComputeUnitLimit) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.UnitLimit == nil {
+		if inst.Units == 0 {
 			return errors.New("UnitLimit parameter is not set")
 		}
 	}
@@ -75,23 +75,23 @@ func (inst *SetComputeUnitLimit) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Parameters of the instruction:
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("UnitLimit", *inst.UnitLimit))
+						paramsBranch.Child(ag_format.Param("Units", inst.Units))
 					})
 				})
 		})
 }
 
 func (obj SetComputeUnitLimit) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `UnitLimit` param:
-	err = encoder.Encode(obj.UnitLimit)
+	// Serialize `Units` param:
+	err = encoder.Encode(obj.Units)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 func (obj *SetComputeUnitLimit) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `UnitLimit`:
-	err = decoder.Decode(&obj.UnitLimit)
+	// Deserialize `Units`:
+	err = decoder.Decode(&obj.Units)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (obj *SetComputeUnitLimit) UnmarshalWithDecoder(decoder *ag_binary.Decoder)
 // NewSetComputeUnitLimitInstruction declares a new SetComputeUnitLimit instruction with the provided parameters and accounts.
 func NewSetComputeUnitLimitInstruction(
 	// Parameters:
-	unitLimit uint32,
+	units uint32,
 ) *SetComputeUnitLimit {
-	return NewSetComputeUnitLimitInstructionBuilder().SetUnitLimit(unitLimit)
+	return NewSetComputeUnitLimitInstructionBuilder().SetUnits(units)
 }

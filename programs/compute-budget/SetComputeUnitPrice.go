@@ -23,7 +23,7 @@ import (
 )
 
 type SetComputeUnitPrice struct {
-	UnitPrice *uint32
+	MicroLamports uint32
 }
 
 // NewSetComputeUnitPriceInstructionBuilder creates a new `SetComputeUnitPrice` instruction builder.
@@ -32,8 +32,8 @@ func NewSetComputeUnitPriceInstructionBuilder() *SetComputeUnitPrice {
 	return nd
 }
 
-func (inst *SetComputeUnitPrice) SetUnitPrice(unitPrice uint32) *SetComputeUnitPrice {
-	inst.UnitPrice = &unitPrice
+func (inst *SetComputeUnitPrice) SetMicroLamports(microLamports uint32) *SetComputeUnitPrice {
+	inst.MicroLamports = microLamports
 	return inst
 }
 
@@ -57,8 +57,8 @@ func (inst SetComputeUnitPrice) ValidateAndBuild() (*Instruction, error) {
 func (inst *SetComputeUnitPrice) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.UnitPrice == nil {
-			return errors.New("UnitPrice parameter is not set")
+		if inst.MicroLamports == 0 {
+			return errors.New("MicroLamports parameter is not set")
 		}
 	}
 	return nil
@@ -74,23 +74,23 @@ func (inst *SetComputeUnitPrice) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Parameters of the instruction:
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("UnitPrice", *inst.UnitPrice))
+						paramsBranch.Child(ag_format.Param("MicroLamports", inst.MicroLamports))
 					})
 				})
 		})
 }
 
 func (obj SetComputeUnitPrice) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `UnitPrice` param:
-	err = encoder.Encode(obj.UnitPrice)
+	// Serialize `MicroLamports` param:
+	err = encoder.Encode(obj.MicroLamports)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 func (obj *SetComputeUnitPrice) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `UnitPrice`:
-	err = decoder.Decode(&obj.UnitPrice)
+	// Deserialize `MicroLamports`:
+	err = decoder.Decode(&obj.MicroLamports)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (obj *SetComputeUnitPrice) UnmarshalWithDecoder(decoder *ag_binary.Decoder)
 // NewSetComputeUnitPriceInstruction declares a new SetComputeUnitPrice instruction with the provided parameters and accounts.
 func NewSetComputeUnitPriceInstruction(
 	// Parameters:
-	unitPrice uint32,
+	microLamports uint32,
 ) *SetComputeUnitPrice {
-	return NewSetComputeUnitPriceInstructionBuilder().SetUnitPrice(unitPrice)
+	return NewSetComputeUnitPriceInstructionBuilder().SetMicroLamports(microLamports)
 }
