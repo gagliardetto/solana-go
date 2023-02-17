@@ -15,6 +15,7 @@
 package computebudget
 
 import (
+	"bytes"
 	"encoding/hex"
 	"testing"
 
@@ -23,7 +24,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDecodeInstruction(t *testing.T) {
+func TestEncodingInstruction(t *testing.T) {
 	tests := []struct {
 		name              string
 		hexData           string
@@ -54,14 +55,31 @@ func TestDecodeInstruction(t *testing.T) {
 			},
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			data, err := hex.DecodeString(test.hexData)
-			require.NoError(t, err)
-			var instruction *Instruction
-			err = bin.NewBinDecoder(data).Decode(&instruction)
-			require.NoError(t, err)
-			assert.Equal(t, test.expectInstruction, instruction)
-		})
-	}
+
+	t.Run("should encode", func(t *testing.T) {
+		for _, test := range tests {
+			t.Run(test.name, func(t *testing.T) {
+				buf := new(bytes.Buffer)
+				err := bin.NewBinEncoder(buf).Encode(test.expectInstruction)
+				require.NoError(t, err)
+
+				encodedHex := hex.EncodeToString(buf.Bytes())
+				require.Equal(t, test.hexData, encodedHex)
+			})
+		}
+	})
+
+	t.Run("should decode", func(t *testing.T) {
+		for _, test := range tests {
+			t.Run(test.name, func(t *testing.T) {
+				data, err := hex.DecodeString(test.hexData)
+				require.NoError(t, err)
+				var instruction *Instruction
+				err = bin.NewBinDecoder(data).Decode(&instruction)
+				require.NoError(t, err)
+				assert.Equal(t, test.expectInstruction, instruction)
+			})
+		}
+	})
+
 }

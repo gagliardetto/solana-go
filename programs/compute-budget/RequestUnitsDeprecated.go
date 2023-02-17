@@ -18,6 +18,7 @@ import (
 	"errors"
 
 	ag_binary "github.com/gagliardetto/binary"
+	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
@@ -28,6 +29,14 @@ type RequestUnitsDeprecated struct {
 
 	// Additional fee to add
 	AdditionalFee *uint32
+}
+
+func (obj *RequestUnitsDeprecated) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	return nil
+}
+
+func (slice RequestUnitsDeprecated) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	return
 }
 
 // NewRequestUnitsDeprecatedInstructionBuilder creates a new `RequestUnitsDeprecated` instruction builder.

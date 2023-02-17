@@ -18,12 +18,21 @@ import (
 	"errors"
 
 	ag_binary "github.com/gagliardetto/binary"
+	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
 type SetComputeUnitLimit struct {
 	Units uint32
+}
+
+func (obj *SetComputeUnitLimit) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	return nil
+}
+
+func (slice SetComputeUnitLimit) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	return
 }
 
 // NewSetComputeUnitLimitInstructionBuilder creates a new `SetComputeUnitLimit` instruction builder.

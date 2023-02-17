@@ -18,12 +18,21 @@ import (
 	"errors"
 
 	ag_binary "github.com/gagliardetto/binary"
+	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
 type SetComputeUnitPrice struct {
-	MicroLamports uint32
+	MicroLamports uint64
+}
+
+func (obj *SetComputeUnitPrice) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	return nil
+}
+
+func (slice SetComputeUnitPrice) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	return
 }
 
 // NewSetComputeUnitPriceInstructionBuilder creates a new `SetComputeUnitPrice` instruction builder.
@@ -32,7 +41,7 @@ func NewSetComputeUnitPriceInstructionBuilder() *SetComputeUnitPrice {
 	return nd
 }
 
-func (inst *SetComputeUnitPrice) SetMicroLamports(microLamports uint32) *SetComputeUnitPrice {
+func (inst *SetComputeUnitPrice) SetMicroLamports(microLamports uint64) *SetComputeUnitPrice {
 	inst.MicroLamports = microLamports
 	return inst
 }
@@ -100,7 +109,7 @@ func (obj *SetComputeUnitPrice) UnmarshalWithDecoder(decoder *ag_binary.Decoder)
 // NewSetComputeUnitPriceInstruction declares a new SetComputeUnitPrice instruction with the provided parameters and accounts.
 func NewSetComputeUnitPriceInstruction(
 	// Parameters:
-	microLamports uint32,
+	microLamports uint64,
 ) *SetComputeUnitPrice {
 	return NewSetComputeUnitPriceInstructionBuilder().SetMicroLamports(microLamports)
 }
