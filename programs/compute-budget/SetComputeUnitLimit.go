@@ -23,6 +23,8 @@ import (
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
+const MAX_COMPUTE_UNIT_LIMIT = 1400000
+
 type SetComputeUnitLimit struct {
 	Units uint32
 }
@@ -68,7 +70,10 @@ func (inst *SetComputeUnitLimit) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
 		if inst.Units == 0 {
-			return errors.New("UnitLimit parameter is not set")
+			return errors.New("Units parameter is not set")
+		}
+		if inst.Units > MAX_COMPUTE_UNIT_LIMIT {
+			return errors.New("Units parameter exceeds the maximum compute unit")
 		}
 	}
 	return nil

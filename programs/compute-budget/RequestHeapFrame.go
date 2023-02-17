@@ -23,8 +23,10 @@ import (
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
+const MAX_HEAP_FRAME_BYTES uint32 = 256 * 1024
+
 type RequestHeapFrame struct {
-	HeapSize *uint32
+	HeapSize uint32
 }
 
 func (obj *RequestHeapFrame) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
@@ -43,7 +45,7 @@ func NewRequestHeapFrameInstructionBuilder() *RequestHeapFrame {
 
 // Request heap frame in bytes
 func (inst *RequestHeapFrame) SetHeapSize(heapSize uint32) *RequestHeapFrame {
-	inst.HeapSize = &heapSize
+	inst.HeapSize = heapSize
 	return inst
 }
 
@@ -67,8 +69,11 @@ func (inst RequestHeapFrame) ValidateAndBuild() (*Instruction, error) {
 func (inst *RequestHeapFrame) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.HeapSize == nil {
+		if inst.HeapSize == 0 {
 			return errors.New("HeapSize parameter is not set")
+		}
+		if inst.HeapSize > MAX_HEAP_FRAME_BYTES {
+			return errors.New("HeapSize parameter exceeds the maximum heap frame bytes")
 		}
 	}
 	return nil
@@ -84,7 +89,7 @@ func (inst *RequestHeapFrame) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Parameters of the instruction:
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("HeapSize", *inst.HeapSize))
+						paramsBranch.Child(ag_format.Param("HeapSize", inst.HeapSize))
 					})
 				})
 		})

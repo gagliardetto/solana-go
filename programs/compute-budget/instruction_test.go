@@ -31,6 +31,31 @@ func TestEncodingInstruction(t *testing.T) {
 		expectInstruction *Instruction
 	}{
 		{
+			name:    "RequestUnitsDeprecated",
+			hexData: "00c05c1500e8030000",
+			expectInstruction: &Instruction{
+				BaseVariant: bin.BaseVariant{
+					TypeID: bin.TypeIDFromUint8(0),
+					Impl: &RequestUnitsDeprecated{
+						Units:         1400000,
+						AdditionalFee: 1000,
+					},
+				},
+			},
+		},
+		{
+			name:    "RequestHeapFrame",
+			hexData: "01a00f0000",
+			expectInstruction: &Instruction{
+				BaseVariant: bin.BaseVariant{
+					TypeID: bin.TypeIDFromUint8(1),
+					Impl: &RequestHeapFrame{
+						HeapSize: 4000,
+					},
+				},
+			},
+		},
+		{
 			name:    "SetComputeUnitLimit",
 			hexData: "02c05c1500",
 			expectInstruction: &Instruction{

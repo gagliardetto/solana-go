@@ -25,10 +25,10 @@ import (
 
 type RequestUnitsDeprecated struct {
 	// Units to request
-	Units *uint32
+	Units uint32
 
 	// Additional fee to add
-	AdditionalFee *uint32
+	AdditionalFee uint32
 }
 
 func (obj *RequestUnitsDeprecated) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
@@ -47,13 +47,13 @@ func NewRequestUnitsDeprecatedInstructionBuilder() *RequestUnitsDeprecated {
 
 // Units to request
 func (inst *RequestUnitsDeprecated) SetUnits(units uint32) *RequestUnitsDeprecated {
-	inst.Units = &units
+	inst.Units = units
 	return inst
 }
 
 // Additional fee to add
 func (inst *RequestUnitsDeprecated) SetAdditionalFee(additionalFee uint32) *RequestUnitsDeprecated {
-	inst.AdditionalFee = &additionalFee
+	inst.AdditionalFee = additionalFee
 	return inst
 }
 
@@ -77,11 +77,11 @@ func (inst RequestUnitsDeprecated) ValidateAndBuild() (*Instruction, error) {
 func (inst *RequestUnitsDeprecated) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Units == nil {
+		if inst.Units == 0 {
 			return errors.New("Units parameter is not set")
 		}
 
-		if inst.AdditionalFee == nil {
+		if inst.AdditionalFee == 0 {
 			return errors.New("AdditionalFee parameter is not set")
 		}
 	}
@@ -98,8 +98,8 @@ func (inst *RequestUnitsDeprecated) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Parameters of the instruction:
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("        Units", *inst.Units))
-						paramsBranch.Child(ag_format.Param("AdditionalFee", *inst.AdditionalFee))
+						paramsBranch.Child(ag_format.Param("        Units", inst.Units))
+						paramsBranch.Child(ag_format.Param("AdditionalFee", inst.AdditionalFee))
 					})
 				})
 		})
