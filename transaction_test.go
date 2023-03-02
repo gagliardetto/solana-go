@@ -229,6 +229,8 @@ func TestTransactionDecode(t *testing.T) {
 
 	decodedData, err := base58.Decode("3Bxs4ART6LMJ13T5")
 	require.NoError(t, err)
+	require.Equal(t, 12, len(decodedData))
+	require.Equal(t, []byte{2, 0, 0, 0, 57, 48, 0, 0, 0, 0, 0, 0}, decodedData)
 	require.Equal(t,
 		[]CompiledInstruction{
 			{
