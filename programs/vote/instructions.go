@@ -63,6 +63,9 @@ var InstructionImplDef = bin.NewVariantDefinition(
 		{
 			"Vote", (*Vote)(nil),
 		},
+		{
+			"Withdraw", (*Withdraw)(nil),
+		},
 	},
 )
 
