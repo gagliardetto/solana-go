@@ -97,7 +97,14 @@ func (cl *Client) SimulateTransactionWithOpts(
 	if err != nil {
 		return nil, fmt.Errorf("send transaction: encode transaction: %w", err)
 	}
+	return cl.SimulateRawTransactionWithOpts(ctx, txData, opts)
+}
 
+func (cl *Client) SimulateRawTransactionWithOpts(
+	ctx context.Context,
+	txData []byte,
+	opts *SimulateTransactionOpts,
+) (out *SimulateTransactionResponse, err error) {
 	obj := M{
 		"encoding": "base64",
 	}
