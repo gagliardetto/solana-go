@@ -296,7 +296,7 @@ func exampleFromGetTransaction() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  txSig := solana.MustSignatureFromBase58("3pByJJ2ff7EQANKd2bgetmnYQxknk3QUib1xLMnrg6aCvg5hS78peaGMoceC9AFckomqrsgo38DpzrG2LPW9zj3g")
+  txSig := solana.MustSignatureFromBase58("3hZorctJtD3QLCRV3zF6JM6FDbFR5kAvsuKEG1RH9rWdz8YgnDzAvMWZFjdJgoL8KSNzZnx7aiExm1JEMC8KHfyy")
   {
     out, err := client.GetTransaction(
       context.TODO(),
@@ -327,12 +327,15 @@ func decodeSystemTransfer(tx *solana.Transaction) {
 
   // Find the program address of this instruction:
   progKey, err := tx.ResolveProgramIDIndex(i0.ProgramIDIndex)
-  if if err != nil {
+  if err != nil {
     panic(err)
   }
 
-  // FInd the accounts of this instruction:
-  accounts := i0.ResolveInstructionAccounts(&tx.Message)
+  // Find the accounts of this instruction:
+  accounts, err := i0.ResolveInstructionAccounts(&tx.Message)
+  if err != nil {
+    panic(err)
+  }
 
   // Feed the accounts and data to the system program parser
   // OR see below for alternative parsing when you DON'T know
