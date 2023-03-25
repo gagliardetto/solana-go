@@ -20,7 +20,8 @@ import (
 	"github.com/gagliardetto/solana-go"
 )
 
-// TODO: add comments
+// GetRecentPrioritizationFees returns a list of prioritization fees from recent blocks.
+// Currently, a node's prioritization-fee cache stores data from up to 150 blocks.
 func (cl *Client) GetRecentPrioritizationFees(
 	ctx context.Context,
 	accounts solana.PublicKeySlice, // optional
@@ -32,6 +33,9 @@ func (cl *Client) GetRecentPrioritizationFees(
 }
 
 type PriorizationFeeResult struct {
-	Slot              uint64 `json:"slot"`
+	// Slot in which the fee was observed
+	Slot uint64 `json:"slot"`
+
+	// The per-compute-unit fee paid by at least one successfully landed transaction, specified in increments of 0.000001 lamports
 	PrioritizationFee uint64 `json:"prioritizationFee"`
 }
