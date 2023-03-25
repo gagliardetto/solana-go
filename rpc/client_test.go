@@ -2766,3 +2766,43 @@ func TestClient_GetLatestBlockhash(t *testing.T) {
 
 	assert.Equal(t, expected, got, "both deserialized values must be equal")
 }
+
+func TestClient_GetRecentPrioritizationFees(t *testing.T) {
+	responseBody := `[ { "slot": 348125, "prioritizationFee": 0 }, { "slot": 348126, "prioritizationFee": 1000 }, { "slot": 348127, "prioritizationFee": 500 } ]`
+	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
+	defer closer()
+
+	client := New(server.URL)
+
+	accounts := []solana.PublicKey{
+		solana.MustPublicKeyFromBase58("41twqNJmPHv8a5AW32if2CcGRcPzaetwErXaNggGWu1q"),
+		solana.MustPublicKeyFromBase58("5U3bH5b6XtG99aVWLqwVzYPVpQiFHytBD68Rz2eFPZd7"),
+	}
+
+	out, err := client.GetRecentPrioritizationFees(
+		context.Background(),
+		accounts,
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t,
+		map[string]interface{}{
+			"id":      float64(0),
+			"jsonrpc": "2.0",
+			"method":  "getRecentPrioritizationFees",
+			"params": []interface{}{
+				[]interface{}{
+					accounts[0].String(),
+					accounts[1].String(),
+				},
+			},
+		},
+		server.RequestBody(t),
+	)
+
+	expected := mustJSONToInterface([]byte(responseBody))
+
+	got := mustJSONToInterface(mustAnyToJSON(out))
+
+	assert.Equal(t, expected, got, "both deserialized values must be equal")
+}
