@@ -872,6 +872,7 @@ func main() {
     - To be used with **solana v1.8**
     - For solana v1.9 or newer: **DEPRECATED: Please use [GetLatestBlockhash](#index--rpc--getlatestblockhash) instead** (This method is expected to be removed in **solana-core v2.0**)
   - [GetRecentPerformanceSamples](#index--rpc--getrecentperformancesamples)
+  - [GetRecentPrioritizationFees](#index--rpc--getrecentprioritizationfees)
   - [GetSignatureStatuses](#index--rpc--getsignaturestatuses)
   - [GetSignaturesForAddress](#index--rpc--getsignaturesforaddress)
   - [GetSlot](#index--rpc--getslot)
@@ -2218,7 +2219,6 @@ func main() {
   spew.Dump(recent)
 }
 ```
-
 #### [index](#contents) > [RPC](#rpc-methods) > GetRecentPerformanceSamples
 
 ```go
@@ -2239,6 +2239,36 @@ func main() {
   out, err := client.GetRecentPerformanceSamples(
     context.TODO(),
     &limit,
+  )
+  if err != nil {
+    panic(err)
+  }
+  spew.Dump(out)
+}
+```
+
+#### [index](#contents) > [RPC](#rpc-methods) > GetRecentPrioritizationFees
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/davecgh/go-spew/spew"
+  "github.com/gagliardetto/solana-go"
+  "github.com/gagliardetto/solana-go/rpc"
+)
+
+func main() {
+  endpoint := rpc.TestNet_RPC
+  client := rpc.New(endpoint)
+
+  out, err := client.GetRecentPrioritizationFees(
+    context.TODO(),
+    []solana.PublicKey{
+      solana.MustPublicKeyFromBase58("q5BgreVhTyBH1QCeriVb7kQYEPneanFXPLjvyjdf8M3"),
+    },
   )
   if err != nil {
     panic(err)
