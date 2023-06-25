@@ -11,7 +11,10 @@ import (
 )
 
 // The serialized size of lookup table metadata.
-const LOOKUP_TABLE_META_SIZE = 56
+const (
+	LOOKUP_TABLE_META_SIZE     = 56
+	LOOKUP_TABLE_MAX_ADDRESSES = 256
+)
 
 // DecodeAddressLookupTableState decodes the given account bytes into a AddressLookupTableState.
 func DecodeAddressLookupTableState(data []byte) (*AddressLookupTableState, error) {
@@ -68,37 +71,49 @@ func (a *AddressLookupTableState) UnmarshalWithDecoder(decoder *bin.Decoder) (er
 		return fmt.Errorf("failed to decode TypeIndex: %w", err)
 	}
 	if a.DeactivationSlot, err = decoder.ReadUint64(bin.LE); err != nil {
-		return err
+		return fmt.Errorf("failed to decode DeactivationSlot: %w", err)
 	}
 	if a.LastExtendedSlot, err = decoder.ReadUint64(bin.LE); err != nil {
-		return err
+		return fmt.Errorf("failed to decode LastExtendedSlot: %w", err)
 	}
 	if a.LastExtendedSlotStartIndex, err = decoder.ReadUint8(); err != nil {
-		return err
+		return fmt.Errorf("failed to decode LastExtendedSlotStartIndex: %w", err)
 	}
-	has, err := decoder.ReadBool()
+	has, err := decoder.ReadOption()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to decode Authority option: %w", err)
 	}
 	if has {
 		var auth solana.PublicKey
 		if _, err := decoder.Read(auth[:]); err != nil {
-			return err
+			return fmt.Errorf("failed to decode Authority: %w", err)
 		}
 		a.Authority = &auth
 	} else {
 		err = decoder.Discard(32)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to decode Authority: %w", err)
 		}
 	}
-	serializedAddressesLen := decoder.Len() - LOOKUP_TABLE_META_SIZE
-	numSerializedAddresses := serializedAddressesLen / 32
-	if serializedAddressesLen%32 != 0 {
-		return fmt.Errorf("lookup table is invalid")
+	serializedAddressesNumBytes := decoder.Len() - LOOKUP_TABLE_META_SIZE
+	if serializedAddressesNumBytes == 0 {
+		// No addresses (the lookup table is empty).
+		a.Addresses = make(solana.PublicKeySlice, 0)
+		return nil
 	}
 
-	decoder.SetPosition(decoder.Position() + 2)
+	numSerializedAddresses := serializedAddressesNumBytes / 32
+	if serializedAddressesNumBytes%32 != 0 {
+		return fmt.Errorf("lookup table is invalid")
+	}
+	if numSerializedAddresses > LOOKUP_TABLE_MAX_ADDRESSES {
+		return fmt.Errorf("lookup table is invalid: max addresses exceeded (%d > %d)", numSerializedAddresses, LOOKUP_TABLE_MAX_ADDRESSES)
+	}
+
+	// Set the position to the start of the serialized addresses.
+	if err := decoder.SetPosition(LOOKUP_TABLE_META_SIZE); err != nil {
+		return fmt.Errorf("failed to set position: %w", err)
+	}
 	a.Addresses = make(solana.PublicKeySlice, numSerializedAddresses)
 
 	for i := 0; i < numSerializedAddresses; i++ {
@@ -132,14 +147,14 @@ func (a AddressLookupTableState) MarshalWithEncoder(encoder *bin.Encoder) error 
 		return err
 	}
 	if a.Authority != nil {
-		if err := encoder.WriteBool(true); err != nil {
+		if err := encoder.WriteOption(true); err != nil {
 			return err
 		}
 		if _, err := encoder.Write(a.Authority[:]); err != nil {
 			return err
 		}
 	} else {
-		if err := encoder.WriteBool(false); err != nil {
+		if err := encoder.WriteOption(false); err != nil {
 			return err
 		}
 		if _, err := encoder.Write(make([]byte, 32)); err != nil {
