@@ -47,6 +47,10 @@ var (
 	// This program defines a common implementation for Fungible and Non Fungible tokens.
 	TokenProgramID = MustPublicKeyFromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
 
+	// A Token2022 program on the Solana blockchain
+	// See https://spl.solana.com/token-2022
+	Token2022ProgramID = MustPublicKeyFromBase58("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb")
+
 	// A Uniswap-like exchange for the Token program on the Solana blockchain,
 	// implementing multiple automated market maker (AMM) curves.
 	TokenSwapProgramID = MustPublicKeyFromBase58("SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8")
