@@ -9,7 +9,12 @@ import (
 )
 
 type GetParsedTransactionOpts struct {
+	// Desired commitment. "processed" is not supported. If parameter not provided, the default is "finalized".
 	Commitment CommitmentType `json:"commitment,omitempty"`
+
+	// Max transaction version to return in responses.
+	// If the requested block contains a transaction with a higher version, an error will be returned.
+	MaxSupportedTransactionVersion *uint64
 }
 
 type GetParsedTransactionResult struct {
@@ -29,6 +34,9 @@ func (cl *Client) GetParsedTransaction(
 	if opts != nil {
 		if opts.Commitment != "" {
 			obj["commitment"] = opts.Commitment
+		}
+		if opts.MaxSupportedTransactionVersion != nil {
+			obj["maxSupportedTransactionVersion"] = *opts.MaxSupportedTransactionVersion
 		}
 	}
 	obj["encoding"] = solana.EncodingJSONParsed
