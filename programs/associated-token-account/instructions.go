@@ -55,6 +55,9 @@ var InstructionImplDef = bin.NewVariantDefinition(
 		{
 			"Create", (*Create)(nil),
 		},
+		{
+			"CreateIdempotent", (*CreateIdempotent)(nil),
+		},
 	},
 )
 
