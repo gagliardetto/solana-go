@@ -124,7 +124,7 @@ func (inst Create) Build() *Instruction {
 
 	return &Instruction{BaseVariant: bin.BaseVariant{
 		Impl:   inst,
-		TypeID: bin.NoTypeIDDefaultID,
+		TypeID: bin.TypeIDFromUint8(Instruction_Create),
 	}}
 }
 

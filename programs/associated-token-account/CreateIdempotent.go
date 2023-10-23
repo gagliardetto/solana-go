@@ -52,7 +52,7 @@ type CreateIdempotent struct {
 	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
-// NewCreateIdempotentInstructionBuilder creates a new `Create` instruction builder.
+// NewCreateIdempotentInstructionBuilder creates a new `CreateIdempotent` instruction builder.
 func NewCreateIdempotentInstructionBuilder() *CreateIdempotent {
 	nd := &CreateIdempotent{}
 	return nd
@@ -124,7 +124,7 @@ func (inst CreateIdempotent) Build() *Instruction {
 
 	return &Instruction{BaseVariant: bin.BaseVariant{
 		Impl:   inst,
-		TypeID: bin.NoTypeIDDefaultID,
+		TypeID: bin.TypeIDFromUint8(Instruction_CreateIdempotent),
 	}}
 }
 
