@@ -79,6 +79,7 @@ func (inst CreateIdempotent) Build() *Instruction {
 	associatedTokenAddress, _, _ := solana.FindAssociatedTokenAddress(
 		inst.Wallet,
 		inst.Mint,
+		TokenProgramID,
 	)
 
 	keys := []*solana.AccountMeta{
@@ -108,7 +109,7 @@ func (inst CreateIdempotent) Build() *Instruction {
 			IsWritable: false,
 		},
 		{
-			PublicKey:  solana.TokenProgramID,
+			PublicKey:  TokenProgramID,
 			IsSigner:   false,
 			IsWritable: false,
 		},
@@ -150,6 +151,7 @@ func (inst *CreateIdempotent) Validate() error {
 	_, _, err := solana.FindAssociatedTokenAddress(
 		inst.Wallet,
 		inst.Mint,
+		TokenProgramID,
 	)
 	if err != nil {
 		return fmt.Errorf("error while FindAssociatedTokenAddress: %w", err)
