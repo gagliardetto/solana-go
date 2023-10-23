@@ -25,10 +25,15 @@ import (
 )
 
 var ProgramID solana.PublicKey = solana.SPLAssociatedTokenAccountProgramID
+var TokenProgramID solana.PublicKey = solana.TokenProgramID
 
 func SetProgramID(pubkey solana.PublicKey) {
 	ProgramID = pubkey
 	solana.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
+}
+
+func SetTokenProgramID(pubkey solana.PublicKey) {
+	TokenProgramID = pubkey
 }
 
 const ProgramName = "AssociatedTokenAccount"
