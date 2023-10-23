@@ -43,6 +43,29 @@ func init() {
 	solana.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
 }
 
+const (
+	// Creates an associated token account for the given wallet address and token mint
+    // Returns an error if the account exists.
+	Instruction_Create uint8 = iota
+
+	// Creates an associated token account for the given wallet address and token mint,
+	// if it doesn't already exist.  Returns an error if the account exists,
+	// but with a different owner.
+	Instruction_CreateIdempotent
+)
+
+// InstructionIDToName returns the name of the instruction given its ID.
+func InstructionIDToName(id uint8) string {
+	switch id {
+	case Instruction_Create:
+		return "Create"
+	case Instruction_CreateIdempotent:
+		return "CreateIdempotent"
+	default:
+		return ""
+	}
+}
+
 type Instruction struct {
 	bin.BaseVariant
 }

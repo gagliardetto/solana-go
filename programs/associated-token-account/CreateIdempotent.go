@@ -124,7 +124,7 @@ func (inst CreateIdempotent) Build() *Instruction {
 
 	return &Instruction{BaseVariant: bin.BaseVariant{
 		Impl:   inst,
-		TypeID: bin.TypeIDFromUint8(1),
+		TypeID: bin.TypeIDFromUint8(Instruction_CreateIdempotent),
 	}}
 }
 
