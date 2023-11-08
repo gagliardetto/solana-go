@@ -616,7 +616,7 @@ func main() {
   // Create a new RPC client:
   client := rpc.New(rpc.TestNet_RPC)
 
-  // Airdrop 5 SOL to the new account:
+  // Airdrop 1 SOL to the new account:
   out, err := client.RequestAirdrop(
     context.TODO(),
     account.PublicKey(),
@@ -744,7 +744,7 @@ func main() {
   amount := uint64(3333)
 
   if true {
-    // Airdrop 5 sol to the account so it will have something to transfer:
+    // Airdrop 1 sol to the account so it will have something to transfer:
     out, err := rpcClient.RequestAirdrop(
       context.TODO(),
       accountFrom.PublicKey(),
