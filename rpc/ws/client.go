@@ -84,9 +84,16 @@ func ConnectWithOptions(ctx context.Context, rpcEndpoint string, opt *Options) (
 	if opt != nil && opt.HttpHeader != nil && len(opt.HttpHeader) > 0 {
 		httpHeader = opt.HttpHeader
 	}
-	c.conn, _, err = dialer.DialContext(ctx, rpcEndpoint, httpHeader)
+	var resp *http.Response
+	c.conn, resp, err = dialer.DialContext(ctx, rpcEndpoint, httpHeader)
 	if err != nil {
-		return nil, fmt.Errorf("new ws client: dial: %w", err)
+		if resp != nil {
+			body, _ := io.ReadAll(resp.Body)
+			err = fmt.Errorf("new ws client: dial: %w, status: %s, body: %q", err, resp.Status, string(body))
+		} else {
+			err = fmt.Errorf("new ws client: dial: %w", err)
+		}
+		return nil, err
 	}
 
 	c.connCtx, c.connCtxCancel = context.WithCancel(context.Background())
