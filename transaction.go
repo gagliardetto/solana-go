@@ -73,6 +73,10 @@ func (t *Transaction) ResolveProgramIDIndex(programIDIndex uint16) (PublicKey, e
 	return t.Message.ResolveProgramIDIndex(programIDIndex)
 }
 
+func (t *Transaction) GetAccountIndex(account PublicKey) (uint16, error) {
+	return t.Message.GetAccountIndex(account)
+}
+
 // TransactionFromDecoder decodes a transaction from a decoder.
 func TransactionFromDecoder(decoder *bin.Decoder) (*Transaction, error) {
 	var out *Transaction

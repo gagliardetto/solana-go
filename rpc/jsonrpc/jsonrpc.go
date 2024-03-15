@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"sync/atomic"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/google/uuid"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -165,7 +167,7 @@ type RPCClient interface {
 type RPCRequest struct {
 	Method  string      `json:"method"`
 	Params  interface{} `json:"params,omitempty"`
-	ID      int         `json:"id"`
+	ID      any         `json:"id"`
 	JSONRPC string      `json:"jsonrpc"`
 }
 
@@ -177,8 +179,8 @@ func NewRequest(method string, params ...interface{}) *RPCRequest {
 		Method:  method,
 		Params:  Params(params...),
 		JSONRPC: jsonrpcVersion,
+		ID:      newID(),
 	}
-
 	return request
 }
 
@@ -197,7 +199,7 @@ type RPCResponse struct {
 	JSONRPC string             `json:"jsonrpc"`
 	Result  stdjson.RawMessage `json:"result,omitempty"`
 	Error   *RPCError          `json:"error,omitempty"`
-	ID      int                `json:"id"`
+	ID      any                `json:"id"`
 }
 
 // RPCError represents a JSON-RPC error object if an RPC error occurred.
@@ -277,23 +279,32 @@ type RPCClientOpts struct {
 type RPCResponses []*RPCResponse
 
 // AsMap returns the responses as map with response id as key.
-func (res RPCResponses) AsMap() map[int]*RPCResponse {
-	resMap := make(map[int]*RPCResponse, 0)
+func (res RPCResponses) AsMap() map[any]*RPCResponse {
+	resMap := make(map[any]*RPCResponse, 0)
 	for _, r := range res {
-		resMap[r.ID] = r
+		actualID := r.ID
+		if actualID != nil {
+			if asFloat, ok := actualID.(stdjson.Number); ok {
+				asInt64, err := asFloat.Int64()
+				if err == nil {
+					actualID = int(asInt64)
+				}
+			} else {
+				resMap[actualID] = r
+			}
+		}
+		resMap[actualID] = r
 	}
-
 	return resMap
 }
 
 // GetByID returns the response object of the given id, nil if it does not exist.
-func (res RPCResponses) GetByID(id int) *RPCResponse {
+func (res RPCResponses) GetByID(id any) *RPCResponse {
 	for _, r := range res {
 		if r.ID == id {
 			return r
 		}
 	}
-
 	return nil
 }
 
@@ -519,11 +530,32 @@ func (client *rpcClient) doCall(
 	return rpcResponse, nil
 }
 
+var UseIntegerID = false
+
+var integerID = new(atomic.Uint64)
+
+var useFixedID = false
+
+const defaultFixedID = 1
+
+func newID() any {
+	if useFixedID {
+		return defaultFixedID
+	}
+	if UseIntegerID {
+		return integerID.Add(1)
+	}
+	return uuid.New().String()
+}
+
 func (client *rpcClient) doCallWithCallbackOnHTTPResponse(
 	ctx context.Context,
 	RPCRequest *RPCRequest,
 	callback func(*http.Request, *http.Response) error,
 ) error {
+	if RPCRequest != nil && RPCRequest.ID == nil {
+		RPCRequest.ID = newID()
+	}
 	httpRequest, err := client.newRequest(ctx, RPCRequest)
 	if err != nil {
 		if httpRequest != nil {
@@ -559,7 +591,6 @@ func (client *rpcClient) doBatchCall(ctx context.Context, rpcRequest []*RPCReque
 	decoder.DisallowUnknownFields()
 	decoder.UseNumber()
 	err = decoder.Decode(&rpcResponse)
-
 	// parsing error
 	if err != nil {
 		// if we have some http error, return it
@@ -661,6 +692,9 @@ func Params(params ...interface{}) interface{} {
 //
 // The function works as you would expect it from json.Unmarshal()
 func (RPCResponse *RPCResponse) GetObject(toType interface{}) error {
+	if RPCResponse == nil {
+		return errors.New("rpc response is nil")
+	}
 	rv := reflect.ValueOf(toType)
 	if rv.Kind() != reflect.Ptr {
 		return fmt.Errorf("expected a pointer, got a value: %s", reflect.TypeOf(toType))
