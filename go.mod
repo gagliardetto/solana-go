@@ -1,6 +1,6 @@
 module github.com/gagliardetto/solana-go
 
-go 1.22
+go 1.18
 
 require (
 	github.com/gagliardetto/binary v0.7.7
