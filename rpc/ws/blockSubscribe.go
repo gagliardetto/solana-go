@@ -114,6 +114,7 @@ func (cl *Client) BlockSubscribe(
 		if opts.Rewards != nil {
 			obj["rewards"] = opts.Rewards
 		}
+		obj["maxSupportedTransactionVersion"] = 0
 		if len(obj) > 0 {
 			params = append(params, obj)
 		}
