@@ -23,6 +23,7 @@ import (
 	"encoding/base64"
 	stdjson "encoding/json"
 	"fmt"
+	"math/big"
 	"testing"
 
 	"github.com/AlekSi/pointer"
@@ -80,7 +81,7 @@ func TestClient_GetAccountInfo(t *testing.T) {
 					},
 				},
 				Executable: true,
-				RentEpoch:  207,
+				RentEpoch:  big.NewInt(207),
 			},
 		}, out)
 }
@@ -1691,7 +1692,7 @@ func TestClient_GetMultipleAccounts(t *testing.T) {
 					rawDataEncoding: solana.EncodingBase64,
 				},
 				Executable: true,
-				RentEpoch:  207,
+				RentEpoch:  big.NewInt(207),
 			},
 		},
 	}
@@ -1781,7 +1782,7 @@ func TestClient_GetProgramAccounts(t *testing.T) {
 					rawDataEncoding: solana.EncodingBase64,
 				},
 				Executable: true,
-				RentEpoch:  206,
+				RentEpoch:  big.NewInt(206),
 			},
 		},
 	}
