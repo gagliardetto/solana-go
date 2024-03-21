@@ -35,7 +35,7 @@ import (
 )
 
 func TestClient_GetAccountInfo(t *testing.T) {
-	responseBody := `{"context":{"slot":83986105},"value":{"data":["dGVzdA==","base64"],"executable":true,"lamports":999999,"owner":"11111111111111111111111111111111","rentEpoch":207}}`
+	responseBody := `{"context":{"slot":83986105},"value":{"data":["dGVzdA==","base64"],"executable":true,"lamports":999999,"owner":"11111111111111111111111111111111","rentEpoch":18446744073709551615}}`
 	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
 	defer closer()
 	client := New(server.URL)
@@ -65,6 +65,7 @@ func TestClient_GetAccountInfo(t *testing.T) {
 		reqBody,
 	)
 
+	rentEpoch, _ := new(big.Int).SetString("18446744073709551615", 10)
 	assert.Equal(t,
 		&GetAccountInfoResult{
 			RPCContext: RPCContext{
@@ -81,7 +82,7 @@ func TestClient_GetAccountInfo(t *testing.T) {
 					},
 				},
 				Executable: true,
-				RentEpoch:  big.NewInt(207),
+				RentEpoch:  rentEpoch,
 			},
 		}, out)
 }
