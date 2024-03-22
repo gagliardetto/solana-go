@@ -23,6 +23,7 @@ import (
 	"encoding/base64"
 	stdjson "encoding/json"
 	"fmt"
+	"math/big"
 	"testing"
 
 	"github.com/AlekSi/pointer"
@@ -34,7 +35,7 @@ import (
 )
 
 func TestClient_GetAccountInfo(t *testing.T) {
-	responseBody := `{"context":{"slot":83986105},"value":{"data":["dGVzdA==","base64"],"executable":true,"lamports":999999,"owner":"11111111111111111111111111111111","rentEpoch":207}}`
+	responseBody := `{"context":{"slot":83986105},"value":{"data":["dGVzdA==","base64"],"executable":true,"lamports":999999,"owner":"11111111111111111111111111111111","rentEpoch":18446744073709551615}}`
 	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
 	defer closer()
 	client := New(server.URL)
@@ -64,6 +65,7 @@ func TestClient_GetAccountInfo(t *testing.T) {
 		reqBody,
 	)
 
+	rentEpoch, _ := new(big.Int).SetString("18446744073709551615", 10)
 	assert.Equal(t,
 		&GetAccountInfoResult{
 			RPCContext: RPCContext{
@@ -80,7 +82,7 @@ func TestClient_GetAccountInfo(t *testing.T) {
 					},
 				},
 				Executable: true,
-				RentEpoch:  207,
+				RentEpoch:  rentEpoch,
 			},
 		}, out)
 }
@@ -1691,7 +1693,7 @@ func TestClient_GetMultipleAccounts(t *testing.T) {
 					rawDataEncoding: solana.EncodingBase64,
 				},
 				Executable: true,
-				RentEpoch:  207,
+				RentEpoch:  big.NewInt(207),
 			},
 		},
 	}
@@ -1781,7 +1783,7 @@ func TestClient_GetProgramAccounts(t *testing.T) {
 					rawDataEncoding: solana.EncodingBase64,
 				},
 				Executable: true,
-				RentEpoch:  206,
+				RentEpoch:  big.NewInt(206),
 			},
 		},
 	}

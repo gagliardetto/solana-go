@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	stdjson "encoding/json"
 	"fmt"
+	"math/big"
 
 	bin "github.com/gagliardetto/binary"
 
@@ -294,7 +295,7 @@ type Account struct {
 	Executable bool `json:"executable"`
 
 	// The epoch at which this account will next owe rent
-	RentEpoch uint64 `json:"rentEpoch"`
+	RentEpoch *big.Int `json:"rentEpoch"`
 }
 
 type DataBytesOrJSON struct {
