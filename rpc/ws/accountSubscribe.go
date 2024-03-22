@@ -92,6 +92,23 @@ func (sw *AccountSubscription) Recv() (*AccountResult, error) {
 	}
 }
 
+func (sw *AccountSubscription) Err() <-chan error {
+	return sw.sub.err
+}
+
+func (sw *AccountSubscription) Response() <-chan *AccountResult {
+	typedChan := make(chan *AccountResult, 1)
+	go func(ch chan *AccountResult) {
+		// TODO: will this subscription yield more than one result?
+		d, ok := <-sw.sub.stream
+		if !ok {
+			return
+		}
+		ch <- d.(*AccountResult)
+	}(typedChan)
+	return typedChan
+}
+
 func (sw *AccountSubscription) Unsubscribe() {
 	sw.sub.Unsubscribe()
 }

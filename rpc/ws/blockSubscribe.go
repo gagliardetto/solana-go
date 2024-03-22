@@ -150,6 +150,23 @@ func (sw *BlockSubscription) Recv() (*BlockResult, error) {
 	}
 }
 
+func (sw *BlockSubscription) Err() <-chan error {
+	return sw.sub.err
+}
+
+func (sw *BlockSubscription) Response() <-chan *BlockResult {
+	typedChan := make(chan *BlockResult, 1)
+	go func(ch chan *BlockResult) {
+		// TODO: will this subscription yield more than one result?
+		d, ok := <-sw.sub.stream
+		if !ok {
+			return
+		}
+		ch <- d.(*BlockResult)
+	}(typedChan)
+	return typedChan
+}
+
 func (sw *BlockSubscription) Unsubscribe() {
 	sw.sub.Unsubscribe()
 }
