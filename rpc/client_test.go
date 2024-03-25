@@ -892,7 +892,7 @@ func TestClient_GetBlockTime(t *testing.T) {
 }
 
 func TestClient_GetClusterNodes(t *testing.T) {
-	responseBody := `[{"featureSet":743297851,"gossip":"162.55.111.250:8001","pubkey":"DMeohMfD3JzmYZA34jL9iiTXp5N7tpAR3rAoXMygdH3U","rpc":"135.181.114.15:8005","shredVersion":18122,"tpu":"162.55.111.250:8004","version":"1.7.3"},{"featureSet":743297851,"gossip":"136.243.131.82:8000","pubkey":"59TSbYfnbb4zx4xf54ApjE8fJRhwzTiSjh9vdHfgyg1U","rpc":"136.243.131.82:8899","shredVersion":18122,"tpu":"136.243.131.82:8003","version":"1.7.3"},{"featureSet":743297851,"gossip":"135.181.114.15:8001","pubkey":"7vu7Q2d4uu9V4xnySHXieeyWvoNh37321kqTd2ATuoj6","rpc":"135.181.114.15:8005","shredVersion":18122,"tpu":"135.181.114.15:8006","version":"1.7.3"}]`
+	responseBody := `[{"featureSet":3580551090,"gossip":"34.147.255.155:8000","pubkey":"hyp3Eo67t6FgeuWg5Qxbeme8NPXJPXXdKT4iJ4DsLf2","pubsub":"34.147.255.155:8900","rpc":"34.147.255.155:8899","shredVersion":50093,"tpu":"34.147.255.155:8009","tpuQuic":"34.147.255.155:8015","version":"1.17.22"},{"featureSet":3746964731,"gossip":"162.19.222.39:8001","pubkey":"EvnRmnMrd69kFdbLMxWkTn1icZ7DCceRhvmb2SJXqDo4","pubsub":"162.19.222.39:8900","rpc":"162.19.222.39:8899","shredVersion":50093,"tpu":"208.91.106.87:8005","tpuQuic":"208.91.106.87:8011","version":"1.17.27"},{"featureSet":3746964731,"gossip":"205.209.104.74:8000","pubkey":"J87afqF2bDQQLTQpks4SdF7hXPr96SPTdJ28UJXXWr9N","pubsub":"205.209.104.74:8900","rpc":"205.209.104.74:8899","shredVersion":50093,"tpu":"205.209.104.74:8003","tpuQuic":"205.209.104.74:8009","version":"1.17.27"}]`
 	server, closer := mockJSONRPC(t, stdjson.RawMessage(wrapIntoRPC(responseBody)))
 	defer closer()
 	client := New(server.URL)
