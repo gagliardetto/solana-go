@@ -578,53 +578,53 @@ func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
 
 		txTree.Child("Message").ParentFunc(func(messageBranch treeout.Branches) {
 			tx.Message.EncodeToTree(messageBranch)
-		})
-	})
 
-	parent.Child(fmt.Sprintf("Instructions[len=%v]", len(tx.Message.Instructions))).ParentFunc(func(message treeout.Branches) {
-		for _, inst := range tx.Message.Instructions {
+			messageBranch.Child(fmt.Sprintf("Instructions[len=%v]", len(tx.Message.Instructions))).ParentFunc(func(message treeout.Branches) {
+				for _, inst := range tx.Message.Instructions {
 
-			progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
-			if err == nil {
-				accounts, err := inst.ResolveInstructionAccounts(&tx.Message)
-				if err != nil {
-					message.Child(fmt.Sprintf(text.RedBG("cannot ResolveInstructionAccounts: %s"), err))
-					return
-				}
-				decodedInstruction, err := DecodeInstruction(progKey, accounts, inst.Data)
-				if err == nil {
-					if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
-						enToTree.EncodeToTree(message)
-					} else {
-						message.Child(spew.Sdump(decodedInstruction))
-					}
-				} else {
-					// TODO: log error?
-					message.Child(fmt.Sprintf(text.RedBG("cannot decode instruction for %s program: %s"), progKey, err)).
-						Child(text.IndigoBG("Program") + ": " + text.Bold("<unknown>") + " " + text.ColorizeBG(progKey.String())).
-						//
-						ParentFunc(func(programBranch treeout.Branches) {
-							programBranch.Child(text.Purple(text.Bold("Instruction")) + ": " + text.Bold("<unknown>")).
+					progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
+					if err == nil {
+						accounts, err := inst.ResolveInstructionAccounts(&tx.Message)
+						if err != nil {
+							message.Child(fmt.Sprintf(text.RedBG("cannot ResolveInstructionAccounts: %s"), err))
+							return
+						}
+						decodedInstruction, err := DecodeInstruction(progKey, accounts, inst.Data)
+						if err == nil {
+							if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
+								enToTree.EncodeToTree(message)
+							} else {
+								message.Child(spew.Sdump(decodedInstruction))
+							}
+						} else {
+							// TODO: log error?
+							message.Child(fmt.Sprintf(text.RedBG("cannot decode instruction for %s program: %s"), progKey, err)).
+								Child(text.IndigoBG("Program") + ": " + text.Bold("<unknown>") + " " + text.ColorizeBG(progKey.String())).
 								//
-								ParentFunc(func(instructionBranch treeout.Branches) {
-									// Data of the instruction call:
-									instructionBranch.Child(text.Sf("data[len=%v bytes]", len(inst.Data))).ParentFunc(func(paramsBranch treeout.Branches) {
-										paramsBranch.Child(bin.FormatByteSlice(inst.Data))
-									})
+								ParentFunc(func(programBranch treeout.Branches) {
+									programBranch.Child(text.Purple(text.Bold("Instruction")) + ": " + text.Bold("<unknown>")).
+										//
+										ParentFunc(func(instructionBranch treeout.Branches) {
+											// Data of the instruction call:
+											instructionBranch.Child(text.Sf("data[len=%v bytes]", len(inst.Data))).ParentFunc(func(paramsBranch treeout.Branches) {
+												paramsBranch.Child(bin.FormatByteSlice(inst.Data))
+											})
 
-									// Accounts of the instruction call:
-									instructionBranch.Child(text.Sf("accounts[len=%v]", len(accounts))).ParentFunc(func(accountsBranch treeout.Branches) {
-										for i := range accounts {
-											accountsBranch.Child(formatMeta(text.Sf("accounts[%v]", i), accounts[i]))
-										}
-									})
+											// Accounts of the instruction call:
+											instructionBranch.Child(text.Sf("accounts[len=%v]", len(accounts))).ParentFunc(func(accountsBranch treeout.Branches) {
+												for i := range accounts {
+													accountsBranch.Child(formatMeta(text.Sf("accounts[%v]", i), accounts[i]))
+												}
+											})
+										})
 								})
-						})
+						}
+					} else {
+						message.Child(fmt.Sprintf(text.RedBG("cannot ResolveProgramIDIndex: %s"), err))
+					}
 				}
-			} else {
-				message.Child(fmt.Sprintf(text.RedBG("cannot ResolveProgramIDIndex: %s"), err))
-			}
-		}
+			})
+		})
 	})
 }
 
