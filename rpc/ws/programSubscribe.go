@@ -95,6 +95,23 @@ func (sw *ProgramSubscription) Recv() (*ProgramResult, error) {
 	}
 }
 
+func (sw *ProgramSubscription) Err() <-chan error {
+	return sw.sub.err
+}
+
+func (sw *ProgramSubscription) Response() <-chan *ProgramResult {
+	typedChan := make(chan *ProgramResult, 1)
+	go func(ch chan *ProgramResult) {
+		// TODO: will this subscription yield more than one result?
+		d, ok := <-sw.sub.stream
+		if !ok {
+			return
+		}
+		ch <- d.(*ProgramResult)
+	}(typedChan)
+	return typedChan
+}
+
 func (sw *ProgramSubscription) Unsubscribe() {
 	sw.sub.Unsubscribe()
 }

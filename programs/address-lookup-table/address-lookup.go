@@ -104,7 +104,12 @@ func (a *AddressLookupTableState) UnmarshalWithDecoder(decoder *bin.Decoder) (er
 
 	numSerializedAddresses := serializedAddressesNumBytes / 32
 	if serializedAddressesNumBytes%32 != 0 {
-		return fmt.Errorf("lookup table is invalid")
+		// cut off the remaining bytes
+		// skip the difference
+		if err := decoder.Discard(serializedAddressesNumBytes % 32); err != nil {
+			return fmt.Errorf("failed to discard remaining bytes: %w", err)
+		}
+		// return fmt.Errorf("lookup table is invalid; serialized addresses are not a multiple of 32 bytes, with %d bytes remaining", serializedAddressesNumBytes%32)
 	}
 	if numSerializedAddresses > LOOKUP_TABLE_MAX_ADDRESSES {
 		return fmt.Errorf("lookup table is invalid: max addresses exceeded (%d > %d)", numSerializedAddresses, LOOKUP_TABLE_MAX_ADDRESSES)
@@ -128,7 +133,7 @@ func (a *AddressLookupTableState) UnmarshalWithDecoder(decoder *bin.Decoder) (er
 		a.Addresses[i] = address
 	}
 	if decoder.Remaining() != 0 {
-		return fmt.Errorf("failed to read all addresses: remaining %d bytes", decoder.Remaining())
+		// return fmt.Errorf("failed to read all addresses: remaining %d bytes", decoder.Remaining())
 	}
 	return nil
 }

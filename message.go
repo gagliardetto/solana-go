@@ -749,6 +749,26 @@ func (m Message) Account(index uint16) (PublicKey, error) {
 	return PublicKey{}, fmt.Errorf("account index not found %d", index)
 }
 
+// GetAccountIndex returns the index of the given account (first occurrence of the account).
+func (m Message) GetAccountIndex(account PublicKey) (uint16, error) {
+	err := m.checkPreconditions()
+	if err != nil {
+		return 0, err
+	}
+	accountKeys, err := m.GetAllKeys()
+	if err != nil {
+		return 0, err
+	}
+
+	for idx, a := range accountKeys {
+		if a.Equals(account) {
+			return uint16(idx), nil
+		}
+	}
+
+	return 0, fmt.Errorf("account not found: %s", account)
+}
+
 func (m Message) HasAccount(account PublicKey) (bool, error) {
 	err := m.checkPreconditions()
 	if err != nil {

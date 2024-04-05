@@ -116,6 +116,23 @@ func (sw *LogSubscription) Recv() (*LogResult, error) {
 	}
 }
 
+func (sw *LogSubscription) Err() <-chan error {
+	return sw.sub.err
+}
+
+func (sw *LogSubscription) Response() <-chan *LogResult {
+	typedChan := make(chan *LogResult, 1)
+	go func(ch chan *LogResult) {
+		// TODO: will this subscription yield more than one result?
+		d, ok := <-sw.sub.stream
+		if !ok {
+			return
+		}
+		ch <- d.(*LogResult)
+	}(typedChan)
+	return typedChan
+}
+
 func (sw *LogSubscription) Unsubscribe() {
 	sw.sub.Unsubscribe()
 }
