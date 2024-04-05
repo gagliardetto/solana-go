@@ -1,6 +1,6 @@
 # Solana SDK library for Go
 
-[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v1.8.4?tab=doc)
+[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v1.10.0?tab=doc)
 [![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/gagliardetto/solana-go?include_prereleases&label=release-tag)](https://github.com/gagliardetto/solana-go/releases)
 [![Build Status](https://github.com/gagliardetto/solana-go/workflows/tests/badge.svg?branch=main)](https://github.com/gagliardetto/solana-go/actions?query=branch%3Amain)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/gagliardetto/solana-go/main)](https://www.tickgit.com/browse?repo=github.com/gagliardetto/solana-go&branch=main)
@@ -83,7 +83,7 @@ Thanks!
 
 ## Current development status
 
-There is currently **no stable release**. The SDK is actively developed and latest is `v1.8.4` which is an `alpha` release.
+There is currently **no stable release**. The SDK is actively developed and latest is `v1.10.0` which is an `alpha` release.
 
 The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/c2435363f39723cef59b91322f3b6a815008af29/docs/src/developing/clients/jsonrpc-api.md).
 
@@ -100,7 +100,7 @@ The RPC and WS client implementation is based on [this RPC spec](https://github.
 
 ```bash
 $ cd my-project
-$ go get github.com/gagliardetto/solana-go@v1.8.4
+$ go get github.com/gagliardetto/solana-go@v1.10.0
 ```
 
 ## Pretty-Print transactions/instructions
@@ -296,7 +296,7 @@ func exampleFromGetTransaction() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  txSig := solana.MustSignatureFromBase58("3pByJJ2ff7EQANKd2bgetmnYQxknk3QUib1xLMnrg6aCvg5hS78peaGMoceC9AFckomqrsgo38DpzrG2LPW9zj3g")
+  txSig := solana.MustSignatureFromBase58("3hZorctJtD3QLCRV3zF6JM6FDbFR5kAvsuKEG1RH9rWdz8YgnDzAvMWZFjdJgoL8KSNzZnx7aiExm1JEMC8KHfyy")
   {
     out, err := client.GetTransaction(
       context.TODO(),
@@ -327,12 +327,15 @@ func decodeSystemTransfer(tx *solana.Transaction) {
 
   // Find the program address of this instruction:
   progKey, err := tx.ResolveProgramIDIndex(i0.ProgramIDIndex)
-  if if err != nil {
+  if err != nil {
     panic(err)
   }
 
-  // FInd the accounts of this instruction:
-  accounts := i0.ResolveInstructionAccounts(&tx.Message)
+  // Find the accounts of this instruction:
+  accounts, err := i0.ResolveInstructionAccounts(&tx.Message)
+  if err != nil {
+    panic(err)
+  }
 
   // Feed the accounts and data to the system program parser
   // OR see below for alternative parsing when you DON'T know
@@ -616,7 +619,7 @@ func main() {
   // Create a new RPC client:
   client := rpc.New(rpc.TestNet_RPC)
 
-  // Airdrop 5 SOL to the new account:
+  // Airdrop 1 SOL to the new account:
   out, err := client.RequestAirdrop(
     context.TODO(),
     account.PublicKey(),
@@ -744,7 +747,7 @@ func main() {
   amount := uint64(3333)
 
   if true {
-    // Airdrop 5 sol to the account so it will have something to transfer:
+    // Airdrop 1 sol to the account so it will have something to transfer:
     out, err := rpcClient.RequestAirdrop(
       context.TODO(),
       accountFrom.PublicKey(),
