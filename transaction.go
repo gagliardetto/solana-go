@@ -26,6 +26,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/treeout"
+	"github.com/mr-tron/base58"
 	"go.uber.org/zap"
 
 	"github.com/gagliardetto/solana-go/text"
@@ -85,6 +86,27 @@ func TransactionFromDecoder(decoder *bin.Decoder) (*Transaction, error) {
 		return nil, err
 	}
 	return out, nil
+}
+
+func TransactionFromBytes(data []byte) (*Transaction, error) {
+	decoder := bin.NewBinDecoder(data)
+	return TransactionFromDecoder(decoder)
+}
+
+func TransactionFromBase64(b64 string) (*Transaction, error) {
+	data, err := base64.StdEncoding.DecodeString(b64)
+	if err != nil {
+		return nil, err
+	}
+	return TransactionFromBytes(data)
+}
+
+func TransactionFromBase58(b58 string) (*Transaction, error) {
+	data, err := base58.Decode(b58)
+	if err != nil {
+		return nil, err
+	}
+	return TransactionFromBytes(data)
 }
 
 // MustTransactionFromDecoder decodes a transaction from a decoder.
