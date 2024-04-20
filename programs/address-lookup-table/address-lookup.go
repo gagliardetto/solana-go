@@ -2,6 +2,7 @@ package addresslookuptable
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 
@@ -36,7 +37,7 @@ func GetAddressLookupTable(
 		return nil, err
 	}
 	if account == nil {
-		return nil, fmt.Errorf("account not found")
+		return nil, errors.New("account not found")
 	}
 	return DecodeAddressLookupTableState(account.GetBinary())
 }
@@ -52,7 +53,7 @@ func GetAddressLookupTableStateWithOpts(
 		return nil, err
 	}
 	if account == nil {
-		return nil, fmt.Errorf("account not found")
+		return nil, errors.New("account not found")
 	}
 	return DecodeAddressLookupTableState(account.GetBinary())
 }
