@@ -20,6 +20,7 @@ package serum
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 
 	rice "github.com/GeertJohan/go.rice"
@@ -36,7 +37,7 @@ import (
 func KnownMarket() ([]*MarketMeta, error) {
 	box := rice.MustFindBox("data").MustBytes("markets.json")
 	if box == nil {
-		return nil, fmt.Errorf("unable to retrieve known markets")
+		return nil, errors.New("unable to retrieve known markets")
 	}
 
 	dec := json.NewDecoder(bytes.NewReader(box))

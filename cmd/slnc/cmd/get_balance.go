@@ -18,6 +18,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/gagliardetto/solana-go"
@@ -41,7 +42,7 @@ var getBalanceCmd = &cobra.Command{
 		}
 
 		if resp.Value == 0 {
-			return fmt.Errorf("account not found")
+			return errors.New("account not found")
 		}
 
 		fmt.Println(resp.Value, "lamports")

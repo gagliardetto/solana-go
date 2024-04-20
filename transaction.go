@@ -20,6 +20,7 @@ package solana
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"sort"
 
@@ -230,7 +231,7 @@ type addressTablePubkeyWithIndex struct {
 
 func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...TransactionOption) (*Transaction, error) {
 	if len(instructions) == 0 {
-		return nil, fmt.Errorf("requires at-least one instruction to create a transaction")
+		return nil, errors.New("requires at-least one instruction to create a transaction")
 	}
 
 	options := transactionOptions{}
@@ -249,7 +250,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 			}
 		}
 		if !found {
-			return nil, fmt.Errorf("cannot determine fee payer. You can ether pass the fee payer via the 'TransactionWithInstructions' option parameter or it falls back to the first instruction's first signer")
+			return nil, errors.New("cannot determine fee payer. You can ether pass the fee payer via the 'TransactionWithInstructions' option parameter or it falls back to the first instruction's first signer")
 		}
 	}
 
@@ -506,7 +507,7 @@ func (tx *Transaction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 			return fmt.Errorf("unable to read numSignatures: %w", err)
 		}
 		if numSignatures < 0 {
-			return fmt.Errorf("numSignatures is negative")
+			return errors.New("numSignatures is negative")
 		}
 		if numSignatures > decoder.Remaining()/64 {
 			return fmt.Errorf("numSignatures %d is too large for remaining bytes %d", numSignatures, decoder.Remaining())

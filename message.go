@@ -19,8 +19,8 @@ package solana
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
-
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/treeout"
 
@@ -120,7 +120,7 @@ type Message struct {
 // NOTE: you can call this once.
 func (mx *Message) SetAddressTables(tables map[PublicKey]PublicKeySlice) error {
 	if mx.addressTables != nil {
-		return fmt.Errorf("address tables already set")
+		return errors.New("address tables already set")
 	}
 	mx.addressTables = tables
 	return nil
@@ -644,7 +644,7 @@ func (m Message) checkPreconditions() error {
 	// but the address table is empty,
 	// then we can't build the account meta list:
 	if m.IsVersioned() && m.AddressTableLookups.NumLookups() > 0 && (m.addressTables == nil || len(m.addressTables) == 0) {
-		return fmt.Errorf("cannot build account meta list without address tables")
+		return errors.New("cannot build account meta list without address tables")
 	}
 
 	return nil

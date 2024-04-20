@@ -2,6 +2,7 @@ package bpfloader
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 
 	"github.com/gagliardetto/solana-go"
@@ -45,19 +46,19 @@ func completePartialProgramInit(
 	allowExcessiveBalance bool,
 ) (instructions []solana.Instruction, balanceNeeded uint64, err error) {
 	if account.Executable {
-		err = fmt.Errorf("buffer account is already executable")
+		err = errors.New("buffer account is already executable")
 		return
 	}
 	if !account.Owner.Equals(loaderId) &&
 		!account.Owner.Equals(solana.SystemProgramID) {
-		err = fmt.Errorf(
+		err = errors.New(
 			"buffer account passed is already in use by another program",
 		)
 		return
 	}
 	if len(account.Data.GetBinary()) > 0 &&
 		len(account.Data.GetBinary()) < accountDataLen {
-		err = fmt.Errorf(
+		err = errors.New(
 			"buffer account passed is not large enough, may have been for a " +
 				" different deploy?",
 		)

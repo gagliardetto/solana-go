@@ -192,7 +192,7 @@ func (inst *TransferChecked) Validate() error {
 			return errors.New("accounts.Owner is not set")
 		}
 		if !inst.Accounts[3].IsSigner && len(inst.Signers) == 0 {
-			return fmt.Errorf("accounts.Signers is not set")
+			return errors.New("accounts.Signers is not set")
 		}
 		if len(inst.Signers) > MAX_SIGNERS {
 			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))

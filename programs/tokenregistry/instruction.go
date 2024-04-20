@@ -20,6 +20,7 @@ package tokenregistry
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"fmt"
 
 	"github.com/gagliardetto/solana-go/text"
@@ -138,7 +139,7 @@ type RegisterToken struct {
 
 func (i *RegisterToken) SetAccounts(accounts []*solana.AccountMeta) error {
 	if len(accounts) < 9 {
-		return fmt.Errorf("insufficient account")
+		return errors.New("insufficient account")
 	}
 	i.Accounts = &RegisterTokenAccounts{
 		TokenMeta: accounts[0],
