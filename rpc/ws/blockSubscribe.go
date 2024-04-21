@@ -150,7 +150,10 @@ type BlockSubscription struct {
 
 func (sw *BlockSubscription) Recv() (*BlockResult, error) {
 	select {
-	case d := <-sw.sub.stream:
+	case d, ok := <-sw.sub.stream:
+		if !ok {
+			return nil, ErrSubscriptionClosed
+		}
 		return d.(*BlockResult), nil
 	case err := <-sw.sub.err:
 		return nil, err

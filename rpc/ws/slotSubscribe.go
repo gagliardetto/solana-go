@@ -47,7 +47,10 @@ type SlotSubscription struct {
 
 func (sw *SlotSubscription) Recv() (*SlotResult, error) {
 	select {
-	case d := <-sw.sub.stream:
+	case d, ok := <-sw.sub.stream:
+		if !ok {
+			return nil, ErrSubscriptionClosed
+		}
 		return d.(*SlotResult), nil
 	case err := <-sw.sub.err:
 		return nil, err
