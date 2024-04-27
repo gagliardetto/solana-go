@@ -83,7 +83,7 @@ func TestNewTransaction(t *testing.T) {
 
 	assert.Equal(t, trx.Message.RecentBlockhash, blockhash)
 
-	assert.Equal(t, trx.Message.AccountKeys, []PublicKey{
+	assert.Equal(t, trx.Message.AccountKeys, PublicKeySlice{
 		MustPublicKeyFromBase58("A9QnpgfhCkmiBSjgBuWk76Wo3HxzxvDopUq9x6UUMmjn"),
 		MustPublicKeyFromBase58("9hFtYBYmBJCVguRYs9pBTWKYAFoKfjYR7zBPpEkVsmD"),
 		MustPublicKeyFromBase58("6FzXPEhCJoBx7Zw3SN9qhekHemd6E2b8kVguitmVAngW"),
@@ -218,7 +218,7 @@ func TestTransactionDecode(t *testing.T) {
 	)
 
 	require.Equal(t,
-		[]PublicKey{
+		PublicKeySlice{
 			MustPublicKeyFromBase58("52NGrUqh6tSGhr59ajGxsH3VnAaoRdSdTbAaV9G3UW35"),
 			MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"),
 			MustPublicKeyFromBase58("11111111111111111111111111111111"),
