@@ -29,8 +29,10 @@ import (
 	"github.com/klauspost/compress/gzhttp"
 )
 
-var ErrNotFound = errors.New("not found")
-var ErrNotConfirmed = errors.New("not confirmed")
+var (
+	ErrNotFound     = errors.New("not found")
+	ErrNotConfirmed = errors.New("not confirmed")
+)
 
 type Client struct {
 	rpcURL    string
@@ -138,4 +140,12 @@ func (cl *Client) RPCCallBatch(
 	requests jsonrpc.RPCRequests,
 ) (jsonrpc.RPCResponses, error) {
 	return cl.rpcClient.CallBatch(ctx, requests)
+}
+
+func NewBoolean(b bool) *bool {
+	return &b
+}
+
+func NewTransactionVersion(v uint64) *uint64 {
+	return &v
 }

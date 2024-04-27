@@ -698,3 +698,78 @@ func (tx *Transaction) VerifySignatures() error {
 
 	return nil
 }
+
+func (tx *Transaction) NumWriteableAccounts() int {
+	return countWriteableAccounts(tx)
+}
+
+func (tx *Transaction) NumSigners() int {
+	return countSigners(tx)
+}
+
+func countSigners(tx *Transaction) (count int) {
+	if tx == nil {
+		return -1
+	}
+	return tx.Message.Signers().Len()
+}
+
+func (tx *Transaction) NumReadonlyAccounts() int {
+	return countReadonlyAccounts(tx)
+}
+
+func countReadonlyAccounts(tx *Transaction) (count int) {
+	if tx == nil {
+		return -1
+	}
+	return int(tx.Message.Header.NumReadonlyUnsignedAccounts) + int(tx.Message.Header.NumReadonlySignedAccounts)
+}
+
+func countWriteableAccounts(tx *Transaction) (count int) {
+	if tx == nil {
+		return -1
+	}
+	if !tx.Message.IsVersioned() {
+		metas, err := tx.Message.AccountMetaList()
+		if err != nil {
+			return -1
+		}
+		for _, meta := range metas {
+			if meta.IsWritable {
+				count++
+			}
+		}
+		return count
+	}
+	numStatisKeys := len(tx.Message.AccountKeys)
+	statisKeys := tx.Message.AccountKeys
+	h := tx.Message.Header
+	for _, key := range statisKeys {
+		accIndex, ok := getStaticAccountIndex(tx, key)
+		if !ok {
+			continue
+		}
+		index := int(accIndex)
+		is := false
+		if index >= int(h.NumRequiredSignatures) {
+			// unsignedAccountIndex < numWritableUnsignedAccounts
+			is = index-int(h.NumRequiredSignatures) < (numStatisKeys-int(h.NumRequiredSignatures))-int(h.NumReadonlyUnsignedAccounts)
+		} else {
+			is = index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)
+		}
+		if is {
+			count++
+		}
+	}
+	count += tx.Message.NumWritableLookups()
+	return count
+}
+
+func getStaticAccountIndex(tx *Transaction, key PublicKey) (int, bool) {
+	for idx, a := range tx.Message.AccountKeys {
+		if a.Equals(key) {
+			return (idx), true
+		}
+	}
+	return -1, false
+}
