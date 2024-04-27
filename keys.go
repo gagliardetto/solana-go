@@ -363,7 +363,7 @@ func (slice PublicKeySlice) ContainsAll(pubkeys PublicKeySlice) bool {
 }
 
 // ContainsAny returns true if any of the provided pubkeys are present in the slice.
-func (slice PublicKeySlice) ContainsAny(pubkeys PublicKeySlice) bool {
+func (slice PublicKeySlice) ContainsAny(pubkeys ...PublicKey) bool {
 	for _, pubkey := range pubkeys {
 		if slice.Contains(pubkey) {
 			return true
