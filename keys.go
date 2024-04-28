@@ -363,7 +363,7 @@ func (slice PublicKeySlice) ContainsAll(pubkeys PublicKeySlice) bool {
 }
 
 // ContainsAny returns true if any of the provided pubkeys are present in the slice.
-func (slice PublicKeySlice) ContainsAny(pubkeys PublicKeySlice) bool {
+func (slice PublicKeySlice) ContainsAny(pubkeys ...PublicKey) bool {
 	for _, pubkey := range pubkeys {
 		if slice.Contains(pubkey) {
 			return true
@@ -567,7 +567,7 @@ const (
 // Ported from https://github.com/solana-labs/solana/blob/216983c50e0a618facc39aa07472ba6d23f1b33a/sdk/program/src/pubkey.rs#L159
 func CreateWithSeed(base PublicKey, seed string, owner PublicKey) (PublicKey, error) {
 	if len(seed) > MaxSeedLength {
-		return PublicKey{}, errors.New("Max seed length exceeded")
+		return PublicKey{}, ErrMaxSeedLengthExceeded
 	}
 
 	// let owner = owner.as_ref();
@@ -588,7 +588,7 @@ func CreateWithSeed(base PublicKey, seed string, owner PublicKey) (PublicKey, er
 
 const PDA_MARKER = "ProgramDerivedAddress"
 
-var ErrMaxSeedLengthExceeded = errors.New("Max seed length exceeded")
+var ErrMaxSeedLengthExceeded = errors.New("max seed length exceeded")
 
 // Create a program address.
 // Ported from https://github.com/solana-labs/solana/blob/216983c50e0a618facc39aa07472ba6d23f1b33a/sdk/program/src/pubkey.rs#L204

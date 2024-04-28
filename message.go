@@ -91,7 +91,7 @@ type Message struct {
 	// List of base-58 encoded public keys used by the transaction,
 	// including by the instructions and for signatures.
 	// The first `message.header.numRequiredSignatures` public keys must sign the transaction.
-	AccountKeys []PublicKey `json:"accountKeys"` // static keys; static keys + dynamic keys if after resolution (i.e. call to `ResolveLookups()`)
+	AccountKeys PublicKeySlice `json:"accountKeys"` // static keys; static keys + dynamic keys if after resolution (i.e. call to `ResolveLookups()`)
 
 	// Details the account types and signatures required by the transaction.
 	Header MessageHeader `json:"header"`
@@ -415,13 +415,13 @@ func (mx *Message) UnmarshalBase64(b64 string) error {
 // in the actual address tables, and returns the accounts.
 // NOTE: you need to call `SetAddressTables` before calling this method,
 // so that the lookups can be associated with the accounts in the address tables.
-func (mx Message) GetAddressTableLookupAccounts() ([]PublicKey, error) {
+func (mx Message) GetAddressTableLookupAccounts() (PublicKeySlice, error) {
 	err := mx.checkPreconditions()
 	if err != nil {
 		return nil, err
 	}
-	var writable []PublicKey
-	var readonly []PublicKey
+	var writable PublicKeySlice
+	var readonly PublicKeySlice
 
 	for _, lookup := range mx.AddressTableLookups {
 		table, ok := mx.addressTables[lookup.AccountKey]
@@ -571,7 +571,7 @@ func (mx *Message) UnmarshalLegacy(decoder *bin.Decoder) (err error) {
 		if numAccountKeys > decoder.Remaining()/32 {
 			return fmt.Errorf("numAccountKeys %d is too large for remaining bytes %d", numAccountKeys, decoder.Remaining())
 		}
-		mx.AccountKeys = make([]PublicKey, numAccountKeys)
+		mx.AccountKeys = make(PublicKeySlice, numAccountKeys)
 		for i := 0; i < numAccountKeys; i++ {
 			_, err := decoder.Read(mx.AccountKeys[i][:])
 			if err != nil {
@@ -846,7 +846,7 @@ func (m Message) IsWritable(account PublicKey) (bool, error) {
 	return index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts), nil
 }
 
-func (m Message) signerKeys() []PublicKey {
+func (m Message) signerKeys() PublicKeySlice {
 	return m.AccountKeys[0:m.Header.NumRequiredSignatures]
 }
 

@@ -67,6 +67,10 @@ type BlockSubscribeOpts struct {
 
 	// Whether to populate the rewards array. If parameter not provided, the default includes rewards.
 	Rewards *bool
+
+	// Max transaction version to return in responses.
+	// If the requested block contains a transaction with a higher version, an error will be returned.
+	MaxSupportedTransactionVersion *uint64
 }
 
 // NOTE: Unstable, disabled by default
@@ -114,7 +118,9 @@ func (cl *Client) BlockSubscribe(
 		if opts.Rewards != nil {
 			obj["rewards"] = opts.Rewards
 		}
-		obj["maxSupportedTransactionVersion"] = 0
+		if opts.MaxSupportedTransactionVersion != nil {
+			obj["maxSupportedTransactionVersion"] = *opts.MaxSupportedTransactionVersion
+		}
 		if len(obj) > 0 {
 			params = append(params, obj)
 		}
@@ -149,6 +155,23 @@ func (sw *BlockSubscription) Recv() (*BlockResult, error) {
 	case err := <-sw.sub.err:
 		return nil, err
 	}
+}
+
+func (sw *BlockSubscription) Err() <-chan error {
+	return sw.sub.err
+}
+
+func (sw *BlockSubscription) Response() <-chan *BlockResult {
+	typedChan := make(chan *BlockResult, 1)
+	go func(ch chan *BlockResult) {
+		// TODO: will this subscription yield more than one result?
+		d, ok := <-sw.sub.stream
+		if !ok {
+			return
+		}
+		ch <- d.(*BlockResult)
+	}(typedChan)
+	return typedChan
 }
 
 func (sw *BlockSubscription) Unsubscribe() {

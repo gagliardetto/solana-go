@@ -83,7 +83,7 @@ func TestNewTransaction(t *testing.T) {
 
 	assert.Equal(t, trx.Message.RecentBlockhash, blockhash)
 
-	assert.Equal(t, trx.Message.AccountKeys, []PublicKey{
+	assert.Equal(t, trx.Message.AccountKeys, PublicKeySlice{
 		MustPublicKeyFromBase58("A9QnpgfhCkmiBSjgBuWk76Wo3HxzxvDopUq9x6UUMmjn"),
 		MustPublicKeyFromBase58("9hFtYBYmBJCVguRYs9pBTWKYAFoKfjYR7zBPpEkVsmD"),
 		MustPublicKeyFromBase58("6FzXPEhCJoBx7Zw3SN9qhekHemd6E2b8kVguitmVAngW"),
@@ -189,6 +189,19 @@ func TestSignTransaction(t *testing.T) {
 	})
 }
 
+func FuzzTransaction(f *testing.F) {
+	encoded := "AfjEs3XhTc3hrxEvlnMPkm/cocvAUbFNbCl00qKnrFue6J53AhEqIFmcJJlJW3EDP5RmcMz+cNTTcZHW/WJYwAcBAAEDO8hh4VddzfcO5jbCt95jryl6y8ff65UcgukHNLWH+UQGgxCGGpgyfQVQV02EQYqm4QwzUt2qf9f1gVLM7rI4hwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6ANIF55zOZWROWRkeh+lExxZBnKFqbvIxZDLE7EijjoBAgIAAQwCAAAAOTAAAAAAAAA="
+	data, err := base64.StdEncoding.DecodeString(encoded)
+	require.NoError(f, err)
+	f.Add(data)
+
+	f.Fuzz(func(t *testing.T, data []byte) {
+		require.NotPanics(t, func() {
+			TransactionFromDecoder(bin.NewBinDecoder(data))
+		})
+	})
+}
+
 func TestTransactionDecode(t *testing.T) {
 	encoded := "AfjEs3XhTc3hrxEvlnMPkm/cocvAUbFNbCl00qKnrFue6J53AhEqIFmcJJlJW3EDP5RmcMz+cNTTcZHW/WJYwAcBAAEDO8hh4VddzfcO5jbCt95jryl6y8ff65UcgukHNLWH+UQGgxCGGpgyfQVQV02EQYqm4QwzUt2qf9f1gVLM7rI4hwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6ANIF55zOZWROWRkeh+lExxZBnKFqbvIxZDLE7EijjoBAgIAAQwCAAAAOTAAAAAAAAA="
 	data, err := base64.StdEncoding.DecodeString(encoded)
@@ -205,7 +218,7 @@ func TestTransactionDecode(t *testing.T) {
 	)
 
 	require.Equal(t,
-		[]PublicKey{
+		PublicKeySlice{
 			MustPublicKeyFromBase58("52NGrUqh6tSGhr59ajGxsH3VnAaoRdSdTbAaV9G3UW35"),
 			MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"),
 			MustPublicKeyFromBase58("11111111111111111111111111111111"),

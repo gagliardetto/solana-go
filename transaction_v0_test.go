@@ -50,7 +50,7 @@ func TestTransactionV0(t *testing.T) {
 	require.Equal(t, "2nMjR8mdczMJZZ1XeQ5Y37GxfrRQmaV74eypnD9ggpQMmaWfETq9C5DoGKha4bMamu9tFQQArBAgxzQ5vnng1ZdG", tx.Signatures[0].String())
 	require.Equal(t, "3x7m4nDNGiZiDgadNtewvHKGcCEWe16QpHo197Azs5ybKNqjzbknuF7VFWeHJ6jowdSeDqVZ2EVgpoq9rNoHvPrM", tx.Signatures[1].String())
 	require.Equal(t,
-		[]PublicKey{
+		PublicKeySlice{
 			MPK("2m4eNwBVqu6SgFk23HgE3W5MW89yT5z1vspz2WsiFBHF"),
 			MPK("G6NDx85GM481GPjT5kUBAvjLxzDMsgRMQ1EAxzGswEJn"),
 			MPK("81o7hHYN5a8fc5wdjjfznK9ziJ9wcuKXwbZnuYpanxMQ"),
@@ -83,7 +83,7 @@ func TestTransactionV0(t *testing.T) {
 		{
 			spew.Dump(tx.Message.AccountKeys)
 			require.Equal(t,
-				[]PublicKey{
+				PublicKeySlice{
 					MPK("2m4eNwBVqu6SgFk23HgE3W5MW89yT5z1vspz2WsiFBHF"),
 					MPK("G6NDx85GM481GPjT5kUBAvjLxzDMsgRMQ1EAxzGswEJn"),
 					MPK("81o7hHYN5a8fc5wdjjfznK9ziJ9wcuKXwbZnuYpanxMQ"),
