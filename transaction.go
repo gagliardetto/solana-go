@@ -139,6 +139,9 @@ type CompiledInstruction struct {
 
 	// The program input data encoded in a base-58 string.
 	Data Base58 `json:"data"`
+
+	//
+	StackHeight int `json:"stackHeight"`
 }
 
 type compiledInstruction struct {
@@ -154,6 +157,9 @@ type compiledInstruction struct {
 
 	// The program input data encoded in a base-58 string.
 	Data Base58 `json:"data"`
+
+	//
+	StackHeight int `json:"stackHeight"`
 }
 
 func (ci *CompiledInstruction) MarshalJSON() ([]byte, error) {
@@ -169,6 +175,7 @@ func (ci *CompiledInstruction) UnmarshalJSON(data []byte) error {
 	//
 	ci.ProgramIDIndex = in.ProgramIDIndex
 	ci.Data = in.Data
+	ci.StackHeight = in.StackHeight
 	ci.Accounts = make([]uint16, 0)
 	if len(in.Accounts) == 0 {
 		return nil
