@@ -14,16 +14,15 @@ type TransactionSignatureSubscription struct {
 }
 
 type TransactionSignatureResult struct {
-	Value struct {
-		Transaction struct {
-			Meta struct {
-				LogMessages []string `json:"logMessages"`
-			} `json:"meta"`
-		} `json:"transaction"`
-		Signature solana.Signature `json:"signature"`
-	} `json:"value"`
+	Transaction struct {
+		Meta struct {
+			LogMessages []string `json:"logMessages"`
+		} `json:"meta"`
+	} `json:"transaction"`
+	Signature solana.Signature `json:"signature"`
 }
 
+// TransactionSignatureSubscribe subscribes to a transaction signature. Only Helius rpc nodes support this method.
 func (cl *Client) TransactionSignatureSubscribe(
 	accountInclude []string,
 	accountRequired []string,
@@ -88,8 +87,8 @@ func (sw *TransactionSignatureSubscription) Recv() (*LogResult, error) {
 			}
 		}
 		logResult := &LogResult{}
-		logResult.Value.Logs = d.(*TransactionSignatureResult).Value.Transaction.Meta.LogMessages
-		logResult.Value.Signature = d.(*TransactionSignatureResult).Value.Signature
+		logResult.Value.Logs = d.(*TransactionSignatureResult).Transaction.Meta.LogMessages
+		logResult.Value.Signature = d.(*TransactionSignatureResult).Signature
 		return logResult, nil
 	case err := <-sw.sub.err:
 		return nil, err
@@ -109,8 +108,8 @@ func (sw *TransactionSignatureSubscription) Response() <-chan *LogResult {
 			return
 		}
 		logResult := &LogResult{}
-		logResult.Value.Logs = d.(*TransactionSignatureResult).Value.Transaction.Meta.LogMessages
-		logResult.Value.Signature = d.(*TransactionSignatureResult).Value.Signature
+		logResult.Value.Logs = d.(*TransactionSignatureResult).Transaction.Meta.LogMessages
+		logResult.Value.Signature = d.(*TransactionSignatureResult).Signature
 		ch <- logResult
 	}(typedChan)
 	return typedChan
