@@ -46,25 +46,25 @@ const (
 )
 
 // LogsSubscribe subscribes to transaction logging.
-func (cl *Client) LogsSubscribe(
+func (c *Client) LogsSubscribe(
 	// Filter criteria for the logs to receive results by account type.
 	filter LogsSubscribeFilterType,
 	commitment rpc.CommitmentType, // (optional)
 ) (*LogSubscription, error) {
-	return cl.logsSubscribe(
+	return c.logsSubscribe(
 		filter,
 		commitment,
 	)
 }
 
 // LogsSubscribe subscribes to all transactions that mention the provided Pubkey.
-func (cl *Client) LogsSubscribeMentions(
+func (c *Client) LogsSubscribeMentions(
 	// Subscribe to all transactions that mention the provided Pubkey.
 	mentions solana.PublicKey,
 	// (optional)
 	commitment rpc.CommitmentType,
 ) (*LogSubscription, error) {
-	return cl.logsSubscribe(
+	return c.logsSubscribe(
 		rpc.M{
 			"mentions": []string{mentions.String()},
 		},
@@ -73,7 +73,7 @@ func (cl *Client) LogsSubscribeMentions(
 }
 
 // LogsSubscribe subscribes to transaction logging.
-func (cl *Client) logsSubscribe(
+func (c *Client) logsSubscribe(
 	filter interface{},
 	commitment rpc.CommitmentType,
 ) (*LogSubscription, error) {
@@ -84,7 +84,7 @@ func (cl *Client) logsSubscribe(
 		conf["commitment"] = commitment
 	}
 
-	genSub, err := cl.subscribe(
+	genSub, err := c.subscribe(
 		params,
 		conf,
 		"logsSubscribe",
