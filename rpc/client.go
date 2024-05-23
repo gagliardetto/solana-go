@@ -67,6 +67,12 @@ func NewWithHeaders(rpcEndpoint string, headers map[string]string) *Client {
 	return NewWithCustomRPCClient(rpcClient)
 }
 
+// New creates a new Solana JSON RPC client with the provided custom headers and custom HTTP client.
+// The provided headers will be added to each RPC request sent via the provided HTTP client.
+func NewWithOpts(rpcEndpoint string, opts *jsonrpc.RPCClientOpts) *Client {
+	return NewWithCustomRPCClient(jsonrpc.NewClientWithOpts(rpcEndpoint, opts))
+}
+
 // Close closes the client.
 func (cl *Client) Close() error {
 	if cl.rpcClient == nil {
