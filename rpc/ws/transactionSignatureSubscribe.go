@@ -16,7 +16,9 @@ type TransactionSignatureSubscription struct {
 type TransactionSignatureResult struct {
 	Transaction struct {
 		Meta struct {
-			LogMessages []string `json:"logMessages"`
+			LogMessages       []string           `json:"logMessages"`
+			PreTokenBalances  []rpc.TokenBalance `json:"preTokenBalances"`
+			PostTokenBalances []rpc.TokenBalance `json:"postTokenBalances"`
 		} `json:"meta"`
 	} `json:"transaction"`
 	Signature solana.Signature `json:"signature"`
@@ -78,7 +80,7 @@ func (cl *Client) transactionSignatureSubscribe(
 	}, nil
 }
 
-func (sw *TransactionSignatureSubscription) Recv() (*LogResult, error) {
+func (sw *TransactionSignatureSubscription) Recv() (*TransactionSignatureResult, error) {
 	select {
 	case d, ok := <-sw.sub.stream:
 		if !ok {
@@ -86,10 +88,7 @@ func (sw *TransactionSignatureSubscription) Recv() (*LogResult, error) {
 				return nil, ErrSubscriptionClosed
 			}
 		}
-		logResult := &LogResult{}
-		logResult.Value.Logs = d.(*TransactionSignatureResult).Transaction.Meta.LogMessages
-		logResult.Value.Signature = d.(*TransactionSignatureResult).Signature
-		return logResult, nil
+		return d.(*TransactionSignatureResult), nil
 	case err := <-sw.sub.err:
 		return nil, err
 	}
@@ -99,18 +98,15 @@ func (sw *TransactionSignatureSubscription) Err() <-chan error {
 	return sw.sub.err
 }
 
-func (sw *TransactionSignatureSubscription) Response() <-chan *LogResult {
-	typedChan := make(chan *LogResult, 1)
-	go func(ch chan *LogResult) {
+func (sw *TransactionSignatureSubscription) Response() <-chan *TransactionSignatureResult {
+	typedChan := make(chan *TransactionSignatureResult, 1)
+	go func(ch chan *TransactionSignatureResult) {
 		// TODO: will this subscription yield more than one result?
 		d, ok := <-sw.sub.stream
 		if !ok {
 			return
 		}
-		logResult := &LogResult{}
-		logResult.Value.Logs = d.(*TransactionSignatureResult).Transaction.Meta.LogMessages
-		logResult.Value.Signature = d.(*TransactionSignatureResult).Signature
-		ch <- logResult
+		ch <- d.(*TransactionSignatureResult)
 	}(typedChan)
 	return typedChan
 }
