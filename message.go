@@ -463,6 +463,10 @@ func (mx *Message) ResolveLookups() (err error) {
 	return nil
 }
 
+func (mx Message) IsResolved() bool {
+	return mx.resolved
+}
+
 // GetAllKeys returns ALL the message's account keys (including the keys from resolved address lookup tables).
 func (mx Message) GetAllKeys() (keys PublicKeySlice, err error) {
 	if mx.resolved {

@@ -789,6 +789,9 @@ func countWriteableAccounts(tx *Transaction) (count int) {
 			count++
 		}
 	}
+	if tx.Message.IsResolved() {
+		return count
+	}
 	count += tx.Message.NumWritableLookups()
 	return count
 }
