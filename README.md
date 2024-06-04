@@ -22,7 +22,7 @@ More contracts to come.
 
 `solana-go` is exclusively supported by my own time (which is money).
 
-If my work has been useful in building your for-profit services/infra/bots/etc., consider donating at 47EhAdBKitfqHRv16Y6wLff8duFBNx3JLxBozcSY36ac (solana) to support future development.
+If my work has been useful in building your for-profit services/infra/bots/etc., consider donating at 8tTwBazKr2ST1b2kNrM7JMXwixRTvZicn7eRBihThymm (solana) to support future development.
 
 Thanks!
 
