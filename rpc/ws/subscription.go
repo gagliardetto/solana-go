@@ -23,6 +23,7 @@ type Subscription struct {
 	stream            chan result
 	err               chan error
 	closeFunc         func(err error)
+	closed            bool
 	unsubscribeMethod string
 	decoderFunc       decoderFunc
 }
@@ -61,6 +62,7 @@ func (s *Subscription) Unsubscribe() {
 
 func (s *Subscription) unsubscribe(err error) {
 	s.closeFunc(err)
+	s.closed = true
 	close(s.stream)
 	close(s.err)
 }
