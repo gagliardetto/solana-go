@@ -69,7 +69,10 @@ type SignatureSubscription struct {
 
 func (sw *SignatureSubscription) Recv() (*SignatureResult, error) {
 	select {
-	case d := <-sw.sub.stream:
+	case d, ok := <-sw.sub.stream:
+		if !ok {
+			return nil, ErrSubscriptionClosed
+		}
 		return d.(*SignatureResult), nil
 	case err := <-sw.sub.err:
 		return nil, err

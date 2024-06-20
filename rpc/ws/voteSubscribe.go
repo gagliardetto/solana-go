@@ -61,7 +61,10 @@ type VoteSubscription struct {
 
 func (sw *VoteSubscription) Recv() (*VoteResult, error) {
 	select {
-	case d := <-sw.sub.stream:
+	case d, ok := <-sw.sub.stream:
+		if !ok {
+			return nil, ErrSubscriptionClosed
+		}
 		return d.(*VoteResult), nil
 	case err := <-sw.sub.err:
 		return nil, err

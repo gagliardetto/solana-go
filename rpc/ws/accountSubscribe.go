@@ -85,7 +85,10 @@ type AccountSubscription struct {
 
 func (sw *AccountSubscription) Recv() (*AccountResult, error) {
 	select {
-	case d := <-sw.sub.stream:
+	case d, ok := <-sw.sub.stream:
+		if !ok {
+			return nil, ErrSubscriptionClosed
+		}
 		return d.(*AccountResult), nil
 	case err := <-sw.sub.err:
 		return nil, err

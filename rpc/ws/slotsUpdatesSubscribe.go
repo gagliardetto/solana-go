@@ -79,7 +79,10 @@ type SlotsUpdatesSubscription struct {
 
 func (sw *SlotsUpdatesSubscription) Recv() (*SlotsUpdatesResult, error) {
 	select {
-	case d := <-sw.sub.stream:
+	case d, ok := <-sw.sub.stream:
+		if !ok {
+			return nil, ErrSubscriptionClosed
+		}
 		return d.(*SlotsUpdatesResult), nil
 	case err := <-sw.sub.err:
 		return nil, err
