@@ -32,15 +32,21 @@ type request struct {
 	ID      uint64      `json:"id"`
 }
 
-func newRequest(params []interface{}, method string, configuration map[string]interface{}) *request {
+func newRequest(params []interface{}, method string, configuration map[string]interface{}, shortID bool) *request {
 	if params != nil && configuration != nil {
 		params = append(params, configuration)
+	}
+	var ID uint64
+	if !shortID {
+		ID = uint64(rand.Int63())
+	} else {
+		ID = uint64(rand.Int31())
 	}
 	return &request{
 		Version: "2.0",
 		Method:  method,
 		Params:  params,
-		ID:      uint64(rand.Int63()),
+		ID:      ID,
 	}
 }
 
@@ -66,6 +72,7 @@ type params struct {
 type Options struct {
 	HttpHeader       http.Header
 	HandshakeTimeout time.Duration
+	ShortID          bool // some RPC do not support int63/uint64 id, so need to enable it to rand a int31/uint32 id
 }
 
 var DefaultHandshakeTimeout = 45 * time.Second
