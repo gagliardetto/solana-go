@@ -536,18 +536,26 @@ func (tx *Transaction) PartialSign(getter privateKeyGetter) (out []Signature, er
 	}
 	signerKeys := tx.Message.signerKeys()
 
-	signedSignatures := []Signature{}
-	for _, key := range signerKeys {
+	// Ensure that the transaction has the correct number of signatures initialized
+	if len(tx.Signatures) == 0 {
+		// Initialize the Signatures slice to the correct length if it's empty
+		tx.Signatures = make([]Signature, len(signerKeys))
+	} else if len(tx.Signatures) != len(signerKeys) {
+		// Return an error if the current length of the Signatures slice doesn't match the expected number
+		return nil, fmt.Errorf("invalid signatures length, expected %d, actual %d", len(signerKeys), len(tx.Signatures))
+	}
+
+	for i, key := range signerKeys {
 		privateKey := getter(key)
 		if privateKey != nil {
 			s, err := privateKey.Sign(messageContent)
 			if err != nil {
 				return nil, fmt.Errorf("failed to signed with key %q: %w", key.String(), err)
 			}
-			signedSignatures = append(signedSignatures, s)
+			// Directly assign the signature to the corresponding position in the transaction's signature slice
+			tx.Signatures[i] = s
 		}
 	}
-	tx.Signatures = append(tx.Signatures, signedSignatures...)
 	return tx.Signatures, nil
 }
 
