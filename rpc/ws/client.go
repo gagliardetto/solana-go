@@ -246,7 +246,9 @@ func (c *Client) handleSubscriptionMessage(subID uint64, message []byte) {
 		return
 	}
 
-	sub.stream <- result
+	if !sub.closed {
+		sub.stream <- result
+	}
 	return
 }
 
