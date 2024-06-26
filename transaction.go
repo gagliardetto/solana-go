@@ -699,22 +699,7 @@ func (tx *Transaction) VerifySignatures() error {
 	return nil
 }
 
-// GetProgramIDs returns the program IDs of the instructions in the transaction.
-// NOTE: this does NOT include the program IDs of the internal instructions.
-func (tx *Transaction) GetProgramIDs() PublicKeySlice {
-	programIDs := make(PublicKeySlice, 0)
-	for ixi, inst := range tx.Message.Instructions {
-		progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
-		if err == nil {
-			programIDs = append(programIDs, progKey)
-		} else {
-			panic(fmt.Errorf("cannot resolve program ID for instruction %d: %w", ixi, err))
-		}
-	}
-	return programIDs
-}
-
-func (tx *Transaction) GetProgramIDsWithError() (PublicKeySlice, error) {
+func (tx *Transaction) GetProgramIDs() (PublicKeySlice, error) {
 	programIDs := make(PublicKeySlice, 0)
 	for ixi, inst := range tx.Message.Instructions {
 		progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
