@@ -215,7 +215,7 @@ type TransactionMeta struct {
 	Rewards []BlockReward `json:"rewards"`
 
 	LoadedAddresses LoadedAddresses `json:"loadedAddresses"`
-	
+
 	ComputeUnitsConsumed *uint64 `json:"computeUnitsConsumed"`
 }
 
@@ -498,11 +498,12 @@ type ParsedMessage struct {
 }
 
 type ParsedInstruction struct {
-	Program   string                   `json:"program,omitempty"`
-	ProgramId solana.PublicKey         `json:"programId,omitempty"`
-	Parsed    *InstructionInfoEnvelope `json:"parsed,omitempty"`
-	Data      solana.Base58            `json:"data,omitempty"`
-	Accounts  []solana.PublicKey       `json:"accounts,omitempty"`
+	Program     string                   `json:"program,omitempty"`
+	ProgramId   solana.PublicKey         `json:"programId,omitempty"`
+	Parsed      *InstructionInfoEnvelope `json:"parsed,omitempty"`
+	Data        solana.Base58            `json:"data,omitempty"`
+	Accounts    []solana.PublicKey       `json:"accounts,omitempty"`
+	StackHeight int                      `json:"stackHeight"`
 }
 
 type InstructionInfoEnvelope struct {
