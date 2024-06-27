@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
@@ -45,7 +46,7 @@ var getProgramAccountsCmd = &cobra.Command{
 		}
 
 		if resp == nil {
-			return fmt.Errorf("program account not found")
+			return errors.New("program account not found")
 		}
 
 		for _, keyedAcct := range resp {
