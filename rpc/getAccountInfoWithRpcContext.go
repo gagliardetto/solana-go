@@ -32,5 +32,9 @@ func (cl *Client) GetAccountInfoWithRpcContext(
 	if err != nil {
 		return nil, nil, err
 	}
-	return out.Value, &out.RPCContext, nil
+	if out == nil {
+		return nil, nil, nil
+	} else {
+		return out.Value, &out.RPCContext, nil
+	}
 }

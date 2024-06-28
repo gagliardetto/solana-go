@@ -43,7 +43,7 @@ func (cl *Client) GetSignatureStatuses(
 	if err != nil {
 		return nil, err
 	}
-	if out.Value == nil {
+	if out == nil || out.Value == nil {
 		// Unknown transaction
 		return nil, ErrNotFound
 	}
