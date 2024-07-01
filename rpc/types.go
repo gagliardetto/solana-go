@@ -225,7 +225,15 @@ type InnerInstruction struct {
 	Index uint16 `json:"index"`
 
 	// Ordered list of inner program instructions that were invoked during a single transaction instruction.
-	Instructions []solana.CompiledInstruction `json:"instructions"`
+	Instructions []CompiledInnerInstruction `json:"instructions"`
+}
+
+type CompiledInnerInstruction struct {
+	solana.CompiledInstruction
+
+	// Invocation stack height of this instruction. Instruction stack height
+	// starts at 1 for transaction instructions.
+	StackHeight uint8 `json:"stackHeight"`
 }
 
 // Ok  interface{} `json:"Ok"`  // <null> Transaction was successful
