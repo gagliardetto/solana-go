@@ -40,7 +40,7 @@ func newRequest(params []interface{}, method string, configuration map[string]in
 		Version: "2.0",
 		Method:  method,
 		Params:  params,
-		ID:      uint64(rand.Int63()),
+		ID:      uint64(rand.Uint32()),
 	}
 }
 
