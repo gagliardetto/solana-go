@@ -17,6 +17,8 @@
 
 package ws
 
+import "sync"
+
 type Subscription struct {
 	req               *request
 	subID             uint64
@@ -26,6 +28,7 @@ type Subscription struct {
 	closed            bool
 	unsubscribeMethod string
 	decoderFunc       decoderFunc
+	unsubOnce         sync.Once
 }
 
 type decoderFunc func([]byte) (interface{}, error)
@@ -57,7 +60,9 @@ func (s *Subscription) Recv() (interface{}, error) {
 }
 
 func (s *Subscription) Unsubscribe() {
-	s.unsubscribe(nil)
+	s.unsubOnce.Do(func() {
+		s.unsubscribe(nil)
+	})
 }
 
 func (s *Subscription) unsubscribe(err error) {
