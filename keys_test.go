@@ -22,6 +22,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"flag"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -96,6 +97,89 @@ func TestPublicKeyFromBase58(t *testing.T) {
 				assert.Equal(t, test.expected, actual)
 			} else {
 				assert.Equal(t, test.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestPrivateKeyFromBase58(t *testing.T) {
+	tests := []struct {
+		name    string
+		in      string
+		want    string
+		wantErr error
+	}{
+		{
+			name: "normal case",
+			in:   "3yZe7d",
+			want: "3yZe7d",
+		},
+		{
+			name:    "edge case - empty string",
+			in:      "",
+			want:    "",
+			wantErr: errors.New("zero length string"),
+		},
+		{
+			name:    "edge case - invalid base58",
+			in:      "invalid-base58",
+			want:    "",
+			wantErr: errors.New("invalid base58 digit ('l')"),
+		},
+		{
+			name: "extreme case - very long input",
+			in:   strings.Repeat("3yZe7d", 100),
+			want: strings.Repeat("3yZe7d", 100),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := PrivateKeyFromBase58(test.in)
+			require.Equal(t, test.wantErr, err)
+			require.Equal(t, test.want, got.String())
+		})
+	}
+}
+
+func TestMustPrivateKeyFromBase58(t *testing.T) {
+	tests := []struct {
+		name      string
+		in        string
+		want      string
+		wantPanic bool
+	}{
+		{
+			name: "normal case",
+			in:   "3yZe7d",
+			want: "3yZe7d",
+		},
+		{
+			name:      "edge case - empty string",
+			in:        "",
+			wantPanic: true,
+		},
+		{
+			name:      "edge case - invalid base58",
+			in:        "invalid-base58",
+			wantPanic: true,
+		},
+		{
+			name: "extreme case - very long input",
+			in:   strings.Repeat("3yZe7d", 100),
+			want: strings.Repeat("3yZe7d", 100),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if test.wantPanic {
+				require.Panics(t, func() {
+					MustPrivateKeyFromBase58(test.in)
+				})
+			} else {
+				got := MustPrivateKeyFromBase58(test.in)
+				require.Equal(t, test.want, got.String())
 			}
 		})
 	}

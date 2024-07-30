@@ -37,6 +37,7 @@ import (
 
 type PrivateKey []byte
 
+// MustPrivateKeyFromBase58 returns a PrivateKey from a base58-encoded string, panicking if the input is invalid.
 func MustPrivateKeyFromBase58(in string) PrivateKey {
 	out, err := PrivateKeyFromBase58(in)
 	if err != nil {
@@ -45,6 +46,7 @@ func MustPrivateKeyFromBase58(in string) PrivateKey {
 	return out
 }
 
+// PrivateKeyFromBase58 returns a PrivateKey from a base58-encoded string.
 func PrivateKeyFromBase58(privkey string) (PrivateKey, error) {
 	res, err := base58.Decode(privkey)
 	if err != nil {
