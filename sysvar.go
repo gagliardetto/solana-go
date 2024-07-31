@@ -62,4 +62,7 @@ var (
 	// The StakeHistory sysvar contains the history of cluster-wide stake activations and de-activations per epoch.
 	// It is updated at the start of every epoch.
 	SysVarStakeHistoryPubkey = MustPublicKeyFromBase58("SysvarStakeHistory1111111111111111111111111")
+
+	// The stake config account is used to store parameters and settings that govern the behavior of staking on the Solana network.
+	SysVarStakeConfigPubkey = MustPublicKeyFromBase58("StakeConfig11111111111111111111111111111111")
 )
