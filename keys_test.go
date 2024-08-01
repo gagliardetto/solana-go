@@ -18,6 +18,8 @@
 package solana
 
 import (
+	"crypto/ed25519"
+	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
@@ -111,8 +113,8 @@ func TestPrivateKeyFromBase58(t *testing.T) {
 	}{
 		{
 			name: "normal case",
-			in:   "3yZe7d",
-			want: "3yZe7d",
+			in:   "6HsFaXKVD7mo43oTbdqyGgAnYFeNNhqY75B3JGJ6K8a227KjjG3uW3v",
+			want: "6HsFaXKVD7mo43oTbdqyGgAnYFeNNhqY75B3JGJ6K8a227KjjG3uW3v",
 		},
 		{
 			name:    "edge case - empty string",
@@ -479,7 +481,38 @@ func TestGetAddedRemoved(t *testing.T) {
 		)
 	}
 }
+func TestIsOnCurve(t *testing.T) {
+	// Test a valid private key
+	privateKey, err := NewRandomPrivateKey()
+	if err != nil {
+		t.Errorf("Failed to generate private key: %v", err)
+	}
 
+	// Test a valid public key
+	publicKey := privateKey.PublicKey()
+	if !IsOnCurve(publicKey.Bytes()) {
+		t.Errorf("Valid public key is not on the curve")
+	}
+
+	// Test an invalid key (too short)
+	shortKey := []byte{1, 2, 3}
+	if IsOnCurve(shortKey) {
+		t.Errorf("Invalid key (too short) is on the curve")
+	}
+
+	// Test an invalid key (too long)
+	longKey := make([]byte, ed25519.PrivateKeySize+1)
+	if IsOnCurve(longKey) {
+		t.Errorf("Invalid key (too long) is on the curve")
+	}
+
+	// Test an invalid key (random bytes)
+	randKey := make([]byte, ed25519.PrivateKeySize)
+	_, _ = rand.Read(randKey)
+	if IsOnCurve(randKey) {
+		t.Errorf("Invalid key (random bytes) is on the curve")
+	}
+}
 func TestIsNativeProgramID(t *testing.T) {
 	require.True(t, isNativeProgramID(ConfigProgramID))
 }
