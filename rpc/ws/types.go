@@ -20,7 +20,6 @@ package ws
 import (
 	stdjson "encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"time"
 )
@@ -29,10 +28,10 @@ type request struct {
 	Version string      `json:"jsonrpc"`
 	Method  string      `json:"method"`
 	Params  interface{} `json:"params,omitempty"`
-	ID      uint64      `json:"id"`
+	ID      string      `json:"id"`
 }
 
-func newRequest(params []interface{}, method string, configuration map[string]interface{}) *request {
+func newRequest(params []interface{}, method string, configuration map[string]interface{}, requestID string) *request {
 	if params != nil && configuration != nil {
 		params = append(params, configuration)
 	}
@@ -40,7 +39,7 @@ func newRequest(params []interface{}, method string, configuration map[string]in
 		Version: "2.0",
 		Method:  method,
 		Params:  params,
-		ID:      uint64(rand.Uint32()),
+		ID:      requestID,
 	}
 }
 

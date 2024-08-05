@@ -19,7 +19,7 @@ package ws
 
 type Subscription struct {
 	req               *request
-	subID             uint64
+	subID             string
 	stream            chan result
 	err               chan error
 	closeFunc         func(err error)
@@ -38,7 +38,6 @@ func newSubscription(
 ) *Subscription {
 	return &Subscription{
 		req:               req,
-		subID:             0,
 		stream:            make(chan result, 200_000),
 		err:               make(chan error, 100_000),
 		closeFunc:         closeFunc,
