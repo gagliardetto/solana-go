@@ -15,6 +15,7 @@
 package associatedtokenaccount
 
 import (
+	"bytes"
 	"fmt"
 
 	spew "github.com/davecgh/go-spew/spew"
@@ -37,6 +38,11 @@ func init() {
 	solana.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
 }
 
+const (
+	Instruction_Create uint8 = iota
+	Instruction_CreateIdempotent
+)
+
 type Instruction struct {
 	bin.BaseVariant
 }
@@ -50,10 +56,13 @@ func (inst *Instruction) EncodeToTree(parent treeout.Branches) {
 }
 
 var InstructionImplDef = bin.NewVariantDefinition(
-	bin.NoTypeIDEncoding, // NOTE: the associated-token-account program has no ID encoding.
+	bin.Uint8TypeIDEncoding,
 	[]bin.VariantType{
 		{
 			"Create", (*Create)(nil),
+		},
+		{
+			"CreateIdempotent", (*CreateIdempotent)(nil),
 		},
 	},
 )
@@ -67,7 +76,11 @@ func (inst *Instruction) Accounts() (out []*solana.AccountMeta) {
 }
 
 func (inst *Instruction) Data() ([]byte, error) {
-	return []byte{}, nil
+	buf := new(bytes.Buffer)
+	if err := bin.NewBinEncoder(buf).Encode(inst); err != nil {
+		return nil, fmt.Errorf("unable to encode instruction: %w", err)
+	}
+	return buf.Bytes(), nil
 }
 
 func (inst *Instruction) TextEncode(encoder *text.Encoder, option *text.Option) error {
@@ -79,6 +92,10 @@ func (inst *Instruction) UnmarshalWithDecoder(decoder *bin.Decoder) error {
 }
 
 func (inst Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
+	err := encoder.WriteUint8(inst.TypeID.Uint8())
+	if err != nil {
+		return fmt.Errorf("unable to write variant type: %w", err)
+	}
 	return encoder.Encode(inst.Impl)
 }
 
