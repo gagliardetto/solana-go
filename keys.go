@@ -209,7 +209,7 @@ func (p PublicKey) MarshalBSONValue() (bsontype.Type, []byte, error) {
 // UnmarshalBSONValue implements the bson.ValueUnmarshaler interface.
 func (p *PublicKey) UnmarshalBSONValue(t bsontype.Type, data []byte) (err error) {
 	var s string
-	if err := bson.Unmarshal(data, &s); err != nil {
+	if err := bson.UnmarshalValue(t, data, &s); err != nil {
 		return err
 	}
 
