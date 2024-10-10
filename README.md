@@ -69,7 +69,7 @@ Thanks!
 - [ ] Clients for Solana Program Library (SPL)
   - [x] [SPL token](/programs/token)
   - [x] [associated-token-account](/programs/associated-token-account)
-  - [ ] memo
+  - [x] memo
   - [ ] name-service
   - [ ] ...
 - [ ] Client for Serum
