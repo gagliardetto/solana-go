@@ -19,6 +19,7 @@ package ws
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -31,6 +32,8 @@ import (
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 )
+
+var ErrSubscriptionClosed = errors.New("subscription closed")
 
 type result interface{}
 

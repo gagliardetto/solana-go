@@ -88,7 +88,10 @@ type ProgramSubscription struct {
 
 func (sw *ProgramSubscription) Recv() (*ProgramResult, error) {
 	select {
-	case d := <-sw.sub.stream:
+	case d, ok := <-sw.sub.stream:
+		if !ok {
+			return nil, ErrSubscriptionClosed
+		}
 		return d.(*ProgramResult), nil
 	case err := <-sw.sub.err:
 		return nil, err

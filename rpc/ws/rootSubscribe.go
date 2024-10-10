@@ -44,7 +44,10 @@ type RootSubscription struct {
 
 func (sw *RootSubscription) Recv() (*RootResult, error) {
 	select {
-	case d := <-sw.sub.stream:
+	case d, ok := <-sw.sub.stream:
+		if !ok {
+			return nil, ErrSubscriptionClosed
+		}
 		return d.(*RootResult), nil
 	case err := <-sw.sub.err:
 		return nil, err
