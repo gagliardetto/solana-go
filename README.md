@@ -194,10 +194,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	processTransactionWithAddressLookups(*parsed, rpcClient)
+	processTransactionWithAddressLookups(parsed, rpcClient)
 }
 
-func processTransactionWithAddressLookups(txx solana.Transaction, rpcClient *rpc.Client) {
+func processTransactionWithAddressLookups(txx *solana.Transaction, rpcClient *rpc.Client) {
 	if !txx.Message.IsVersioned() {
 		fmt.Println("tx is not versioned; only versioned transactions can contain lookups")
 		return
