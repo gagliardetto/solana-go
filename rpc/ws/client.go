@@ -43,6 +43,7 @@ type Client struct {
 	subscriptionByRequestID map[uint64]*Subscription
 	subscriptionByWSSubID   map[uint64]*Subscription
 	reconnectOnErr          bool
+	shortID                 bool
 }
 
 const (
@@ -74,6 +75,10 @@ func ConnectWithOptions(ctx context.Context, rpcEndpoint string, opt *Options) (
 		Proxy:             http.ProxyFromEnvironment,
 		HandshakeTimeout:  DefaultHandshakeTimeout,
 		EnableCompression: true,
+	}
+
+	if opt != nil && opt.ShortID {
+		c.shortID = opt.ShortID
 	}
 
 	if opt != nil && opt.HandshakeTimeout > 0 {
@@ -287,7 +292,7 @@ func (c *Client) closeSubscription(reqID uint64, err error) {
 }
 
 func (c *Client) unsubscribe(subID uint64, method string) error {
-	req := newRequest([]interface{}{subID}, method, nil)
+	req := newRequest([]interface{}{subID}, method, nil, c.shortID)
 	data, err := req.encode()
 	if err != nil {
 		return fmt.Errorf("unable to encode unsubscription message for subID %d and method %s", subID, method)
@@ -311,7 +316,7 @@ func (c *Client) subscribe(
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	req := newRequest(params, subscriptionMethod, conf)
+	req := newRequest(params, subscriptionMethod, conf, c.shortID)
 	data, err := req.encode()
 	if err != nil {
 		return nil, fmt.Errorf("subscribe: unable to encode subsciption request: %w", err)
