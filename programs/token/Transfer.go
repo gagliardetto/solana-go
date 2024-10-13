@@ -147,16 +147,16 @@ func (inst *Transfer) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.Accounts[0] == nil {
-			return fmt.Errorf("accounts.Source is not set")
+			return errors.New("accounts.Source is not set")
 		}
 		if inst.Accounts[1] == nil {
-			return fmt.Errorf("accounts.Destination is not set")
+			return errors.New("accounts.Destination is not set")
 		}
 		if inst.Accounts[2] == nil {
-			return fmt.Errorf("accounts.Owner is not set")
+			return errors.New("accounts.Owner is not set")
 		}
 		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
-			return fmt.Errorf("accounts.Signers is not set")
+			return errors.New("accounts.Signers is not set")
 		}
 		if len(inst.Signers) > MAX_SIGNERS {
 			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))

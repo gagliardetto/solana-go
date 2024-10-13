@@ -17,7 +17,6 @@ package system
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
@@ -166,10 +165,10 @@ func (inst *CreateAccountWithSeed) Validate() error {
 	// Check whether all accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return fmt.Errorf("FundingAccount is not set")
+			return errors.New("FundingAccount is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return fmt.Errorf("CreatedAccount is not set")
+			return errors.New("CreatedAccount is not set")
 		}
 	}
 	return nil

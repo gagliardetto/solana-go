@@ -19,6 +19,7 @@ package tokenregistry
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/gagliardetto/solana-go"
@@ -44,7 +45,7 @@ func GetTokenRegistryEntry(ctx context.Context, rpcCli *rpc.Client, mintAddress 
 		return nil, err
 	}
 	if resp == nil {
-		return nil, fmt.Errorf("resp empty... cannot find account")
+		return nil, errors.New("resp empty... cannot find account")
 	}
 
 	for _, keyedAcct := range resp {
@@ -74,7 +75,7 @@ func GetEntries(ctx context.Context, rpcCli *rpc.Client) (out []*TokenMeta, err 
 		return nil, err
 	}
 	if resp == nil {
-		return nil, fmt.Errorf("resp empty... cannot find accounts")
+		return nil, errors.New("resp empty... cannot find accounts")
 	}
 
 	for _, keyedAcct := range resp {
