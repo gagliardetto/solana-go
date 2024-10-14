@@ -18,10 +18,13 @@
 package solana
 
 import (
+	"crypto/ed25519"
+	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"flag"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -96,6 +99,89 @@ func TestPublicKeyFromBase58(t *testing.T) {
 				assert.Equal(t, test.expected, actual)
 			} else {
 				assert.Equal(t, test.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestPrivateKeyFromBase58(t *testing.T) {
+	tests := []struct {
+		name    string
+		in      string
+		want    string
+		wantErr error
+	}{
+		{
+			name: "normal case",
+			in:   "6HsFaXKVD7mo43oTbdqyGgAnYFeNNhqY75B3JGJ6K8a227KjjG3uW3v",
+			want: "6HsFaXKVD7mo43oTbdqyGgAnYFeNNhqY75B3JGJ6K8a227KjjG3uW3v",
+		},
+		{
+			name:    "edge case - empty string",
+			in:      "",
+			want:    "",
+			wantErr: errors.New("zero length string"),
+		},
+		{
+			name:    "edge case - invalid base58",
+			in:      "invalid-base58",
+			want:    "",
+			wantErr: errors.New("invalid base58 digit ('l')"),
+		},
+		{
+			name: "extreme case - very long input",
+			in:   strings.Repeat("3yZe7d", 100),
+			want: strings.Repeat("3yZe7d", 100),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := PrivateKeyFromBase58(test.in)
+			require.Equal(t, test.wantErr, err)
+			require.Equal(t, test.want, got.String())
+		})
+	}
+}
+
+func TestMustPrivateKeyFromBase58(t *testing.T) {
+	tests := []struct {
+		name      string
+		in        string
+		want      string
+		wantPanic bool
+	}{
+		{
+			name: "normal case",
+			in:   "3yZe7d",
+			want: "3yZe7d",
+		},
+		{
+			name:      "edge case - empty string",
+			in:        "",
+			wantPanic: true,
+		},
+		{
+			name:      "edge case - invalid base58",
+			in:        "invalid-base58",
+			wantPanic: true,
+		},
+		{
+			name: "extreme case - very long input",
+			in:   strings.Repeat("3yZe7d", 100),
+			want: strings.Repeat("3yZe7d", 100),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if test.wantPanic {
+				require.Panics(t, func() {
+					MustPrivateKeyFromBase58(test.in)
+				})
+			} else {
+				got := MustPrivateKeyFromBase58(test.in)
+				require.Equal(t, test.want, got.String())
 			}
 		})
 	}
@@ -395,7 +481,38 @@ func TestGetAddedRemoved(t *testing.T) {
 		)
 	}
 }
+func TestIsOnCurve(t *testing.T) {
+	// Test a valid private key
+	privateKey, err := NewRandomPrivateKey()
+	if err != nil {
+		t.Errorf("Failed to generate private key: %v", err)
+	}
 
+	// Test a valid public key
+	publicKey := privateKey.PublicKey()
+	if !IsOnCurve(publicKey.Bytes()) {
+		t.Errorf("Valid public key is not on the curve")
+	}
+
+	// Test an invalid key (too short)
+	shortKey := []byte{1, 2, 3}
+	if IsOnCurve(shortKey) {
+		t.Errorf("Invalid key (too short) is on the curve")
+	}
+
+	// Test an invalid key (too long)
+	longKey := make([]byte, ed25519.PrivateKeySize+1)
+	if IsOnCurve(longKey) {
+		t.Errorf("Invalid key (too long) is on the curve")
+	}
+
+	// Test an invalid key (random bytes)
+	randKey := make([]byte, ed25519.PrivateKeySize)
+	_, _ = rand.Read(randKey)
+	if IsOnCurve(randKey) {
+		t.Errorf("Invalid key (random bytes) is on the curve")
+	}
+}
 func TestIsNativeProgramID(t *testing.T) {
 	require.True(t, isNativeProgramID(ConfigProgramID))
 }

@@ -37,6 +37,7 @@ import (
 
 type PrivateKey []byte
 
+// MustPrivateKeyFromBase58 returns a PrivateKey from a base58-encoded string, panicking if the input is invalid.
 func MustPrivateKeyFromBase58(in string) PrivateKey {
 	out, err := PrivateKeyFromBase58(in)
 	if err != nil {
@@ -45,10 +46,29 @@ func MustPrivateKeyFromBase58(in string) PrivateKey {
 	return out
 }
 
+// PrivateKeyFromBase58 returns a PrivateKey from a base58-encoded string.
+//
+// PrivateKeyFromBase58 returns a PrivateKey from a base58-encoded string. The function
+// first decodes the input string using base58, then checks if the resulting private key
+// is valid by deriving the corresponding public key and checking if it is on the Ed25519
+// curve. If the private key is invalid, an error is returned.
+//
+// Parameters:
+//
+//	privkey - the base58-encoded private key string
+//
+// Returns:
+//
+//	PrivateKey - the decoded private key
+//	error - an error if the input string is invalid or the derived public key is not on the curve
 func PrivateKeyFromBase58(privkey string) (PrivateKey, error) {
 	res, err := base58.Decode(privkey)
 	if err != nil {
 		return nil, err
+	}
+	pub := PrivateKey(res).PublicKey().Bytes()
+	if !IsOnCurve(pub) {
+		return nil, errors.New("invalid private key")
 	}
 	return res, nil
 }
@@ -72,6 +92,15 @@ func (k PrivateKey) String() string {
 	return base58.Encode(k)
 }
 
+// NewRandomPrivateKey generates a new random Ed25519 private key.
+//
+// NewRandomPrivateKey returns a new random Ed25519 private key. The private key is
+// generated using a cryptographically secure random number generator.
+//
+// Returns:
+//
+//	PrivateKey: a new random Ed25519 private key
+//	error: an error if the key generation fails
 func NewRandomPrivateKey() (PrivateKey, error) {
 	pub, priv, err := ed25519.GenerateKey(crypto_rand.Reader)
 	if err != nil {
