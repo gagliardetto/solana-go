@@ -133,64 +133,10 @@ type CompiledInstruction struct {
 	// List of ordered indices into the message.accountKeys array indicating which accounts to pass to the program.
 	// NOTE: it is actually a []uint8, but using a uint16 because []uint8 is treated as a []byte everywhere,
 	// and that can be an issue.
-	AccountsWithKey []PublicKey `json:"omitempty"`
-	//
 	Accounts []uint16 `json:"accounts"`
 
 	// The program input data encoded in a base-58 string.
 	Data Base58 `json:"data"`
-
-	//
-	StackHeight int64 `json:"stackHeight"`
-}
-
-type compiledInstruction struct {
-	// Index into the message.accountKeys array indicating the program account that executes this instruction.
-	// NOTE: it is actually a uint8, but using a uint16 because uint8 is treated as a byte everywhere,
-	// and that can be an issue.
-	ProgramIDIndex uint16 `json:"programIdIndex"`
-
-	// List of ordered indices into the message.accountKeys array indicating which accounts to pass to the program.
-	// NOTE: it is actually a []uint8, but using a uint16 because []uint8 is treated as a []byte everywhere,
-	// and that can be an issue.
-	Accounts []interface{} `json:"accounts"`
-
-	// The program input data encoded in a base-58 string.
-	Data Base58 `json:"data"`
-
-	//
-	StackHeight int64 `json:"stackHeight"`
-}
-
-func (ci *CompiledInstruction) UnmarshalJSON(data []byte) error {
-	in := compiledInstruction{}
-	err := json.Unmarshal(data, &in)
-	if err != nil {
-		return err
-	}
-	//
-	ci.ProgramIDIndex = in.ProgramIDIndex
-	ci.Data = in.Data
-	ci.StackHeight = in.StackHeight
-	ci.Accounts = make([]uint16, 0)
-	if len(in.Accounts) == 0 {
-		return nil
-	}
-	_, ok := in.Accounts[0].(string)
-	if ok {
-		accountsWithKey := make([]PublicKey, len(in.Accounts))
-		for i, item := range in.Accounts {
-			accountsWithKey[i] = MustPublicKeyFromBase58(item.(string))
-		}
-		ci.AccountsWithKey = accountsWithKey
-	} else {
-		AccountsWithIndex := make([]uint16, len(in.Accounts))
-		for i, item := range in.Accounts {
-			AccountsWithIndex[i] = uint16(item.(float64))
-		}
-		ci.Accounts = AccountsWithIndex
-	}
-	return nil
 }
 
 func (ci *CompiledInstruction) ResolveInstructionAccounts(message *Message) ([]*AccountMeta, error) {

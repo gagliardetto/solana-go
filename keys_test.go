@@ -32,27 +32,32 @@ func TestPublicKeyFromBytes(t *testing.T) {
 	tests := []struct {
 		name     string
 		inHex    string
+		isErr    bool
 		expected PublicKey
 	}{
 		{
 			"empty",
 			"",
-			MustPublicKeyFromBase58("11111111111111111111111111111111"),
+			true,
+			PublicKey{},
 		},
 		{
 			"smaller than required",
 			"010203040506",
-			MustPublicKeyFromBase58("4wBqpZM9k69W87zdYXT2bRtLViWqTiJV3i2Kn9q7S6j"),
+			true,
+			PublicKey{},
 		},
 		{
 			"equal to 32 bytes",
 			"0102030405060102030405060102030405060102030405060102030405060101",
+			false,
 			MustPublicKeyFromBase58("4wBqpZM9msxygzsdeLPq6Zw3LoiAxJk3GjtKPpqkcsi"),
 		},
 		{
 			"longer than required",
 			"0102030405060102030405060102030405060102030405060102030405060101FFFFFFFFFF",
-			MustPublicKeyFromBase58("4wBqpZM9msxygzsdeLPq6Zw3LoiAxJk3GjtKPpqkcsi"),
+			true,
+			PublicKey{},
 		},
 	}
 
@@ -61,8 +66,15 @@ func TestPublicKeyFromBytes(t *testing.T) {
 			bytes, err := hex.DecodeString(test.inHex)
 			require.NoError(t, err)
 
-			actual := PublicKeyFromBytes(bytes)
-			assert.Equal(t, test.expected, actual, "%s != %s", test.expected, actual)
+			if test.isErr {
+				require.Panics(t, func() {
+					actual := PublicKeyFromBytes(bytes)
+					require.Equal(t, zeroPublicKey, actual)
+				})
+			} else {
+				actual := PublicKeyFromBytes(bytes)
+				require.Equal(t, test.expected, actual)
+			}
 		})
 	}
 }
