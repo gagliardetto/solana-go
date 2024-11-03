@@ -216,7 +216,14 @@ type TransactionMeta struct {
 
 	LoadedAddresses LoadedAddresses `json:"loadedAddresses"`
 
+	ReturnData ReturnData `json:"returnData"`
+
 	ComputeUnitsConsumed *uint64 `json:"computeUnitsConsumed"`
+}
+
+type ReturnData struct {
+	ProgramId solana.PublicKey `json:"programId"`
+	Data      solana.Data      `json:"data"`
 }
 
 type InnerInstruction struct {
@@ -225,15 +232,7 @@ type InnerInstruction struct {
 	Index uint16 `json:"index"`
 
 	// Ordered list of inner program instructions that were invoked during a single transaction instruction.
-	Instructions []CompiledInnerInstruction `json:"instructions"`
-}
-
-type CompiledInnerInstruction struct {
-	solana.CompiledInstruction
-
-	// Invocation stack height of this instruction. Instruction stack height
-	// starts at 1 for transaction instructions.
-	StackHeight uint8 `json:"stackHeight"`
+	Instructions []solana.CompiledInstruction `json:"instructions"`
 }
 
 // Ok  interface{} `json:"Ok"`  // <null> Transaction was successful
@@ -511,7 +510,7 @@ type ParsedInstruction struct {
 	Parsed      *InstructionInfoEnvelope `json:"parsed,omitempty"`
 	Data        solana.Base58            `json:"data,omitempty"`
 	Accounts    []solana.PublicKey       `json:"accounts,omitempty"`
-	StackHeight int                      `json:"stackHeight"`
+	StackHeight int64                    `json:"stackHeight"`
 }
 
 type InstructionInfoEnvelope struct {

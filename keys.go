@@ -37,6 +37,17 @@ import (
 
 type PrivateKey []byte
 
+// IsValid returns whether the private key is valid.
+func (k PrivateKey) IsValid() bool {
+	_, err := ValidatePrivateKey(k)
+	return err == nil
+}
+
+func (k PrivateKey) Validate() error {
+	_, err := ValidatePrivateKey(k)
+	return err
+}
+
 func MustPrivateKeyFromBase58(in string) PrivateKey {
 	out, err := PrivateKeyFromBase58(in)
 	if err != nil {
@@ -50,7 +61,23 @@ func PrivateKeyFromBase58(privkey string) (PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
+	// validate
+	if _, err := ValidatePrivateKey(res); err != nil {
+		return nil, err
+	}
 	return res, nil
+}
+
+func ValidatePrivateKey(b []byte) (bool, error) {
+	if len(b) != ed25519.PrivateKeySize {
+		return false, fmt.Errorf("invalid private key size, expected %v, got %d", ed25519.PrivateKeySize, len(b))
+	}
+	// check if the public key is on the ed25519 curve
+	pub := ed25519.PrivateKey(b).Public().(ed25519.PublicKey)
+	if !IsOnCurve(pub) {
+		return false, errors.New("the corresponding public key is not on the ed25519 curve")
+	}
+	return true, nil
 }
 
 func PrivateKeyFromSolanaKeygenFile(file string) (PrivateKey, error) {
@@ -59,13 +86,16 @@ func PrivateKeyFromSolanaKeygenFile(file string) (PrivateKey, error) {
 		return nil, fmt.Errorf("read keygen file: %w", err)
 	}
 
-	var values []byte
-	err = json.Unmarshal(content, &values)
+	var privateKeyBytes []byte
+	err = json.Unmarshal(content, &privateKeyBytes)
 	if err != nil {
 		return nil, fmt.Errorf("decode keygen file: %w", err)
 	}
 
-	return PrivateKey([]byte(values)), nil
+	if _, err := ValidatePrivateKey(privateKeyBytes); err != nil {
+		return nil, fmt.Errorf("invalid private key: %w", err)
+	}
+	return PrivateKey(privateKeyBytes), nil
 }
 
 func (k PrivateKey) String() string {
@@ -83,6 +113,9 @@ func NewRandomPrivateKey() (PrivateKey, error) {
 }
 
 func (k PrivateKey) Sign(payload []byte) (Signature, error) {
+	if err := k.Validate(); err != nil {
+		return Signature{}, err
+	}
 	p := ed25519.PrivateKey(k)
 	signData, err := p.Sign(crypto_rand.Reader, payload, crypto.Hash(0))
 	if err != nil {
@@ -96,6 +129,10 @@ func (k PrivateKey) Sign(payload []byte) (Signature, error) {
 }
 
 func (k PrivateKey) PublicKey() PublicKey {
+	if err := k.Validate(); err != nil {
+		panic(err)
+	}
+
 	p := ed25519.PrivateKey(k)
 	pub := p.Public().(ed25519.PublicKey)
 
@@ -115,18 +152,16 @@ func (p PublicKey) Verify(message []byte, signature Signature) bool {
 
 type PublicKey [PublicKeyLength]byte
 
+// PublicKeyFromBytes creates a PublicKey from a byte slice that must be 32 bytes long.
+// NOTE: it will accept on- and off-curve pubkeys.
 func PublicKeyFromBytes(in []byte) (out PublicKey) {
 	byteCount := len(in)
-	if byteCount == 0 {
-		return
+
+	if byteCount != PublicKeyLength {
+		panic(fmt.Errorf("invalid public key size, expected %v, got %d", PublicKeyLength, byteCount))
 	}
 
-	max := PublicKeyLength
-	if byteCount < max {
-		max = byteCount
-	}
-
-	copy(out[:], in[0:max])
+	copy(out[:], in)
 	return
 }
 
@@ -143,6 +178,8 @@ func MustPublicKeyFromBase58(in string) PublicKey {
 	return out
 }
 
+// PublicKeyFromBase58 creates a PublicKey from a base58 encoded string.
+// NOTE: it will accept on- and off-curve pubkeys.
 func PublicKeyFromBase58(in string) (out PublicKey, err error) {
 	val, err := base58.Decode(in)
 	if err != nil {
@@ -551,14 +588,17 @@ func isNativeProgramID(key PublicKey) bool {
 }
 
 const (
-	/// Number of bytes in a pubkey.
+	// Number of bytes in a pubkey.
 	PublicKeyLength = 32
 	// Maximum length of derived pubkey seed.
 	MaxSeedLength = 32
 	// Maximum number of seeds.
 	MaxSeeds = 16
-	/// Number of bytes in a signature.
+	// Number of bytes in a signature.
 	SignatureLength = 64
+
+	// Number of bytes in a private key.
+	PrivateKeyLength = ed25519.PrivateKeySize
 
 	// // Maximum string length of a base58 encoded pubkey.
 	// MaxBase58Length = 44
@@ -621,6 +661,9 @@ func CreateProgramAddress(seeds [][]byte, programID PublicKey) (PublicKey, error
 
 // Check if the provided `b` is on the ed25519 curve.
 func IsOnCurve(b []byte) bool {
+	if len(b) != ed25519.PublicKeySize {
+		return false
+	}
 	_, err := new(edwards25519.Point).SetBytes(b)
 	isOnCurve := err == nil
 	return isOnCurve

@@ -141,7 +141,7 @@ type CompiledInstruction struct {
 	Data Base58 `json:"data"`
 
 	//
-	StackHeight int `json:"stackHeight"`
+	StackHeight int64 `json:"stackHeight"`
 }
 
 type compiledInstruction struct {
@@ -159,11 +159,7 @@ type compiledInstruction struct {
 	Data Base58 `json:"data"`
 
 	//
-	StackHeight int `json:"stackHeight"`
-}
-
-func (ci *CompiledInstruction) MarshalJSON() ([]byte, error) {
-	return json.Marshal(ci)
+	StackHeight int64 `json:"stackHeight"`
 }
 
 func (ci *CompiledInstruction) UnmarshalJSON(data []byte) error {
