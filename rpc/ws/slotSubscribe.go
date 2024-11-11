@@ -14,6 +14,8 @@
 
 package ws
 
+import "context"
+
 type SlotResult struct {
 	Parent uint64 `json:"parent"`
 	Root   uint64 `json:"root"`
@@ -45,8 +47,10 @@ type SlotSubscription struct {
 	sub *Subscription
 }
 
-func (sw *SlotSubscription) Recv() (*SlotResult, error) {
+func (sw *SlotSubscription) Recv(ctx context.Context) (*SlotResult, error) {
 	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	case d, ok := <-sw.sub.stream:
 		if !ok {
 			return nil, ErrSubscriptionClosed

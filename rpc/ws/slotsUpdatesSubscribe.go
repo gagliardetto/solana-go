@@ -14,7 +14,11 @@
 
 package ws
 
-import "github.com/gagliardetto/solana-go"
+import (
+	"context"
+
+	"github.com/gagliardetto/solana-go"
+)
 
 type SlotsUpdatesResult struct {
 	// The parent slot.
@@ -77,8 +81,10 @@ type SlotsUpdatesSubscription struct {
 	sub *Subscription
 }
 
-func (sw *SlotsUpdatesSubscription) Recv() (*SlotsUpdatesResult, error) {
+func (sw *SlotsUpdatesSubscription) Recv(ctx context.Context) (*SlotsUpdatesResult, error) {
 	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	case d, ok := <-sw.sub.stream:
 		if !ok {
 			return nil, ErrSubscriptionClosed

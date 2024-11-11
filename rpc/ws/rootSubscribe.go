@@ -14,6 +14,8 @@
 
 package ws
 
+import "context"
+
 type RootResult uint64
 
 // SignatureSubscribe subscribes to receive notification
@@ -42,8 +44,10 @@ type RootSubscription struct {
 	sub *Subscription
 }
 
-func (sw *RootSubscription) Recv() (*RootResult, error) {
+func (sw *RootSubscription) Recv(ctx context.Context) (*RootResult, error) {
 	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	case d, ok := <-sw.sub.stream:
 		if !ok {
 			return nil, ErrSubscriptionClosed

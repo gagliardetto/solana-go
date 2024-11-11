@@ -66,6 +66,6 @@ func TestStreamOpenOrders(t *testing.T) {
 	client, err := ws.Connect(context.Background(), rpcURL)
 	require.NoError(t, err)
 
-	err = StreamOpenOrders(client)
+	err = StreamOpenOrders(context.Background(), client)
 	require.NoError(t, err)
 }
