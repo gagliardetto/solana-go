@@ -94,7 +94,7 @@ The RPC and WS client implementation is based on [this RPC spec](https://github.
 
 ## Requirements
 
-- Go 1.18 or later
+- Go 1.19 or later
 
 ## Installation
 
