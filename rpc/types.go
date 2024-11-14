@@ -153,6 +153,8 @@ type TokenBalance struct {
 
 	// Pubkey of token balance's owner.
 	Owner *solana.PublicKey `json:"owner,omitempty"`
+	// Pubkey of token program.
+	ProgramId *solana.PublicKey `json:"programId,omitempty"`
 
 	// Pubkey of the token's mint.
 	Mint          solana.PublicKey `json:"mint"`
