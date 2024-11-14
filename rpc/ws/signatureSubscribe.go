@@ -15,6 +15,7 @@
 package ws
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -67,8 +68,10 @@ type SignatureSubscription struct {
 	sub *Subscription
 }
 
-func (sw *SignatureSubscription) Recv() (*SignatureResult, error) {
+func (sw *SignatureSubscription) Recv(ctx context.Context) (*SignatureResult, error) {
 	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	case d, ok := <-sw.sub.stream:
 		if !ok {
 			return nil, ErrSubscriptionClosed

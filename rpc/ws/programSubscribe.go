@@ -15,6 +15,8 @@
 package ws
 
 import (
+	"context"
+
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 )
@@ -86,8 +88,10 @@ type ProgramSubscription struct {
 	sub *Subscription
 }
 
-func (sw *ProgramSubscription) Recv() (*ProgramResult, error) {
+func (sw *ProgramSubscription) Recv(ctx context.Context) (*ProgramResult, error) {
 	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	case d, ok := <-sw.sub.stream:
 		if !ok {
 			return nil, ErrSubscriptionClosed

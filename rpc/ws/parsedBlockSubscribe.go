@@ -15,6 +15,8 @@
 package ws
 
 import (
+	"context"
+
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 )
@@ -92,8 +94,10 @@ type ParsedBlockSubscription struct {
 	sub *Subscription
 }
 
-func (sw *ParsedBlockSubscription) Recv() (*ParsedBlockResult, error) {
+func (sw *ParsedBlockSubscription) Recv(ctx context.Context) (*ParsedBlockResult, error) {
 	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	case d := <-sw.sub.stream:
 		return d.(*ParsedBlockResult), nil
 	case err := <-sw.sub.err:

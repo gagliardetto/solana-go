@@ -24,6 +24,7 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 	client, err := ws.Connect(context.Background(), rpc.MainNetBeta_WS)
 	if err != nil {
 		panic(err)
@@ -43,7 +44,7 @@ func main() {
 	defer sub.Unsubscribe()
 
 	for {
-		got, err := sub.Recv()
+		got, err := sub.Recv(ctx)
 		if err != nil {
 			panic(err)
 		}

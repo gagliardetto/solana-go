@@ -15,6 +15,8 @@
 package ws
 
 import (
+	"context"
+
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -59,8 +61,10 @@ type VoteSubscription struct {
 	sub *Subscription
 }
 
-func (sw *VoteSubscription) Recv() (*VoteResult, error) {
+func (sw *VoteSubscription) Recv(ctx context.Context) (*VoteResult, error) {
 	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	case d, ok := <-sw.sub.stream:
 		if !ok {
 			return nil, ErrSubscriptionClosed

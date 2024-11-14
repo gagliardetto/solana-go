@@ -101,14 +101,14 @@ func FetchMarket(ctx context.Context, rpcCli *rpc.Client, marketAddr solana.Publ
 	return meta, nil
 }
 
-func StreamOpenOrders(client *ws.Client) error {
+func StreamOpenOrders(ctx context.Context, client *ws.Client) error {
 	sub, err := client.ProgramSubscribe(DEXProgramIDV2, rpc.CommitmentSingleGossip)
 	if err != nil {
 		return fmt.Errorf("unable to subscribe to programID %q: %w", DEXProgramIDV2, err)
 	}
 	count := 0
 	for {
-		d, err := sub.Recv()
+		d, err := sub.Recv(ctx)
 		if err != nil {
 			return fmt.Errorf("received error from programID subscription: %w", err)
 		}

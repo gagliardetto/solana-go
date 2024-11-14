@@ -15,6 +15,7 @@
 package ws
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gagliardetto/solana-go"
@@ -148,8 +149,10 @@ type BlockSubscription struct {
 	sub *Subscription
 }
 
-func (sw *BlockSubscription) Recv() (*BlockResult, error) {
+func (sw *BlockSubscription) Recv(ctx context.Context) (*BlockResult, error) {
 	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	case d, ok := <-sw.sub.stream:
 		if !ok {
 			return nil, ErrSubscriptionClosed
