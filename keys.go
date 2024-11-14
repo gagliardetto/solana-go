@@ -718,3 +718,19 @@ func FindTokenMetadataAddress(mint PublicKey) (PublicKey, uint8, error) {
 	}
 	return FindProgramAddress(seed, TokenMetadataProgramID)
 }
+
+// Get the marketAuthority(PDA) from the Market Initialization
+func GetAssociatedAuthority(programID PublicKey, marketAddr PublicKey) (PublicKey, uint8, error) {
+	var address PublicKey
+	var err error
+	bumpSeed := uint8(0)
+	endSeed := []byte{0, 0, 0, 0, 0, 0, 0}
+	for bumpSeed < 100 {
+		address, err = CreateProgramAddress([][]byte{marketAddr[:], []byte{byte(bumpSeed)}, endSeed}, programID)
+		if err == nil {
+			return address, bumpSeed, nil
+		}
+		bumpSeed++
+	}
+	return PublicKey{}, bumpSeed, errors.New("unable to find a valid program address")
+}
