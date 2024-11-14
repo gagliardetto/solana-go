@@ -762,7 +762,7 @@ func main() {
   }
   //---------------
 
-  recent, err := rpcClient.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
+  recent, err := rpcClient.GetLatestBlockhash(context.TODO(), rpc.CommitmentFinalized)
   if err != nil {
     panic(err)
   }
@@ -1072,7 +1072,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
+  example, err := client.GetLatestBlockhash(context.TODO(), rpc.CommitmentFinalized)
   if err != nil {
     panic(err)
   }
@@ -1125,7 +1125,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
+  example, err := client.GetLatestBlockhash(context.TODO(), rpc.CommitmentFinalized)
   if err != nil {
     panic(err)
   }
@@ -1227,7 +1227,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1263,7 +1263,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1301,7 +1301,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1367,7 +1367,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1424,7 +1424,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1465,7 +1465,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1631,7 +1631,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -2212,6 +2212,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
+  // DEPRECATED: This method is only available in solana-core v1.8 or older. Please use getLatestBlockhash for solana-core v1.9 or newer.
   recent, err := client.GetRecentBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
@@ -2409,7 +2410,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  recent, err := client.GetRecentBlockhash(
+  recent, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
