@@ -19,6 +19,7 @@ package token
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	bin "github.com/gagliardetto/binary"
@@ -52,7 +53,7 @@ func FetchMints(ctx context.Context, rpcCli *rpc.Client) (out []*Mint, err error
 		return nil, err
 	}
 	if resp == nil {
-		return nil, fmt.Errorf("resp empty... program account not found")
+		return nil, errors.New("resp empty... program account not found")
 	}
 
 	for _, keyedAcct := range resp {

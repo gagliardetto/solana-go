@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -38,7 +39,7 @@ func getClient() *rpc.Client {
 	for _, header := range httpHeaders {
 		headerArray := strings.SplitN(header, ": ", 2)
 		if len(headerArray) != 2 || strings.Contains(headerArray[0], " ") {
-			errorCheck("validating http headers", fmt.Errorf("invalid HTTP Header format"))
+			errorCheck("validating http headers", errors.New("invalid HTTP Header format"))
 		}
 		headers[headerArray[0]] = headerArray[1]
 	}
