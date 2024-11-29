@@ -305,6 +305,9 @@ type Account struct {
 
 	// The epoch at which this account will next owe rent
 	RentEpoch *big.Int `json:"rentEpoch"`
+
+	// The amount of storage space required to store the token account
+	Space uint64 `json:"space"`
 }
 
 type DataBytesOrJSON struct {

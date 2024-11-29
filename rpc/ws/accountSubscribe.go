@@ -23,11 +23,9 @@ import (
 
 type AccountResult struct {
 	Context struct {
-		Slot uint64
+		Slot uint64 `json:"slot"`
 	} `json:"context"`
-	Value struct {
-		rpc.Account
-	} `json:"value"`
+	Value *rpc.Account `json:"value"`
 }
 
 // AccountSubscribe subscribes to an account to receive notifications
