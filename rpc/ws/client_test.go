@@ -51,8 +51,8 @@ func Test_AccountSubscribe(t *testing.T) {
 		return
 	}
 	text.NewEncoder(os.Stdout).Encode(data, nil)
-	fmt.Println("OpenOrders: ", data.Value.Account.Owner)
-	fmt.Println("data: ", data.Value.Account.Data)
+	fmt.Println("OpenOrders: ", data.Value.Owner)
+	fmt.Println("data: ", data.Value.Data)
 	return
 }
 
@@ -107,8 +107,8 @@ func Test_AccountSubscribeWithHttpHeader(t *testing.T) {
 		t.Errorf("encoding error: %v", err)
 	}
 
-	t.Log("OpenOrders: ", data.Value.Account.Owner)
-	t.Log("data: ", data.Value.Account.Data)
+	t.Log("OpenOrders: ", data.Value.Owner)
+	t.Log("data: ", data.Value.Data)
 }
 
 func Test_ProgramSubscribe(t *testing.T) {
