@@ -376,6 +376,9 @@ func (wrap *DataBytesOrJSON) UnmarshalJSON(data []byte) error {
 // GetBinary returns the decoded bytes if the encoding is
 // "base58", "base64", or "base64+zstd".
 func (dt *DataBytesOrJSON) GetBinary() []byte {
+	if dt == nil || dt.asDecodedBinary == nil {
+		return nil
+	}
 	return dt.asDecodedBinary.Content
 }
 
