@@ -39,6 +39,9 @@ var (
 	FeatureProgramID = MustPublicKeyFromBase58("Feature111111111111111111111111111111111111")
 
 	ComputeBudget = MustPublicKeyFromBase58("ComputeBudget111111111111111111111111111111")
+
+	// Create and manage address lookup tables.
+	AddressLookupTableProgramID = MustPublicKeyFromBase58("AddressLookupTab1e1111111111111111111111111")
 )
 
 // SPL:
