@@ -78,6 +78,34 @@ func (t *Transaction) GetAccountIndex(account PublicKey) (uint16, error) {
 	return t.Message.GetAccountIndex(account)
 }
 
+// IsSimpleVoteTransaction checks if a transaction is a simple vote transaction.
+// A simple vote transaction meets these conditions:
+// 1. has 1 or 2 signatures
+// 2. is legacy message (this is implicit in solana-go as it mainly handles legacy messages)
+// 3. has only one instruction
+// 4. which must be Vote instruction
+func (t *Transaction) IsSimpleVoteTransaction() bool {
+	// Check signature count (condition 1)
+	if len(t.Signatures) == 0 || len(t.Signatures) > 2 {
+		return false
+	}
+
+	// Check instruction count (condition 3)
+	instructions := t.Message.Instructions
+	if len(instructions) != 1 {
+		return false
+	}
+
+	// Get the program ID for the instruction
+	programID := t.Message.AccountKeys[instructions[0].ProgramIDIndex]
+
+	// Check if it's a Vote instruction (condition 4)
+	// Note: This is the Vote Program ID on Solana mainnet
+	voteProgram := VoteProgramID // This is a built-in constant in solana-go
+
+	return programID.Equals(voteProgram)
+}
+
 // TransactionFromDecoder decodes a transaction from a decoder.
 func TransactionFromDecoder(decoder *bin.Decoder) (*Transaction, error) {
 	var out *Transaction
