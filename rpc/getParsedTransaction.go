@@ -131,7 +131,7 @@ func (obj GetParsedTransactionResult) MarshalWithEncoder(encoder *bin.Encoder) (
 	return nil
 }
 
-func (obj GetParsedTransactionResult) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
+func (obj *GetParsedTransactionResult) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 	// Deserialize `Slot`:
 	obj.Slot, err = decoder.ReadUint64(bin.LE)
 	if err != nil {
