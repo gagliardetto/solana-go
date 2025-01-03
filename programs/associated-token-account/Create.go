@@ -25,9 +25,10 @@ import (
 )
 
 type Create struct {
-	Payer  solana.PublicKey `bin:"-" borsh_skip:"true"`
-	Wallet solana.PublicKey `bin:"-" borsh_skip:"true"`
-	Mint   solana.PublicKey `bin:"-" borsh_skip:"true"`
+	Payer        solana.PublicKey `bin:"-" borsh_skip:"true"`
+	Wallet       solana.PublicKey `bin:"-" borsh_skip:"true"`
+	Mint         solana.PublicKey `bin:"-" borsh_skip:"true"`
+	TokenProgram solana.PublicKey `bin:"-" borsh_skip:"true"`
 
 	// [0] = [WRITE, SIGNER] Payer
 	// ··········· Funding account
@@ -73,12 +74,18 @@ func (inst *Create) SetMint(mint solana.PublicKey) *Create {
 	return inst
 }
 
+func (inst *Create) SetTokenProgram(tokenProgram solana.PublicKey) *Create {
+	inst.TokenProgram = tokenProgram
+	return inst
+}
+
 func (inst Create) Build() *Instruction {
 
 	// Find the associatedTokenAddress;
-	associatedTokenAddress, _, _ := solana.FindAssociatedTokenAddress(
+	associatedTokenAddress, _, _ := solana.FindAssociatedTokenAddressWithTokenProgramID(
 		inst.Wallet,
 		inst.Mint,
+		inst.TokenProgram,
 	)
 
 	keys := []*solana.AccountMeta{
@@ -108,7 +115,7 @@ func (inst Create) Build() *Instruction {
 			IsWritable: false,
 		},
 		{
-			PublicKey:  solana.TokenProgramID,
+			PublicKey:  inst.TokenProgram,
 			IsSigner:   false,
 			IsWritable: false,
 		},
@@ -147,9 +154,13 @@ func (inst *Create) Validate() error {
 	if inst.Mint.IsZero() {
 		return errors.New("Mint not set")
 	}
-	_, _, err := solana.FindAssociatedTokenAddress(
+	if inst.TokenProgram.IsZero() {
+		return errors.New("TokenProgram not set")
+	}
+	_, _, err := solana.FindAssociatedTokenAddressWithTokenProgramID(
 		inst.Wallet,
 		inst.Mint,
+		inst.TokenProgram,
 	)
 	if err != nil {
 		return fmt.Errorf("error while FindAssociatedTokenAddress: %w", err)
@@ -198,5 +209,19 @@ func NewCreateInstruction(
 	return NewCreateInstructionBuilder().
 		SetPayer(payer).
 		SetWallet(walletAddress).
-		SetMint(splTokenMintAddress)
+		SetMint(splTokenMintAddress).
+		SetTokenProgram(solana.TokenProgramID)
+}
+
+func NewCreateInstructionWithTokenProgram(
+	payer solana.PublicKey,
+	walletAddress solana.PublicKey,
+	splTokenMintAddress solana.PublicKey,
+	tokenProgram solana.PublicKey,
+) *Create {
+	return NewCreateInstructionBuilder().
+		SetPayer(payer).
+		SetWallet(walletAddress).
+		SetMint(splTokenMintAddress).
+		SetTokenProgram(tokenProgram)
 }
