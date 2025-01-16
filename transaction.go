@@ -802,3 +802,16 @@ func getStaticAccountIndex(tx *Transaction, key PublicKey) (int, bool) {
 	}
 	return -1, false
 }
+
+func (tx *Transaction) IsVote() bool {
+	// is vote if any of the instructions are of the vote program
+	for _, inst := range tx.Message.Instructions {
+		progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
+		if err == nil {
+			if progKey.Equals(VoteProgramID) {
+				return true
+			}
+		}
+	}
+	return false
+}
