@@ -3,6 +3,7 @@
 package stable_vault
 
 import (
+	"errors"
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -11,15 +12,41 @@ import (
 
 // RejectAdmin is the `reject_admin` instruction.
 type RejectAdmin struct {
+
+	// [0] = [] pending_admin
+	//
+	// [1] = [] vault
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewRejectAdminInstructionBuilder creates a new `RejectAdmin` instruction builder.
 func NewRejectAdminInstructionBuilder() *RejectAdmin {
 	nd := &RejectAdmin{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 0),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
+}
+
+// SetPendingAdminAccount sets the "pending_admin" account.
+func (inst *RejectAdmin) SetPendingAdminAccount(pendingAdmin ag_solanago.PublicKey) *RejectAdmin {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(pendingAdmin)
+	return inst
+}
+
+// GetPendingAdminAccount gets the "pending_admin" account.
+func (inst *RejectAdmin) GetPendingAdminAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
+// SetVaultAccount sets the "vault" account.
+func (inst *RejectAdmin) SetVaultAccount(vault ag_solanago.PublicKey) *RejectAdmin {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *RejectAdmin) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst RejectAdmin) Build() *Instruction {
@@ -42,6 +69,12 @@ func (inst RejectAdmin) ValidateAndBuild() (*Instruction, error) {
 func (inst *RejectAdmin) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
+		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.PendingAdmin is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.Vault is not set")
+		}
 	}
 	return nil
 }
@@ -58,7 +91,10 @@ func (inst *RejectAdmin) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Params[len=0]").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=0]").ParentFunc(func(accountsBranch ag_treeout.Branches) {})
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("pending_admin", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("        vault", inst.AccountMetaSlice.Get(1)))
+					})
 				})
 		})
 }
@@ -71,6 +107,11 @@ func (obj *RejectAdmin) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err er
 }
 
 // NewRejectAdminInstruction declares a new RejectAdmin instruction with the provided parameters and accounts.
-func NewRejectAdminInstruction() *RejectAdmin {
-	return NewRejectAdminInstructionBuilder()
+func NewRejectAdminInstruction(
+	// Accounts:
+	pendingAdmin ag_solanago.PublicKey,
+	vault ag_solanago.PublicKey) *RejectAdmin {
+	return NewRejectAdminInstructionBuilder().
+		SetPendingAdminAccount(pendingAdmin).
+		SetVaultAccount(vault)
 }

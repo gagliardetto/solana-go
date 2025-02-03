@@ -15,24 +15,36 @@ type Swap struct {
 	AmountIn         *uint64 `bin:"optional"`
 	MinimumAmountOut *uint64
 
-	// [0] = [WRITE] user_token_in
+	// [0] = [SIGNER] user
 	//
-	// [1] = [WRITE] user_token_out
+	// [1] = [WRITE] user_token_in
 	//
-	// [2] = [WRITE] vault_token_in
+	// [2] = [WRITE] user_token_out
 	//
-	// [3] = [WRITE] vault_token_out
+	// [3] = [WRITE] vault_token_in
 	//
-	// [4] = [WRITE] beneficiary_token_out
+	// [4] = [WRITE] vault_token_out
 	//
-	// [5] = [WRITE] pool
+	// [5] = [WRITE] beneficiary_token_out
+	//
+	// [6] = [WRITE] pool
+	//
+	// [7] = [] withdraw_authority
+	//
+	// [8] = [] vault
+	//
+	// [9] = [] vault_authority
+	//
+	// [10] = [] vault_program
+	//
+	// [11] = [] token_program
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewSwapInstructionBuilder creates a new `Swap` instruction builder.
 func NewSwapInstructionBuilder() *Swap {
 	nd := &Swap{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 6),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 12),
 	}
 	return nd
 }
@@ -49,70 +61,136 @@ func (inst *Swap) SetMinimumAmountOut(minimum_amount_out uint64) *Swap {
 	return inst
 }
 
+// SetUserAccount sets the "user" account.
+func (inst *Swap) SetUserAccount(user ag_solanago.PublicKey) *Swap {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(user).SIGNER()
+	return inst
+}
+
+// GetUserAccount gets the "user" account.
+func (inst *Swap) GetUserAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
 // SetUserTokenInAccount sets the "user_token_in" account.
 func (inst *Swap) SetUserTokenInAccount(userTokenIn ag_solanago.PublicKey) *Swap {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(userTokenIn).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(userTokenIn).WRITE()
 	return inst
 }
 
 // GetUserTokenInAccount gets the "user_token_in" account.
 func (inst *Swap) GetUserTokenInAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 // SetUserTokenOutAccount sets the "user_token_out" account.
 func (inst *Swap) SetUserTokenOutAccount(userTokenOut ag_solanago.PublicKey) *Swap {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(userTokenOut).WRITE()
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(userTokenOut).WRITE()
 	return inst
 }
 
 // GetUserTokenOutAccount gets the "user_token_out" account.
 func (inst *Swap) GetUserTokenOutAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(1)
+	return inst.AccountMetaSlice.Get(2)
 }
 
 // SetVaultTokenInAccount sets the "vault_token_in" account.
 func (inst *Swap) SetVaultTokenInAccount(vaultTokenIn ag_solanago.PublicKey) *Swap {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(vaultTokenIn).WRITE()
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(vaultTokenIn).WRITE()
 	return inst
 }
 
 // GetVaultTokenInAccount gets the "vault_token_in" account.
 func (inst *Swap) GetVaultTokenInAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(2)
+	return inst.AccountMetaSlice.Get(3)
 }
 
 // SetVaultTokenOutAccount sets the "vault_token_out" account.
 func (inst *Swap) SetVaultTokenOutAccount(vaultTokenOut ag_solanago.PublicKey) *Swap {
-	inst.AccountMetaSlice[3] = ag_solanago.Meta(vaultTokenOut).WRITE()
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(vaultTokenOut).WRITE()
 	return inst
 }
 
 // GetVaultTokenOutAccount gets the "vault_token_out" account.
 func (inst *Swap) GetVaultTokenOutAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(3)
+	return inst.AccountMetaSlice.Get(4)
 }
 
 // SetBeneficiaryTokenOutAccount sets the "beneficiary_token_out" account.
 func (inst *Swap) SetBeneficiaryTokenOutAccount(beneficiaryTokenOut ag_solanago.PublicKey) *Swap {
-	inst.AccountMetaSlice[4] = ag_solanago.Meta(beneficiaryTokenOut).WRITE()
+	inst.AccountMetaSlice[5] = ag_solanago.Meta(beneficiaryTokenOut).WRITE()
 	return inst
 }
 
 // GetBeneficiaryTokenOutAccount gets the "beneficiary_token_out" account.
 func (inst *Swap) GetBeneficiaryTokenOutAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(4)
+	return inst.AccountMetaSlice.Get(5)
 }
 
 // SetPoolAccount sets the "pool" account.
 func (inst *Swap) SetPoolAccount(pool ag_solanago.PublicKey) *Swap {
-	inst.AccountMetaSlice[5] = ag_solanago.Meta(pool).WRITE()
+	inst.AccountMetaSlice[6] = ag_solanago.Meta(pool).WRITE()
 	return inst
 }
 
 // GetPoolAccount gets the "pool" account.
 func (inst *Swap) GetPoolAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(5)
+	return inst.AccountMetaSlice.Get(6)
+}
+
+// SetWithdrawAuthorityAccount sets the "withdraw_authority" account.
+func (inst *Swap) SetWithdrawAuthorityAccount(withdrawAuthority ag_solanago.PublicKey) *Swap {
+	inst.AccountMetaSlice[7] = ag_solanago.Meta(withdrawAuthority)
+	return inst
+}
+
+// GetWithdrawAuthorityAccount gets the "withdraw_authority" account.
+func (inst *Swap) GetWithdrawAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(7)
+}
+
+// SetVaultAccount sets the "vault" account.
+func (inst *Swap) SetVaultAccount(vault ag_solanago.PublicKey) *Swap {
+	inst.AccountMetaSlice[8] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *Swap) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(8)
+}
+
+// SetVaultAuthorityAccount sets the "vault_authority" account.
+func (inst *Swap) SetVaultAuthorityAccount(vaultAuthority ag_solanago.PublicKey) *Swap {
+	inst.AccountMetaSlice[9] = ag_solanago.Meta(vaultAuthority)
+	return inst
+}
+
+// GetVaultAuthorityAccount gets the "vault_authority" account.
+func (inst *Swap) GetVaultAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(9)
+}
+
+// SetVaultProgramAccount sets the "vault_program" account.
+func (inst *Swap) SetVaultProgramAccount(vaultProgram ag_solanago.PublicKey) *Swap {
+	inst.AccountMetaSlice[10] = ag_solanago.Meta(vaultProgram)
+	return inst
+}
+
+// GetVaultProgramAccount gets the "vault_program" account.
+func (inst *Swap) GetVaultProgramAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(10)
+}
+
+// SetTokenProgramAccount sets the "token_program" account.
+func (inst *Swap) SetTokenProgramAccount(tokenProgram ag_solanago.PublicKey) *Swap {
+	inst.AccountMetaSlice[11] = ag_solanago.Meta(tokenProgram)
+	return inst
+}
+
+// GetTokenProgramAccount gets the "token_program" account.
+func (inst *Swap) GetTokenProgramAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(11)
 }
 
 func (inst Swap) Build() *Instruction {
@@ -143,22 +221,40 @@ func (inst *Swap) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return errors.New("accounts.UserTokenIn is not set")
+			return errors.New("accounts.User is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return errors.New("accounts.UserTokenOut is not set")
+			return errors.New("accounts.UserTokenIn is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
-			return errors.New("accounts.VaultTokenIn is not set")
+			return errors.New("accounts.UserTokenOut is not set")
 		}
 		if inst.AccountMetaSlice[3] == nil {
-			return errors.New("accounts.VaultTokenOut is not set")
+			return errors.New("accounts.VaultTokenIn is not set")
 		}
 		if inst.AccountMetaSlice[4] == nil {
-			return errors.New("accounts.BeneficiaryTokenOut is not set")
+			return errors.New("accounts.VaultTokenOut is not set")
 		}
 		if inst.AccountMetaSlice[5] == nil {
+			return errors.New("accounts.BeneficiaryTokenOut is not set")
+		}
+		if inst.AccountMetaSlice[6] == nil {
 			return errors.New("accounts.Pool is not set")
+		}
+		if inst.AccountMetaSlice[7] == nil {
+			return errors.New("accounts.WithdrawAuthority is not set")
+		}
+		if inst.AccountMetaSlice[8] == nil {
+			return errors.New("accounts.Vault is not set")
+		}
+		if inst.AccountMetaSlice[9] == nil {
+			return errors.New("accounts.VaultAuthority is not set")
+		}
+		if inst.AccountMetaSlice[10] == nil {
+			return errors.New("accounts.VaultProgram is not set")
+		}
+		if inst.AccountMetaSlice[11] == nil {
+			return errors.New("accounts.TokenProgram is not set")
 		}
 	}
 	return nil
@@ -179,13 +275,19 @@ func (inst *Swap) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=6]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("        user_token_in", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("       user_token_out", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(ag_format.Meta("       vault_token_in", inst.AccountMetaSlice.Get(2)))
-						accountsBranch.Child(ag_format.Meta("      vault_token_out", inst.AccountMetaSlice.Get(3)))
-						accountsBranch.Child(ag_format.Meta("beneficiary_token_out", inst.AccountMetaSlice.Get(4)))
-						accountsBranch.Child(ag_format.Meta("                 pool", inst.AccountMetaSlice.Get(5)))
+					instructionBranch.Child("Accounts[len=12]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("                 user", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("        user_token_in", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("       user_token_out", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("       vault_token_in", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("      vault_token_out", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("beneficiary_token_out", inst.AccountMetaSlice.Get(5)))
+						accountsBranch.Child(ag_format.Meta("                 pool", inst.AccountMetaSlice.Get(6)))
+						accountsBranch.Child(ag_format.Meta("   withdraw_authority", inst.AccountMetaSlice.Get(7)))
+						accountsBranch.Child(ag_format.Meta("                vault", inst.AccountMetaSlice.Get(8)))
+						accountsBranch.Child(ag_format.Meta("      vault_authority", inst.AccountMetaSlice.Get(9)))
+						accountsBranch.Child(ag_format.Meta("        vault_program", inst.AccountMetaSlice.Get(10)))
+						accountsBranch.Child(ag_format.Meta("        token_program", inst.AccountMetaSlice.Get(11)))
 					})
 				})
 		})
@@ -245,19 +347,31 @@ func NewSwapInstruction(
 	amount_in uint64,
 	minimum_amount_out uint64,
 	// Accounts:
+	user ag_solanago.PublicKey,
 	userTokenIn ag_solanago.PublicKey,
 	userTokenOut ag_solanago.PublicKey,
 	vaultTokenIn ag_solanago.PublicKey,
 	vaultTokenOut ag_solanago.PublicKey,
 	beneficiaryTokenOut ag_solanago.PublicKey,
-	pool ag_solanago.PublicKey) *Swap {
+	pool ag_solanago.PublicKey,
+	withdrawAuthority ag_solanago.PublicKey,
+	vault ag_solanago.PublicKey,
+	vaultAuthority ag_solanago.PublicKey,
+	vaultProgram ag_solanago.PublicKey,
+	tokenProgram ag_solanago.PublicKey) *Swap {
 	return NewSwapInstructionBuilder().
 		SetAmountIn(amount_in).
 		SetMinimumAmountOut(minimum_amount_out).
+		SetUserAccount(user).
 		SetUserTokenInAccount(userTokenIn).
 		SetUserTokenOutAccount(userTokenOut).
 		SetVaultTokenInAccount(vaultTokenIn).
 		SetVaultTokenOutAccount(vaultTokenOut).
 		SetBeneficiaryTokenOutAccount(beneficiaryTokenOut).
-		SetPoolAccount(pool)
+		SetPoolAccount(pool).
+		SetWithdrawAuthorityAccount(withdrawAuthority).
+		SetVaultAccount(vault).
+		SetVaultAuthorityAccount(vaultAuthority).
+		SetVaultProgramAccount(vaultProgram).
+		SetTokenProgramAccount(tokenProgram)
 }

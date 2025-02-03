@@ -99,7 +99,7 @@ func (inst *PlaceLimitOrderWithFreeFunds) GetSeatAccount() *ag_solanago.AccountM
 func (inst PlaceLimitOrderWithFreeFunds) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_PlaceLimitOrderWithFreeFunds,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_PlaceLimitOrderWithFreeFunds),
 	}}
 }
 

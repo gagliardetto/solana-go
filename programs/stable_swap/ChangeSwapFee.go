@@ -14,14 +14,16 @@ import (
 type ChangeSwapFee struct {
 	NewSwapFee *uint64
 
-	// [0] = [WRITE] pool
+	// [0] = [SIGNER] owner
+	//
+	// [1] = [WRITE] pool
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewChangeSwapFeeInstructionBuilder creates a new `ChangeSwapFee` instruction builder.
 func NewChangeSwapFeeInstructionBuilder() *ChangeSwapFee {
 	nd := &ChangeSwapFee{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
@@ -32,15 +34,26 @@ func (inst *ChangeSwapFee) SetNewSwapFee(new_swap_fee uint64) *ChangeSwapFee {
 	return inst
 }
 
+// SetOwnerAccount sets the "owner" account.
+func (inst *ChangeSwapFee) SetOwnerAccount(owner ag_solanago.PublicKey) *ChangeSwapFee {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(owner).SIGNER()
+	return inst
+}
+
+// GetOwnerAccount gets the "owner" account.
+func (inst *ChangeSwapFee) GetOwnerAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
 // SetPoolAccount sets the "pool" account.
 func (inst *ChangeSwapFee) SetPoolAccount(pool ag_solanago.PublicKey) *ChangeSwapFee {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(pool).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(pool).WRITE()
 	return inst
 }
 
 // GetPoolAccount gets the "pool" account.
 func (inst *ChangeSwapFee) GetPoolAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst ChangeSwapFee) Build() *Instruction {
@@ -71,6 +84,9 @@ func (inst *ChangeSwapFee) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.Owner is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
 			return errors.New("accounts.Pool is not set")
 		}
 	}
@@ -91,8 +107,9 @@ func (inst *ChangeSwapFee) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=1]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("pool", inst.AccountMetaSlice.Get(0)))
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta(" pool", inst.AccountMetaSlice.Get(1)))
 					})
 				})
 		})
@@ -120,8 +137,10 @@ func NewChangeSwapFeeInstruction(
 	// Parameters:
 	new_swap_fee uint64,
 	// Accounts:
+	owner ag_solanago.PublicKey,
 	pool ag_solanago.PublicKey) *ChangeSwapFee {
 	return NewChangeSwapFeeInstructionBuilder().
 		SetNewSwapFee(new_swap_fee).
+		SetOwnerAccount(owner).
 		SetPoolAccount(pool)
 }

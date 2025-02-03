@@ -150,7 +150,7 @@ func (inst *CancelMultipleOrdersById) GetTokenProgramAccount() *ag_solanago.Acco
 func (inst CancelMultipleOrdersById) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_CancelMultipleOrdersById,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_CancelMultipleOrdersById),
 	}}
 }
 

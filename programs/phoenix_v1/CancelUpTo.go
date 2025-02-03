@@ -150,7 +150,7 @@ func (inst *CancelUpTo) GetTokenProgramAccount() *ag_solanago.AccountMeta {
 func (inst CancelUpTo) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_CancelUpTo,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_CancelUpTo),
 	}}
 }
 

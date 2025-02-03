@@ -78,7 +78,7 @@ func (inst *ClaimAuthority) GetSuccessorAccount() *ag_solanago.AccountMeta {
 func (inst ClaimAuthority) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_ClaimAuthority,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_ClaimAuthority),
 	}}
 }
 

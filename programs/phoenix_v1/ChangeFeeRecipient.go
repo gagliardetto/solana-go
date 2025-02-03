@@ -91,7 +91,7 @@ func (inst *ChangeFeeRecipient) GetNewFeeRecipientAccount() *ag_solanago.Account
 func (inst ChangeFeeRecipient) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_ChangeFeeRecipient,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_ChangeFeeRecipient),
 	}}
 }
 

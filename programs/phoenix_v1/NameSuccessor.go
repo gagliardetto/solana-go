@@ -85,7 +85,7 @@ func (inst *NameSuccessor) GetMarketAuthorityAccount() *ag_solanago.AccountMeta 
 func (inst NameSuccessor) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_NameSuccessor,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_NameSuccessor),
 	}}
 }
 

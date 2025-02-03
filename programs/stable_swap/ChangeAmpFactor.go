@@ -16,13 +16,17 @@ type ChangeAmpFactor struct {
 	RampDuration *uint32
 
 	// [0] = [WRITE] pool
+	//
+	// [1] = [] vault
+	//
+	// [2] = [SIGNER] admin
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewChangeAmpFactorInstructionBuilder creates a new `ChangeAmpFactor` instruction builder.
 func NewChangeAmpFactorInstructionBuilder() *ChangeAmpFactor {
 	nd := &ChangeAmpFactor{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
 	}
 	return nd
 }
@@ -48,6 +52,28 @@ func (inst *ChangeAmpFactor) SetPoolAccount(pool ag_solanago.PublicKey) *ChangeA
 // GetPoolAccount gets the "pool" account.
 func (inst *ChangeAmpFactor) GetPoolAccount() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice.Get(0)
+}
+
+// SetVaultAccount sets the "vault" account.
+func (inst *ChangeAmpFactor) SetVaultAccount(vault ag_solanago.PublicKey) *ChangeAmpFactor {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *ChangeAmpFactor) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
+}
+
+// SetAdminAccount sets the "admin" account.
+func (inst *ChangeAmpFactor) SetAdminAccount(admin ag_solanago.PublicKey) *ChangeAmpFactor {
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(admin).SIGNER()
+	return inst
+}
+
+// GetAdminAccount gets the "admin" account.
+func (inst *ChangeAmpFactor) GetAdminAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(2)
 }
 
 func (inst ChangeAmpFactor) Build() *Instruction {
@@ -83,6 +109,12 @@ func (inst *ChangeAmpFactor) Validate() error {
 		if inst.AccountMetaSlice[0] == nil {
 			return errors.New("accounts.Pool is not set")
 		}
+		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.Vault is not set")
+		}
+		if inst.AccountMetaSlice[2] == nil {
+			return errors.New("accounts.Admin is not set")
+		}
 	}
 	return nil
 }
@@ -102,8 +134,10 @@ func (inst *ChangeAmpFactor) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=1]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("pool", inst.AccountMetaSlice.Get(0)))
+					instructionBranch.Child("Accounts[len=3]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta(" pool", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("vault", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("admin", inst.AccountMetaSlice.Get(2)))
 					})
 				})
 		})
@@ -142,9 +176,13 @@ func NewChangeAmpFactorInstruction(
 	new_amp_factor uint16,
 	ramp_duration uint32,
 	// Accounts:
-	pool ag_solanago.PublicKey) *ChangeAmpFactor {
+	pool ag_solanago.PublicKey,
+	vault ag_solanago.PublicKey,
+	admin ag_solanago.PublicKey) *ChangeAmpFactor {
 	return NewChangeAmpFactorInstructionBuilder().
 		SetNewAmpFactor(new_amp_factor).
 		SetRampDuration(ramp_duration).
-		SetPoolAccount(pool)
+		SetPoolAccount(pool).
+		SetVaultAccount(vault).
+		SetAdminAccount(admin)
 }

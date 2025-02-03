@@ -27,66 +27,66 @@ func init() {
 	}
 }
 
-var (
-	Instruction_Swap = ag_binary.TypeID([8]byte{248, 198, 158, 145, 225, 117, 135, 200})
+const (
+	Instruction_Swap uint8 = iota
 
-	Instruction_SwapWithFreeFunds = ag_binary.TypeID([8]byte{85, 145, 253, 195, 175, 103, 32, 30})
+	Instruction_SwapWithFreeFunds
 
-	Instruction_PlaceLimitOrder = ag_binary.TypeID([8]byte{108, 176, 33, 186, 146, 229, 1, 197})
+	Instruction_PlaceLimitOrder
 
-	Instruction_PlaceLimitOrderWithFreeFunds = ag_binary.TypeID([8]byte{201, 97, 183, 58, 224, 51, 193, 217})
+	Instruction_PlaceLimitOrderWithFreeFunds
 
-	Instruction_ReduceOrder = ag_binary.TypeID([8]byte{138, 143, 24, 74, 37, 73, 195, 236})
+	Instruction_ReduceOrder
 
-	Instruction_ReduceOrderWithFreeFunds = ag_binary.TypeID([8]byte{153, 234, 42, 168, 238, 72, 171, 102})
+	Instruction_ReduceOrderWithFreeFunds
 
-	Instruction_CancelAllOrders = ag_binary.TypeID([8]byte{196, 83, 243, 171, 17, 100, 160, 143})
+	Instruction_CancelAllOrders
 
-	Instruction_CancelAllOrdersWithFreeFunds = ag_binary.TypeID([8]byte{26, 160, 6, 99, 49, 168, 177, 236})
+	Instruction_CancelAllOrdersWithFreeFunds
 
-	Instruction_CancelUpTo = ag_binary.TypeID([8]byte{26, 209, 244, 253, 59, 175, 227, 54})
+	Instruction_CancelUpTo
 
-	Instruction_CancelUpToWithFreeFunds = ag_binary.TypeID([8]byte{224, 111, 103, 64, 53, 162, 174, 119})
+	Instruction_CancelUpToWithFreeFunds
 
-	Instruction_CancelMultipleOrdersById = ag_binary.TypeID([8]byte{240, 145, 18, 248, 67, 112, 10, 149})
+	Instruction_CancelMultipleOrdersById
 
-	Instruction_CancelMultipleOrdersByIdWithFreeFunds = ag_binary.TypeID([8]byte{70, 205, 161, 158, 178, 223, 151, 140})
+	Instruction_CancelMultipleOrdersByIdWithFreeFunds
 
-	Instruction_WithdrawFunds = ag_binary.TypeID([8]byte{241, 36, 29, 111, 208, 31, 104, 217})
+	Instruction_WithdrawFunds
 
-	Instruction_DepositFunds = ag_binary.TypeID([8]byte{202, 39, 52, 211, 53, 20, 250, 88})
+	Instruction_DepositFunds
 
-	Instruction_RequestSeat = ag_binary.TypeID([8]byte{45, 147, 28, 81, 244, 235, 148, 143})
+	Instruction_RequestSeat
 
-	Instruction_Log = ag_binary.TypeID([8]byte{141, 230, 214, 242, 9, 209, 207, 170})
+	Instruction_Log
 
-	Instruction_PlaceMultiplePostOnlyOrders = ag_binary.TypeID([8]byte{43, 115, 45, 80, 85, 20, 71, 229})
+	Instruction_PlaceMultiplePostOnlyOrders
 
-	Instruction_PlaceMultiplePostOnlyOrdersWithFreeFunds = ag_binary.TypeID([8]byte{219, 66, 162, 10, 147, 94, 156, 68})
+	Instruction_PlaceMultiplePostOnlyOrdersWithFreeFunds
 
-	Instruction_InitializeMarket = ag_binary.TypeID([8]byte{35, 35, 189, 193, 155, 48, 170, 203})
+	Instruction_InitializeMarket
 
-	Instruction_ClaimAuthority = ag_binary.TypeID([8]byte{222, 132, 185, 123, 127, 107, 6, 31})
+	Instruction_ClaimAuthority
 
-	Instruction_NameSuccessor = ag_binary.TypeID([8]byte{160, 203, 37, 229, 225, 119, 129, 236})
+	Instruction_NameSuccessor
 
-	Instruction_ChangeMarketStatus = ag_binary.TypeID([8]byte{221, 127, 224, 41, 177, 145, 126, 8})
+	Instruction_ChangeMarketStatus
 
-	Instruction_ChangeSeatStatus = ag_binary.TypeID([8]byte{197, 197, 78, 110, 99, 229, 168, 22})
+	Instruction_ChangeSeatStatus
 
-	Instruction_RequestSeatAuthorized = ag_binary.TypeID([8]byte{250, 119, 182, 161, 113, 25, 150, 156})
+	Instruction_RequestSeatAuthorized
 
-	Instruction_EvictSeat = ag_binary.TypeID([8]byte{232, 165, 194, 88, 233, 155, 82, 197})
+	Instruction_EvictSeat
 
-	Instruction_ForceCancelOrders = ag_binary.TypeID([8]byte{64, 181, 196, 63, 222, 72, 64, 232})
+	Instruction_ForceCancelOrders
 
-	Instruction_CollectFees = ag_binary.TypeID([8]byte{164, 152, 207, 99, 30, 186, 19, 182})
+	Instruction_CollectFees
 
-	Instruction_ChangeFeeRecipient = ag_binary.TypeID([8]byte{253, 7, 246, 194, 88, 253, 47, 118})
+	Instruction_ChangeFeeRecipient
 )
 
 // InstructionIDToName returns the name of the instruction given its ID.
-func InstructionIDToName(id ag_binary.TypeID) string {
+func InstructionIDToName(id uint8) string {
 	switch id {
 	case Instruction_Swap:
 		return "Swap"
@@ -162,91 +162,91 @@ func (inst *Instruction) EncodeToTree(parent ag_treeout.Branches) {
 }
 
 var InstructionImplDef = ag_binary.NewVariantDefinition(
-	ag_binary.AnchorTypeIDEncoding,
+	ag_binary.Uint8TypeIDEncoding,
 	[]ag_binary.VariantType{
 		{
-			"swap", (*Swap)(nil),
+			"Swap", (*Swap)(nil),
 		},
 		{
-			"swap_with_free_funds", (*SwapWithFreeFunds)(nil),
+			"SwapWithFreeFunds", (*SwapWithFreeFunds)(nil),
 		},
 		{
-			"place_limit_order", (*PlaceLimitOrder)(nil),
+			"PlaceLimitOrder", (*PlaceLimitOrder)(nil),
 		},
 		{
-			"place_limit_order_with_free_funds", (*PlaceLimitOrderWithFreeFunds)(nil),
+			"PlaceLimitOrderWithFreeFunds", (*PlaceLimitOrderWithFreeFunds)(nil),
 		},
 		{
-			"reduce_order", (*ReduceOrder)(nil),
+			"ReduceOrder", (*ReduceOrder)(nil),
 		},
 		{
-			"reduce_order_with_free_funds", (*ReduceOrderWithFreeFunds)(nil),
+			"ReduceOrderWithFreeFunds", (*ReduceOrderWithFreeFunds)(nil),
 		},
 		{
-			"cancel_all_orders", (*CancelAllOrders)(nil),
+			"CancelAllOrders", (*CancelAllOrders)(nil),
 		},
 		{
-			"cancel_all_orders_with_free_funds", (*CancelAllOrdersWithFreeFunds)(nil),
+			"CancelAllOrdersWithFreeFunds", (*CancelAllOrdersWithFreeFunds)(nil),
 		},
 		{
-			"cancel_up_to", (*CancelUpTo)(nil),
+			"CancelUpTo", (*CancelUpTo)(nil),
 		},
 		{
-			"cancel_up_to_with_free_funds", (*CancelUpToWithFreeFunds)(nil),
+			"CancelUpToWithFreeFunds", (*CancelUpToWithFreeFunds)(nil),
 		},
 		{
-			"cancel_multiple_orders_by_id", (*CancelMultipleOrdersById)(nil),
+			"CancelMultipleOrdersById", (*CancelMultipleOrdersById)(nil),
 		},
 		{
-			"cancel_multiple_orders_by_id_with_free_funds", (*CancelMultipleOrdersByIdWithFreeFunds)(nil),
+			"CancelMultipleOrdersByIdWithFreeFunds", (*CancelMultipleOrdersByIdWithFreeFunds)(nil),
 		},
 		{
-			"withdraw_funds", (*WithdrawFunds)(nil),
+			"WithdrawFunds", (*WithdrawFunds)(nil),
 		},
 		{
-			"deposit_funds", (*DepositFunds)(nil),
+			"DepositFunds", (*DepositFunds)(nil),
 		},
 		{
-			"request_seat", (*RequestSeat)(nil),
+			"RequestSeat", (*RequestSeat)(nil),
 		},
 		{
-			"log", (*Log)(nil),
+			"Log", (*Log)(nil),
 		},
 		{
-			"place_multiple_post_only_orders", (*PlaceMultiplePostOnlyOrders)(nil),
+			"PlaceMultiplePostOnlyOrders", (*PlaceMultiplePostOnlyOrders)(nil),
 		},
 		{
-			"place_multiple_post_only_orders_with_free_funds", (*PlaceMultiplePostOnlyOrdersWithFreeFunds)(nil),
+			"PlaceMultiplePostOnlyOrdersWithFreeFunds", (*PlaceMultiplePostOnlyOrdersWithFreeFunds)(nil),
 		},
 		{
-			"initialize_market", (*InitializeMarket)(nil),
+			"InitializeMarket", (*InitializeMarket)(nil),
 		},
 		{
-			"claim_authority", (*ClaimAuthority)(nil),
+			"ClaimAuthority", (*ClaimAuthority)(nil),
 		},
 		{
-			"name_successor", (*NameSuccessor)(nil),
+			"NameSuccessor", (*NameSuccessor)(nil),
 		},
 		{
-			"change_market_status", (*ChangeMarketStatus)(nil),
+			"ChangeMarketStatus", (*ChangeMarketStatus)(nil),
 		},
 		{
-			"change_seat_status", (*ChangeSeatStatus)(nil),
+			"ChangeSeatStatus", (*ChangeSeatStatus)(nil),
 		},
 		{
-			"request_seat_authorized", (*RequestSeatAuthorized)(nil),
+			"RequestSeatAuthorized", (*RequestSeatAuthorized)(nil),
 		},
 		{
-			"evict_seat", (*EvictSeat)(nil),
+			"EvictSeat", (*EvictSeat)(nil),
 		},
 		{
-			"force_cancel_orders", (*ForceCancelOrders)(nil),
+			"ForceCancelOrders", (*ForceCancelOrders)(nil),
 		},
 		{
-			"collect_fees", (*CollectFees)(nil),
+			"CollectFees", (*CollectFees)(nil),
 		},
 		{
-			"change_fee_recipient", (*ChangeFeeRecipient)(nil),
+			"ChangeFeeRecipient", (*ChangeFeeRecipient)(nil),
 		},
 	},
 )
@@ -276,7 +276,7 @@ func (inst *Instruction) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error 
 }
 
 func (inst *Instruction) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	err := encoder.WriteBytes(inst.TypeID.Bytes(), false)
+	err := encoder.WriteUint8(inst.TypeID.Uint8())
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)
 	}

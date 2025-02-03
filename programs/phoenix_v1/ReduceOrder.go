@@ -150,7 +150,7 @@ func (inst *ReduceOrder) GetTokenProgramAccount() *ag_solanago.AccountMeta {
 func (inst ReduceOrder) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_ReduceOrder,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_ReduceOrder),
 	}}
 }
 

@@ -19,16 +19,20 @@ type CreateStrategy struct {
 	RampMinDuration *uint32
 	RampMaxDuration *uint32
 
-	// ····· owner_only: [0] = [WRITE] pool
+	// [0] = [] owner_only
 	//
-	// [1] = [WRITE] strategy
+	// ····· owner_only: [1] = [SIGNER] owner
+	//
+	// ················· [2] = [WRITE] pool
+	//
+	// [3] = [WRITE] strategy
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewCreateStrategyInstructionBuilder creates a new `CreateStrategy` instruction builder.
 func NewCreateStrategyInstructionBuilder() *CreateStrategy {
 	nd := &CreateStrategy{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 4),
 	}
 	return nd
 }
@@ -69,41 +73,64 @@ func (inst *CreateStrategy) SetRampMaxDuration(ramp_max_duration uint32) *Create
 	return inst
 }
 
+// SetOwnerOnlyAccount sets the "owner_only" account.
+func (inst *CreateStrategy) SetOwnerOnlyAccount(ownerOnly ag_solanago.PublicKey) *CreateStrategy {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(ownerOnly)
+	return inst
+}
+
+// GetOwnerOnlyAccount gets the "owner_only" account.
+func (inst *CreateStrategy) GetOwnerOnlyAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
 type CreateStrategyOwnerOnlyAccountsBuilder struct {
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 func NewCreateStrategyOwnerOnlyAccountsBuilder() *CreateStrategyOwnerOnlyAccountsBuilder {
 	return &CreateStrategyOwnerOnlyAccountsBuilder{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 }
 
 func (inst *CreateStrategy) SetOwnerOnlyAccountsFromBuilder(createStrategyOwnerOnlyAccountsBuilder *CreateStrategyOwnerOnlyAccountsBuilder) *CreateStrategy {
-	inst.AccountMetaSlice[1] = createStrategyOwnerOnlyAccountsBuilder.GetPoolAccount()
+	inst.AccountMetaSlice[1] = createStrategyOwnerOnlyAccountsBuilder.GetOwnerAccount()
+	inst.AccountMetaSlice[2] = createStrategyOwnerOnlyAccountsBuilder.GetPoolAccount()
 	return inst
+}
+
+// SetOwnerAccount sets the "owner" account.
+func (inst *CreateStrategyOwnerOnlyAccountsBuilder) SetOwnerAccount(owner ag_solanago.PublicKey) *CreateStrategyOwnerOnlyAccountsBuilder {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(owner).SIGNER()
+	return inst
+}
+
+// GetOwnerAccount gets the "owner" account.
+func (inst *CreateStrategyOwnerOnlyAccountsBuilder) GetOwnerAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
 }
 
 // SetPoolAccount sets the "pool" account.
 func (inst *CreateStrategyOwnerOnlyAccountsBuilder) SetPoolAccount(pool ag_solanago.PublicKey) *CreateStrategyOwnerOnlyAccountsBuilder {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(pool).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(pool).WRITE()
 	return inst
 }
 
 // GetPoolAccount gets the "pool" account.
 func (inst *CreateStrategyOwnerOnlyAccountsBuilder) GetPoolAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 // SetStrategyAccount sets the "strategy" account.
 func (inst *CreateStrategy) SetStrategyAccount(strategy ag_solanago.PublicKey) *CreateStrategy {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(strategy).WRITE()
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(strategy).WRITE()
 	return inst
 }
 
 // GetStrategyAccount gets the "strategy" account.
 func (inst *CreateStrategy) GetStrategyAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(1)
+	return inst.AccountMetaSlice.Get(3)
 }
 
 func (inst CreateStrategy) Build() *Instruction {
@@ -149,9 +176,15 @@ func (inst *CreateStrategy) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return errors.New("accounts.OwnerOnlyPool is not set")
+			return errors.New("accounts.OwnerOnly is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.OwnerOnlyOwner is not set")
+		}
+		if inst.AccountMetaSlice[2] == nil {
+			return errors.New("accounts.OwnerOnlyPool is not set")
+		}
+		if inst.AccountMetaSlice[3] == nil {
 			return errors.New("accounts.Strategy is not set")
 		}
 	}
@@ -177,9 +210,11 @@ func (inst *CreateStrategy) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("owner_only/pool", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("       strategy", inst.AccountMetaSlice.Get(1)))
+					instructionBranch.Child("Accounts[len=4]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("      owner_only", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("owner_only/owner", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta(" owner_only/pool", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("        strategy", inst.AccountMetaSlice.Get(3)))
 					})
 				})
 		})
@@ -262,6 +297,8 @@ func NewCreateStrategyInstruction(
 	ramp_min_duration uint32,
 	ramp_max_duration uint32,
 	// Accounts:
+	ownerOnly ag_solanago.PublicKey,
+	ownerOnlyOwner ag_solanago.PublicKey,
 	ownerOnlyPool ag_solanago.PublicKey,
 	strategy ag_solanago.PublicKey) *CreateStrategy {
 	return NewCreateStrategyInstructionBuilder().
@@ -271,8 +308,10 @@ func NewCreateStrategyInstruction(
 		SetRampMaxStep(ramp_max_step).
 		SetRampMinDuration(ramp_min_duration).
 		SetRampMaxDuration(ramp_max_duration).
+		SetOwnerOnlyAccount(ownerOnly).
 		SetOwnerOnlyAccountsFromBuilder(
 			NewCreateStrategyOwnerOnlyAccountsBuilder().
+				SetOwnerAccount(ownerOnlyOwner).
 				SetPoolAccount(ownerOnlyPool),
 		).
 		SetStrategyAccount(strategy)

@@ -117,7 +117,7 @@ func (inst *CollectFees) GetTokenProgramAccount() *ag_solanago.AccountMeta {
 func (inst CollectFees) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_CollectFees,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_CollectFees),
 	}}
 }
 

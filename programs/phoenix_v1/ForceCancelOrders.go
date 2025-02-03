@@ -176,7 +176,7 @@ func (inst *ForceCancelOrders) GetTokenProgramAccount() *ag_solanago.AccountMeta
 func (inst ForceCancelOrders) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_ForceCancelOrders,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_ForceCancelOrders),
 	}}
 }
 

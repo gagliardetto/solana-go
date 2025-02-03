@@ -17,13 +17,18 @@ type Initialize struct {
 	Beneficiary           *ag_solanago.PublicKey
 	BeneficiaryFee        *uint64
 
+	// [0] = [] admin
+	//
+	// [1] = [] vault
+	//
+	// [2] = [] vault_authority
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewInitializeInstructionBuilder creates a new `Initialize` instruction builder.
 func NewInitializeInstructionBuilder() *Initialize {
 	nd := &Initialize{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 0),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
 	}
 	return nd
 }
@@ -50,6 +55,39 @@ func (inst *Initialize) SetBeneficiary(beneficiary ag_solanago.PublicKey) *Initi
 func (inst *Initialize) SetBeneficiaryFee(beneficiary_fee uint64) *Initialize {
 	inst.BeneficiaryFee = &beneficiary_fee
 	return inst
+}
+
+// SetAdminAccount sets the "admin" account.
+func (inst *Initialize) SetAdminAccount(admin ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(admin)
+	return inst
+}
+
+// GetAdminAccount gets the "admin" account.
+func (inst *Initialize) GetAdminAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
+// SetVaultAccount sets the "vault" account.
+func (inst *Initialize) SetVaultAccount(vault ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *Initialize) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
+}
+
+// SetVaultAuthorityAccount sets the "vault_authority" account.
+func (inst *Initialize) SetVaultAuthorityAccount(vaultAuthority ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(vaultAuthority)
+	return inst
+}
+
+// GetVaultAuthorityAccount gets the "vault_authority" account.
+func (inst *Initialize) GetVaultAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(2)
 }
 
 func (inst Initialize) Build() *Instruction {
@@ -88,6 +126,15 @@ func (inst *Initialize) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
+		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.Admin is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.Vault is not set")
+		}
+		if inst.AccountMetaSlice[2] == nil {
+			return errors.New("accounts.VaultAuthority is not set")
+		}
 	}
 	return nil
 }
@@ -109,7 +156,11 @@ func (inst *Initialize) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=0]").ParentFunc(func(accountsBranch ag_treeout.Branches) {})
+					instructionBranch.Child("Accounts[len=3]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("          admin", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("          vault", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("vault_authority", inst.AccountMetaSlice.Get(2)))
+					})
 				})
 		})
 }
@@ -167,10 +218,17 @@ func NewInitializeInstruction(
 	withdraw_authority ag_solanago.PublicKey,
 	withdraw_authority_bump uint8,
 	beneficiary ag_solanago.PublicKey,
-	beneficiary_fee uint64) *Initialize {
+	beneficiary_fee uint64,
+	// Accounts:
+	admin ag_solanago.PublicKey,
+	vault ag_solanago.PublicKey,
+	vaultAuthority ag_solanago.PublicKey) *Initialize {
 	return NewInitializeInstructionBuilder().
 		SetWithdrawAuthority(withdraw_authority).
 		SetWithdrawAuthorityBump(withdraw_authority_bump).
 		SetBeneficiary(beneficiary).
-		SetBeneficiaryFee(beneficiary_fee)
+		SetBeneficiaryFee(beneficiary_fee).
+		SetAdminAccount(admin).
+		SetVaultAccount(vault).
+		SetVaultAuthorityAccount(vaultAuthority)
 }

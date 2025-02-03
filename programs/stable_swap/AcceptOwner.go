@@ -13,27 +13,40 @@ import (
 // AcceptOwner is the `accept_owner` instruction.
 type AcceptOwner struct {
 
-	// [0] = [WRITE] pool
+	// [0] = [SIGNER] pending_owner
+	//
+	// [1] = [WRITE] pool
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewAcceptOwnerInstructionBuilder creates a new `AcceptOwner` instruction builder.
 func NewAcceptOwnerInstructionBuilder() *AcceptOwner {
 	nd := &AcceptOwner{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
 
+// SetPendingOwnerAccount sets the "pending_owner" account.
+func (inst *AcceptOwner) SetPendingOwnerAccount(pendingOwner ag_solanago.PublicKey) *AcceptOwner {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(pendingOwner).SIGNER()
+	return inst
+}
+
+// GetPendingOwnerAccount gets the "pending_owner" account.
+func (inst *AcceptOwner) GetPendingOwnerAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
 // SetPoolAccount sets the "pool" account.
 func (inst *AcceptOwner) SetPoolAccount(pool ag_solanago.PublicKey) *AcceptOwner {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(pool).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(pool).WRITE()
 	return inst
 }
 
 // GetPoolAccount gets the "pool" account.
 func (inst *AcceptOwner) GetPoolAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst AcceptOwner) Build() *Instruction {
@@ -57,6 +70,9 @@ func (inst *AcceptOwner) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.PendingOwner is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
 			return errors.New("accounts.Pool is not set")
 		}
 	}
@@ -75,8 +91,9 @@ func (inst *AcceptOwner) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Params[len=0]").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=1]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("pool", inst.AccountMetaSlice.Get(0)))
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("pending_owner", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("         pool", inst.AccountMetaSlice.Get(1)))
 					})
 				})
 		})
@@ -92,7 +109,9 @@ func (obj *AcceptOwner) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err er
 // NewAcceptOwnerInstruction declares a new AcceptOwner instruction with the provided parameters and accounts.
 func NewAcceptOwnerInstruction(
 	// Accounts:
+	pendingOwner ag_solanago.PublicKey,
 	pool ag_solanago.PublicKey) *AcceptOwner {
 	return NewAcceptOwnerInstructionBuilder().
+		SetPendingOwnerAccount(pendingOwner).
 		SetPoolAccount(pool)
 }

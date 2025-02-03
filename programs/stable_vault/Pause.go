@@ -3,6 +3,7 @@
 package stable_vault
 
 import (
+	"errors"
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -11,15 +12,41 @@ import (
 
 // Pause is the `pause` instruction.
 type Pause struct {
+
+	// [0] = [] admin
+	//
+	// [1] = [] vault
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewPauseInstructionBuilder creates a new `Pause` instruction builder.
 func NewPauseInstructionBuilder() *Pause {
 	nd := &Pause{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 0),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
+}
+
+// SetAdminAccount sets the "admin" account.
+func (inst *Pause) SetAdminAccount(admin ag_solanago.PublicKey) *Pause {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(admin)
+	return inst
+}
+
+// GetAdminAccount gets the "admin" account.
+func (inst *Pause) GetAdminAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
+// SetVaultAccount sets the "vault" account.
+func (inst *Pause) SetVaultAccount(vault ag_solanago.PublicKey) *Pause {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *Pause) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst Pause) Build() *Instruction {
@@ -42,6 +69,12 @@ func (inst Pause) ValidateAndBuild() (*Instruction, error) {
 func (inst *Pause) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
+		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.Admin is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.Vault is not set")
+		}
 	}
 	return nil
 }
@@ -58,7 +91,10 @@ func (inst *Pause) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Params[len=0]").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=0]").ParentFunc(func(accountsBranch ag_treeout.Branches) {})
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("admin", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("vault", inst.AccountMetaSlice.Get(1)))
+					})
 				})
 		})
 }
@@ -71,6 +107,11 @@ func (obj *Pause) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
 }
 
 // NewPauseInstruction declares a new Pause instruction with the provided parameters and accounts.
-func NewPauseInstruction() *Pause {
-	return NewPauseInstructionBuilder()
+func NewPauseInstruction(
+	// Accounts:
+	admin ag_solanago.PublicKey,
+	vault ag_solanago.PublicKey) *Pause {
+	return NewPauseInstructionBuilder().
+		SetAdminAccount(admin).
+		SetVaultAccount(vault)
 }

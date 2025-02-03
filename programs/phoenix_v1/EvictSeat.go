@@ -169,7 +169,7 @@ func (inst *EvictSeat) GetTokenProgramAccount() *ag_solanago.AccountMeta {
 func (inst EvictSeat) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_EvictSeat,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_EvictSeat),
 	}}
 }
 

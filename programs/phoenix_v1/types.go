@@ -2246,6 +2246,9 @@ func (obj *OrderPacketImmediateOrCancel) UnmarshalWithDecoder(decoder *ag_binary
 	if err != nil {
 		return err
 	}
+	if !decoder.HasRemaining() {
+		return
+	}
 	// Deserialize `LastValidSlot` (optional):
 	{
 		ok, err := decoder.ReadBool()

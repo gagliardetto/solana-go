@@ -39,7 +39,7 @@ func (inst *Log) GetLogAuthorityAccount() *ag_solanago.AccountMeta {
 func (inst Log) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_Log,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_Log),
 	}}
 }
 

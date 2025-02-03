@@ -164,7 +164,7 @@ func (inst *PlaceLimitOrder) GetTokenProgramAccount() *ag_solanago.AccountMeta {
 func (inst PlaceLimitOrder) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_PlaceLimitOrder,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_PlaceLimitOrder),
 	}}
 }
 

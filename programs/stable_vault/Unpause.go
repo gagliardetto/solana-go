@@ -3,6 +3,7 @@
 package stable_vault
 
 import (
+	"errors"
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
@@ -11,15 +12,41 @@ import (
 
 // Unpause is the `unpause` instruction.
 type Unpause struct {
+
+	// [0] = [] admin
+	//
+	// [1] = [] vault
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewUnpauseInstructionBuilder creates a new `Unpause` instruction builder.
 func NewUnpauseInstructionBuilder() *Unpause {
 	nd := &Unpause{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 0),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
+}
+
+// SetAdminAccount sets the "admin" account.
+func (inst *Unpause) SetAdminAccount(admin ag_solanago.PublicKey) *Unpause {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(admin)
+	return inst
+}
+
+// GetAdminAccount gets the "admin" account.
+func (inst *Unpause) GetAdminAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
+// SetVaultAccount sets the "vault" account.
+func (inst *Unpause) SetVaultAccount(vault ag_solanago.PublicKey) *Unpause {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *Unpause) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst Unpause) Build() *Instruction {
@@ -42,6 +69,12 @@ func (inst Unpause) ValidateAndBuild() (*Instruction, error) {
 func (inst *Unpause) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
+		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.Admin is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.Vault is not set")
+		}
 	}
 	return nil
 }
@@ -58,7 +91,10 @@ func (inst *Unpause) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Params[len=0]").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=0]").ParentFunc(func(accountsBranch ag_treeout.Branches) {})
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("admin", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("vault", inst.AccountMetaSlice.Get(1)))
+					})
 				})
 		})
 }
@@ -71,6 +107,11 @@ func (obj *Unpause) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error)
 }
 
 // NewUnpauseInstruction declares a new Unpause instruction with the provided parameters and accounts.
-func NewUnpauseInstruction() *Unpause {
-	return NewUnpauseInstructionBuilder()
+func NewUnpauseInstruction(
+	// Accounts:
+	admin ag_solanago.PublicKey,
+	vault ag_solanago.PublicKey) *Unpause {
+	return NewUnpauseInstructionBuilder().
+		SetAdminAccount(admin).
+		SetVaultAccount(vault)
 }

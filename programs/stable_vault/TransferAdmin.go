@@ -14,13 +14,16 @@ import (
 type TransferAdmin struct {
 	NewAdmin *ag_solanago.PublicKey
 
+	// [0] = [] admin
+	//
+	// [1] = [] vault
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewTransferAdminInstructionBuilder creates a new `TransferAdmin` instruction builder.
 func NewTransferAdminInstructionBuilder() *TransferAdmin {
 	nd := &TransferAdmin{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 0),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
@@ -29,6 +32,28 @@ func NewTransferAdminInstructionBuilder() *TransferAdmin {
 func (inst *TransferAdmin) SetNewAdmin(new_admin ag_solanago.PublicKey) *TransferAdmin {
 	inst.NewAdmin = &new_admin
 	return inst
+}
+
+// SetAdminAccount sets the "admin" account.
+func (inst *TransferAdmin) SetAdminAccount(admin ag_solanago.PublicKey) *TransferAdmin {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(admin)
+	return inst
+}
+
+// GetAdminAccount gets the "admin" account.
+func (inst *TransferAdmin) GetAdminAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
+// SetVaultAccount sets the "vault" account.
+func (inst *TransferAdmin) SetVaultAccount(vault ag_solanago.PublicKey) *TransferAdmin {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *TransferAdmin) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst TransferAdmin) Build() *Instruction {
@@ -58,6 +83,12 @@ func (inst *TransferAdmin) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
+		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.Admin is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.Vault is not set")
+		}
 	}
 	return nil
 }
@@ -76,7 +107,10 @@ func (inst *TransferAdmin) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=0]").ParentFunc(func(accountsBranch ag_treeout.Branches) {})
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("admin", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("vault", inst.AccountMetaSlice.Get(1)))
+					})
 				})
 		})
 }
@@ -101,7 +135,12 @@ func (obj *TransferAdmin) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err 
 // NewTransferAdminInstruction declares a new TransferAdmin instruction with the provided parameters and accounts.
 func NewTransferAdminInstruction(
 	// Parameters:
-	new_admin ag_solanago.PublicKey) *TransferAdmin {
+	new_admin ag_solanago.PublicKey,
+	// Accounts:
+	admin ag_solanago.PublicKey,
+	vault ag_solanago.PublicKey) *TransferAdmin {
 	return NewTransferAdminInstructionBuilder().
-		SetNewAdmin(new_admin)
+		SetNewAdmin(new_admin).
+		SetAdminAccount(admin).
+		SetVaultAccount(vault)
 }

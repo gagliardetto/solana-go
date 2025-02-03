@@ -15,18 +15,32 @@ type Withdraw struct {
 	Amount            *uint64
 	MinimumAmountsOut *[]uint64
 
-	// [0] = [WRITE] user_pool_token
+	// [0] = [SIGNER] user
 	//
-	// [1] = [WRITE] mint
+	// [1] = [WRITE] user_pool_token
 	//
-	// [2] = [WRITE] pool
+	// [2] = [WRITE] mint
+	//
+	// [3] = [WRITE] pool
+	//
+	// [4] = [] withdraw_authority
+	//
+	// [5] = [] vault
+	//
+	// [6] = [] vault_authority
+	//
+	// [7] = [] vault_program
+	//
+	// [8] = [] token_program
+	//
+	// [9] = [] token_program_2022
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewWithdrawInstructionBuilder creates a new `Withdraw` instruction builder.
 func NewWithdrawInstructionBuilder() *Withdraw {
 	nd := &Withdraw{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 10),
 	}
 	return nd
 }
@@ -43,37 +57,114 @@ func (inst *Withdraw) SetMinimumAmountsOut(minimum_amounts_out []uint64) *Withdr
 	return inst
 }
 
+// SetUserAccount sets the "user" account.
+func (inst *Withdraw) SetUserAccount(user ag_solanago.PublicKey) *Withdraw {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(user).SIGNER()
+	return inst
+}
+
+// GetUserAccount gets the "user" account.
+func (inst *Withdraw) GetUserAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
 // SetUserPoolTokenAccount sets the "user_pool_token" account.
 func (inst *Withdraw) SetUserPoolTokenAccount(userPoolToken ag_solanago.PublicKey) *Withdraw {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(userPoolToken).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(userPoolToken).WRITE()
 	return inst
 }
 
 // GetUserPoolTokenAccount gets the "user_pool_token" account.
 func (inst *Withdraw) GetUserPoolTokenAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 // SetMintAccount sets the "mint" account.
 func (inst *Withdraw) SetMintAccount(mint ag_solanago.PublicKey) *Withdraw {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint).WRITE()
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(mint).WRITE()
 	return inst
 }
 
 // GetMintAccount gets the "mint" account.
 func (inst *Withdraw) GetMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(1)
+	return inst.AccountMetaSlice.Get(2)
 }
 
 // SetPoolAccount sets the "pool" account.
 func (inst *Withdraw) SetPoolAccount(pool ag_solanago.PublicKey) *Withdraw {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(pool).WRITE()
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(pool).WRITE()
 	return inst
 }
 
 // GetPoolAccount gets the "pool" account.
 func (inst *Withdraw) GetPoolAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(2)
+	return inst.AccountMetaSlice.Get(3)
+}
+
+// SetWithdrawAuthorityAccount sets the "withdraw_authority" account.
+func (inst *Withdraw) SetWithdrawAuthorityAccount(withdrawAuthority ag_solanago.PublicKey) *Withdraw {
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(withdrawAuthority)
+	return inst
+}
+
+// GetWithdrawAuthorityAccount gets the "withdraw_authority" account.
+func (inst *Withdraw) GetWithdrawAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(4)
+}
+
+// SetVaultAccount sets the "vault" account.
+func (inst *Withdraw) SetVaultAccount(vault ag_solanago.PublicKey) *Withdraw {
+	inst.AccountMetaSlice[5] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *Withdraw) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(5)
+}
+
+// SetVaultAuthorityAccount sets the "vault_authority" account.
+func (inst *Withdraw) SetVaultAuthorityAccount(vaultAuthority ag_solanago.PublicKey) *Withdraw {
+	inst.AccountMetaSlice[6] = ag_solanago.Meta(vaultAuthority)
+	return inst
+}
+
+// GetVaultAuthorityAccount gets the "vault_authority" account.
+func (inst *Withdraw) GetVaultAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(6)
+}
+
+// SetVaultProgramAccount sets the "vault_program" account.
+func (inst *Withdraw) SetVaultProgramAccount(vaultProgram ag_solanago.PublicKey) *Withdraw {
+	inst.AccountMetaSlice[7] = ag_solanago.Meta(vaultProgram)
+	return inst
+}
+
+// GetVaultProgramAccount gets the "vault_program" account.
+func (inst *Withdraw) GetVaultProgramAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(7)
+}
+
+// SetTokenProgramAccount sets the "token_program" account.
+func (inst *Withdraw) SetTokenProgramAccount(tokenProgram ag_solanago.PublicKey) *Withdraw {
+	inst.AccountMetaSlice[8] = ag_solanago.Meta(tokenProgram)
+	return inst
+}
+
+// GetTokenProgramAccount gets the "token_program" account.
+func (inst *Withdraw) GetTokenProgramAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(8)
+}
+
+// SetTokenProgram2022Account sets the "token_program_2022" account.
+func (inst *Withdraw) SetTokenProgram2022Account(tokenProgram2022 ag_solanago.PublicKey) *Withdraw {
+	inst.AccountMetaSlice[9] = ag_solanago.Meta(tokenProgram2022)
+	return inst
+}
+
+// GetTokenProgram2022Account gets the "token_program_2022" account.
+func (inst *Withdraw) GetTokenProgram2022Account() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(9)
 }
 
 func (inst Withdraw) Build() *Instruction {
@@ -107,13 +198,34 @@ func (inst *Withdraw) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return errors.New("accounts.UserPoolToken is not set")
+			return errors.New("accounts.User is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return errors.New("accounts.Mint is not set")
+			return errors.New("accounts.UserPoolToken is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
+			return errors.New("accounts.Mint is not set")
+		}
+		if inst.AccountMetaSlice[3] == nil {
 			return errors.New("accounts.Pool is not set")
+		}
+		if inst.AccountMetaSlice[4] == nil {
+			return errors.New("accounts.WithdrawAuthority is not set")
+		}
+		if inst.AccountMetaSlice[5] == nil {
+			return errors.New("accounts.Vault is not set")
+		}
+		if inst.AccountMetaSlice[6] == nil {
+			return errors.New("accounts.VaultAuthority is not set")
+		}
+		if inst.AccountMetaSlice[7] == nil {
+			return errors.New("accounts.VaultProgram is not set")
+		}
+		if inst.AccountMetaSlice[8] == nil {
+			return errors.New("accounts.TokenProgram is not set")
+		}
+		if inst.AccountMetaSlice[9] == nil {
+			return errors.New("accounts.TokenProgram2022 is not set")
 		}
 	}
 	return nil
@@ -134,10 +246,17 @@ func (inst *Withdraw) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=3]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("user_pool_token", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("           mint", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(ag_format.Meta("           pool", inst.AccountMetaSlice.Get(2)))
+					instructionBranch.Child("Accounts[len=10]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("              user", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("   user_pool_token", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("              mint", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("              pool", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("withdraw_authority", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("             vault", inst.AccountMetaSlice.Get(5)))
+						accountsBranch.Child(ag_format.Meta("   vault_authority", inst.AccountMetaSlice.Get(6)))
+						accountsBranch.Child(ag_format.Meta("     vault_program", inst.AccountMetaSlice.Get(7)))
+						accountsBranch.Child(ag_format.Meta("     token_program", inst.AccountMetaSlice.Get(8)))
+						accountsBranch.Child(ag_format.Meta("token_program_2022", inst.AccountMetaSlice.Get(9)))
 					})
 				})
 		})
@@ -176,13 +295,27 @@ func NewWithdrawInstruction(
 	amount uint64,
 	minimum_amounts_out []uint64,
 	// Accounts:
+	user ag_solanago.PublicKey,
 	userPoolToken ag_solanago.PublicKey,
 	mint ag_solanago.PublicKey,
-	pool ag_solanago.PublicKey) *Withdraw {
+	pool ag_solanago.PublicKey,
+	withdrawAuthority ag_solanago.PublicKey,
+	vault ag_solanago.PublicKey,
+	vaultAuthority ag_solanago.PublicKey,
+	vaultProgram ag_solanago.PublicKey,
+	tokenProgram ag_solanago.PublicKey,
+	tokenProgram2022 ag_solanago.PublicKey) *Withdraw {
 	return NewWithdrawInstructionBuilder().
 		SetAmount(amount).
 		SetMinimumAmountsOut(minimum_amounts_out).
+		SetUserAccount(user).
 		SetUserPoolTokenAccount(userPoolToken).
 		SetMintAccount(mint).
-		SetPoolAccount(pool)
+		SetPoolAccount(pool).
+		SetWithdrawAuthorityAccount(withdrawAuthority).
+		SetVaultAccount(vault).
+		SetVaultAuthorityAccount(vaultAuthority).
+		SetVaultProgramAccount(vaultProgram).
+		SetTokenProgramAccount(tokenProgram).
+		SetTokenProgram2022Account(tokenProgram2022)
 }

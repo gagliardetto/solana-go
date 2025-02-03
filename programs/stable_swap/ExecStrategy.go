@@ -15,14 +15,16 @@ type ExecStrategy struct {
 	RampStep     *uint16
 	RampDuration *uint32
 
-	// [0] = [WRITE] pool
+	// [0] = [] strategy
+	//
+	// [1] = [WRITE] pool
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewExecStrategyInstructionBuilder creates a new `ExecStrategy` instruction builder.
 func NewExecStrategyInstructionBuilder() *ExecStrategy {
 	nd := &ExecStrategy{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
@@ -39,15 +41,26 @@ func (inst *ExecStrategy) SetRampDuration(ramp_duration uint32) *ExecStrategy {
 	return inst
 }
 
+// SetStrategyAccount sets the "strategy" account.
+func (inst *ExecStrategy) SetStrategyAccount(strategy ag_solanago.PublicKey) *ExecStrategy {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(strategy)
+	return inst
+}
+
+// GetStrategyAccount gets the "strategy" account.
+func (inst *ExecStrategy) GetStrategyAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
 // SetPoolAccount sets the "pool" account.
 func (inst *ExecStrategy) SetPoolAccount(pool ag_solanago.PublicKey) *ExecStrategy {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(pool).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(pool).WRITE()
 	return inst
 }
 
 // GetPoolAccount gets the "pool" account.
 func (inst *ExecStrategy) GetPoolAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst ExecStrategy) Build() *Instruction {
@@ -81,6 +94,9 @@ func (inst *ExecStrategy) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.Strategy is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
 			return errors.New("accounts.Pool is not set")
 		}
 	}
@@ -102,8 +118,9 @@ func (inst *ExecStrategy) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=1]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("pool", inst.AccountMetaSlice.Get(0)))
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("strategy", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("    pool", inst.AccountMetaSlice.Get(1)))
 					})
 				})
 		})
@@ -142,9 +159,11 @@ func NewExecStrategyInstruction(
 	ramp_step uint16,
 	ramp_duration uint32,
 	// Accounts:
+	strategy ag_solanago.PublicKey,
 	pool ag_solanago.PublicKey) *ExecStrategy {
 	return NewExecStrategyInstructionBuilder().
 		SetRampStep(ramp_step).
 		SetRampDuration(ramp_duration).
+		SetStrategyAccount(strategy).
 		SetPoolAccount(pool)
 }

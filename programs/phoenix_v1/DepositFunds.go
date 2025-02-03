@@ -163,7 +163,7 @@ func (inst *DepositFunds) GetTokenProgramAccount() *ag_solanago.AccountMeta {
 func (inst DepositFunds) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_DepositFunds,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_DepositFunds),
 	}}
 }
 

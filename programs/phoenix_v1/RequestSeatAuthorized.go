@@ -130,7 +130,7 @@ func (inst *RequestSeatAuthorized) GetSystemProgramAccount() *ag_solanago.Accoun
 func (inst RequestSeatAuthorized) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_RequestSeatAuthorized,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_RequestSeatAuthorized),
 	}}
 }
 

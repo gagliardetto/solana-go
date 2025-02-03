@@ -13,27 +13,40 @@ import (
 // Unpause is the `unpause` instruction.
 type Unpause struct {
 
-	// [0] = [WRITE] pool
+	// [0] = [SIGNER] owner
+	//
+	// [1] = [WRITE] pool
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewUnpauseInstructionBuilder creates a new `Unpause` instruction builder.
 func NewUnpauseInstructionBuilder() *Unpause {
 	nd := &Unpause{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
 
+// SetOwnerAccount sets the "owner" account.
+func (inst *Unpause) SetOwnerAccount(owner ag_solanago.PublicKey) *Unpause {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(owner).SIGNER()
+	return inst
+}
+
+// GetOwnerAccount gets the "owner" account.
+func (inst *Unpause) GetOwnerAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
 // SetPoolAccount sets the "pool" account.
 func (inst *Unpause) SetPoolAccount(pool ag_solanago.PublicKey) *Unpause {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(pool).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(pool).WRITE()
 	return inst
 }
 
 // GetPoolAccount gets the "pool" account.
 func (inst *Unpause) GetPoolAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst Unpause) Build() *Instruction {
@@ -57,6 +70,9 @@ func (inst *Unpause) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.Owner is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
 			return errors.New("accounts.Pool is not set")
 		}
 	}
@@ -75,8 +91,9 @@ func (inst *Unpause) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Params[len=0]").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=1]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("pool", inst.AccountMetaSlice.Get(0)))
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta(" pool", inst.AccountMetaSlice.Get(1)))
 					})
 				})
 		})
@@ -92,7 +109,9 @@ func (obj *Unpause) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error)
 // NewUnpauseInstruction declares a new Unpause instruction with the provided parameters and accounts.
 func NewUnpauseInstruction(
 	// Accounts:
+	owner ag_solanago.PublicKey,
 	pool ag_solanago.PublicKey) *Unpause {
 	return NewUnpauseInstructionBuilder().
+		SetOwnerAccount(owner).
 		SetPoolAccount(pool)
 }

@@ -99,7 +99,7 @@ func (inst *SwapWithFreeFunds) GetSeatAccount() *ag_solanago.AccountMeta {
 func (inst SwapWithFreeFunds) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_SwapWithFreeFunds,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_SwapWithFreeFunds),
 	}}
 }
 

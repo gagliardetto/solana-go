@@ -98,7 +98,7 @@ func (inst *PlaceMultiplePostOnlyOrdersWithFreeFunds) GetSeatAccount() *ag_solan
 func (inst PlaceMultiplePostOnlyOrdersWithFreeFunds) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_PlaceMultiplePostOnlyOrdersWithFreeFunds,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_PlaceMultiplePostOnlyOrdersWithFreeFunds),
 	}}
 }
 

@@ -13,18 +13,35 @@ import (
 // ApproveStrategy is the `approve_strategy` instruction.
 type ApproveStrategy struct {
 
-	// ····· admin_only: [0] = [WRITE] pool
+	// [0] = [] admin_only
 	//
-	// [1] = [WRITE] strategy
+	// ····· admin_only: [1] = [WRITE] pool
+	//
+	// ················· [2] = [] vault
+	//
+	// ················· [3] = [SIGNER] admin
+	//
+	// [4] = [WRITE] strategy
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewApproveStrategyInstructionBuilder creates a new `ApproveStrategy` instruction builder.
 func NewApproveStrategyInstructionBuilder() *ApproveStrategy {
 	nd := &ApproveStrategy{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 5),
 	}
 	return nd
+}
+
+// SetAdminOnlyAccount sets the "admin_only" account.
+func (inst *ApproveStrategy) SetAdminOnlyAccount(adminOnly ag_solanago.PublicKey) *ApproveStrategy {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(adminOnly)
+	return inst
+}
+
+// GetAdminOnlyAccount gets the "admin_only" account.
+func (inst *ApproveStrategy) GetAdminOnlyAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
 }
 
 type ApproveStrategyAdminOnlyAccountsBuilder struct {
@@ -33,12 +50,14 @@ type ApproveStrategyAdminOnlyAccountsBuilder struct {
 
 func NewApproveStrategyAdminOnlyAccountsBuilder() *ApproveStrategyAdminOnlyAccountsBuilder {
 	return &ApproveStrategyAdminOnlyAccountsBuilder{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
 	}
 }
 
 func (inst *ApproveStrategy) SetAdminOnlyAccountsFromBuilder(approveStrategyAdminOnlyAccountsBuilder *ApproveStrategyAdminOnlyAccountsBuilder) *ApproveStrategy {
-	inst.AccountMetaSlice[0] = approveStrategyAdminOnlyAccountsBuilder.GetPoolAccount()
+	inst.AccountMetaSlice[1] = approveStrategyAdminOnlyAccountsBuilder.GetPoolAccount()
+	inst.AccountMetaSlice[2] = approveStrategyAdminOnlyAccountsBuilder.GetVaultAccount()
+	inst.AccountMetaSlice[3] = approveStrategyAdminOnlyAccountsBuilder.GetAdminAccount()
 	return inst
 }
 
@@ -53,15 +72,37 @@ func (inst *ApproveStrategyAdminOnlyAccountsBuilder) GetPoolAccount() *ag_solana
 	return inst.AccountMetaSlice.Get(0)
 }
 
+// SetVaultAccount sets the "vault" account.
+func (inst *ApproveStrategyAdminOnlyAccountsBuilder) SetVaultAccount(vault ag_solanago.PublicKey) *ApproveStrategyAdminOnlyAccountsBuilder {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *ApproveStrategyAdminOnlyAccountsBuilder) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
+}
+
+// SetAdminAccount sets the "admin" account.
+func (inst *ApproveStrategyAdminOnlyAccountsBuilder) SetAdminAccount(admin ag_solanago.PublicKey) *ApproveStrategyAdminOnlyAccountsBuilder {
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(admin).SIGNER()
+	return inst
+}
+
+// GetAdminAccount gets the "admin" account.
+func (inst *ApproveStrategyAdminOnlyAccountsBuilder) GetAdminAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(2)
+}
+
 // SetStrategyAccount sets the "strategy" account.
 func (inst *ApproveStrategy) SetStrategyAccount(strategy ag_solanago.PublicKey) *ApproveStrategy {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(strategy).WRITE()
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(strategy).WRITE()
 	return inst
 }
 
 // GetStrategyAccount gets the "strategy" account.
 func (inst *ApproveStrategy) GetStrategyAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(1)
+	return inst.AccountMetaSlice.Get(4)
 }
 
 func (inst ApproveStrategy) Build() *Instruction {
@@ -85,9 +126,18 @@ func (inst *ApproveStrategy) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return errors.New("accounts.AdminOnlyPool is not set")
+			return errors.New("accounts.AdminOnly is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.AdminOnlyPool is not set")
+		}
+		if inst.AccountMetaSlice[2] == nil {
+			return errors.New("accounts.AdminOnlyVault is not set")
+		}
+		if inst.AccountMetaSlice[3] == nil {
+			return errors.New("accounts.AdminOnlyAdmin is not set")
+		}
+		if inst.AccountMetaSlice[4] == nil {
 			return errors.New("accounts.Strategy is not set")
 		}
 	}
@@ -106,9 +156,12 @@ func (inst *ApproveStrategy) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Params[len=0]").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("admin_only/pool", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("       strategy", inst.AccountMetaSlice.Get(1)))
+					instructionBranch.Child("Accounts[len=5]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("      admin_only", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta(" admin_only/pool", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("admin_only/vault", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("admin_only/admin", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("        strategy", inst.AccountMetaSlice.Get(4)))
 					})
 				})
 		})
@@ -124,11 +177,18 @@ func (obj *ApproveStrategy) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (er
 // NewApproveStrategyInstruction declares a new ApproveStrategy instruction with the provided parameters and accounts.
 func NewApproveStrategyInstruction(
 	// Accounts:
+	adminOnly ag_solanago.PublicKey,
 	adminOnlyPool ag_solanago.PublicKey,
+	adminOnlyVault ag_solanago.PublicKey,
+	adminOnlyAdmin ag_solanago.PublicKey,
 	strategy ag_solanago.PublicKey) *ApproveStrategy {
 	return NewApproveStrategyInstructionBuilder().
+		SetAdminOnlyAccount(adminOnly).
 		SetAdminOnlyAccountsFromBuilder(
 			NewApproveStrategyAdminOnlyAccountsBuilder().
-				SetPoolAccount(adminOnlyPool)).
+				SetPoolAccount(adminOnlyPool).
+				SetVaultAccount(adminOnlyVault).
+				SetAdminAccount(adminOnlyAdmin),
+		).
 		SetStrategyAccount(strategy)
 }

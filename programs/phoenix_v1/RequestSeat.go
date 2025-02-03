@@ -104,7 +104,7 @@ func (inst *RequestSeat) GetSystemProgramAccount() *ag_solanago.AccountMeta {
 func (inst RequestSeat) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_RequestSeat,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_RequestSeat),
 	}}
 }
 

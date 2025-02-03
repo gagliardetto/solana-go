@@ -14,14 +14,16 @@ import (
 type TransferOwner struct {
 	NewOwner *ag_solanago.PublicKey
 
-	// [0] = [WRITE] pool
+	// [0] = [SIGNER] owner
+	//
+	// [1] = [WRITE] pool
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewTransferOwnerInstructionBuilder creates a new `TransferOwner` instruction builder.
 func NewTransferOwnerInstructionBuilder() *TransferOwner {
 	nd := &TransferOwner{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
@@ -32,15 +34,26 @@ func (inst *TransferOwner) SetNewOwner(new_owner ag_solanago.PublicKey) *Transfe
 	return inst
 }
 
+// SetOwnerAccount sets the "owner" account.
+func (inst *TransferOwner) SetOwnerAccount(owner ag_solanago.PublicKey) *TransferOwner {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(owner).SIGNER()
+	return inst
+}
+
+// GetOwnerAccount gets the "owner" account.
+func (inst *TransferOwner) GetOwnerAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
 // SetPoolAccount sets the "pool" account.
 func (inst *TransferOwner) SetPoolAccount(pool ag_solanago.PublicKey) *TransferOwner {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(pool).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(pool).WRITE()
 	return inst
 }
 
 // GetPoolAccount gets the "pool" account.
 func (inst *TransferOwner) GetPoolAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst TransferOwner) Build() *Instruction {
@@ -71,6 +84,9 @@ func (inst *TransferOwner) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.Owner is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
 			return errors.New("accounts.Pool is not set")
 		}
 	}
@@ -91,8 +107,9 @@ func (inst *TransferOwner) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=1]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("pool", inst.AccountMetaSlice.Get(0)))
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("owner", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta(" pool", inst.AccountMetaSlice.Get(1)))
 					})
 				})
 		})
@@ -120,8 +137,10 @@ func NewTransferOwnerInstruction(
 	// Parameters:
 	new_owner ag_solanago.PublicKey,
 	// Accounts:
+	owner ag_solanago.PublicKey,
 	pool ag_solanago.PublicKey) *TransferOwner {
 	return NewTransferOwnerInstructionBuilder().
 		SetNewOwner(new_owner).
+		SetOwnerAccount(owner).
 		SetPoolAccount(pool)
 }

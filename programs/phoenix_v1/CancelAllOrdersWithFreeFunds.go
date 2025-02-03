@@ -78,7 +78,7 @@ func (inst *CancelAllOrdersWithFreeFunds) GetTraderAccount() *ag_solanago.Accoun
 func (inst CancelAllOrdersWithFreeFunds) Build() *Instruction {
 	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: Instruction_CancelAllOrdersWithFreeFunds,
+		TypeID: ag_binary.TypeIDFromUint8(Instruction_CancelAllOrdersWithFreeFunds),
 	}}
 }
 

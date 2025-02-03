@@ -16,14 +16,24 @@ type Initialize struct {
 	SwapFee   *uint64
 	MaxCaps   *[]uint64
 
-	// [0] = [WRITE] pool
+	// [0] = [SIGNER] owner
+	//
+	// [1] = [] mint
+	//
+	// [2] = [WRITE] pool
+	//
+	// [3] = [] pool_authority
+	//
+	// [4] = [] withdraw_authority
+	//
+	// [5] = [] vault
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewInitializeInstructionBuilder creates a new `Initialize` instruction builder.
 func NewInitializeInstructionBuilder() *Initialize {
 	nd := &Initialize{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 1),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 6),
 	}
 	return nd
 }
@@ -46,15 +56,70 @@ func (inst *Initialize) SetMaxCaps(max_caps []uint64) *Initialize {
 	return inst
 }
 
+// SetOwnerAccount sets the "owner" account.
+func (inst *Initialize) SetOwnerAccount(owner ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(owner).SIGNER()
+	return inst
+}
+
+// GetOwnerAccount gets the "owner" account.
+func (inst *Initialize) GetOwnerAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
+// SetMintAccount sets the "mint" account.
+func (inst *Initialize) SetMintAccount(mint ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint)
+	return inst
+}
+
+// GetMintAccount gets the "mint" account.
+func (inst *Initialize) GetMintAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
+}
+
 // SetPoolAccount sets the "pool" account.
 func (inst *Initialize) SetPoolAccount(pool ag_solanago.PublicKey) *Initialize {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(pool).WRITE()
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(pool).WRITE()
 	return inst
 }
 
 // GetPoolAccount gets the "pool" account.
 func (inst *Initialize) GetPoolAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
+	return inst.AccountMetaSlice.Get(2)
+}
+
+// SetPoolAuthorityAccount sets the "pool_authority" account.
+func (inst *Initialize) SetPoolAuthorityAccount(poolAuthority ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(poolAuthority)
+	return inst
+}
+
+// GetPoolAuthorityAccount gets the "pool_authority" account.
+func (inst *Initialize) GetPoolAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(3)
+}
+
+// SetWithdrawAuthorityAccount sets the "withdraw_authority" account.
+func (inst *Initialize) SetWithdrawAuthorityAccount(withdrawAuthority ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(withdrawAuthority)
+	return inst
+}
+
+// GetWithdrawAuthorityAccount gets the "withdraw_authority" account.
+func (inst *Initialize) GetWithdrawAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(4)
+}
+
+// SetVaultAccount sets the "vault" account.
+func (inst *Initialize) SetVaultAccount(vault ag_solanago.PublicKey) *Initialize {
+	inst.AccountMetaSlice[5] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *Initialize) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(5)
 }
 
 func (inst Initialize) Build() *Instruction {
@@ -91,7 +156,22 @@ func (inst *Initialize) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.Owner is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.Mint is not set")
+		}
+		if inst.AccountMetaSlice[2] == nil {
 			return errors.New("accounts.Pool is not set")
+		}
+		if inst.AccountMetaSlice[3] == nil {
+			return errors.New("accounts.PoolAuthority is not set")
+		}
+		if inst.AccountMetaSlice[4] == nil {
+			return errors.New("accounts.WithdrawAuthority is not set")
+		}
+		if inst.AccountMetaSlice[5] == nil {
+			return errors.New("accounts.Vault is not set")
 		}
 	}
 	return nil
@@ -113,8 +193,13 @@ func (inst *Initialize) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=1]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("pool", inst.AccountMetaSlice.Get(0)))
+					instructionBranch.Child("Accounts[len=6]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("             owner", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("              mint", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("              pool", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("    pool_authority", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("withdraw_authority", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("             vault", inst.AccountMetaSlice.Get(5)))
 					})
 				})
 		})
@@ -164,10 +249,20 @@ func NewInitializeInstruction(
 	swap_fee uint64,
 	max_caps []uint64,
 	// Accounts:
-	pool ag_solanago.PublicKey) *Initialize {
+	owner ag_solanago.PublicKey,
+	mint ag_solanago.PublicKey,
+	pool ag_solanago.PublicKey,
+	poolAuthority ag_solanago.PublicKey,
+	withdrawAuthority ag_solanago.PublicKey,
+	vault ag_solanago.PublicKey) *Initialize {
 	return NewInitializeInstructionBuilder().
 		SetAmpFactor(amp_factor).
 		SetSwapFee(swap_fee).
 		SetMaxCaps(max_caps).
-		SetPoolAccount(pool)
+		SetOwnerAccount(owner).
+		SetMintAccount(mint).
+		SetPoolAccount(pool).
+		SetPoolAuthorityAccount(poolAuthority).
+		SetWithdrawAuthorityAccount(withdrawAuthority).
+		SetVaultAccount(vault)
 }

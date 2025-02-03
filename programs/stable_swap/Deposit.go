@@ -15,18 +15,30 @@ type Deposit struct {
 	Amounts          *[]uint64
 	MinimumAmountOut *uint64
 
-	// [0] = [WRITE] user_pool_token
+	// [0] = [SIGNER] user
 	//
-	// [1] = [WRITE] mint
+	// [1] = [WRITE] user_pool_token
 	//
-	// [2] = [WRITE] pool
+	// [2] = [WRITE] mint
+	//
+	// [3] = [WRITE] pool
+	//
+	// [4] = [] pool_authority
+	//
+	// [5] = [] vault
+	//
+	// [6] = [] vault_authority
+	//
+	// [7] = [] token_program
+	//
+	// [8] = [] token_program_2022
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewDepositInstructionBuilder creates a new `Deposit` instruction builder.
 func NewDepositInstructionBuilder() *Deposit {
 	nd := &Deposit{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 3),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 9),
 	}
 	return nd
 }
@@ -43,37 +55,103 @@ func (inst *Deposit) SetMinimumAmountOut(minimum_amount_out uint64) *Deposit {
 	return inst
 }
 
+// SetUserAccount sets the "user" account.
+func (inst *Deposit) SetUserAccount(user ag_solanago.PublicKey) *Deposit {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(user).SIGNER()
+	return inst
+}
+
+// GetUserAccount gets the "user" account.
+func (inst *Deposit) GetUserAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
 // SetUserPoolTokenAccount sets the "user_pool_token" account.
 func (inst *Deposit) SetUserPoolTokenAccount(userPoolToken ag_solanago.PublicKey) *Deposit {
-	inst.AccountMetaSlice[0] = ag_solanago.Meta(userPoolToken).WRITE()
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(userPoolToken).WRITE()
 	return inst
 }
 
 // GetUserPoolTokenAccount gets the "user_pool_token" account.
 func (inst *Deposit) GetUserPoolTokenAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(0)
+	return inst.AccountMetaSlice.Get(1)
 }
 
 // SetMintAccount sets the "mint" account.
 func (inst *Deposit) SetMintAccount(mint ag_solanago.PublicKey) *Deposit {
-	inst.AccountMetaSlice[1] = ag_solanago.Meta(mint).WRITE()
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(mint).WRITE()
 	return inst
 }
 
 // GetMintAccount gets the "mint" account.
 func (inst *Deposit) GetMintAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(1)
+	return inst.AccountMetaSlice.Get(2)
 }
 
 // SetPoolAccount sets the "pool" account.
 func (inst *Deposit) SetPoolAccount(pool ag_solanago.PublicKey) *Deposit {
-	inst.AccountMetaSlice[2] = ag_solanago.Meta(pool).WRITE()
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(pool).WRITE()
 	return inst
 }
 
 // GetPoolAccount gets the "pool" account.
 func (inst *Deposit) GetPoolAccount() *ag_solanago.AccountMeta {
-	return inst.AccountMetaSlice.Get(2)
+	return inst.AccountMetaSlice.Get(3)
+}
+
+// SetPoolAuthorityAccount sets the "pool_authority" account.
+func (inst *Deposit) SetPoolAuthorityAccount(poolAuthority ag_solanago.PublicKey) *Deposit {
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(poolAuthority)
+	return inst
+}
+
+// GetPoolAuthorityAccount gets the "pool_authority" account.
+func (inst *Deposit) GetPoolAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(4)
+}
+
+// SetVaultAccount sets the "vault" account.
+func (inst *Deposit) SetVaultAccount(vault ag_solanago.PublicKey) *Deposit {
+	inst.AccountMetaSlice[5] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *Deposit) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(5)
+}
+
+// SetVaultAuthorityAccount sets the "vault_authority" account.
+func (inst *Deposit) SetVaultAuthorityAccount(vaultAuthority ag_solanago.PublicKey) *Deposit {
+	inst.AccountMetaSlice[6] = ag_solanago.Meta(vaultAuthority)
+	return inst
+}
+
+// GetVaultAuthorityAccount gets the "vault_authority" account.
+func (inst *Deposit) GetVaultAuthorityAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(6)
+}
+
+// SetTokenProgramAccount sets the "token_program" account.
+func (inst *Deposit) SetTokenProgramAccount(tokenProgram ag_solanago.PublicKey) *Deposit {
+	inst.AccountMetaSlice[7] = ag_solanago.Meta(tokenProgram)
+	return inst
+}
+
+// GetTokenProgramAccount gets the "token_program" account.
+func (inst *Deposit) GetTokenProgramAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(7)
+}
+
+// SetTokenProgram2022Account sets the "token_program_2022" account.
+func (inst *Deposit) SetTokenProgram2022Account(tokenProgram2022 ag_solanago.PublicKey) *Deposit {
+	inst.AccountMetaSlice[8] = ag_solanago.Meta(tokenProgram2022)
+	return inst
+}
+
+// GetTokenProgram2022Account gets the "token_program_2022" account.
+func (inst *Deposit) GetTokenProgram2022Account() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(8)
 }
 
 func (inst Deposit) Build() *Instruction {
@@ -107,13 +185,31 @@ func (inst *Deposit) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
 		if inst.AccountMetaSlice[0] == nil {
-			return errors.New("accounts.UserPoolToken is not set")
+			return errors.New("accounts.User is not set")
 		}
 		if inst.AccountMetaSlice[1] == nil {
-			return errors.New("accounts.Mint is not set")
+			return errors.New("accounts.UserPoolToken is not set")
 		}
 		if inst.AccountMetaSlice[2] == nil {
+			return errors.New("accounts.Mint is not set")
+		}
+		if inst.AccountMetaSlice[3] == nil {
 			return errors.New("accounts.Pool is not set")
+		}
+		if inst.AccountMetaSlice[4] == nil {
+			return errors.New("accounts.PoolAuthority is not set")
+		}
+		if inst.AccountMetaSlice[5] == nil {
+			return errors.New("accounts.Vault is not set")
+		}
+		if inst.AccountMetaSlice[6] == nil {
+			return errors.New("accounts.VaultAuthority is not set")
+		}
+		if inst.AccountMetaSlice[7] == nil {
+			return errors.New("accounts.TokenProgram is not set")
+		}
+		if inst.AccountMetaSlice[8] == nil {
+			return errors.New("accounts.TokenProgram2022 is not set")
 		}
 	}
 	return nil
@@ -134,10 +230,16 @@ func (inst *Deposit) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=3]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("user_pool_token", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(ag_format.Meta("           mint", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(ag_format.Meta("           pool", inst.AccountMetaSlice.Get(2)))
+					instructionBranch.Child("Accounts[len=9]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("              user", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("   user_pool_token", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("              mint", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("              pool", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("    pool_authority", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("             vault", inst.AccountMetaSlice.Get(5)))
+						accountsBranch.Child(ag_format.Meta("   vault_authority", inst.AccountMetaSlice.Get(6)))
+						accountsBranch.Child(ag_format.Meta("     token_program", inst.AccountMetaSlice.Get(7)))
+						accountsBranch.Child(ag_format.Meta("token_program_2022", inst.AccountMetaSlice.Get(8)))
 					})
 				})
 		})
@@ -176,13 +278,25 @@ func NewDepositInstruction(
 	amounts []uint64,
 	minimum_amount_out uint64,
 	// Accounts:
+	user ag_solanago.PublicKey,
 	userPoolToken ag_solanago.PublicKey,
 	mint ag_solanago.PublicKey,
-	pool ag_solanago.PublicKey) *Deposit {
+	pool ag_solanago.PublicKey,
+	poolAuthority ag_solanago.PublicKey,
+	vault ag_solanago.PublicKey,
+	vaultAuthority ag_solanago.PublicKey,
+	tokenProgram ag_solanago.PublicKey,
+	tokenProgram2022 ag_solanago.PublicKey) *Deposit {
 	return NewDepositInstructionBuilder().
 		SetAmounts(amounts).
 		SetMinimumAmountOut(minimum_amount_out).
+		SetUserAccount(user).
 		SetUserPoolTokenAccount(userPoolToken).
 		SetMintAccount(mint).
-		SetPoolAccount(pool)
+		SetPoolAccount(pool).
+		SetPoolAuthorityAccount(poolAuthority).
+		SetVaultAccount(vault).
+		SetVaultAuthorityAccount(vaultAuthority).
+		SetTokenProgramAccount(tokenProgram).
+		SetTokenProgram2022Account(tokenProgram2022)
 }

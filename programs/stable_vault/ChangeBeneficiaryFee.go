@@ -14,13 +14,16 @@ import (
 type ChangeBeneficiaryFee struct {
 	NewBeneficiaryFee *uint64
 
+	// [0] = [] admin
+	//
+	// [1] = [] vault
 	ag_solanago.AccountMetaSlice `bin:"-"`
 }
 
 // NewChangeBeneficiaryFeeInstructionBuilder creates a new `ChangeBeneficiaryFee` instruction builder.
 func NewChangeBeneficiaryFeeInstructionBuilder() *ChangeBeneficiaryFee {
 	nd := &ChangeBeneficiaryFee{
-		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 0),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 2),
 	}
 	return nd
 }
@@ -29,6 +32,28 @@ func NewChangeBeneficiaryFeeInstructionBuilder() *ChangeBeneficiaryFee {
 func (inst *ChangeBeneficiaryFee) SetNewBeneficiaryFee(new_beneficiary_fee uint64) *ChangeBeneficiaryFee {
 	inst.NewBeneficiaryFee = &new_beneficiary_fee
 	return inst
+}
+
+// SetAdminAccount sets the "admin" account.
+func (inst *ChangeBeneficiaryFee) SetAdminAccount(admin ag_solanago.PublicKey) *ChangeBeneficiaryFee {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(admin)
+	return inst
+}
+
+// GetAdminAccount gets the "admin" account.
+func (inst *ChangeBeneficiaryFee) GetAdminAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(0)
+}
+
+// SetVaultAccount sets the "vault" account.
+func (inst *ChangeBeneficiaryFee) SetVaultAccount(vault ag_solanago.PublicKey) *ChangeBeneficiaryFee {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(vault)
+	return inst
+}
+
+// GetVaultAccount gets the "vault" account.
+func (inst *ChangeBeneficiaryFee) GetVaultAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice.Get(1)
 }
 
 func (inst ChangeBeneficiaryFee) Build() *Instruction {
@@ -58,6 +83,12 @@ func (inst *ChangeBeneficiaryFee) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
+		if inst.AccountMetaSlice[0] == nil {
+			return errors.New("accounts.Admin is not set")
+		}
+		if inst.AccountMetaSlice[1] == nil {
+			return errors.New("accounts.Vault is not set")
+		}
 	}
 	return nil
 }
@@ -76,7 +107,10 @@ func (inst *ChangeBeneficiaryFee) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=0]").ParentFunc(func(accountsBranch ag_treeout.Branches) {})
+					instructionBranch.Child("Accounts[len=2]").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("admin", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("vault", inst.AccountMetaSlice.Get(1)))
+					})
 				})
 		})
 }
@@ -101,7 +135,12 @@ func (obj *ChangeBeneficiaryFee) UnmarshalWithDecoder(decoder *ag_binary.Decoder
 // NewChangeBeneficiaryFeeInstruction declares a new ChangeBeneficiaryFee instruction with the provided parameters and accounts.
 func NewChangeBeneficiaryFeeInstruction(
 	// Parameters:
-	new_beneficiary_fee uint64) *ChangeBeneficiaryFee {
+	new_beneficiary_fee uint64,
+	// Accounts:
+	admin ag_solanago.PublicKey,
+	vault ag_solanago.PublicKey) *ChangeBeneficiaryFee {
 	return NewChangeBeneficiaryFeeInstructionBuilder().
-		SetNewBeneficiaryFee(new_beneficiary_fee)
+		SetNewBeneficiaryFee(new_beneficiary_fee).
+		SetAdminAccount(admin).
+		SetVaultAccount(vault)
 }
