@@ -22,7 +22,7 @@ func CreateInitializePermanentDelegateInstruction(
 		Delegate:    delegate,
 	}
 
-	ix := &createInitializePermanentDelegateInstruction{
+	ix := &instruction{
 		programID: programID,
 		accounts: []*solana.AccountMeta{
 			solana.Meta(mint).WRITE(),
@@ -43,22 +43,4 @@ func (data *createInitializePermanentDelegateInstructionData) encode() []byte {
 	binary.Write(&buf, binary.LittleEndian, data.Instruction)
 	buf.Write(data.Delegate.Bytes())
 	return buf.Bytes()
-}
-
-type createInitializePermanentDelegateInstruction struct {
-	programID solana.PublicKey
-	accounts  []*solana.AccountMeta
-	data      []byte
-}
-
-func (inst *createInitializePermanentDelegateInstruction) ProgramID() solana.PublicKey {
-	return inst.programID
-}
-
-func (inst *createInitializePermanentDelegateInstruction) Accounts() (out []*solana.AccountMeta) {
-	return inst.accounts
-}
-
-func (inst *createInitializePermanentDelegateInstruction) Data() ([]byte, error) {
-	return inst.data, nil
 }

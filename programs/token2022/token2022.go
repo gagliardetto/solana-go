@@ -4,6 +4,13 @@ import (
 	"github.com/gagliardetto/solana-go"
 )
 
+type programInstruction byte
+
+const (
+	initialize programInstruction = 0
+	update     programInstruction = 1
+)
+
 var (
 	/*
 		The Token-2022 Program, also known as Token Extensions, is a superset of the functionality provided by the Token Program.
@@ -14,12 +21,6 @@ var (
 )
 
 type TokenInstruction byte
-type MetadataPointerInstruction byte
-
-const (
-	Initialize MetadataPointerInstruction = 0
-	Update     MetadataPointerInstruction = 1
-)
 
 const (
 	InitializeMint TokenInstruction = iota
@@ -65,3 +66,21 @@ const (
 	ScaledUiAmountExtension
 	PausableExtension
 )
+
+type instruction struct {
+	programID solana.PublicKey
+	accounts  []*solana.AccountMeta
+	data      []byte
+}
+
+func (inst *instruction) ProgramID() solana.PublicKey {
+	return inst.programID
+}
+
+func (inst *instruction) Accounts() (out []*solana.AccountMeta) {
+	return inst.accounts
+}
+
+func (inst *instruction) Data() ([]byte, error) {
+	return inst.data, nil
+}

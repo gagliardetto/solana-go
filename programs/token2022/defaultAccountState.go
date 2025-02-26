@@ -17,11 +17,11 @@ func CreateInitializeDefaultAccountStateInstruction(
 
 	pointerData := createInitializeDefaultAccountStateInstructionData{
 		Instruction:                    DefaultAccountStateExtension,
-		DefaultAccountStateInstruction: Initialize,
+		DefaultAccountStateInstruction: initialize,
 		AccountState:                   accountState,
 	}
 
-	ix := &createInitializeDefaultAccountStateInstruction{
+	ix := &instruction{
 		programID: programID,
 		accounts: []*solana.AccountMeta{
 			solana.Meta(mint).WRITE(),
@@ -34,7 +34,7 @@ func CreateInitializeDefaultAccountStateInstruction(
 
 type createInitializeDefaultAccountStateInstructionData struct {
 	Instruction                    TokenInstruction
-	DefaultAccountStateInstruction MetadataPointerInstruction
+	DefaultAccountStateInstruction programInstruction
 	AccountState                   token.AccountState
 }
 
@@ -44,22 +44,4 @@ func (data *createInitializeDefaultAccountStateInstructionData) encode() []byte 
 	binary.Write(&buf, binary.LittleEndian, data.DefaultAccountStateInstruction)
 	buf.Write([]byte{byte(data.AccountState)})
 	return buf.Bytes()
-}
-
-type createInitializeDefaultAccountStateInstruction struct {
-	programID solana.PublicKey
-	accounts  []*solana.AccountMeta
-	data      []byte
-}
-
-func (inst *createInitializeDefaultAccountStateInstruction) ProgramID() solana.PublicKey {
-	return inst.programID
-}
-
-func (inst *createInitializeDefaultAccountStateInstruction) Accounts() (out []*solana.AccountMeta) {
-	return inst.accounts
-}
-
-func (inst *createInitializeDefaultAccountStateInstruction) Data() ([]byte, error) {
-	return inst.data, nil
 }

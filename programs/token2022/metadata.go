@@ -92,7 +92,7 @@ func CreateInitializeMetadataPointerInstruction(
 
 	pointerData := initializeMetadataPointerData{
 		Instruction:                MetadataPointerExtension,
-		MetadataPointerInstruction: Initialize,
+		MetadataPointerInstruction: initialize,
 		Authority:                  *authority,
 		MetadataAddress:            *metadataAddress,
 	}
@@ -128,7 +128,7 @@ func (inst *createInitializeMetadataPointerInstruction) Data() ([]byte, error) {
 
 type initializeMetadataPointerData struct {
 	Instruction                TokenInstruction
-	MetadataPointerInstruction MetadataPointerInstruction
+	MetadataPointerInstruction programInstruction
 	Authority                  solana.PublicKey
 	MetadataAddress            solana.PublicKey
 }
@@ -156,7 +156,7 @@ func CreateUpdateMetadataPointerInstruction(
 
 	pointerData := updateMetadataPointerData{
 		Instruction:                MetadataPointerExtension,
-		MetadataPointerInstruction: Update,
+		MetadataPointerInstruction: update,
 		MetadataAddress:            *metadataAddress,
 	}
 
@@ -183,7 +183,7 @@ func addSigners(keys []*solana.AccountMeta, authority solana.PublicKey, multiSig
 
 type updateMetadataPointerData struct {
 	Instruction                TokenInstruction
-	MetadataPointerInstruction MetadataPointerInstruction
+	MetadataPointerInstruction programInstruction
 	MetadataAddress            solana.PublicKey
 }
 
