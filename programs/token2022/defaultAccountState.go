@@ -8,6 +8,8 @@ import (
 	"github.com/gagliardetto/solana-go/programs/token"
 )
 
+const DEFAULT_ACCOUNT_STATE_MINT_LEN = 171
+
 // Instruction to initialize the DefaultAccountState Extension
 func CreateInitializeDefaultAccountStateInstruction(
 	mint solana.PublicKey, // Mint Account address
