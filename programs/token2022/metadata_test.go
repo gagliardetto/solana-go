@@ -2,7 +2,6 @@ package token2022
 
 import (
 	"context"
-	"log"
 	"strings"
 	"testing"
 
@@ -52,8 +51,6 @@ func TestCreateInitializeMetadataPointerInstruction(t *testing.T) {
 		},
 	}
 
-	log.Println(metadata.LenForLamports())
-
 	lamports, err := rpcClient.GetMinimumBalanceForRentExemption(context.Background(), metadata.LenForLamports(), rpc.CommitmentFinalized)
 	if err != nil {
 		t.Fatal(err)
@@ -72,8 +69,6 @@ func TestCreateInitializeMetadataPointerInstruction(t *testing.T) {
 		payer.PublicKey(),
 		mint.PublicKey(),
 	)
-
-	log.Println(initializeMetadataIx.Data())
 
 	token.SetProgramID(ProgramID)
 	initializeMintIx := token.NewInitializeMintInstructionBuilder().

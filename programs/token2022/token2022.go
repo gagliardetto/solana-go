@@ -23,7 +23,7 @@ var (
 type TokenInstruction byte
 
 const (
-	InitializeMint TokenInstruction = iota +2
+	InitializeMint TokenInstruction = iota
 	InitializeAccount
 	InitializeMultisig
 	Transfer
@@ -60,9 +60,12 @@ const (
 	CpiGuardExtension
 	InitializePermanentDelegate
 	TransferHookExtension
+	ConfidentialTransferFeeExtension
+	WithdrawExcessLamports
 	MetadataPointerExtension
 	GroupPointerExtension
 	GroupMemberPointerExtension
+	ConfidentialMintBurnExtension
 	ScaledUiAmountExtension
 	PausableExtension
 )

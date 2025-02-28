@@ -65,7 +65,7 @@ func TestCreateInitializeDefaultAccountStateInstruction(t *testing.T) {
 		mint.PublicKey(),
 		token.Frozen,
 	)
-
+	token.SetProgramID(ProgramID)
 	initializeMintIx := token.NewInitializeMintInstruction(
 		2,
 		payer.PublicKey(),
@@ -92,7 +92,7 @@ func TestCreateInitializeDefaultAccountStateInstruction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	wsUrl := strings.Replace(rpcUrl, "http://", "ws://", 1)
+	wsUrl := strings.Replace(rpcUrl, "https://", "wss://", 1)
 	log.Println("wsUrl:", wsUrl)
 	wsClient, err := ws.Connect(context.Background(), wsUrl)
 	if err != nil {
@@ -108,7 +108,7 @@ func getRpcUrl() (string, error) {
 	godotenv.Load("../../.env")
 	mockchainApiKey := os.Getenv("MOCKCHAIN_API_KEY")
 
-	req, err := http.NewRequest("POST", "https://rpc.mockchain.app/blockchains", bytes.NewBuffer([]byte{}))
+	req, err := http.NewRequest("POST", "http://rpc.mockchain.app/blockchains", bytes.NewBuffer([]byte{}))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return "", err
