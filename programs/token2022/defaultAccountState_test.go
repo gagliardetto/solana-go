@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -53,7 +53,13 @@ func TestCreateInitializeDefaultAccountStateInstruction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	createAccountIx := system.NewCreateAccountInstruction(lamports, DEFAULT_ACCOUNT_STATE_MINT_LEN, ProgramID, payer.PublicKey(), mint.PublicKey())
+	createAccountIx := system.NewCreateAccountInstruction(
+		lamports,
+		DEFAULT_ACCOUNT_STATE_MINT_LEN,
+		ProgramID,
+		payer.PublicKey(),
+		mint.PublicKey(),
+	)
 
 	initializeDefaultAccountStateIx := CreateInitializeDefaultAccountStateInstruction(
 		mint.PublicKey(),
@@ -67,8 +73,6 @@ func TestCreateInitializeDefaultAccountStateInstruction(t *testing.T) {
 		mint.PublicKey(),
 		solana.SysVarRentPubkey, //TODO: This is a really weird way of doing things... just declare it for me
 	)
-
-	log.Println(initializeMintIx.Build().Data())
 
 	recentBlockhash, err := rpcClient.GetLatestBlockhash(context.Background(), rpc.CommitmentFinalized)
 	if err != nil {
@@ -88,7 +92,8 @@ func TestCreateInitializeDefaultAccountStateInstruction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	wsUrl := strings.Replace(rpcUrl, "https://", "wss://", 1)
+	wsUrl := strings.Replace(rpcUrl, "http://", "ws://", 1)
+	log.Println("wsUrl:", wsUrl)
 	wsClient, err := ws.Connect(context.Background(), wsUrl)
 	if err != nil {
 		t.Fatal(err)
@@ -118,7 +123,7 @@ func getRpcUrl() (string, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
 		return "", err
@@ -159,7 +164,7 @@ func clearMockchain(rpcUrl string) error {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
 	}

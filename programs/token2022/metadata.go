@@ -74,27 +74,22 @@ func (meta *TokenMetadata) Pack() []byte {
 
 // Use this in conjuntion with GetMinimumBalanceForRentExemption to calculate the lamports needed to create the account
 func (meta *TokenMetadata) LenForLamports() uint64 {
-	// Size of MetadataExtension 2 bytes for type, 2 bytes for length
-	metadataExtension := 2 + 2
-	// Size of Mint Account with extension
-	mintLen := 234
-
-	return uint64(metadataExtension) + uint64(len(meta.Pack())) + uint64(mintLen)
+	return 234
 }
 
 // Construct an Initialize MetadataPointer instruction
 func CreateInitializeMetadataPointerInstruction(
 	mint solana.PublicKey,
-	authority *solana.PublicKey,
-	metadataAddress *solana.PublicKey,
+	authority solana.PublicKey,
+	metadataAddress solana.PublicKey,
 ) solana.Instruction {
 	programID := ProgramID
 
 	pointerData := initializeMetadataPointerData{
 		Instruction:                MetadataPointerExtension,
 		MetadataPointerInstruction: initialize,
-		Authority:                  *authority,
-		MetadataAddress:            *metadataAddress,
+		Authority:                  authority,
+		MetadataAddress:            metadataAddress,
 	}
 
 	ix := &createInitializeMetadataPointerInstruction{

@@ -23,7 +23,7 @@ var (
 type TokenInstruction byte
 
 const (
-	InitializeMint TokenInstruction = iota
+	InitializeMint TokenInstruction = iota +2
 	InitializeAccount
 	InitializeMultisig
 	Transfer
