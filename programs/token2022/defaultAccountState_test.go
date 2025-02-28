@@ -102,6 +102,31 @@ func TestCreateInitializeDefaultAccountStateInstruction(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	updateIx := CreateUpdateDefaultAccountStateInstruction(
+		mint.PublicKey(),
+		token.Initialized,
+		payer.PublicKey(),
+	)
+
+	recentBlockhash, err = rpcClient.GetLatestBlockhash(context.Background(), rpc.CommitmentFinalized)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tx, err = solana.NewTransaction([]solana.Instruction{updateIx}, recentBlockhash.Value.Blockhash)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := tx.Sign(func(key solana.PublicKey) *solana.PrivateKey {
+		return &payer
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := sendandconfirmtransaction.SendAndConfirmTransaction(context.TODO(), rpcClient, wsClient, tx); err != nil {
+		t.Fatal(err)
+	}
+
 }
 
 func getRpcUrl() (string, error) {

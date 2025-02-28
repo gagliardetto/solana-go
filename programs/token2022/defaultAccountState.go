@@ -34,6 +34,31 @@ func CreateInitializeDefaultAccountStateInstruction(
 	return ix
 }
 
+func CreateUpdateDefaultAccountStateInstruction(
+	mint solana.PublicKey, // Mint Account address
+	accountState token.AccountState, // Default AccountState
+	freezeAuthority solana.PublicKey, // Freeze Authority
+) solana.Instruction {
+	programID := ProgramID
+
+	pointerData := createInitializeDefaultAccountStateInstructionData{
+		Instruction:                    DefaultAccountStateExtension,
+		DefaultAccountStateInstruction: update,
+		AccountState:                   accountState,
+	}
+
+	ix := &instruction{
+		programID: programID,
+		accounts: []*solana.AccountMeta{
+			solana.Meta(mint).WRITE(),
+			solana.Meta(freezeAuthority).SIGNER(),
+		},
+		data: pointerData.encode(),
+	}
+
+	return ix
+}
+
 type createInitializeDefaultAccountStateInstructionData struct {
 	Instruction                    TokenInstruction
 	DefaultAccountStateInstruction programInstruction
