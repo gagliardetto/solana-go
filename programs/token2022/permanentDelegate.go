@@ -7,19 +7,17 @@ import (
 	"github.com/gagliardetto/solana-go"
 )
 
+const DEFAULT_PERMANENT_DELEGATE_MINT_LEN = 202
+
 func CreateInitializePermanentDelegateInstruction(
 	mint solana.PublicKey,
-	permanentDelegate *solana.PublicKey,
+	permanentDelegate solana.PublicKey,
 ) solana.Instruction {
 	programID := ProgramID
 
-	delegate := solana.MustPublicKeyFromBase58("11111111111111111111111111111111")
-	if permanentDelegate != nil {
-		delegate = *permanentDelegate
-	}
 	pointerData := createInitializePermanentDelegateInstructionData{
 		Instruction: InitializePermanentDelegate,
-		Delegate:    delegate,
+		Delegate:    permanentDelegate,
 	}
 
 	ix := &instruction{
