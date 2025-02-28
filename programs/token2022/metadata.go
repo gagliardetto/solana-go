@@ -7,6 +7,8 @@ import (
 	"github.com/gagliardetto/solana-go"
 )
 
+const DEFAULT_METADATA_MINT_LEN = 234
+
 /*
 Before the Token Extensions Program and the Token Metadata Interface, the process of adding extra data to a Mint Account required creating a Metadata Account through the Metaplex Metadata Program.
 
@@ -74,7 +76,7 @@ func (meta *TokenMetadata) Pack() []byte {
 
 // Use this in conjuntion with GetMinimumBalanceForRentExemption to calculate the lamports needed to create the account
 func (meta *TokenMetadata) LenForLamports() uint64 {
-	return 234
+	return DEFAULT_METADATA_MINT_LEN + uint64(len(meta.Pack()))
 }
 
 // Construct an Initialize MetadataPointer instruction

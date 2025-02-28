@@ -1,6 +1,8 @@
 package token2022
 
 import (
+	"bytes"
+
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -86,4 +88,53 @@ func (inst *instruction) Accounts() (out []*solana.AccountMeta) {
 
 func (inst *instruction) Data() ([]byte, error) {
 	return inst.data, nil
+}
+
+type InitializeInstructionArgs struct {
+	Metadata        solana.PublicKey
+	UpdateAuthority solana.PublicKey
+	Mint            solana.PublicKey
+	MintAuthority   solana.PublicKey
+	Name            string
+	Symbol          string
+	Uri             string
+}
+
+func CreateInitializeInstruction(
+	args InitializeInstructionArgs,
+) solana.Instruction {
+	programID := ProgramID
+
+	ix := &instruction{
+		programID: programID,
+		accounts: []*solana.AccountMeta{
+			solana.Meta(args.Metadata).WRITE(),
+			solana.Meta(args.UpdateAuthority),
+			solana.Meta(args.Mint),
+			solana.Meta(args.MintAuthority).SIGNER(),
+		},
+		data: encodeInitializeInstructionData(
+			args.Name,
+			args.Symbol,
+			args.Uri,
+		),
+	}
+
+	return ix
+}
+
+func encodeInitializeInstructionData(
+	name string,
+	symbol string,
+	uri string,
+) []byte {
+	var buf bytes.Buffer
+	buf.Write([]byte{210, 225, 30, 162, 88, 184, 77, 141, byte(len([]byte(name))), 0, 0, 0})
+	buf.Write([]byte(name))
+	buf.Write([]byte{byte(len([]byte(symbol))), 0, 0, 0})
+	buf.Write([]byte(symbol))
+	buf.Write([]byte{byte(len([]byte(uri))), 0, 0, 0})
+	buf.Write([]byte(uri))
+
+	return buf.Bytes()
 }

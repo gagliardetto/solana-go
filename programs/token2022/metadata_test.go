@@ -44,7 +44,7 @@ func TestCreateInitializeMetadataPointerInstruction(t *testing.T) {
 		UpdateAuthority: payer.PublicKey().ToPointer(),
 		Mint:            mint.PublicKey(),
 		Name:            "OPOS",
-		Symbol:          "OPOSSSS",
+		Symbol:          "OPOS",
 		Uri:             "https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/DeveloperPortal/metadata.json",
 		AdditionalMetadata: map[string]string{
 			"description": "Only Possible On Solana",
@@ -58,7 +58,7 @@ func TestCreateInitializeMetadataPointerInstruction(t *testing.T) {
 
 	createAccountIx := system.NewCreateAccountInstruction(
 		lamports,
-		metadata.LenForLamports(),
+		DEFAULT_METADATA_MINT_LEN,
 		ProgramID,
 		payer.PublicKey(),
 		mint.PublicKey(),
@@ -77,6 +77,16 @@ func TestCreateInitializeMetadataPointerInstruction(t *testing.T) {
 		SetMintAccount(mint.PublicKey()).
 		SetSysVarRentPubkeyAccount(solana.SysVarRentPubkey)
 
+	initMetadataIx := CreateInitializeInstruction(InitializeInstructionArgs{
+		Metadata:        mint.PublicKey(),
+		UpdateAuthority: payer.PublicKey(),
+		Mint:            mint.PublicKey(),
+		MintAuthority:   payer.PublicKey(),
+		Name:            metadata.Name,
+		Symbol:          metadata.Symbol,
+		Uri:             metadata.Uri,
+	})
+
 	recentBlockhash, err := rpcClient.GetLatestBlockhash(context.Background(), rpc.CommitmentFinalized)
 	if err != nil {
 		t.Fatal(err)
@@ -85,6 +95,7 @@ func TestCreateInitializeMetadataPointerInstruction(t *testing.T) {
 		createAccountIx.Build(),
 		initializeMetadataIx,
 		initializeMintIx.Build(),
+		initMetadataIx,
 	}, recentBlockhash.Value.Blockhash)
 	if err != nil {
 		t.Fatal(err)
@@ -96,7 +107,7 @@ func TestCreateInitializeMetadataPointerInstruction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	wsUrl := strings.Replace(rpcUrl, "https://", "wss://", 1)
+	wsUrl := strings.Replace(rpcUrl, "http://", "ws://", 1)
 	wsClient, err := ws.Connect(context.Background(), wsUrl)
 	if err != nil {
 		t.Fatal(err)
