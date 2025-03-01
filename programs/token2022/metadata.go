@@ -3,6 +3,7 @@ package token2022
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 
 	"github.com/gagliardetto/solana-go"
 )
@@ -139,6 +140,7 @@ func (data *initializeMetadataPointerData) encode() []byte {
 	return buf.Bytes()
 }
 
+// TODO: Must test this!
 func CreateUpdateMetadataPointerInstruction(
 	mint solana.PublicKey,
 	authority solana.PublicKey,
@@ -164,6 +166,111 @@ func CreateUpdateMetadataPointerInstruction(
 	}
 	return ix
 }
+
+func ParseTokenMetadata(data []byte) (TokenMetadata, error) {
+	if len(data) < DEFAULT_METADATA_MINT_LEN {
+		return TokenMetadata{}, fmt.Errorf("data length is less than the minimum required length of 234")
+	}
+
+	var updateAuth *solana.PublicKey = nil
+	if data[238] != 0 {
+		a := solana.PublicKeyFromBytes(data[238 : 238+32])
+		updateAuth = &a
+	}
+
+	mint := solana.PublicKeyFromBytes(data[202 : 202+32])
+
+	if len(data) < 306 {
+		return TokenMetadata{
+			UpdateAuthority:    updateAuth,
+			Mint:               mint,
+			Name:               "",
+			Symbol:             "",
+			Uri:                "",
+			AdditionalMetadata: map[string]string{},
+		}, fmt.Errorf("data length is less than what is necessary to parse metadata")
+	}
+
+	nameLen := int(binary.LittleEndian.Uint32(data[302 : 302+4]))
+	if len(data) < 302+4+int(nameLen) {
+		return TokenMetadata{
+			UpdateAuthority:    updateAuth,
+			Mint:               mint,
+			Name:               "",
+			Symbol:             "",
+			Uri:                "",
+			AdditionalMetadata: map[string]string{},
+		}, fmt.Errorf("data length is less than what is necessary to parse metadata")
+	}
+	name := string(data[302+4 : 302+4+nameLen])
+
+	if len(data) < 302+4+nameLen+4 {
+		return TokenMetadata{
+			UpdateAuthority:    updateAuth,
+			Mint:               mint,
+			Name:               name,
+			Symbol:             "",
+			Uri:                "",
+			AdditionalMetadata: map[string]string{},
+		}, fmt.Errorf("data length is less than what is necessary to parse metadata")
+	}
+
+	symbolLen := int(binary.LittleEndian.Uint32(data[302+4+nameLen : 302+4+nameLen+4]))
+	if len(data) < 302+4+nameLen+4+symbolLen {
+		return TokenMetadata{
+			UpdateAuthority:    updateAuth,
+			Mint:               mint,
+			Name:               name,
+			Symbol:             "",
+			Uri:                "",
+			AdditionalMetadata: map[string]string{},
+		}, fmt.Errorf("data length is less than what is necessary to parse metadata")
+	}
+	symbol := string(data[302+4+nameLen+4 : 302+4+nameLen+4+symbolLen])
+
+	if len(data) < 302+4+nameLen+4+symbolLen+4 {
+		return TokenMetadata{
+			UpdateAuthority:    updateAuth,
+			Mint:               mint,
+			Name:               name,
+			Symbol:             symbol,
+			Uri:                "",
+			AdditionalMetadata: map[string]string{},
+		}, fmt.Errorf("data length is less than what is necessary to parse metadata")
+	}
+
+	uriLen := int(binary.LittleEndian.Uint32(data[302+4+nameLen+4+symbolLen : 302+4+nameLen+4+symbolLen+4]))
+	if len(data) < 302+4+nameLen+4+symbolLen+4+uriLen {
+		return TokenMetadata{
+			UpdateAuthority:    updateAuth,
+			Mint:               mint,
+			Name:               name,
+			Symbol:             symbol,
+			Uri:                "",
+			AdditionalMetadata: map[string]string{},
+		}, fmt.Errorf("data length is less than what is necessary to parse metadata")
+	}
+	uri := string(data[302+4+nameLen+4+symbolLen+4 : 302+4+nameLen+4+symbolLen+4+uriLen])
+
+	meta := TokenMetadata{
+		UpdateAuthority:    updateAuth,
+		Mint:               mint,
+		Name:               name,
+		Symbol:             symbol,
+		Uri:                uri,
+		AdditionalMetadata: map[string]string{},
+	}
+
+	return meta, nil
+}
+
+// u32('mintAuthorityOption'),
+// publicKey('mintAuthority'),
+// u64('supply'),
+// u8('decimals'),
+// bool('isInitialized'),
+// u32('freezeAuthorityOption'),
+// publicKey('freezeAuthority'),
 
 func addSigners(keys []*solana.AccountMeta, authority solana.PublicKey, multiSigners []interface{}) []*solana.AccountMeta {
 	keys = append(keys, solana.Meta(authority).SIGNER())

@@ -40,8 +40,10 @@ func TestCreateInitializeMetadataPointerInstruction(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	updateAuth, _ := solana.NewRandomPrivateKey()
+
 	metadata := TokenMetadata{
-		UpdateAuthority: payer.PublicKey().ToPointer(),
+		UpdateAuthority: updateAuth.PublicKey().ToPointer(),
 		Mint:            mint.PublicKey(),
 		Name:            "OPOS",
 		Symbol:          "OPOS",
@@ -79,7 +81,7 @@ func TestCreateInitializeMetadataPointerInstruction(t *testing.T) {
 
 	initMetadataIx := CreateInitializeInstruction(InitializeInstructionArgs{
 		Metadata:        mint.PublicKey(),
-		UpdateAuthority: payer.PublicKey(),
+		UpdateAuthority: updateAuth.PublicKey(),
 		Mint:            mint.PublicKey(),
 		MintAuthority:   payer.PublicKey(),
 		Name:            metadata.Name,
@@ -107,12 +109,36 @@ func TestCreateInitializeMetadataPointerInstruction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	wsUrl := strings.Replace(rpcUrl, "http://", "ws://", 1)
+	wsUrl := strings.Replace(rpcUrl, "https://", "wss://", 1)
 	wsClient, err := ws.Connect(context.Background(), wsUrl)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if _, err := sendandconfirmtransaction.SendAndConfirmTransaction(context.TODO(), rpcClient, wsClient, tx); err != nil {
 		t.Fatal(err)
+	}
+
+	mintAccount, err := rpcClient.GetAccountInfo(context.Background(), mint.PublicKey())
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsedMeta, err := ParseTokenMetadata(mintAccount.Value.Data.GetBinary())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if *parsedMeta.UpdateAuthority != updateAuth.PublicKey() {
+		t.Fatalf("UpdateAuthority mismatch")
+	}
+	if parsedMeta.Mint != mint.PublicKey() {
+		t.Fatalf("Mint mismatch")
+	}
+	if parsedMeta.Name != metadata.Name {
+		t.Fatalf("Name mismatch")
+	}
+	if parsedMeta.Symbol != metadata.Symbol {
+		t.Fatalf("Symbol mismatch")
+	}
+	if parsedMeta.Uri != metadata.Uri {
+		t.Fatalf("Uri mismatch")
 	}
 }
