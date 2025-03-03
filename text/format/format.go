@@ -1,4 +1,4 @@
-// Copyright 2021 github.com/gagliardetto
+// Copyright 2021 github.com/XY-Finance
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@ package format
 import (
 	"strings"
 
+	"github.com/XY-Finance/solana-go"
+	"github.com/XY-Finance/solana-go/text"
+	. "github.com/XY-Finance/solana-go/text"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/text"
-	. "github.com/gagliardetto/solana-go/text"
 )
 
 func Program(name string, programID solana.PublicKey) string {

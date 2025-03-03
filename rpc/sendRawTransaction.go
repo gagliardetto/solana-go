@@ -20,7 +20,7 @@ import (
 	"context"
 	"encoding/base64"
 
-	"github.com/gagliardetto/solana-go"
+	"github.com/XY-Finance/solana-go"
 )
 
 // SendRawTransaction submits a signed transaction to the cluster for processing.
