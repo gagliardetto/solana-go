@@ -20,8 +20,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/programs/token"
+	"github.com/XY-Finance/solana-go"
+	"github.com/XY-Finance/solana-go/programs/token"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 )

@@ -24,9 +24,9 @@ import (
 
 	rice "github.com/GeertJohan/go.rice"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/rpc"
-	"github.com/gagliardetto/solana-go/rpc/ws"
+	"github.com/XY-Finance/solana-go"
+	"github.com/XY-Finance/solana-go/rpc"
+	"github.com/XY-Finance/solana-go/rpc/ws"
 	"go.uber.org/zap"
 )
 
