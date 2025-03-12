@@ -22,9 +22,10 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	bin "github.com/gagliardetto/binary"
+	"github.com/gagliardetto/treeout"
+
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/text"
-	"github.com/gagliardetto/treeout"
 )
 
 var ProgramID solana.PublicKey = solana.StakeProgramID
@@ -53,6 +54,28 @@ const (
 	Instruction_Withdraw
 	// Deactivates the stake in the account
 	Instruction_Deactivate
+	// Sets the lockup for the stake account
+	Instruction_SetLockup
+	// Merges two stake accounts
+	Instruction_Merge
+	// Authorize a key to manage stake or withdrawal with seed
+	Instruction_AuthorizeWithSeed
+	// Initializes a new stake account with checked authorities
+	Instruction_InitializeChecked
+	// Authorize a key to manage stake or withdrawal with checked authorities
+	Instruction_AuthorizeChecked
+	// Authorize a key to manage stake or withdrawal with checked authorities and seed
+	Instruction_AuthorizeCheckedWithSeed
+	// Sets the lockup for the stake account with checked authorities
+	Instruction_SetLockupChecked
+	// Gets the minimum delegation for the stake account
+	Instruction_GetMinimumDelegation
+	// Deactivates delinquent stake accounts
+	Instruction_DeactivateDelinquent
+	// Moves stake from one account to another
+	Instruction_MoveStake
+	// Moves lamports from one account to another
+	Instruction_MoveLamports
 )
 
 type Instruction struct {
@@ -74,7 +97,7 @@ var InstructionImplDef = bin.NewVariantDefinition(
 			"Initialize", (*Initialize)(nil),
 		},
 		{
-			"Authorize", nil,
+			"Authorize", (*Authorize)(nil),
 		},
 		{
 			"DelegateStake", (*DelegateStake)(nil),
@@ -87,6 +110,39 @@ var InstructionImplDef = bin.NewVariantDefinition(
 		},
 		{
 			"Deactivate", (*Deactivate)(nil),
+		},
+		{
+			"SetLockup", (*SetLockup)(nil),
+		},
+		{
+			"Merge", (*Merge)(nil),
+		},
+		{
+			"AuthorizeWithSeed", (*AuthorizeWithSeed)(nil),
+		},
+		{
+			"InitializeChecked", (*InitializeChecked)(nil),
+		},
+		{
+			"AuthorizeChecked", (*AuthorizeChecked)(nil),
+		},
+		{
+			"AuthorizeCheckedWithSeed", (*AuthorizeCheckedWithSeed)(nil),
+		},
+		{
+			"SetLockupChecked", (*SetLockupChecked)(nil),
+		},
+		{
+			"GetMinimumDelegation", (*GetMinimumDelegation)(nil),
+		},
+		{
+			"DeactivateDelinquent", (*DeactivateDelinquent)(nil),
+		},
+		{
+			"MoveStake", (*MoveStake)(nil),
+		},
+		{
+			"MoveLamports", (*MoveLamports)(nil),
 		},
 	},
 )

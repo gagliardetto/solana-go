@@ -19,9 +19,10 @@ import (
 	"fmt"
 
 	bin "github.com/gagliardetto/binary"
+	"github.com/gagliardetto/treeout"
+
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/text/format"
-	"github.com/gagliardetto/treeout"
 )
 
 type Split struct {
@@ -117,9 +118,9 @@ func (inst *Split) EncodeToTree(parent treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.Meta("              StakeAccount", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(format.Meta("           NewStakeAccount", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(format.Meta("             StakeAuthoriy", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(format.Meta("StakeAccount", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(format.Meta("NewStakeAccount", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(format.Meta("StakeAuthoriy", inst.AccountMetaSlice.Get(2)))
 					})
 				})
 		})
