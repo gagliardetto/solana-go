@@ -52,7 +52,7 @@ func (inst *RecoverNested) SetAccounts(accounts []*ag_solanago.AccountMeta) erro
 	if len(accounts) != 7 {
 		return fmt.Errorf("expected 7 accounts, got %v", len(accounts))
 	}
-	inst.Accounts = ag_solanago.AccountMetaSlice(accounts)
+	inst.Accounts = accounts
 	return nil
 }
 
