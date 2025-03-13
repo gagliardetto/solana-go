@@ -100,7 +100,7 @@ func (inst *UiAmountToAmount) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	if inst.Accounts[0] == nil {
-		return errors.New("accounts.Mint is not set")
+		return errors.New("accounts.Accounts is not set")
 	}
 
 	return nil

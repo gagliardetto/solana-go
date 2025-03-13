@@ -36,7 +36,7 @@ type AmountToUiAmount struct {
 }
 
 func (inst *AmountToUiAmount) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
-	inst.Accounts = ag_solanago.AccountMetaSlice(accounts)
+	inst.Accounts = accounts
 	return nil
 }
 
@@ -97,7 +97,7 @@ func (inst *AmountToUiAmount) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	if inst.Accounts[0] == nil {
-		return errors.New("accounts.Mint is not set")
+		return errors.New("accounts.Accounts is not set")
 	}
 
 	return nil

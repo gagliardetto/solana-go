@@ -29,27 +29,27 @@ import (
 type InitializeImmutableOwner struct {
 	// [0] = [WRITE] account
 	// ··········· The account to initialize.
-	Account *ag_solanago.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts *ag_solanago.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *InitializeImmutableOwner) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+func (inst *InitializeImmutableOwner) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
 	if len(accounts) != 1 {
 		return fmt.Errorf("expected 1 account, got %v", len(accounts))
 	}
-	obj.Account = accounts[0]
+	inst.Accounts = accounts[0]
 	return nil
 }
 
-func (slice InitializeImmutableOwner) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
-	accounts = append(accounts, slice.Account)
+func (inst InitializeImmutableOwner) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	accounts = append(accounts, inst.Accounts)
 	return
 }
 
-func (obj InitializeImmutableOwner) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+func (inst InitializeImmutableOwner) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
 	return nil
 }
 
-func (obj *InitializeImmutableOwner) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+func (inst *InitializeImmutableOwner) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
 	return nil
 }
 
@@ -58,12 +58,12 @@ func NewInitializeImmutableOwnerInstructionBuilder() *InitializeImmutableOwner {
 }
 
 func (inst *InitializeImmutableOwner) SetAccount(account ag_solanago.PublicKey) *InitializeImmutableOwner {
-	inst.Account = ag_solanago.Meta(account).WRITE()
+	inst.Accounts = ag_solanago.Meta(account).WRITE()
 	return inst
 }
 
 func (inst *InitializeImmutableOwner) GetAccount() *ag_solanago.AccountMeta {
-	return inst.Account
+	return inst.Accounts
 }
 
 func (inst InitializeImmutableOwner) Build() *Instruction {
@@ -81,8 +81,8 @@ func (inst InitializeImmutableOwner) ValidateAndBuild() (*Instruction, error) {
 }
 
 func (inst *InitializeImmutableOwner) Validate() error {
-	if inst.Account == nil {
-		return errors.New("accounts.Account is not set")
+	if inst.Accounts == nil {
+		return errors.New("accounts.Accounts is not set")
 	}
 	return nil
 }
@@ -93,7 +93,7 @@ func (inst *InitializeImmutableOwner) EncodeToTree(parent ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("InitializeImmutableOwner")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("account", inst.Account))
+						accountsBranch.Child(ag_format.Meta("account", inst.Accounts))
 					})
 				})
 		})

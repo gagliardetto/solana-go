@@ -29,19 +29,19 @@ import (
 type GetAccountDataSize struct {
 	// [0] = [WRITE] mint
 	// ··········· The mint.
-	Mint *ag_solanago.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts *ag_solanago.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
 func (inst *GetAccountDataSize) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
 	if len(accounts) != 1 {
 		return fmt.Errorf("expected 1 account, got %v", len(accounts))
 	}
-	inst.Mint = accounts[0]
+	inst.Accounts = accounts[0]
 	return nil
 }
 
 func (inst GetAccountDataSize) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
-	accounts = append(accounts, inst.Mint)
+	accounts = append(accounts, inst.Accounts)
 	return
 }
 
@@ -58,12 +58,12 @@ func NewGetAccountDataSizeInstructionBuilder() *GetAccountDataSize {
 }
 
 func (inst *GetAccountDataSize) SetMint(mint ag_solanago.PublicKey) *GetAccountDataSize {
-	inst.Mint = ag_solanago.Meta(mint).WRITE()
+	inst.Accounts = ag_solanago.Meta(mint).WRITE()
 	return inst
 }
 
 func (inst *GetAccountDataSize) GetMint() *ag_solanago.AccountMeta {
-	return inst.Mint
+	return inst.Accounts
 }
 
 func (inst GetAccountDataSize) Build() *Instruction {
@@ -81,8 +81,8 @@ func (inst GetAccountDataSize) ValidateAndBuild() (*Instruction, error) {
 }
 
 func (inst *GetAccountDataSize) Validate() error {
-	if inst.Mint == nil {
-		return errors.New("accounts.Mint is not set")
+	if inst.Accounts == nil {
+		return errors.New("accounts.Accounts is not set")
 	}
 	return nil
 }
@@ -93,7 +93,7 @@ func (inst *GetAccountDataSize) EncodeToTree(parent ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("GetAccountDataSize")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("mint", inst.Mint))
+						accountsBranch.Child(ag_format.Meta("mint", inst.Accounts))
 					})
 				})
 		})
