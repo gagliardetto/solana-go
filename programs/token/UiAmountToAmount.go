@@ -94,18 +94,15 @@ func (inst UiAmountToAmount) ValidateAndBuild() (*Instruction, error) {
 
 func (inst *UiAmountToAmount) Validate() error {
 	// Check whether all (required) parameters are set:
-	{
-		if inst.UiAmount == nil {
-			return errors.New("UiAmount parameter is not set")
-		}
+	if inst.UiAmount == nil {
+		return errors.New("UiAmount parameter is not set")
 	}
 
 	// Check whether all (required) accounts are set:
-	{
-		if inst.Accounts[0] == nil {
-			return errors.New("accounts.Mint is not set")
-		}
+	if inst.Accounts[0] == nil {
+		return errors.New("accounts.Mint is not set")
 	}
+
 	return nil
 }
 

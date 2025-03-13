@@ -91,18 +91,15 @@ func (inst AmountToUiAmount) ValidateAndBuild() (*Instruction, error) {
 
 func (inst *AmountToUiAmount) Validate() error {
 	// Check whether all (required) parameters are set:
-	{
-		if inst.Amount == nil {
-			return errors.New("Amount parameter is not set")
-		}
+	if inst.Amount == nil {
+		return errors.New("amount parameter is not set")
 	}
 
 	// Check whether all (required) accounts are set:
-	{
-		if inst.Accounts[0] == nil {
-			return errors.New("accounts.Mint is not set")
-		}
+	if inst.Accounts[0] == nil {
+		return errors.New("accounts.Mint is not set")
 	}
+
 	return nil
 }
 
@@ -115,7 +112,7 @@ func (inst *AmountToUiAmount) EncodeToTree(parent ag_treeout.Branches) {
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("Amount", *inst.Amount))
+						paramsBranch.Child(ag_format.Param("amount", *inst.Amount))
 					})
 
 					// Accounts of the instruction:
