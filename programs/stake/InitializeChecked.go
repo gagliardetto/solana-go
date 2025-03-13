@@ -49,56 +49,49 @@ type InitializeChecked struct {
 }
 
 func (inst *InitializeChecked) UnmarshalWithDecoder(dec *bin.Decoder) error {
-	{
-		err := dec.Decode(&inst.Authorized)
-		if err != nil {
-			return err
-		}
+	err := dec.Decode(&inst.Authorized)
+	if err != nil {
+		return err
 	}
-	{
-		err := dec.Decode(&inst.Lockup)
-		if err != nil {
-			return err
-		}
+
+	err = dec.Decode(&inst.Lockup)
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 
 func (inst *InitializeChecked) MarshalWithEncoder(encoder *bin.Encoder) error {
-	{
-		err := encoder.Encode(*inst.Authorized)
-		if err != nil {
-			return err
-		}
+	err := encoder.Encode(*inst.Authorized)
+	if err != nil {
+		return err
 	}
-	{
-		err := encoder.Encode(*inst.Lockup)
-		if err != nil {
-			return err
-		}
+
+	err = encoder.Encode(*inst.Lockup)
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 
 func (inst *InitializeChecked) Validate() error {
 	// Check whether all (required) parameters are set:
-	{
-		if inst.Authorized == nil {
-			return errors.New("authorized parameter is not set")
-		}
-		err := inst.Authorized.Validate()
-		if err != nil {
-			return err
-		}
+	if inst.Authorized == nil {
+		return errors.New("authorized parameter is not set")
 	}
-	{
-		if inst.Lockup == nil {
-			return errors.New("lockup parameter is not set")
-		}
-		err := inst.Lockup.Validate()
-		if err != nil {
-			return err
-		}
+	err := inst.Authorized.Validate()
+	if err != nil {
+		return err
+	}
+
+	if inst.Lockup == nil {
+		return errors.New("lockup parameter is not set")
+	}
+	err = inst.Lockup.Validate()
+	if err != nil {
+		return err
 	}
 
 	// Check whether all accounts are set:
@@ -191,17 +184,17 @@ func (inst *InitializeChecked) EncodeToTree(parent treeout.Branches) {
 							authBranch.Child(format.Account("Withdrawer", *inst.Authorized.Withdrawer))
 						})
 						paramsBranch.Child("Lockup").ParentFunc(func(authBranch treeout.Branches) {
-							authBranch.Child(format.Param("UnixTimestamp", inst.Lockup.UnixTimestamp))
-							authBranch.Child(format.Param("        Epoch", inst.Lockup.Epoch))
+							authBranch.Child(format.Param("  UnixTimestamp", inst.Lockup.UnixTimestamp))
+							authBranch.Child(format.Param("          Epoch", inst.Lockup.Epoch))
 							authBranch.Child(format.Account("    Custodian", *inst.Lockup.Custodian))
 						})
 					})
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.Meta("StakeAccount", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(format.Meta("RentSysvar", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(format.Meta("StakeAuthority", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(format.Meta("     StakeAccount", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(format.Meta("       RentSysvar", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(format.Meta("   StakeAuthority", inst.AccountMetaSlice.Get(2)))
 						accountsBranch.Child(format.Meta("WithdrawAuthority", inst.AccountMetaSlice.Get(3)))
 					})
 				})

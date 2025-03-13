@@ -126,8 +126,8 @@ func (inst *SetLockupChecked) EncodeToTree(parent treeout.Branches) {
 					// Parameters of the instruction:
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch treeout.Branches) {
 						paramsBranch.Child("Lockup").ParentFunc(func(authBranch treeout.Branches) {
-							authBranch.Child(format.Param("UnixTimestamp", inst.Lockup.UnixTimestamp))
-							authBranch.Child(format.Param("        Epoch", inst.Lockup.Epoch))
+							authBranch.Child(format.Param("  UnixTimestamp", inst.Lockup.UnixTimestamp))
+							authBranch.Child(format.Param("          Epoch", inst.Lockup.Epoch))
 							authBranch.Child(format.Account("    Custodian", *inst.Lockup.Custodian))
 						})
 					})

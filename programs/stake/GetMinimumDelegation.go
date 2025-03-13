@@ -23,8 +23,7 @@ import (
 )
 
 // GetMinimumDelegation instruction
-type GetMinimumDelegation struct {
-}
+type GetMinimumDelegation struct{}
 
 func (inst GetMinimumDelegation) ValidateAndBuild() (*Instruction, error) {
 	if err := inst.Validate(); err != nil {

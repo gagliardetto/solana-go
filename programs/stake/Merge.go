@@ -43,7 +43,7 @@ type Merge struct {
 }
 
 func (inst *Merge) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
-	inst.AccountMetaSlice = ag_solanago.AccountMetaSlice(accounts)
+	inst.AccountMetaSlice = accounts
 	return nil
 }
 

@@ -42,7 +42,7 @@ type MoveStake struct {
 }
 
 func (inst *MoveStake) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
-	inst.Accounts = ag_solanago.AccountMetaSlice(accounts)
+	inst.Accounts = accounts
 	return nil
 }
 
@@ -121,7 +121,7 @@ func (inst *MoveStake) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
 		if inst.Lamports == nil {
-			return errors.New("Lamports parameter is not set")
+			return errors.New("lamports parameter is not set")
 		}
 	}
 

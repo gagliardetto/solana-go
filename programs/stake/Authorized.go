@@ -30,34 +30,30 @@ type Authorized struct {
 }
 
 func (inst *Authorized) UnmarshalWithDecoder(dec *bin.Decoder) error {
-	{
-		err := dec.Decode(&inst.Staker)
-		if err != nil {
-			return err
-		}
+	err := dec.Decode(&inst.Staker)
+	if err != nil {
+		return err
 	}
-	{
-		err := dec.Decode(&inst.Withdrawer)
-		if err != nil {
-			return err
-		}
+
+	err = dec.Decode(&inst.Withdrawer)
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 
 func (inst *Authorized) MarshalWithEncoder(encoder *bin.Encoder) error {
-	{
-		err := encoder.Encode(*inst.Staker)
-		if err != nil {
-			return err
-		}
+	err := encoder.Encode(*inst.Staker)
+	if err != nil {
+		return err
 	}
-	{
-		err := encoder.Encode(*inst.Withdrawer)
-		if err != nil {
-			return err
-		}
+
+	err = encoder.Encode(*inst.Withdrawer)
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 

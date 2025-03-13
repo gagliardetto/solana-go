@@ -127,7 +127,7 @@ func (inst MoveLamports) ValidateAndBuild() (*Instruction, error) {
 
 func (inst *MoveLamports) Validate() error {
 	if inst.Amount == nil {
-		return errors.New("Amount parameter is not set")
+		return errors.New("amount parameter is not set")
 	}
 	if inst.Accounts[0] == nil {
 		return errors.New("accounts.SourceStakeAccount is not set")
@@ -158,7 +158,7 @@ func (inst *MoveLamports) EncodeToTree(parent ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("     SourceStakeAccount", inst.Accounts[0]))
 						accountsBranch.Child(ag_format.Meta("DestinationStakeAccount", inst.Accounts[1]))
-						accountsBranch.Child(ag_format.Meta("StakeAuthority", inst.Accounts[2]))
+						accountsBranch.Child(ag_format.Meta("         StakeAuthority", inst.Accounts[2]))
 					})
 				})
 		})
