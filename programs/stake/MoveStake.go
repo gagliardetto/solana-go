@@ -1,4 +1,5 @@
 // Copyright 2021 github.com/gagliardetto
+// Copyright 2025 github.com/liquid-collective
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +19,10 @@ import (
 	"errors"
 
 	ag_binary "github.com/gagliardetto/binary"
+	ag_treeout "github.com/gagliardetto/treeout"
+
 	ag_solanago "github.com/gagliardetto/solana-go"
 	ag_format "github.com/gagliardetto/solana-go/text/format"
-	ag_treeout "github.com/gagliardetto/treeout"
 )
 
 // MoveStake moves stake from one account to another.
@@ -152,9 +154,9 @@ func (inst *MoveStake) EncodeToTree(parent ag_treeout.Branches) {
 					})
 
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("SourceStakeAccount", inst.Accounts[0]))
+						accountsBranch.Child(ag_format.Meta("     SourceStakeAccount", inst.Accounts[0]))
 						accountsBranch.Child(ag_format.Meta("DestinationStakeAccount", inst.Accounts[1]))
-						accountsBranch.Child(ag_format.Meta("StakeAuthority", inst.Accounts[2]))
+						accountsBranch.Child(ag_format.Meta("         StakeAuthority", inst.Accounts[2]))
 					})
 				})
 		})

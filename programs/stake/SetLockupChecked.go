@@ -1,4 +1,5 @@
 // Copyright 2021 github.com/gagliardetto
+// Copyright 2025 github.com/liquid-collective
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -134,8 +135,8 @@ func (inst *SetLockupChecked) EncodeToTree(parent treeout.Branches) {
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch treeout.Branches) {
 						accountsBranch.Child(format.Meta("StakeAccount", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(format.Meta("ClockSysvar", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(format.Meta("Custodian", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(format.Meta(" ClockSysvar", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(format.Meta("   Custodian", inst.AccountMetaSlice.Get(2)))
 					})
 				})
 		})

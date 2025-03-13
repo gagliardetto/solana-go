@@ -1,4 +1,5 @@
 // Copyright 2021 github.com/gagliardetto
+// Copyright 2025 github.com/liquid-collective
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -155,7 +156,7 @@ func (inst *MoveLamports) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("SourceStakeAccount", inst.Accounts[0]))
+						accountsBranch.Child(ag_format.Meta("     SourceStakeAccount", inst.Accounts[0]))
 						accountsBranch.Child(ag_format.Meta("DestinationStakeAccount", inst.Accounts[1]))
 						accountsBranch.Child(ag_format.Meta("StakeAuthority", inst.Accounts[2]))
 					})

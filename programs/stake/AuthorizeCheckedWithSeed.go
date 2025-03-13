@@ -1,4 +1,5 @@
 // Copyright 2021 github.com/gagliardetto
+// Copyright 2025 github.com/liquid-collective
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -196,17 +197,17 @@ func (inst *AuthorizeCheckedWithSeed) EncodeToTree(parent ag_treeout.Branches) {
 
 					// Parameters of the instruction:
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("NewAuthority", *inst.NewAuthority))
+						paramsBranch.Child(ag_format.Param(" NewAuthority", *inst.NewAuthority))
 						paramsBranch.Child(ag_format.Param("AuthorityType", *inst.AuthorityType))
-						paramsBranch.Child(ag_format.Param("Base", *inst.Base))
-						paramsBranch.Child(ag_format.Param("Seed", *inst.Seed))
-						paramsBranch.Child(ag_format.Param("Owner", *inst.Owner))
+						paramsBranch.Child(ag_format.Param("         Base", *inst.Base))
+						paramsBranch.Child(ag_format.Param("         Seed", *inst.Seed))
+						paramsBranch.Child(ag_format.Param("        Owner", *inst.Owner))
 					})
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
 						accountsBranch.Child(ag_format.Meta("StakeAccount", inst.Accounts[0]))
-						accountsBranch.Child(ag_format.Meta("ClockSysvar", inst.Accounts[1]))
+						accountsBranch.Child(ag_format.Meta(" ClockSysvar", inst.Accounts[1]))
 						signersBranch := accountsBranch.Child(fmt.Sprintf("Signers[len=%v]", len(inst.Signers)))
 						for i, v := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), v))
