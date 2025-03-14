@@ -96,7 +96,8 @@ func (a AccountMeta) less(act *AccountMeta) bool {
 	if a.IsWritable != act.IsWritable {
 		return a.IsWritable
 	}
-	return false
+
+	return a.PublicKey.String() < act.PublicKey.String()
 }
 
 type AccountMetaSlice []*AccountMeta
