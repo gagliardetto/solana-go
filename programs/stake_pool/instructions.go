@@ -41,32 +41,32 @@ func init() {
 }
 
 const (
-	Instruction_Initialize                       uint8 = 0
-	Instruction_AddValidatorToPool               uint8 = 1
-	Instruction_RemoveValidatorFromPool          uint8 = 2
-	Instruction_DecreaseValidatorStake           uint8 = 3
-	Instruction_IncreaseValidatorStake           uint8 = 4
-	Instruction_SetPreferredValidator            uint8 = 5
-	Instruction_UpdateValidatorListBalance       uint8 = 6
-	Instruction_UpdateStakePoolBalance           uint8 = 7
-	Instruction_CleanupRemovedValidatorEntries   uint8 = 8
-	Instruction_DepositStake                     uint8 = 9
-	Instruction_WithdrawStake                    uint8 = 10
-	Instruction_SetManager                       uint8 = 11
-	Instruction_SetFee                           uint8 = 12
-	Instruction_SetStaker                        uint8 = 13
-	Instruction_DecreaseAdditionalValidatorStake uint8 = 14
-	Instruction_IncreaseAdditionalValidatorStake uint8 = 15
-	Instruction_Redelegate                       uint8 = 16
-	Instruction_SetFundingAuthority              uint8 = 17
-	Instruction_DepositSol                       uint8 = 18
-	Instruction_WithdrawSol                      uint8 = 19
-	Instruction_CreateTokenMetadata              uint8 = 20
-	Instruction_UpdateTokenMetadata              uint8 = 21
-	Instruction_DepositStakeWithSlippage         uint8 = 22
-	Instruction_WithdrawStakeWithSlippage        uint8 = 23
-	Instruction_DepositSolWithSlippage           uint8 = 24
-	Instruction_WithdrawSolWithSlippage          uint8 = 25
+	Instruction_Initialize uint8 = iota
+	Instruction_AddValidatorToPool
+	Instruction_RemoveValidatorFromPool
+	Instruction_DecreaseValidatorStake
+	Instruction_IncreaseValidatorStake
+	Instruction_SetPreferredValidator
+	Instruction_UpdateValidatorListBalance
+	Instruction_UpdateStakePoolBalance
+	Instruction_CleanupRemovedValidatorEntries
+	Instruction_DepositStake
+	Instruction_WithdrawStake
+	Instruction_SetManager
+	Instruction_SetFee
+	Instruction_SetStaker
+	Instruction_DecreaseAdditionalValidatorStake
+	Instruction_IncreaseAdditionalValidatorStake
+	Instruction_Redelegate
+	Instruction_SetFundingAuthority
+	Instruction_DepositSol
+	Instruction_WithdrawSol
+	Instruction_CreateTokenMetadata
+	Instruction_UpdateTokenMetadata
+	Instruction_DepositStakeWithSlippage
+	Instruction_WithdrawStakeWithSlippage
+	Instruction_DepositSolWithSlippage
+	Instruction_WithdrawSolWithSlippage
 )
 
 func InstructionIDToName(id uint8) string {
