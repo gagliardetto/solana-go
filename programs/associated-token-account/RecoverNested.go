@@ -192,7 +192,7 @@ func (inst *RecoverNested) EncodeToTree(parent ag_treeout.Branches) {
 }
 
 func (inst RecoverNested) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	return encoder.WriteBytes([]byte{}, false)
+	return nil
 }
 
 func (inst *RecoverNested) UnmarshalWithDecoder(_ *ag_binary.Decoder) (err error) {
@@ -201,7 +201,7 @@ func (inst *RecoverNested) UnmarshalWithDecoder(_ *ag_binary.Decoder) (err error
 
 // NewRecoverNestedInstruction declares a new RecoverNested instruction with the provided parameters and accounts.
 func NewRecoverNestedInstruction(
-	// Accounts:
+// Accounts:
 	nested ag_solanago.PublicKey,
 	tokenMintForNested ag_solanago.PublicKey,
 	walletAssociatedToken ag_solanago.PublicKey,

@@ -157,7 +157,7 @@ func (inst *Create) EncodeToTree(parent treeout.Branches) {
 }
 
 func (inst Create) MarshalWithEncoder(encoder *bin.Encoder) error {
-	return encoder.WriteBytes([]byte{}, false)
+	return nil
 }
 
 func (inst *Create) UnmarshalWithDecoder(decoder *bin.Decoder) error {

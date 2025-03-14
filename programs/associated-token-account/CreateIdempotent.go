@@ -199,7 +199,7 @@ func (inst *CreateIdempotent) EncodeToTree(parent ag_treeout.Branches) {
 }
 
 func (inst CreateIdempotent) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	return encoder.WriteBytes([]byte{}, false)
+	return nil
 }
 
 func (inst *CreateIdempotent) UnmarshalWithDecoder(_ *ag_binary.Decoder) (err error) {
@@ -208,7 +208,7 @@ func (inst *CreateIdempotent) UnmarshalWithDecoder(_ *ag_binary.Decoder) (err er
 
 // NewCreateIdempotentInstruction declares a new CreateIdempotent instruction with the provided parameters and accounts.
 func NewCreateIdempotentInstruction(
-	// Accounts:
+// Accounts:
 	funding ag_solanago.PublicKey,
 	associatedToken ag_solanago.PublicKey,
 	wallet ag_solanago.PublicKey,

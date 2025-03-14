@@ -15,6 +15,7 @@
 package associatedtokenaccount
 
 import (
+	"bytes"
 	"fmt"
 
 	ag_spew "github.com/davecgh/go-spew/spew"
@@ -103,7 +104,11 @@ func (inst *Instruction) Accounts() (out []*ag_solanago.AccountMeta) {
 }
 
 func (inst *Instruction) Data() ([]byte, error) {
-	return []byte{}, nil
+	buf := new(bytes.Buffer)
+	if err := ag_binary.NewBinEncoder(buf).Encode(inst); err != nil {
+		return nil, fmt.Errorf("unable to encode instruction: %w", err)
+	}
+	return buf.Bytes(), nil
 }
 
 func (inst *Instruction) TextEncode(encoder *ag_text.Encoder, option *ag_text.Option) error {
@@ -115,6 +120,10 @@ func (inst *Instruction) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error 
 }
 
 func (inst Instruction) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	err := encoder.WriteUint8(inst.TypeID.Uint8())
+	if err != nil {
+		return fmt.Errorf("unable to write variant type: %w", err)
+	}
 	return encoder.Encode(inst.Impl)
 }
 
@@ -128,26 +137,14 @@ func registryDecodeInstruction(accounts []*ag_solanago.AccountMeta, data []byte)
 
 func DecodeInstruction(accounts []*ag_solanago.AccountMeta, data []byte) (*Instruction, error) {
 	inst := new(Instruction)
-	decoder := ag_binary.NewBinDecoder(data)
-
-	if len(data) == 0 {
-		if v, ok := inst.Impl.(ag_solanago.AccountsSettable); ok {
-			if err := v.SetAccounts(accounts); err != nil {
-				return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
-			}
-		}
-		return inst, nil
-	}
-
-	if err := decoder.Decode(inst); err != nil {
+	if err := ag_binary.NewBinDecoder(data).Decode(inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction: %w", err)
 	}
-
 	if v, ok := inst.Impl.(ag_solanago.AccountsSettable); ok {
-		if err := v.SetAccounts(accounts); err != nil {
+		err := v.SetAccounts(accounts)
+		if err != nil {
 			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
 		}
 	}
-
 	return inst, nil
 }
