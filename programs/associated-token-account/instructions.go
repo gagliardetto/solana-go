@@ -15,74 +15,119 @@
 package associatedtokenaccount
 
 import (
+	"bytes"
 	"fmt"
 
-	spew "github.com/davecgh/go-spew/spew"
-	bin "github.com/gagliardetto/binary"
-	solana "github.com/gagliardetto/solana-go"
-	text "github.com/gagliardetto/solana-go/text"
-	treeout "github.com/gagliardetto/treeout"
+	ag_spew "github.com/davecgh/go-spew/spew"
+	ag_binary "github.com/gagliardetto/binary"
+	ag_treeout "github.com/gagliardetto/treeout"
+
+	ag_solanago "github.com/gagliardetto/solana-go"
+	ag_text "github.com/gagliardetto/solana-go/text"
 )
 
-var ProgramID solana.PublicKey = solana.SPLAssociatedTokenAccountProgramID
+var ProgramID ag_solanago.PublicKey = ag_solanago.SPLAssociatedTokenAccountProgramID
 
-func SetProgramID(pubkey solana.PublicKey) {
+func SetProgramID(pubkey ag_solanago.PublicKey) {
 	ProgramID = pubkey
-	solana.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
+	ag_solanago.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
 }
 
 const ProgramName = "AssociatedTokenAccount"
 
 func init() {
-	solana.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
+	ag_solanago.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
 }
 
-type Instruction struct {
-	bin.BaseVariant
-}
+const (
+	// Creates an associated token account for the given wallet address and
+	// token mint Returns an error if the account exists.
+	Instruction_Create uint8 = iota
 
-func (inst *Instruction) EncodeToTree(parent treeout.Branches) {
-	if enToTree, ok := inst.Impl.(text.EncodableToTree); ok {
-		enToTree.EncodeToTree(parent)
-	} else {
-		parent.Child(spew.Sdump(inst))
+	// Creates an associated token account for the given wallet address and
+	// token mint, if it doesn't already exist.  Returns an error if the
+	// account exists, but with a different owner.
+	Instruction_CreateIdempotent
+
+	// Transfers from and closes a nested associated token account: an
+	// associated token account owned by an associated token account.
+	Instruction_RecoverNested
+)
+
+// InstructionIDToName returns the name of the instruction given its ID.
+func InstructionIDToName(id uint8) string {
+	switch id {
+	case Instruction_Create:
+		return "Create"
+	case Instruction_CreateIdempotent:
+		return "CreateIdempotent"
+	case Instruction_RecoverNested:
+		return "RecoverNested"
+	default:
+		return ""
 	}
 }
 
-var InstructionImplDef = bin.NewVariantDefinition(
-	bin.NoTypeIDEncoding, // NOTE: the associated-token-account program has no ID encoding.
-	[]bin.VariantType{
+type Instruction struct {
+	ag_binary.BaseVariant
+}
+
+func (inst *Instruction) EncodeToTree(parent ag_treeout.Branches) {
+	if enToTree, ok := inst.Impl.(ag_text.EncodableToTree); ok {
+		enToTree.EncodeToTree(parent)
+	} else {
+		parent.Child(ag_spew.Sdump(inst))
+	}
+}
+
+var InstructionImplDef = ag_binary.NewVariantDefinition(
+	ag_binary.Uint8TypeIDEncoding,
+	[]ag_binary.VariantType{
 		{
 			"Create", (*Create)(nil),
+		},
+		{
+			"CreateIdempotent", (*CreateIdempotent)(nil),
+		},
+		{
+			"RecoverNested", (*RecoverNested)(nil),
 		},
 	},
 )
 
-func (inst *Instruction) ProgramID() solana.PublicKey {
+func (inst *Instruction) ProgramID() ag_solanago.PublicKey {
 	return ProgramID
 }
 
-func (inst *Instruction) Accounts() (out []*solana.AccountMeta) {
-	return inst.Impl.(solana.AccountsGettable).GetAccounts()
+func (inst *Instruction) Accounts() (out []*ag_solanago.AccountMeta) {
+	return inst.Impl.(ag_solanago.AccountsGettable).GetAccounts()
 }
 
 func (inst *Instruction) Data() ([]byte, error) {
-	return []byte{}, nil
+	buf := new(bytes.Buffer)
+	if err := ag_binary.NewBinEncoder(buf).Encode(inst); err != nil {
+		return nil, fmt.Errorf("unable to encode instruction: %w", err)
+	}
+	return buf.Bytes(), nil
 }
 
-func (inst *Instruction) TextEncode(encoder *text.Encoder, option *text.Option) error {
+func (inst *Instruction) TextEncode(encoder *ag_text.Encoder, option *ag_text.Option) error {
 	return encoder.Encode(inst.Impl, option)
 }
 
-func (inst *Instruction) UnmarshalWithDecoder(decoder *bin.Decoder) error {
+func (inst *Instruction) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
 	return inst.BaseVariant.UnmarshalBinaryVariant(decoder, InstructionImplDef)
 }
 
-func (inst Instruction) MarshalWithEncoder(encoder *bin.Encoder) error {
+func (inst Instruction) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	err := encoder.WriteUint8(inst.TypeID.Uint8())
+	if err != nil {
+		return fmt.Errorf("unable to write variant type: %w", err)
+	}
 	return encoder.Encode(inst.Impl)
 }
 
-func registryDecodeInstruction(accounts []*solana.AccountMeta, data []byte) (interface{}, error) {
+func registryDecodeInstruction(accounts []*ag_solanago.AccountMeta, data []byte) (interface{}, error) {
 	inst, err := DecodeInstruction(accounts, data)
 	if err != nil {
 		return nil, err
@@ -90,12 +135,12 @@ func registryDecodeInstruction(accounts []*solana.AccountMeta, data []byte) (int
 	return inst, nil
 }
 
-func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instruction, error) {
+func DecodeInstruction(accounts []*ag_solanago.AccountMeta, data []byte) (*Instruction, error) {
 	inst := new(Instruction)
-	if err := bin.NewBinDecoder(data).Decode(inst); err != nil {
+	if err := ag_binary.NewBinDecoder(data).Decode(inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction: %w", err)
 	}
-	if v, ok := inst.Impl.(solana.AccountsSettable); ok {
+	if v, ok := inst.Impl.(ag_solanago.AccountsSettable); ok {
 		err := v.SetAccounts(accounts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)

@@ -19,16 +19,13 @@ import (
 	"fmt"
 
 	bin "github.com/gagliardetto/binary"
+	treeout "github.com/gagliardetto/treeout"
+
 	solana "github.com/gagliardetto/solana-go"
 	format "github.com/gagliardetto/solana-go/text/format"
-	treeout "github.com/gagliardetto/treeout"
 )
 
 type Create struct {
-	Payer  solana.PublicKey `bin:"-" borsh_skip:"true"`
-	Wallet solana.PublicKey `bin:"-" borsh_skip:"true"`
-	Mint   solana.PublicKey `bin:"-" borsh_skip:"true"`
-
 	// [0] = [WRITE, SIGNER] Payer
 	// ··········· Funding account
 	//
@@ -46,44 +43,35 @@ type Create struct {
 	//
 	// [5] = [] TokenProgram
 	// ··········· SPL token program ID
-	//
-	// [6] = [] SysVarRent
-	// ··········· SysVarRentPubkey
 	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewCreateInstructionBuilder creates a new `Create` instruction builder.
 func NewCreateInstructionBuilder() *Create {
-	nd := &Create{}
-	return nd
+	return &Create{}
 }
 
 func (inst *Create) SetPayer(payer solana.PublicKey) *Create {
-	inst.Payer = payer
+	inst.AccountMetaSlice[0] = solana.Meta(payer).WRITE().SIGNER()
 	return inst
 }
 
 func (inst *Create) SetWallet(wallet solana.PublicKey) *Create {
-	inst.Wallet = wallet
+	inst.AccountMetaSlice[2] = solana.Meta(wallet)
 	return inst
 }
 
 func (inst *Create) SetMint(mint solana.PublicKey) *Create {
-	inst.Mint = mint
+	inst.AccountMetaSlice[3] = solana.Meta(mint)
 	return inst
 }
 
-func (inst Create) Build() *Instruction {
+func (inst *Create) SetAccounts(payer, wallet, mint solana.PublicKey) *Create {
+	associatedTokenAddress, _, _ := solana.FindAssociatedTokenAddress(wallet, mint)
 
-	// Find the associatedTokenAddress;
-	associatedTokenAddress, _, _ := solana.FindAssociatedTokenAddress(
-		inst.Wallet,
-		inst.Mint,
-	)
-
-	keys := []*solana.AccountMeta{
+	inst.AccountMetaSlice = []*solana.AccountMeta{
 		{
-			PublicKey:  inst.Payer,
+			PublicKey:  payer,
 			IsSigner:   true,
 			IsWritable: true,
 		},
@@ -93,12 +81,12 @@ func (inst Create) Build() *Instruction {
 			IsWritable: true,
 		},
 		{
-			PublicKey:  inst.Wallet,
+			PublicKey:  wallet,
 			IsSigner:   false,
 			IsWritable: false,
 		},
 		{
-			PublicKey:  inst.Mint,
+			PublicKey:  mint,
 			IsSigner:   false,
 			IsWritable: false,
 		},
@@ -112,24 +100,18 @@ func (inst Create) Build() *Instruction {
 			IsSigner:   false,
 			IsWritable: false,
 		},
-		{
-			PublicKey:  solana.SysVarRentPubkey,
-			IsSigner:   false,
-			IsWritable: false,
-		},
 	}
 
-	inst.AccountMetaSlice = keys
+	return inst
+}
 
+func (inst Create) Build() *Instruction {
 	return &Instruction{BaseVariant: bin.BaseVariant{
 		Impl:   inst,
 		TypeID: bin.NoTypeIDDefaultID,
 	}}
 }
 
-// ValidateAndBuild validates the instruction accounts.
-// If there is a validation error, return the error.
-// Otherwise, build and return the instruction.
 func (inst Create) ValidateAndBuild() (*Instruction, error) {
 	if err := inst.Validate(); err != nil {
 		return nil, err
@@ -138,18 +120,18 @@ func (inst Create) ValidateAndBuild() (*Instruction, error) {
 }
 
 func (inst *Create) Validate() error {
-	if inst.Payer.IsZero() {
+	if inst.AccountMetaSlice.Get(0).PublicKey.IsZero() {
 		return errors.New("Payer not set")
 	}
-	if inst.Wallet.IsZero() {
+	if inst.AccountMetaSlice.Get(2).PublicKey.IsZero() {
 		return errors.New("Wallet not set")
 	}
-	if inst.Mint.IsZero() {
+	if inst.AccountMetaSlice.Get(3).PublicKey.IsZero() {
 		return errors.New("Mint not set")
 	}
 	_, _, err := solana.FindAssociatedTokenAddress(
-		inst.Wallet,
-		inst.Mint,
+		inst.AccountMetaSlice.Get(2).PublicKey,
+		inst.AccountMetaSlice.Get(3).PublicKey,
 	)
 	if err != nil {
 		return fmt.Errorf("error while FindAssociatedTokenAddress: %w", err)
@@ -159,31 +141,23 @@ func (inst *Create) Validate() error {
 
 func (inst *Create) EncodeToTree(parent treeout.Branches) {
 	parent.Child(format.Program(ProgramName, ProgramID)).
-		//
 		ParentFunc(func(programBranch treeout.Branches) {
 			programBranch.Child(format.Instruction("Create")).
-				//
 				ParentFunc(func(instructionBranch treeout.Branches) {
-
-					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=0]").ParentFunc(func(paramsBranch treeout.Branches) {})
-
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=7").ParentFunc(func(accountsBranch treeout.Branches) {
+					instructionBranch.Child("Accounts[len=6]").ParentFunc(func(accountsBranch treeout.Branches) {
 						accountsBranch.Child(format.Meta("                 payer", inst.AccountMetaSlice.Get(0)))
 						accountsBranch.Child(format.Meta("associatedTokenAddress", inst.AccountMetaSlice.Get(1)))
 						accountsBranch.Child(format.Meta("                wallet", inst.AccountMetaSlice.Get(2)))
 						accountsBranch.Child(format.Meta("             tokenMint", inst.AccountMetaSlice.Get(3)))
 						accountsBranch.Child(format.Meta("         systemProgram", inst.AccountMetaSlice.Get(4)))
 						accountsBranch.Child(format.Meta("          tokenProgram", inst.AccountMetaSlice.Get(5)))
-						accountsBranch.Child(format.Meta("            sysVarRent", inst.AccountMetaSlice.Get(6)))
 					})
 				})
 		})
 }
 
 func (inst Create) MarshalWithEncoder(encoder *bin.Encoder) error {
-	return encoder.WriteBytes([]byte{}, false)
+	return nil
 }
 
 func (inst *Create) UnmarshalWithDecoder(decoder *bin.Decoder) error {
