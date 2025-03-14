@@ -19,9 +19,10 @@ import (
 	"fmt"
 
 	bin "github.com/gagliardetto/binary"
+	"github.com/gagliardetto/treeout"
+
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/text/format"
-	"github.com/gagliardetto/treeout"
 )
 
 type Withdraw struct {
@@ -136,11 +137,11 @@ func (inst *Withdraw) EncodeToTree(parent treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.Meta("                   StakeAccount", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(format.Meta("               RecipientAccount", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(format.Meta("                    ClockSysvar", inst.AccountMetaSlice.Get(2)))
-						accountsBranch.Child(format.Meta("             StakeHistorySysvar", inst.AccountMetaSlice.Get(3)))
-						accountsBranch.Child(format.Meta("              WithdrawAuthority", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(format.Meta("StakeAccount", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(format.Meta("RecipientAccount", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(format.Meta("ClockSysvar", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(format.Meta("StakeHistorySysvar", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(format.Meta("WithdrawAuthority", inst.AccountMetaSlice.Get(4)))
 					})
 				})
 		})
