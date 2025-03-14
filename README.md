@@ -69,6 +69,7 @@ Thanks!
 - [ ] Clients for Solana Program Library (SPL)
   - [x] [SPL token](/programs/token)
   - [x] [associated-token-account](/programs/associated-token-account)
+  - [x] [SPL Stake Pool](/programs/stake-pool)
   - [x] memo
   - [ ] name-service
   - [ ] ...
