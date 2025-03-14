@@ -45,22 +45,22 @@ type AddValidatorToPool struct {
 	Signers  ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
-func (a *AddValidatorToPool) SetAccounts(accounts ag_solanago.AccountMetaSlice) *AddValidatorToPool {
-	a.Accounts = accounts
-	return a
+func (inst *AddValidatorToPool) SetAccounts(accounts ag_solanago.AccountMetaSlice) *AddValidatorToPool {
+	inst.Accounts = accounts
+	return inst
 }
 
-func (a *AddValidatorToPool) SetSigners(signers ag_solanago.AccountMetaSlice) *AddValidatorToPool {
-	a.Signers = signers
-	return a
+func (inst *AddValidatorToPool) SetSigners(signers ag_solanago.AccountMetaSlice) *AddValidatorToPool {
+	inst.Signers = signers
+	return inst
 }
 
-func (a *AddValidatorToPool) GetSigners() []*ag_solanago.AccountMeta {
-	return a.Signers
+func (inst *AddValidatorToPool) GetSigners() []*ag_solanago.AccountMeta {
+	return inst.Signers
 }
 
-func (a *AddValidatorToPool) GetAccounts() []*ag_solanago.AccountMeta {
-	return a.Accounts
+func (inst *AddValidatorToPool) GetAccounts() []*ag_solanago.AccountMeta {
+	return inst.Accounts
 }
 
 func NewAddValidatorToPoolInstruction(
@@ -105,167 +105,167 @@ func NewAddValidatorToPoolBuilder() *AddValidatorToPool {
 	}
 }
 
-func (a *AddValidatorToPool) SetOptionalSeed(seed *uint32) *AddValidatorToPool {
-	a.OptionalSeed = seed
-	return a
+func (inst *AddValidatorToPool) SetOptionalSeed(seed *uint32) *AddValidatorToPool {
+	inst.OptionalSeed = seed
+	return inst
 }
 
-func (a *AddValidatorToPool) SetStakePool(pool ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[0] = ag_solanago.Meta(pool).WRITE()
-	return a
+func (inst *AddValidatorToPool) SetStakePool(pool ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[0] = ag_solanago.Meta(pool).WRITE()
+	return inst
 }
 
-func (a *AddValidatorToPool) SetStaker(staker ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
-	a.Signers[0] = a.Accounts[1]
-	return a
+func (inst *AddValidatorToPool) SetStaker(staker ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
+	inst.Signers[0] = inst.Accounts[1]
+	return inst
 }
 
-func (a *AddValidatorToPool) SetReserveStake(reserveStake ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[2] = ag_solanago.Meta(reserveStake).WRITE()
-	return a
+func (inst *AddValidatorToPool) SetReserveStake(reserveStake ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[2] = ag_solanago.Meta(reserveStake).WRITE()
+	return inst
 }
 
-func (a *AddValidatorToPool) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[3] = ag_solanago.Meta(withdrawAuthority)
-	return a
+func (inst *AddValidatorToPool) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[3] = ag_solanago.Meta(withdrawAuthority)
+	return inst
 }
 
-func (a *AddValidatorToPool) SetValidatorList(validatorList ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[4] = ag_solanago.Meta(validatorList).WRITE()
-	return a
+func (inst *AddValidatorToPool) SetValidatorList(validatorList ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[4] = ag_solanago.Meta(validatorList).WRITE()
+	return inst
 }
 
-func (a *AddValidatorToPool) SetValidatorStakeAccount(validatorStakeAccount ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[5] = ag_solanago.Meta(validatorStakeAccount).WRITE()
-	return a
+func (inst *AddValidatorToPool) SetValidatorStakeAccount(validatorStakeAccount ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[5] = ag_solanago.Meta(validatorStakeAccount).WRITE()
+	return inst
 }
 
-func (a *AddValidatorToPool) SetVoteAccount(voteAccount ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[6] = ag_solanago.Meta(voteAccount)
-	return a
+func (inst *AddValidatorToPool) SetVoteAccount(voteAccount ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[6] = ag_solanago.Meta(voteAccount)
+	return inst
 }
 
-func (a *AddValidatorToPool) SetRent(rent ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[7] = ag_solanago.Meta(rent)
-	return a
+func (inst *AddValidatorToPool) SetRent(rent ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[7] = ag_solanago.Meta(rent)
+	return inst
 }
 
-func (a *AddValidatorToPool) SetClock(clock ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[8] = ag_solanago.Meta(clock)
-	return a
+func (inst *AddValidatorToPool) SetClock(clock ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[8] = ag_solanago.Meta(clock)
+	return inst
 }
 
-func (a *AddValidatorToPool) SetStakeHistory(stakeHistory ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[9] = ag_solanago.Meta(stakeHistory)
-	return a
+func (inst *AddValidatorToPool) SetStakeHistory(stakeHistory ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[9] = ag_solanago.Meta(stakeHistory)
+	return inst
 }
 
-func (a *AddValidatorToPool) SetStakeConfig(stakeConfig ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[10] = ag_solanago.Meta(stakeConfig)
-	return a
+func (inst *AddValidatorToPool) SetStakeConfig(stakeConfig ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[10] = ag_solanago.Meta(stakeConfig)
+	return inst
 }
 
-func (a *AddValidatorToPool) SetSystemProgram(systemProgram ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[11] = ag_solanago.Meta(systemProgram)
-	return a
+func (inst *AddValidatorToPool) SetSystemProgram(systemProgram ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[11] = ag_solanago.Meta(systemProgram)
+	return inst
 }
 
-func (a *AddValidatorToPool) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *AddValidatorToPool {
-	a.Accounts[12] = ag_solanago.Meta(stakeProgram)
-	return a
+func (inst *AddValidatorToPool) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *AddValidatorToPool {
+	inst.Accounts[12] = ag_solanago.Meta(stakeProgram)
+	return inst
 }
 
-func (a *AddValidatorToPool) GetOptionalSeed() *uint32 {
-	return a.OptionalSeed
+func (inst *AddValidatorToPool) GetOptionalSeed() *uint32 {
+	return inst.OptionalSeed
 }
 
-func (a *AddValidatorToPool) GetStakePool() ag_solanago.PublicKey {
-	return a.Accounts[0].PublicKey
+func (inst *AddValidatorToPool) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (a *AddValidatorToPool) GetStaker() ag_solanago.PublicKey {
-	return a.Accounts[1].PublicKey
+func (inst *AddValidatorToPool) GetStaker() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (a *AddValidatorToPool) GetReserveStake() ag_solanago.PublicKey {
-	return a.Accounts[2].PublicKey
+func (inst *AddValidatorToPool) GetReserveStake() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (a *AddValidatorToPool) GetWithdrawAuthority() ag_solanago.PublicKey {
-	return a.Accounts[3].PublicKey
+func (inst *AddValidatorToPool) GetWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (a *AddValidatorToPool) GetValidatorList() ag_solanago.PublicKey {
-	return a.Accounts[4].PublicKey
+func (inst *AddValidatorToPool) GetValidatorList() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (a *AddValidatorToPool) GetValidatorStakeAccount() ag_solanago.PublicKey {
-	return a.Accounts[5].PublicKey
+func (inst *AddValidatorToPool) GetValidatorStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (a *AddValidatorToPool) GetVoteAccount() ag_solanago.PublicKey {
-	return a.Accounts[6].PublicKey
+func (inst *AddValidatorToPool) GetVoteAccount() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (a *AddValidatorToPool) GetRent() ag_solanago.PublicKey {
-	return a.Accounts[7].PublicKey
+func (inst *AddValidatorToPool) GetRent() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (a *AddValidatorToPool) GetClock() ag_solanago.PublicKey {
-	return a.Accounts[8].PublicKey
+func (inst *AddValidatorToPool) GetClock() ag_solanago.PublicKey {
+	return inst.Accounts[8].PublicKey
 }
 
-func (a *AddValidatorToPool) GetStakeHistory() ag_solanago.PublicKey {
-	return a.Accounts[9].PublicKey
+func (inst *AddValidatorToPool) GetStakeHistory() ag_solanago.PublicKey {
+	return inst.Accounts[9].PublicKey
 }
 
-func (a *AddValidatorToPool) GetStakeConfig() ag_solanago.PublicKey {
-	return a.Accounts[10].PublicKey
+func (inst *AddValidatorToPool) GetStakeConfig() ag_solanago.PublicKey {
+	return inst.Accounts[10].PublicKey
 }
 
-func (a *AddValidatorToPool) GetSystemProgram() ag_solanago.PublicKey {
-	return a.Accounts[11].PublicKey
+func (inst *AddValidatorToPool) GetSystemProgram() ag_solanago.PublicKey {
+	return inst.Accounts[11].PublicKey
 }
 
-func (a *AddValidatorToPool) GetStakeProgram() ag_solanago.PublicKey {
-	return a.Accounts[12].PublicKey
+func (inst *AddValidatorToPool) GetStakeProgram() ag_solanago.PublicKey {
+	return inst.Accounts[12].PublicKey
 }
 
-func (a *AddValidatorToPool) ValidateAndBuild() (*Instruction, error) {
-	if err := a.Validate(); err != nil {
+func (inst *AddValidatorToPool) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return a.Build(), nil
+	return inst.Build(), nil
 }
 
-func (a *AddValidatorToPool) Build() *Instruction {
+func (inst *AddValidatorToPool) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_AddValidatorToPool),
-			Impl:   a,
+			Impl:   inst,
 		},
 	}
 }
 
-func (a *AddValidatorToPool) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *AddValidatorToPool) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("AddValidatorToPool")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if a.OptionalSeed != nil {
-							paramsBranch.Child(ag_format.Param("OptionalSeed", *a.OptionalSeed))
+						if inst.OptionalSeed != nil {
+							paramsBranch.Child(ag_format.Param("OptionalSeed", *inst.OptionalSeed))
 						}
 					})
 
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range a.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
 
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(a.Signers)))
-						for j, signer := range a.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -273,13 +273,13 @@ func (a *AddValidatorToPool) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (a *AddValidatorToPool) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if a.OptionalSeed != nil {
-		if err := encoder.Encode(a.OptionalSeed); err != nil {
+func (inst *AddValidatorToPool) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.OptionalSeed != nil {
+		if err := encoder.Encode(inst.OptionalSeed); err != nil {
 			return err
 		}
 	}
-	for _, account := range a.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -287,15 +287,15 @@ func (a *AddValidatorToPool) MarshalWithEncoder(encoder *ag_binary.Encoder) erro
 	return nil
 }
 
-func (a *AddValidatorToPool) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	if a.OptionalSeed != nil {
-		err = decoder.Decode(a.OptionalSeed)
+func (inst *AddValidatorToPool) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	if inst.OptionalSeed != nil {
+		err = decoder.Decode(inst.OptionalSeed)
 		if err != nil {
 			return err
 		}
 	}
-	for i := range a.Accounts {
-		err = decoder.Decode(a.Accounts[i])
+	for i := range inst.Accounts {
+		err = decoder.Decode(inst.Accounts[i])
 		if err != nil {
 			return err
 		}
@@ -303,13 +303,13 @@ func (a *AddValidatorToPool) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (e
 	return nil
 }
 
-func (a *AddValidatorToPool) Validate() error {
-	for i, account := range a.Accounts {
+func (inst *AddValidatorToPool) Validate() error {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(a.Signers) == 0 || !a.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.Staker should be a signer")
 	}
 	return nil

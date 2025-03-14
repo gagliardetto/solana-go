@@ -73,124 +73,124 @@ func NewDepositSolBuilder() *DepositSol {
 	}
 }
 
-func (d *DepositSol) SetStakePool(stakePool ag_solanago.PublicKey) *DepositSol {
-	d.Accounts[0] = ag_solanago.Meta(stakePool).WRITE()
-	return d
+func (inst *DepositSol) SetStakePool(stakePool ag_solanago.PublicKey) *DepositSol {
+	inst.Accounts[0] = ag_solanago.Meta(stakePool).WRITE()
+	return inst
 }
 
-func (d *DepositSol) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *DepositSol {
-	d.Accounts[1] = ag_solanago.Meta(withdrawAuthority)
-	return d
+func (inst *DepositSol) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *DepositSol {
+	inst.Accounts[1] = ag_solanago.Meta(withdrawAuthority)
+	return inst
 }
 
-func (d *DepositSol) SetReserveStake(reserveStake ag_solanago.PublicKey) *DepositSol {
-	d.Accounts[2] = ag_solanago.Meta(reserveStake).WRITE()
-	return d
+func (inst *DepositSol) SetReserveStake(reserveStake ag_solanago.PublicKey) *DepositSol {
+	inst.Accounts[2] = ag_solanago.Meta(reserveStake).WRITE()
+	return inst
 }
 
-func (d *DepositSol) SetFundingAccount(fundingAccount ag_solanago.PublicKey) *DepositSol {
-	d.Accounts[3] = ag_solanago.Meta(fundingAccount).SIGNER()
-	d.Signers = append(d.Signers, ag_solanago.Meta(fundingAccount).SIGNER())
-	return d
+func (inst *DepositSol) SetFundingAccount(fundingAccount ag_solanago.PublicKey) *DepositSol {
+	inst.Accounts[3] = ag_solanago.Meta(fundingAccount).SIGNER()
+	inst.Signers = append(inst.Signers, ag_solanago.Meta(fundingAccount).SIGNER())
+	return inst
 }
 
-func (d *DepositSol) SetDestinationAccount(destinationAccount ag_solanago.PublicKey) *DepositSol {
-	d.Accounts[4] = ag_solanago.Meta(destinationAccount).WRITE()
-	return d
+func (inst *DepositSol) SetDestinationAccount(destinationAccount ag_solanago.PublicKey) *DepositSol {
+	inst.Accounts[4] = ag_solanago.Meta(destinationAccount).WRITE()
+	return inst
 }
 
-func (d *DepositSol) SetManagerFeeAccount(managerFeeAccount ag_solanago.PublicKey) *DepositSol {
-	d.Accounts[5] = ag_solanago.Meta(managerFeeAccount).WRITE()
-	return d
+func (inst *DepositSol) SetManagerFeeAccount(managerFeeAccount ag_solanago.PublicKey) *DepositSol {
+	inst.Accounts[5] = ag_solanago.Meta(managerFeeAccount).WRITE()
+	return inst
 }
 
-func (d *DepositSol) SetReferralFeeAccount(referralFeeAccount ag_solanago.PublicKey) *DepositSol {
-	d.Accounts[6] = ag_solanago.Meta(referralFeeAccount).WRITE()
-	return d
+func (inst *DepositSol) SetReferralFeeAccount(referralFeeAccount ag_solanago.PublicKey) *DepositSol {
+	inst.Accounts[6] = ag_solanago.Meta(referralFeeAccount).WRITE()
+	return inst
 }
 
-func (d *DepositSol) SetPoolMint(poolMint ag_solanago.PublicKey) *DepositSol {
-	d.Accounts[7] = ag_solanago.Meta(poolMint).WRITE()
-	return d
+func (inst *DepositSol) SetPoolMint(poolMint ag_solanago.PublicKey) *DepositSol {
+	inst.Accounts[7] = ag_solanago.Meta(poolMint).WRITE()
+	return inst
 }
 
-func (d *DepositSol) SetSystemProgram(systemProgram ag_solanago.PublicKey) *DepositSol {
-	d.Accounts[8] = ag_solanago.Meta(systemProgram)
-	return d
+func (inst *DepositSol) SetSystemProgram(systemProgram ag_solanago.PublicKey) *DepositSol {
+	inst.Accounts[8] = ag_solanago.Meta(systemProgram)
+	return inst
 }
 
-func (d *DepositSol) SetTokenProgram(tokenProgram ag_solanago.PublicKey) *DepositSol {
-	d.Accounts[9] = ag_solanago.Meta(tokenProgram)
-	return d
+func (inst *DepositSol) SetTokenProgram(tokenProgram ag_solanago.PublicKey) *DepositSol {
+	inst.Accounts[9] = ag_solanago.Meta(tokenProgram)
+	return inst
 }
 
-func (d *DepositSol) GetStakePool() ag_solanago.PublicKey {
-	return d.Accounts[0].PublicKey
+func (inst *DepositSol) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (d *DepositSol) GetWithdrawAuthority() ag_solanago.PublicKey {
-	return d.Accounts[1].PublicKey
+func (inst *DepositSol) GetWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (d *DepositSol) GetReserveStake() ag_solanago.PublicKey {
-	return d.Accounts[2].PublicKey
+func (inst *DepositSol) GetReserveStake() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (d *DepositSol) GetFundingAccount() ag_solanago.PublicKey {
-	return d.Accounts[3].PublicKey
+func (inst *DepositSol) GetFundingAccount() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (d *DepositSol) GetDestinationAccount() ag_solanago.PublicKey {
-	return d.Accounts[4].PublicKey
+func (inst *DepositSol) GetDestinationAccount() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (d *DepositSol) GetManagerFeeAccount() ag_solanago.PublicKey {
-	return d.Accounts[5].PublicKey
+func (inst *DepositSol) GetManagerFeeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (d *DepositSol) GetReferralFeeAccount() ag_solanago.PublicKey {
-	return d.Accounts[6].PublicKey
+func (inst *DepositSol) GetReferralFeeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (d *DepositSol) GetPoolMint() ag_solanago.PublicKey {
-	return d.Accounts[7].PublicKey
+func (inst *DepositSol) GetPoolMint() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (d *DepositSol) GetSystemProgram() ag_solanago.PublicKey {
-	return d.Accounts[8].PublicKey
+func (inst *DepositSol) GetSystemProgram() ag_solanago.PublicKey {
+	return inst.Accounts[8].PublicKey
 }
 
-func (d *DepositSol) GetTokenProgram() ag_solanago.PublicKey {
-	return d.Accounts[9].PublicKey
+func (inst *DepositSol) GetTokenProgram() ag_solanago.PublicKey {
+	return inst.Accounts[9].PublicKey
 }
 
-func (d *DepositSol) ValidateAndBuild() (*Instruction, error) {
-	if err := d.Validate(); err != nil {
+func (inst *DepositSol) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return d.Build(), nil
+	return inst.Build(), nil
 }
 
-func (d *DepositSol) Build() *Instruction {
+func (inst *DepositSol) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_DepositSol),
-			Impl:   d,
+			Impl:   inst,
 		},
 	}
 }
 
-func (d *DepositSol) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *DepositSol) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("DepositSol")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range d.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(d.Signers)))
-						for j, signer := range d.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -198,8 +198,8 @@ func (d *DepositSol) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (d *DepositSol) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	for _, account := range d.Accounts {
+func (inst *DepositSol) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -207,22 +207,22 @@ func (d *DepositSol) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
 	return nil
 }
 
-func (d *DepositSol) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	for i := range d.Accounts {
-		if err := decoder.Decode(d.Accounts[i]); err != nil {
+func (inst *DepositSol) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (d *DepositSol) Validate() error {
-	for i, account := range d.Accounts {
+func (inst *DepositSol) Validate() error {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(d.Signers) == 0 || !d.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.FundingAccount should be a signer")
 	}
 	return nil

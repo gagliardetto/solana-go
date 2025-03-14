@@ -53,61 +53,61 @@ func NewSetStakerInstructionBuilder() *SetStaker {
 	}
 }
 
-func (s *SetStaker) SetStakePool(pool ag_solanago.PublicKey) *SetStaker {
-	s.Accounts[0] = ag_solanago.Meta(pool).WRITE()
-	return s
+func (inst *SetStaker) SetStakePool(pool ag_solanago.PublicKey) *SetStaker {
+	inst.Accounts[0] = ag_solanago.Meta(pool).WRITE()
+	return inst
 }
 
-func (s *SetStaker) SetCurrentStaker(staker ag_solanago.PublicKey) *SetStaker {
-	s.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
-	s.Signers[0] = ag_solanago.Meta(staker).SIGNER()
-	return s
+func (inst *SetStaker) SetCurrentStaker(staker ag_solanago.PublicKey) *SetStaker {
+	inst.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(staker).SIGNER()
+	return inst
 }
 
-func (s *SetStaker) SetNewStaker(newStaker ag_solanago.PublicKey) *SetStaker {
-	s.Accounts[2] = ag_solanago.Meta(newStaker)
-	return s
+func (inst *SetStaker) SetNewStaker(newStaker ag_solanago.PublicKey) *SetStaker {
+	inst.Accounts[2] = ag_solanago.Meta(newStaker)
+	return inst
 }
 
-func (s *SetStaker) GetStakePool() ag_solanago.PublicKey {
-	return s.Accounts[0].PublicKey
+func (inst *SetStaker) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (s *SetStaker) GetCurrentStaker() ag_solanago.PublicKey {
-	return s.Accounts[1].PublicKey
+func (inst *SetStaker) GetCurrentStaker() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (s *SetStaker) GetNewStaker() ag_solanago.PublicKey {
-	return s.Accounts[2].PublicKey
+func (inst *SetStaker) GetNewStaker() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (s *SetStaker) ValidateAndBuild() (*Instruction, error) {
-	if err := s.Validate(); err != nil {
+func (inst *SetStaker) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return s.Build(), nil
+	return inst.Build(), nil
 }
 
-func (s *SetStaker) Build() *Instruction {
+func (inst *SetStaker) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_SetStaker),
-			Impl:   s,
+			Impl:   inst,
 		},
 	}
 }
 
-func (s *SetStaker) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *SetStaker) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("SetStaker")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range s.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(s.Signers)))
-						for j, signer := range s.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -115,8 +115,8 @@ func (s *SetStaker) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (s *SetStaker) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	for _, account := range s.Accounts {
+func (inst *SetStaker) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -124,22 +124,22 @@ func (s *SetStaker) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
 	return nil
 }
 
-func (s *SetStaker) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	for i := range s.Accounts {
-		if err := decoder.Decode(s.Accounts[i]); err != nil {
+func (inst *SetStaker) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (s *SetStaker) Validate() error {
-	for i, account := range s.Accounts {
+func (inst *SetStaker) Validate() error {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(s.Signers) == 0 || !s.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.CurrentStaker should be a signer")
 	}
 	return nil

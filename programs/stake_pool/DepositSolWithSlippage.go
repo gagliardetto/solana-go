@@ -81,150 +81,150 @@ func NewDepositSolWithSlippageBuilder() *DepositSolWithSlippage {
 	}
 }
 
-func (d *DepositSolWithSlippage) SetLamportsIn(in uint64) *DepositSolWithSlippage {
-	d.LamportsIn = &in
-	return d
+func (inst *DepositSolWithSlippage) SetLamportsIn(in uint64) *DepositSolWithSlippage {
+	inst.LamportsIn = &in
+	return inst
 }
 
-func (d *DepositSolWithSlippage) SetMinTokensOut(out uint64) *DepositSolWithSlippage {
-	d.MinTokensOut = &out
-	return d
+func (inst *DepositSolWithSlippage) SetMinTokensOut(out uint64) *DepositSolWithSlippage {
+	inst.MinTokensOut = &out
+	return inst
 }
 
-func (d *DepositSolWithSlippage) SetStakePool(pool ag_solanago.PublicKey) *DepositSolWithSlippage {
-	d.Accounts[0] = ag_solanago.Meta(pool).WRITE()
-	return d
+func (inst *DepositSolWithSlippage) SetStakePool(pool ag_solanago.PublicKey) *DepositSolWithSlippage {
+	inst.Accounts[0] = ag_solanago.Meta(pool).WRITE()
+	return inst
 }
 
-func (d *DepositSolWithSlippage) SetWithdrawAuthority(authority ag_solanago.PublicKey) *DepositSolWithSlippage {
-	d.Accounts[1] = ag_solanago.Meta(authority)
-	return d
+func (inst *DepositSolWithSlippage) SetWithdrawAuthority(authority ag_solanago.PublicKey) *DepositSolWithSlippage {
+	inst.Accounts[1] = ag_solanago.Meta(authority)
+	return inst
 }
 
-func (d *DepositSolWithSlippage) SetReserveStake(stake ag_solanago.PublicKey) *DepositSolWithSlippage {
-	d.Accounts[2] = ag_solanago.Meta(stake).WRITE()
-	return d
+func (inst *DepositSolWithSlippage) SetReserveStake(stake ag_solanago.PublicKey) *DepositSolWithSlippage {
+	inst.Accounts[2] = ag_solanago.Meta(stake).WRITE()
+	return inst
 }
 
-func (d *DepositSolWithSlippage) SetDepositFrom(from ag_solanago.PublicKey) *DepositSolWithSlippage {
-	d.Accounts[3] = ag_solanago.Meta(from).SIGNER()
-	d.Signers[0] = ag_solanago.Meta(from).SIGNER()
-	return d
+func (inst *DepositSolWithSlippage) SetDepositFrom(from ag_solanago.PublicKey) *DepositSolWithSlippage {
+	inst.Accounts[3] = ag_solanago.Meta(from).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(from).SIGNER()
+	return inst
 }
 
-func (d *DepositSolWithSlippage) SetMintTo(to ag_solanago.PublicKey) *DepositSolWithSlippage {
-	d.Accounts[4] = ag_solanago.Meta(to).WRITE()
-	return d
+func (inst *DepositSolWithSlippage) SetMintTo(to ag_solanago.PublicKey) *DepositSolWithSlippage {
+	inst.Accounts[4] = ag_solanago.Meta(to).WRITE()
+	return inst
 }
 
-func (d *DepositSolWithSlippage) SetManagerFeeAccount(account ag_solanago.PublicKey) *DepositSolWithSlippage {
-	d.Accounts[5] = ag_solanago.Meta(account).WRITE()
-	return d
+func (inst *DepositSolWithSlippage) SetManagerFeeAccount(account ag_solanago.PublicKey) *DepositSolWithSlippage {
+	inst.Accounts[5] = ag_solanago.Meta(account).WRITE()
+	return inst
 }
 
-func (d *DepositSolWithSlippage) SetReferralFeeDest(dest ag_solanago.PublicKey) *DepositSolWithSlippage {
-	d.Accounts[6] = ag_solanago.Meta(dest).WRITE()
-	return d
+func (inst *DepositSolWithSlippage) SetReferralFeeDest(dest ag_solanago.PublicKey) *DepositSolWithSlippage {
+	inst.Accounts[6] = ag_solanago.Meta(dest).WRITE()
+	return inst
 }
 
-func (d *DepositSolWithSlippage) SetPoolMint(mint ag_solanago.PublicKey) *DepositSolWithSlippage {
-	d.Accounts[7] = ag_solanago.Meta(mint).WRITE()
-	return d
+func (inst *DepositSolWithSlippage) SetPoolMint(mint ag_solanago.PublicKey) *DepositSolWithSlippage {
+	inst.Accounts[7] = ag_solanago.Meta(mint).WRITE()
+	return inst
 }
 
-func (d *DepositSolWithSlippage) SetSystemProgram(program ag_solanago.PublicKey) *DepositSolWithSlippage {
-	d.Accounts[8] = ag_solanago.Meta(program)
-	return d
+func (inst *DepositSolWithSlippage) SetSystemProgram(program ag_solanago.PublicKey) *DepositSolWithSlippage {
+	inst.Accounts[8] = ag_solanago.Meta(program)
+	return inst
 }
 
-func (d *DepositSolWithSlippage) SetTokenProgram(program ag_solanago.PublicKey) *DepositSolWithSlippage {
-	d.Accounts[9] = ag_solanago.Meta(program)
-	return d
+func (inst *DepositSolWithSlippage) SetTokenProgram(program ag_solanago.PublicKey) *DepositSolWithSlippage {
+	inst.Accounts[9] = ag_solanago.Meta(program)
+	return inst
 }
 
-func (d *DepositSolWithSlippage) GetLamportsIn() *uint64 {
-	return d.LamportsIn
+func (inst *DepositSolWithSlippage) GetLamportsIn() *uint64 {
+	return inst.LamportsIn
 }
 
-func (d *DepositSolWithSlippage) GetMinTokensOut() *uint64 {
-	return d.MinTokensOut
+func (inst *DepositSolWithSlippage) GetMinTokensOut() *uint64 {
+	return inst.MinTokensOut
 }
 
-func (d *DepositSolWithSlippage) GetStakePool() ag_solanago.PublicKey {
-	return d.Accounts[0].PublicKey
+func (inst *DepositSolWithSlippage) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (d *DepositSolWithSlippage) GetWithdrawAuthority() ag_solanago.PublicKey {
-	return d.Accounts[1].PublicKey
+func (inst *DepositSolWithSlippage) GetWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (d *DepositSolWithSlippage) GetReserveStake() ag_solanago.PublicKey {
-	return d.Accounts[2].PublicKey
+func (inst *DepositSolWithSlippage) GetReserveStake() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (d *DepositSolWithSlippage) GetDepositFrom() ag_solanago.PublicKey {
-	return d.Accounts[3].PublicKey
+func (inst *DepositSolWithSlippage) GetDepositFrom() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (d *DepositSolWithSlippage) GetMintTo() ag_solanago.PublicKey {
-	return d.Accounts[4].PublicKey
+func (inst *DepositSolWithSlippage) GetMintTo() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (d *DepositSolWithSlippage) GetManagerFeeAccount() ag_solanago.PublicKey {
-	return d.Accounts[5].PublicKey
+func (inst *DepositSolWithSlippage) GetManagerFeeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (d *DepositSolWithSlippage) GetReferralFeeDest() ag_solanago.PublicKey {
-	return d.Accounts[6].PublicKey
+func (inst *DepositSolWithSlippage) GetReferralFeeDest() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (d *DepositSolWithSlippage) GetPoolMint() ag_solanago.PublicKey {
-	return d.Accounts[7].PublicKey
+func (inst *DepositSolWithSlippage) GetPoolMint() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (d *DepositSolWithSlippage) GetSystemProgram() ag_solanago.PublicKey {
-	return d.Accounts[8].PublicKey
+func (inst *DepositSolWithSlippage) GetSystemProgram() ag_solanago.PublicKey {
+	return inst.Accounts[8].PublicKey
 }
 
-func (d *DepositSolWithSlippage) GetTokenProgram() ag_solanago.PublicKey {
-	return d.Accounts[9].PublicKey
+func (inst *DepositSolWithSlippage) GetTokenProgram() ag_solanago.PublicKey {
+	return inst.Accounts[9].PublicKey
 }
 
-func (d *DepositSolWithSlippage) ValidateAndBuild() (*Instruction, error) {
-	if err := d.Validate(); err != nil {
+func (inst *DepositSolWithSlippage) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return d.Build(), nil
+	return inst.Build(), nil
 }
 
-func (d *DepositSolWithSlippage) Build() *Instruction {
+func (inst *DepositSolWithSlippage) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_DepositSolWithSlippage),
-			Impl:   d,
+			Impl:   inst,
 		},
 	}
 }
 
-func (d *DepositSolWithSlippage) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *DepositSolWithSlippage) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("DepositSolWithSlippage")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if d.LamportsIn != nil {
-							paramsBranch.Child(ag_format.Param("LamportsIn", *d.LamportsIn))
+						if inst.LamportsIn != nil {
+							paramsBranch.Child(ag_format.Param("LamportsIn", *inst.LamportsIn))
 						}
-						if d.MinTokensOut != nil {
-							paramsBranch.Child(ag_format.Param("MinTokensOut", *d.MinTokensOut))
+						if inst.MinTokensOut != nil {
+							paramsBranch.Child(ag_format.Param("MinTokensOut", *inst.MinTokensOut))
 						}
 					})
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range d.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(d.Signers)))
-						for j, signer := range d.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -232,18 +232,18 @@ func (d *DepositSolWithSlippage) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (d *DepositSolWithSlippage) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if d.LamportsIn != nil {
-		if err := encoder.Encode(d.LamportsIn); err != nil {
+func (inst *DepositSolWithSlippage) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.LamportsIn != nil {
+		if err := encoder.Encode(inst.LamportsIn); err != nil {
 			return err
 		}
 	}
-	if d.MinTokensOut != nil {
-		if err := encoder.Encode(d.MinTokensOut); err != nil {
+	if inst.MinTokensOut != nil {
+		if err := encoder.Encode(inst.MinTokensOut); err != nil {
 			return err
 		}
 	}
-	for _, account := range d.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -251,38 +251,38 @@ func (d *DepositSolWithSlippage) MarshalWithEncoder(encoder *ag_binary.Encoder) 
 	return nil
 }
 
-func (d *DepositSolWithSlippage) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if d.LamportsIn != nil {
-		if err := decoder.Decode(d.LamportsIn); err != nil {
+func (inst *DepositSolWithSlippage) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if inst.LamportsIn != nil {
+		if err := decoder.Decode(inst.LamportsIn); err != nil {
 			return err
 		}
 	}
-	if d.MinTokensOut != nil {
-		if err := decoder.Decode(d.MinTokensOut); err != nil {
+	if inst.MinTokensOut != nil {
+		if err := decoder.Decode(inst.MinTokensOut); err != nil {
 			return err
 		}
 	}
-	for i := range d.Accounts {
-		if err := decoder.Decode(d.Accounts[i]); err != nil {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (d *DepositSolWithSlippage) Validate() error {
-	if d.LamportsIn == nil {
+func (inst *DepositSolWithSlippage) Validate() error {
+	if inst.LamportsIn == nil {
 		return errors.New("lamportsIn is not set")
 	}
-	if d.MinTokensOut == nil {
+	if inst.MinTokensOut == nil {
 		return errors.New("minTokensOut is not set")
 	}
-	for i, account := range d.Accounts {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(d.Signers) == 0 || !d.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.DepositFrom should be a signer")
 	}
 	return nil

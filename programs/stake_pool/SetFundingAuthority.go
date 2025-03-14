@@ -57,75 +57,75 @@ func NewSetFundingAuthorityInstructionBuilder() *SetFundingAuthority {
 	}
 }
 
-func (s *SetFundingAuthority) SetAuth(auth *FundingType) *SetFundingAuthority {
-	s.Auth = auth
-	return s
+func (inst *SetFundingAuthority) SetAuth(auth *FundingType) *SetFundingAuthority {
+	inst.Auth = auth
+	return inst
 }
 
-func (s *SetFundingAuthority) SetStakePool(stakePool ag_solanago.PublicKey) *SetFundingAuthority {
-	s.Accounts[0] = ag_solanago.Meta(stakePool).WRITE()
-	return s
+func (inst *SetFundingAuthority) SetStakePool(stakePool ag_solanago.PublicKey) *SetFundingAuthority {
+	inst.Accounts[0] = ag_solanago.Meta(stakePool).WRITE()
+	return inst
 }
 
-func (s *SetFundingAuthority) SetManager(manager ag_solanago.PublicKey) *SetFundingAuthority {
-	s.Accounts[1] = ag_solanago.Meta(manager).SIGNER()
-	s.Signers[0] = ag_solanago.Meta(manager).SIGNER()
-	return s
+func (inst *SetFundingAuthority) SetManager(manager ag_solanago.PublicKey) *SetFundingAuthority {
+	inst.Accounts[1] = ag_solanago.Meta(manager).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(manager).SIGNER()
+	return inst
 }
 
-func (s *SetFundingAuthority) SetNewFundingAuthority(newFundingAuthority ag_solanago.PublicKey) *SetFundingAuthority {
-	s.Accounts[2] = ag_solanago.Meta(newFundingAuthority)
-	return s
+func (inst *SetFundingAuthority) SetNewFundingAuthority(newFundingAuthority ag_solanago.PublicKey) *SetFundingAuthority {
+	inst.Accounts[2] = ag_solanago.Meta(newFundingAuthority)
+	return inst
 }
 
-func (s *SetFundingAuthority) GetAuth() *FundingType {
-	return s.Auth
+func (inst *SetFundingAuthority) GetAuth() *FundingType {
+	return inst.Auth
 }
 
-func (s *SetFundingAuthority) GetStakePool() ag_solanago.PublicKey {
-	return s.Accounts[0].PublicKey
+func (inst *SetFundingAuthority) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (s *SetFundingAuthority) GetManager() ag_solanago.PublicKey {
-	return s.Accounts[1].PublicKey
+func (inst *SetFundingAuthority) GetManager() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (s *SetFundingAuthority) GetNewFundingAuthority() ag_solanago.PublicKey {
-	return s.Accounts[2].PublicKey
+func (inst *SetFundingAuthority) GetNewFundingAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (s *SetFundingAuthority) ValidateAndBuild() (*Instruction, error) {
-	if err := s.Validate(); err != nil {
+func (inst *SetFundingAuthority) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return s.Build(), nil
+	return inst.Build(), nil
 }
 
-func (s *SetFundingAuthority) Build() *Instruction {
+func (inst *SetFundingAuthority) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_SetFundingAuthority),
-			Impl:   s,
+			Impl:   inst,
 		},
 	}
 }
 
-func (s *SetFundingAuthority) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *SetFundingAuthority) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("SetFundingAuthority")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if s.Auth != nil {
-							paramsBranch.Child(ag_format.Param("Auth", *s.Auth))
+						if inst.Auth != nil {
+							paramsBranch.Child(ag_format.Param("Auth", *inst.Auth))
 						}
 					})
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range s.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(s.Signers)))
-						for j, signer := range s.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -133,13 +133,13 @@ func (s *SetFundingAuthority) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (s *SetFundingAuthority) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if s.Auth != nil {
-		if err := encoder.Encode(s.Auth); err != nil {
+func (inst *SetFundingAuthority) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.Auth != nil {
+		if err := encoder.Encode(inst.Auth); err != nil {
 			return err
 		}
 	}
-	for _, account := range s.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -147,30 +147,30 @@ func (s *SetFundingAuthority) MarshalWithEncoder(encoder *ag_binary.Encoder) err
 	return nil
 }
 
-func (s *SetFundingAuthority) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if s.Auth != nil {
-		if err := decoder.Decode(s.Auth); err != nil {
+func (inst *SetFundingAuthority) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if inst.Auth != nil {
+		if err := decoder.Decode(inst.Auth); err != nil {
 			return err
 		}
 	}
-	for i := range s.Accounts {
-		if err := decoder.Decode(s.Accounts[i]); err != nil {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (s *SetFundingAuthority) Validate() error {
-	if s.Auth == nil {
+func (inst *SetFundingAuthority) Validate() error {
+	if inst.Auth == nil {
 		return errors.New("auth is not set")
 	}
-	for i, account := range s.Accounts {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(s.Signers) == 0 || !s.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.Manager should be a signer")
 	}
 	return nil

@@ -87,165 +87,165 @@ func NewWithdrawStakeBuilder() *WithdrawStake {
 	}
 }
 
-func (w *WithdrawStake) SetAmount(amount uint64) *WithdrawStake {
-	w.Amount = &amount
-	return w
+func (inst *WithdrawStake) SetAmount(amount uint64) *WithdrawStake {
+	inst.Amount = &amount
+	return inst
 }
 
-func (w *WithdrawStake) SetStakePool(stakePool ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[0] = ag_solanago.Meta(stakePool).WRITE()
-	return w
+func (inst *WithdrawStake) SetStakePool(stakePool ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[0] = ag_solanago.Meta(stakePool).WRITE()
+	return inst
 }
 
-func (w *WithdrawStake) SetValidatorStakeList(validatorStakeList ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[1] = ag_solanago.Meta(validatorStakeList).WRITE()
-	return w
+func (inst *WithdrawStake) SetValidatorStakeList(validatorStakeList ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[1] = ag_solanago.Meta(validatorStakeList).WRITE()
+	return inst
 }
 
-func (w *WithdrawStake) SetStakePoolWithdrawAuthority(stakePoolWithdrawAuthority ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[2] = ag_solanago.Meta(stakePoolWithdrawAuthority)
-	return w
+func (inst *WithdrawStake) SetStakePoolWithdrawAuthority(stakePoolWithdrawAuthority ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[2] = ag_solanago.Meta(stakePoolWithdrawAuthority)
+	return inst
 }
 
-func (w *WithdrawStake) SetValidatorAccount(validatorAccount ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[3] = ag_solanago.Meta(validatorAccount).WRITE()
-	return w
+func (inst *WithdrawStake) SetValidatorAccount(validatorAccount ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[3] = ag_solanago.Meta(validatorAccount).WRITE()
+	return inst
 }
 
-func (w *WithdrawStake) SetUninitializedStakeAccount(uninitializedStakeAccount ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[4] = ag_solanago.Meta(uninitializedStakeAccount).WRITE()
-	return w
+func (inst *WithdrawStake) SetUninitializedStakeAccount(uninitializedStakeAccount ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[4] = ag_solanago.Meta(uninitializedStakeAccount).WRITE()
+	return inst
 }
 
-func (w *WithdrawStake) SetUserAccount(userAccount ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[5] = ag_solanago.Meta(userAccount)
-	return w
+func (inst *WithdrawStake) SetUserAccount(userAccount ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[5] = ag_solanago.Meta(userAccount)
+	return inst
 }
 
-func (w *WithdrawStake) SetUserTransferAuthority(userTransferAuthority ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[6] = ag_solanago.Meta(userTransferAuthority).SIGNER()
-	w.Signers[0] = ag_solanago.Meta(userTransferAuthority).SIGNER()
-	return w
+func (inst *WithdrawStake) SetUserTransferAuthority(userTransferAuthority ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[6] = ag_solanago.Meta(userTransferAuthority).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(userTransferAuthority).SIGNER()
+	return inst
 }
 
-func (w *WithdrawStake) SetUserAccountWithPoolTokensToBurnFrom(userAccountWithPoolTokensToBurnFrom ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[7] = ag_solanago.Meta(userAccountWithPoolTokensToBurnFrom).WRITE()
-	return w
+func (inst *WithdrawStake) SetUserAccountWithPoolTokensToBurnFrom(userAccountWithPoolTokensToBurnFrom ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[7] = ag_solanago.Meta(userAccountWithPoolTokensToBurnFrom).WRITE()
+	return inst
 }
 
-func (w *WithdrawStake) SetAccountToReceivePoolFeeTokens(accountToReceivePoolFeeTokens ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[8] = ag_solanago.Meta(accountToReceivePoolFeeTokens).WRITE()
-	return w
+func (inst *WithdrawStake) SetAccountToReceivePoolFeeTokens(accountToReceivePoolFeeTokens ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[8] = ag_solanago.Meta(accountToReceivePoolFeeTokens).WRITE()
+	return inst
 }
 
-func (w *WithdrawStake) SetPoolTokenMintAccount(poolTokenMintAccount ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[9] = ag_solanago.Meta(poolTokenMintAccount).WRITE()
-	return w
+func (inst *WithdrawStake) SetPoolTokenMintAccount(poolTokenMintAccount ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[9] = ag_solanago.Meta(poolTokenMintAccount).WRITE()
+	return inst
 }
 
-func (w *WithdrawStake) SetSysvarClockAccount(sysvarClockAccount ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[10] = ag_solanago.Meta(sysvarClockAccount)
-	return w
+func (inst *WithdrawStake) SetSysvarClockAccount(sysvarClockAccount ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[10] = ag_solanago.Meta(sysvarClockAccount)
+	return inst
 }
 
-func (w *WithdrawStake) SetPoolTokenProgramID(poolTokenProgramID ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[11] = ag_solanago.Meta(poolTokenProgramID)
-	return w
+func (inst *WithdrawStake) SetPoolTokenProgramID(poolTokenProgramID ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[11] = ag_solanago.Meta(poolTokenProgramID)
+	return inst
 }
 
-func (w *WithdrawStake) SetStakeProgramID(stakeProgramID ag_solanago.PublicKey) *WithdrawStake {
-	w.Accounts[12] = ag_solanago.Meta(stakeProgramID)
-	return w
+func (inst *WithdrawStake) SetStakeProgramID(stakeProgramID ag_solanago.PublicKey) *WithdrawStake {
+	inst.Accounts[12] = ag_solanago.Meta(stakeProgramID)
+	return inst
 }
 
-func (w *WithdrawStake) GetAmount() *uint64 {
-	return w.Amount
+func (inst *WithdrawStake) GetAmount() *uint64 {
+	return inst.Amount
 }
 
-func (w *WithdrawStake) GetStakePool() ag_solanago.PublicKey {
-	return w.Accounts[0].PublicKey
+func (inst *WithdrawStake) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (w *WithdrawStake) GetValidatorStakeList() ag_solanago.PublicKey {
-	return w.Accounts[1].PublicKey
+func (inst *WithdrawStake) GetValidatorStakeList() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (w *WithdrawStake) GetStakePoolWithdrawAuthority() ag_solanago.PublicKey {
-	return w.Accounts[2].PublicKey
+func (inst *WithdrawStake) GetStakePoolWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (w *WithdrawStake) GetValidatorAccount() ag_solanago.PublicKey {
-	return w.Accounts[3].PublicKey
+func (inst *WithdrawStake) GetValidatorAccount() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (w *WithdrawStake) GetUninitializedStakeAccount() ag_solanago.PublicKey {
-	return w.Accounts[4].PublicKey
+func (inst *WithdrawStake) GetUninitializedStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (w *WithdrawStake) GetUserAccount() ag_solanago.PublicKey {
-	return w.Accounts[5].PublicKey
+func (inst *WithdrawStake) GetUserAccount() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (w *WithdrawStake) GetUserTransferAuthority() ag_solanago.PublicKey {
-	return w.Accounts[6].PublicKey
+func (inst *WithdrawStake) GetUserTransferAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (w *WithdrawStake) GetUserAccountWithPoolTokensToBurnFrom() ag_solanago.PublicKey {
-	return w.Accounts[7].PublicKey
+func (inst *WithdrawStake) GetUserAccountWithPoolTokensToBurnFrom() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (w *WithdrawStake) GetAccountToReceivePoolFeeTokens() ag_solanago.PublicKey {
-	return w.Accounts[8].PublicKey
+func (inst *WithdrawStake) GetAccountToReceivePoolFeeTokens() ag_solanago.PublicKey {
+	return inst.Accounts[8].PublicKey
 }
 
-func (w *WithdrawStake) GetPoolTokenMintAccount() ag_solanago.PublicKey {
-	return w.Accounts[9].PublicKey
+func (inst *WithdrawStake) GetPoolTokenMintAccount() ag_solanago.PublicKey {
+	return inst.Accounts[9].PublicKey
 }
 
-func (w *WithdrawStake) GetSysvarClockAccount() ag_solanago.PublicKey {
-	return w.Accounts[10].PublicKey
+func (inst *WithdrawStake) GetSysvarClockAccount() ag_solanago.PublicKey {
+	return inst.Accounts[10].PublicKey
 }
 
-func (w *WithdrawStake) GetPoolTokenProgramID() ag_solanago.PublicKey {
-	return w.Accounts[11].PublicKey
+func (inst *WithdrawStake) GetPoolTokenProgramID() ag_solanago.PublicKey {
+	return inst.Accounts[11].PublicKey
 }
 
-func (w *WithdrawStake) GetStakeProgramID() ag_solanago.PublicKey {
-	return w.Accounts[12].PublicKey
+func (inst *WithdrawStake) GetStakeProgramID() ag_solanago.PublicKey {
+	return inst.Accounts[12].PublicKey
 }
 
-func (w *WithdrawStake) ValidateAndBuild() (*Instruction, error) {
-	if err := w.Validate(); err != nil {
+func (inst *WithdrawStake) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return w.Build(), nil
+	return inst.Build(), nil
 }
 
-func (w *WithdrawStake) Build() *Instruction {
+func (inst *WithdrawStake) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_WithdrawStake),
-			Impl:   w,
+			Impl:   inst,
 		},
 	}
 }
 
-func (w *WithdrawStake) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *WithdrawStake) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("WithdrawStake")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if w.Amount != nil {
-							paramsBranch.Child(ag_format.Param("Amount", *w.Amount))
+						if inst.Amount != nil {
+							paramsBranch.Child(ag_format.Param("Amount", *inst.Amount))
 						}
 					})
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range w.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(w.Signers)))
-						for j, signer := range w.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -253,13 +253,13 @@ func (w *WithdrawStake) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (w *WithdrawStake) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if w.Amount != nil {
-		if err := encoder.Encode(w.Amount); err != nil {
+func (inst *WithdrawStake) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.Amount != nil {
+		if err := encoder.Encode(inst.Amount); err != nil {
 			return err
 		}
 	}
-	for _, account := range w.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -267,30 +267,30 @@ func (w *WithdrawStake) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
 	return nil
 }
 
-func (w *WithdrawStake) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if w.Amount != nil {
-		if err := decoder.Decode(w.Amount); err != nil {
+func (inst *WithdrawStake) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if inst.Amount != nil {
+		if err := decoder.Decode(inst.Amount); err != nil {
 			return err
 		}
 	}
-	for i := range w.Accounts {
-		if err := decoder.Decode(w.Accounts[i]); err != nil {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (w *WithdrawStake) Validate() error {
-	if w.Amount == nil {
+func (inst *WithdrawStake) Validate() error {
+	if inst.Amount == nil {
 		return errors.New("amount is not set")
 	}
-	for i, account := range w.Accounts {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(w.Signers) == 0 || !w.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.userTransferAuthority should be a signer")
 	}
 	return nil

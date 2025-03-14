@@ -67,117 +67,117 @@ func NewUpdateTokenMetadataInstructionBuilder() *UpdateTokenMetadata {
 	}
 }
 
-func (u *UpdateTokenMetadata) SetName(name string) *UpdateTokenMetadata {
-	u.Name = &name
-	return u
+func (inst *UpdateTokenMetadata) SetName(name string) *UpdateTokenMetadata {
+	inst.Name = &name
+	return inst
 }
 
-func (u *UpdateTokenMetadata) SetSymbol(symbol string) *UpdateTokenMetadata {
-	u.Symbol = &symbol
-	return u
+func (inst *UpdateTokenMetadata) SetSymbol(symbol string) *UpdateTokenMetadata {
+	inst.Symbol = &symbol
+	return inst
 }
 
-func (u *UpdateTokenMetadata) SetURI(uri string) *UpdateTokenMetadata {
-	u.URI = &uri
-	return u
+func (inst *UpdateTokenMetadata) SetURI(uri string) *UpdateTokenMetadata {
+	inst.URI = &uri
+	return inst
 }
 
-func (u *UpdateTokenMetadata) SetStakePool(stakePool ag_solanago.PublicKey) *UpdateTokenMetadata {
-	u.Accounts[0] = ag_solanago.Meta(stakePool)
-	return u
+func (inst *UpdateTokenMetadata) SetStakePool(stakePool ag_solanago.PublicKey) *UpdateTokenMetadata {
+	inst.Accounts[0] = ag_solanago.Meta(stakePool)
+	return inst
 }
 
-func (u *UpdateTokenMetadata) SetManager(manager ag_solanago.PublicKey) *UpdateTokenMetadata {
-	u.Accounts[1] = ag_solanago.Meta(manager).SIGNER()
-	u.Signers[0] = ag_solanago.Meta(manager).SIGNER()
-	return u
+func (inst *UpdateTokenMetadata) SetManager(manager ag_solanago.PublicKey) *UpdateTokenMetadata {
+	inst.Accounts[1] = ag_solanago.Meta(manager).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(manager).SIGNER()
+	return inst
 }
 
-func (u *UpdateTokenMetadata) SetStakePoolWithdrawAuthority(stakePoolWithdrawAuthority ag_solanago.PublicKey) *UpdateTokenMetadata {
-	u.Accounts[2] = ag_solanago.Meta(stakePoolWithdrawAuthority)
-	return u
+func (inst *UpdateTokenMetadata) SetStakePoolWithdrawAuthority(stakePoolWithdrawAuthority ag_solanago.PublicKey) *UpdateTokenMetadata {
+	inst.Accounts[2] = ag_solanago.Meta(stakePoolWithdrawAuthority)
+	return inst
 }
 
-func (u *UpdateTokenMetadata) SetTokenMetadata(tokenMetadata ag_solanago.PublicKey) *UpdateTokenMetadata {
-	u.Accounts[3] = ag_solanago.Meta(tokenMetadata).WRITE()
-	return u
+func (inst *UpdateTokenMetadata) SetTokenMetadata(tokenMetadata ag_solanago.PublicKey) *UpdateTokenMetadata {
+	inst.Accounts[3] = ag_solanago.Meta(tokenMetadata).WRITE()
+	return inst
 }
 
-func (u *UpdateTokenMetadata) SetMplTokenMetadata(mplTokenMetadata ag_solanago.PublicKey) *UpdateTokenMetadata {
-	u.Accounts[4] = ag_solanago.Meta(mplTokenMetadata)
-	return u
+func (inst *UpdateTokenMetadata) SetMplTokenMetadata(mplTokenMetadata ag_solanago.PublicKey) *UpdateTokenMetadata {
+	inst.Accounts[4] = ag_solanago.Meta(mplTokenMetadata)
+	return inst
 }
 
-func (u *UpdateTokenMetadata) GetName() *string {
-	return u.Name
+func (inst *UpdateTokenMetadata) GetName() *string {
+	return inst.Name
 }
 
-func (u *UpdateTokenMetadata) GetSymbol() *string {
-	return u.Symbol
+func (inst *UpdateTokenMetadata) GetSymbol() *string {
+	return inst.Symbol
 }
 
-func (u *UpdateTokenMetadata) GetURI() *string {
-	return u.URI
+func (inst *UpdateTokenMetadata) GetURI() *string {
+	return inst.URI
 }
 
-func (u *UpdateTokenMetadata) GetStakePool() ag_solanago.PublicKey {
-	return u.Accounts[0].PublicKey
+func (inst *UpdateTokenMetadata) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (u *UpdateTokenMetadata) GetManager() ag_solanago.PublicKey {
-	return u.Accounts[1].PublicKey
+func (inst *UpdateTokenMetadata) GetManager() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (u *UpdateTokenMetadata) GetStakePoolWithdrawAuthority() ag_solanago.PublicKey {
-	return u.Accounts[2].PublicKey
+func (inst *UpdateTokenMetadata) GetStakePoolWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (u *UpdateTokenMetadata) GetTokenMetadata() ag_solanago.PublicKey {
-	return u.Accounts[3].PublicKey
+func (inst *UpdateTokenMetadata) GetTokenMetadata() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (u *UpdateTokenMetadata) GetMplTokenMetadata() ag_solanago.PublicKey {
-	return u.Accounts[4].PublicKey
+func (inst *UpdateTokenMetadata) GetMplTokenMetadata() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (u *UpdateTokenMetadata) ValidateAndBuild() (*Instruction, error) {
-	if err := u.Validate(); err != nil {
+func (inst *UpdateTokenMetadata) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return u.Build(), nil
+	return inst.Build(), nil
 }
 
-func (u *UpdateTokenMetadata) Build() *Instruction {
+func (inst *UpdateTokenMetadata) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_UpdateTokenMetadata),
-			Impl:   u,
+			Impl:   inst,
 		},
 	}
 }
 
-func (u *UpdateTokenMetadata) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *UpdateTokenMetadata) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("UpdateTokenMetadata")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if u.Name != nil {
-							paramsBranch.Child(ag_format.Param("Name", *u.Name))
+						if inst.Name != nil {
+							paramsBranch.Child(ag_format.Param("Name", *inst.Name))
 						}
-						if u.Symbol != nil {
-							paramsBranch.Child(ag_format.Param("Symbol", *u.Symbol))
+						if inst.Symbol != nil {
+							paramsBranch.Child(ag_format.Param("Symbol", *inst.Symbol))
 						}
-						if u.URI != nil {
-							paramsBranch.Child(ag_format.Param("URI", *u.URI))
+						if inst.URI != nil {
+							paramsBranch.Child(ag_format.Param("URI", *inst.URI))
 						}
 					})
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range u.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(u.Signers)))
-						for j, signer := range u.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -185,23 +185,23 @@ func (u *UpdateTokenMetadata) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (u *UpdateTokenMetadata) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if u.Name != nil {
-		if err := encoder.Encode(u.Name); err != nil {
+func (inst *UpdateTokenMetadata) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.Name != nil {
+		if err := encoder.Encode(inst.Name); err != nil {
 			return err
 		}
 	}
-	if u.Symbol != nil {
-		if err := encoder.Encode(u.Symbol); err != nil {
+	if inst.Symbol != nil {
+		if err := encoder.Encode(inst.Symbol); err != nil {
 			return err
 		}
 	}
-	if u.URI != nil {
-		if err := encoder.Encode(u.URI); err != nil {
+	if inst.URI != nil {
+		if err := encoder.Encode(inst.URI); err != nil {
 			return err
 		}
 	}
-	for _, account := range u.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -209,46 +209,46 @@ func (u *UpdateTokenMetadata) MarshalWithEncoder(encoder *ag_binary.Encoder) err
 	return nil
 }
 
-func (u *UpdateTokenMetadata) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if u.Name != nil {
-		if err := decoder.Decode(u.Name); err != nil {
+func (inst *UpdateTokenMetadata) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if inst.Name != nil {
+		if err := decoder.Decode(inst.Name); err != nil {
 			return err
 		}
 	}
-	if u.Symbol != nil {
-		if err := decoder.Decode(u.Symbol); err != nil {
+	if inst.Symbol != nil {
+		if err := decoder.Decode(inst.Symbol); err != nil {
 			return err
 		}
 	}
-	if u.URI != nil {
-		if err := decoder.Decode(u.URI); err != nil {
+	if inst.URI != nil {
+		if err := decoder.Decode(inst.URI); err != nil {
 			return err
 		}
 	}
-	for i := range u.Accounts {
-		if err := decoder.Decode(u.Accounts[i]); err != nil {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (u *UpdateTokenMetadata) Validate() error {
-	if u.Name == nil {
+func (inst *UpdateTokenMetadata) Validate() error {
+	if inst.Name == nil {
 		return errors.New("name is not set")
 	}
-	if u.Symbol == nil {
+	if inst.Symbol == nil {
 		return errors.New("symbol is not set")
 	}
-	if u.URI == nil {
+	if inst.URI == nil {
 		return errors.New("uri is not set")
 	}
-	for i, account := range u.Accounts {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(u.Signers) == 0 || !u.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.Manager should be a signer")
 	}
 	return nil

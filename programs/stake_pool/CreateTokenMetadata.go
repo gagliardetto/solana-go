@@ -49,146 +49,146 @@ func NewCreateTokenMetadataInstructionBuilder() *CreateTokenMetadata {
 	}
 }
 
-func (c *CreateTokenMetadata) SetName(name string) *CreateTokenMetadata {
-	c.Name = &name
-	return c
+func (inst *CreateTokenMetadata) SetName(name string) *CreateTokenMetadata {
+	inst.Name = &name
+	return inst
 }
 
-func (c *CreateTokenMetadata) SetSymbol(symbol string) *CreateTokenMetadata {
-	c.Symbol = &symbol
-	return c
+func (inst *CreateTokenMetadata) SetSymbol(symbol string) *CreateTokenMetadata {
+	inst.Symbol = &symbol
+	return inst
 }
 
-func (c *CreateTokenMetadata) SetURI(uri string) *CreateTokenMetadata {
-	c.URI = &uri
-	return c
+func (inst *CreateTokenMetadata) SetURI(uri string) *CreateTokenMetadata {
+	inst.URI = &uri
+	return inst
 }
 
-func (c *CreateTokenMetadata) SetStakePool(stakePool ag_solanago.PublicKey) *CreateTokenMetadata {
-	c.Accounts[0] = ag_solanago.Meta(stakePool)
-	return c
+func (inst *CreateTokenMetadata) SetStakePool(stakePool ag_solanago.PublicKey) *CreateTokenMetadata {
+	inst.Accounts[0] = ag_solanago.Meta(stakePool)
+	return inst
 }
 
-func (c *CreateTokenMetadata) SetManager(manager ag_solanago.PublicKey) *CreateTokenMetadata {
-	c.Accounts[1] = ag_solanago.Meta(manager).SIGNER()
-	c.Signers[0] = ag_solanago.Meta(manager).SIGNER()
-	return c
+func (inst *CreateTokenMetadata) SetManager(manager ag_solanago.PublicKey) *CreateTokenMetadata {
+	inst.Accounts[1] = ag_solanago.Meta(manager).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(manager).SIGNER()
+	return inst
 }
 
-func (c *CreateTokenMetadata) SetStakePoolWithdrawAuthority(stakePoolWithdrawAuthority ag_solanago.PublicKey) *CreateTokenMetadata {
-	c.Accounts[2] = ag_solanago.Meta(stakePoolWithdrawAuthority)
-	return c
+func (inst *CreateTokenMetadata) SetStakePoolWithdrawAuthority(stakePoolWithdrawAuthority ag_solanago.PublicKey) *CreateTokenMetadata {
+	inst.Accounts[2] = ag_solanago.Meta(stakePoolWithdrawAuthority)
+	return inst
 }
 
-func (c *CreateTokenMetadata) SetPoolMint(poolMint ag_solanago.PublicKey) *CreateTokenMetadata {
-	c.Accounts[3] = ag_solanago.Meta(poolMint)
-	return c
+func (inst *CreateTokenMetadata) SetPoolMint(poolMint ag_solanago.PublicKey) *CreateTokenMetadata {
+	inst.Accounts[3] = ag_solanago.Meta(poolMint)
+	return inst
 }
 
-func (c *CreateTokenMetadata) SetPayer(payer ag_solanago.PublicKey) *CreateTokenMetadata {
-	c.Accounts[4] = ag_solanago.Meta(payer).WRITE()
-	return c
+func (inst *CreateTokenMetadata) SetPayer(payer ag_solanago.PublicKey) *CreateTokenMetadata {
+	inst.Accounts[4] = ag_solanago.Meta(payer).WRITE()
+	return inst
 }
 
-func (c *CreateTokenMetadata) SetTokenMetadata(tokenMetadata ag_solanago.PublicKey) *CreateTokenMetadata {
-	c.Accounts[5] = ag_solanago.Meta(tokenMetadata).WRITE()
-	return c
+func (inst *CreateTokenMetadata) SetTokenMetadata(tokenMetadata ag_solanago.PublicKey) *CreateTokenMetadata {
+	inst.Accounts[5] = ag_solanago.Meta(tokenMetadata).WRITE()
+	return inst
 }
 
-func (c *CreateTokenMetadata) SetMplTokenMetadata(mplTokenMetadata ag_solanago.PublicKey) *CreateTokenMetadata {
-	c.Accounts[6] = ag_solanago.Meta(mplTokenMetadata)
-	return c
+func (inst *CreateTokenMetadata) SetMplTokenMetadata(mplTokenMetadata ag_solanago.PublicKey) *CreateTokenMetadata {
+	inst.Accounts[6] = ag_solanago.Meta(mplTokenMetadata)
+	return inst
 }
 
-func (c *CreateTokenMetadata) SetSystemProgram(systemProgram ag_solanago.PublicKey) *CreateTokenMetadata {
-	c.Accounts[7] = ag_solanago.Meta(systemProgram)
-	return c
+func (inst *CreateTokenMetadata) SetSystemProgram(systemProgram ag_solanago.PublicKey) *CreateTokenMetadata {
+	inst.Accounts[7] = ag_solanago.Meta(systemProgram)
+	return inst
 }
 
-func (c *CreateTokenMetadata) GetName() *string {
-	return c.Name
+func (inst *CreateTokenMetadata) GetName() *string {
+	return inst.Name
 }
 
-func (c *CreateTokenMetadata) GetSymbol() *string {
-	return c.Symbol
+func (inst *CreateTokenMetadata) GetSymbol() *string {
+	return inst.Symbol
 }
 
-func (c *CreateTokenMetadata) GetURI() *string {
-	return c.URI
+func (inst *CreateTokenMetadata) GetURI() *string {
+	return inst.URI
 }
 
-func (c *CreateTokenMetadata) GetStakePool() ag_solanago.PublicKey {
-	return c.Accounts[0].PublicKey
+func (inst *CreateTokenMetadata) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (c *CreateTokenMetadata) GetManager() ag_solanago.PublicKey {
-	return c.Accounts[1].PublicKey
+func (inst *CreateTokenMetadata) GetManager() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (c *CreateTokenMetadata) GetStakePoolWithdrawAuthority() ag_solanago.PublicKey {
-	return c.Accounts[2].PublicKey
+func (inst *CreateTokenMetadata) GetStakePoolWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (c *CreateTokenMetadata) GetPoolMint() ag_solanago.PublicKey {
-	return c.Accounts[3].PublicKey
+func (inst *CreateTokenMetadata) GetPoolMint() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (c *CreateTokenMetadata) GetPayer() ag_solanago.PublicKey {
-	return c.Accounts[4].PublicKey
+func (inst *CreateTokenMetadata) GetPayer() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (c *CreateTokenMetadata) GetTokenMetadata() ag_solanago.PublicKey {
-	return c.Accounts[5].PublicKey
+func (inst *CreateTokenMetadata) GetTokenMetadata() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (c *CreateTokenMetadata) GetMplTokenMetadata() ag_solanago.PublicKey {
-	return c.Accounts[6].PublicKey
+func (inst *CreateTokenMetadata) GetMplTokenMetadata() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (c *CreateTokenMetadata) GetSystemProgram() ag_solanago.PublicKey {
-	return c.Accounts[7].PublicKey
+func (inst *CreateTokenMetadata) GetSystemProgram() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (c *CreateTokenMetadata) ValidateAndBuild() (*Instruction, error) {
-	if err := c.Validate(); err != nil {
+func (inst *CreateTokenMetadata) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return c.Build(), nil
+	return inst.Build(), nil
 }
 
-func (c *CreateTokenMetadata) Build() *Instruction {
+func (inst *CreateTokenMetadata) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_CreateTokenMetadata),
-			Impl:   c,
+			Impl:   inst,
 		},
 	}
 }
 
-func (c *CreateTokenMetadata) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *CreateTokenMetadata) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("CreateTokenMetadata")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if c.Name != nil {
-							paramsBranch.Child(ag_format.Param("Name", *c.Name))
+						if inst.Name != nil {
+							paramsBranch.Child(ag_format.Param("Name", *inst.Name))
 						}
-						if c.Symbol != nil {
-							paramsBranch.Child(ag_format.Param("Symbol", *c.Symbol))
+						if inst.Symbol != nil {
+							paramsBranch.Child(ag_format.Param("Symbol", *inst.Symbol))
 						}
-						if c.URI != nil {
-							paramsBranch.Child(ag_format.Param("URI", *c.URI))
+						if inst.URI != nil {
+							paramsBranch.Child(ag_format.Param("URI", *inst.URI))
 						}
 					})
 
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range c.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
 
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(c.Signers)))
-						for j, signer := range c.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -196,23 +196,23 @@ func (c *CreateTokenMetadata) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (c *CreateTokenMetadata) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if c.Name != nil {
-		if err := encoder.Encode(c.Name); err != nil {
+func (inst *CreateTokenMetadata) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.Name != nil {
+		if err := encoder.Encode(inst.Name); err != nil {
 			return err
 		}
 	}
-	if c.Symbol != nil {
-		if err := encoder.Encode(c.Symbol); err != nil {
+	if inst.Symbol != nil {
+		if err := encoder.Encode(inst.Symbol); err != nil {
 			return err
 		}
 	}
-	if c.URI != nil {
-		if err := encoder.Encode(c.URI); err != nil {
+	if inst.URI != nil {
+		if err := encoder.Encode(inst.URI); err != nil {
 			return err
 		}
 	}
-	for _, account := range c.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -220,47 +220,47 @@ func (c *CreateTokenMetadata) MarshalWithEncoder(encoder *ag_binary.Encoder) err
 	return nil
 }
 
-func (c *CreateTokenMetadata) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if c.Name != nil {
-		if err := decoder.Decode(c.Name); err != nil {
+func (inst *CreateTokenMetadata) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if inst.Name != nil {
+		if err := decoder.Decode(inst.Name); err != nil {
 			return err
 		}
 	}
-	if c.Symbol != nil {
-		if err := decoder.Decode(c.Symbol); err != nil {
+	if inst.Symbol != nil {
+		if err := decoder.Decode(inst.Symbol); err != nil {
 			return err
 		}
 	}
-	if c.URI != nil {
-		if err := decoder.Decode(c.URI); err != nil {
+	if inst.URI != nil {
+		if err := decoder.Decode(inst.URI); err != nil {
 			return err
 		}
 	}
-	for i := range c.Accounts {
-		if err := decoder.Decode(c.Accounts[i]); err != nil {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (c *CreateTokenMetadata) Validate() error {
-	if c.Name == nil {
+func (inst *CreateTokenMetadata) Validate() error {
+	if inst.Name == nil {
 		return errors.New("name is not set")
 	}
-	if c.Symbol == nil {
+	if inst.Symbol == nil {
 		return errors.New("symbol is not set")
 	}
-	if c.URI == nil {
+	if inst.URI == nil {
 		return errors.New("uri is not set")
 	}
 
-	for i, account := range c.Accounts {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(c.Signers) == 0 || !c.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.Manager should be a signer")
 	}
 	return nil

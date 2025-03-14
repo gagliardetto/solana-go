@@ -101,219 +101,219 @@ func NewRedelegateBuilder() *Redelegate {
 	}
 }
 
-func (r *Redelegate) SetLamports(lamports uint64) *Redelegate {
-	r.Lamports = &lamports
-	return r
+func (inst *Redelegate) SetLamports(lamports uint64) *Redelegate {
+	inst.Lamports = &lamports
+	return inst
 }
 
-func (r *Redelegate) SetSourceTransientStakeSeed(sourceTransientStakeSeed uint64) *Redelegate {
-	r.SourceTransientStakeSeed = &sourceTransientStakeSeed
-	return r
+func (inst *Redelegate) SetSourceTransientStakeSeed(sourceTransientStakeSeed uint64) *Redelegate {
+	inst.SourceTransientStakeSeed = &sourceTransientStakeSeed
+	return inst
 }
 
-func (r *Redelegate) SetEphemeralStakeSeed(ephemeralStakeSeed uint64) *Redelegate {
-	r.EphemeralStakeSeed = &ephemeralStakeSeed
-	return r
+func (inst *Redelegate) SetEphemeralStakeSeed(ephemeralStakeSeed uint64) *Redelegate {
+	inst.EphemeralStakeSeed = &ephemeralStakeSeed
+	return inst
 }
 
-func (r *Redelegate) SetDestinationTransientStakeSeed(destinationTransientStakeSeed uint64) *Redelegate {
-	r.DestinationTransientStakeSeed = &destinationTransientStakeSeed
-	return r
+func (inst *Redelegate) SetDestinationTransientStakeSeed(destinationTransientStakeSeed uint64) *Redelegate {
+	inst.DestinationTransientStakeSeed = &destinationTransientStakeSeed
+	return inst
 }
 
-func (r *Redelegate) SetStakePool(stakePool ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[0] = ag_solanago.Meta(stakePool)
-	return r
+func (inst *Redelegate) SetStakePool(stakePool ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[0] = ag_solanago.Meta(stakePool)
+	return inst
 }
 
-func (r *Redelegate) SetStaker(staker ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
-	r.Signers[0] = ag_solanago.Meta(staker).SIGNER()
-	return r
+func (inst *Redelegate) SetStaker(staker ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(staker).SIGNER()
+	return inst
 }
 
-func (r *Redelegate) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[2] = ag_solanago.Meta(withdrawAuthority)
-	return r
+func (inst *Redelegate) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[2] = ag_solanago.Meta(withdrawAuthority)
+	return inst
 }
 
-func (r *Redelegate) SetValidatorList(validatorList ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[3] = ag_solanago.Meta(validatorList).WRITE()
-	return r
+func (inst *Redelegate) SetValidatorList(validatorList ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[3] = ag_solanago.Meta(validatorList).WRITE()
+	return inst
 }
 
-func (r *Redelegate) SetSourceCanonicalStakeAccount(sourceCanonicalStakeAccount ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[4] = ag_solanago.Meta(sourceCanonicalStakeAccount).WRITE()
-	return r
+func (inst *Redelegate) SetSourceCanonicalStakeAccount(sourceCanonicalStakeAccount ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[4] = ag_solanago.Meta(sourceCanonicalStakeAccount).WRITE()
+	return inst
 }
 
-func (r *Redelegate) SetSourceTransientStakeAccount(sourceTransientStakeAccount ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[5] = ag_solanago.Meta(sourceTransientStakeAccount).WRITE()
-	return r
+func (inst *Redelegate) SetSourceTransientStakeAccount(sourceTransientStakeAccount ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[5] = ag_solanago.Meta(sourceTransientStakeAccount).WRITE()
+	return inst
 }
 
-func (r *Redelegate) SetUninitializedEphemeralStakeAccount(uninitializedEphemeralStakeAccount ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[6] = ag_solanago.Meta(uninitializedEphemeralStakeAccount).WRITE()
-	return r
+func (inst *Redelegate) SetUninitializedEphemeralStakeAccount(uninitializedEphemeralStakeAccount ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[6] = ag_solanago.Meta(uninitializedEphemeralStakeAccount).WRITE()
+	return inst
 }
 
-func (r *Redelegate) SetDestinationTransientStakeAccount(destinationTransientStakeAccount ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[7] = ag_solanago.Meta(destinationTransientStakeAccount).WRITE()
-	return r
+func (inst *Redelegate) SetDestinationTransientStakeAccount(destinationTransientStakeAccount ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[7] = ag_solanago.Meta(destinationTransientStakeAccount).WRITE()
+	return inst
 }
 
-func (r *Redelegate) SetDestinationStakeAccount(destinationStakeAccount ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[8] = ag_solanago.Meta(destinationStakeAccount)
-	return r
+func (inst *Redelegate) SetDestinationStakeAccount(destinationStakeAccount ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[8] = ag_solanago.Meta(destinationStakeAccount)
+	return inst
 }
 
-func (r *Redelegate) SetDestinationValidatorVoteAccount(destinationValidatorVoteAccount ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[9] = ag_solanago.Meta(destinationValidatorVoteAccount)
-	return r
+func (inst *Redelegate) SetDestinationValidatorVoteAccount(destinationValidatorVoteAccount ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[9] = ag_solanago.Meta(destinationValidatorVoteAccount)
+	return inst
 }
 
-func (r *Redelegate) SetClockSysvar(clockSysvar ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[10] = ag_solanago.Meta(clockSysvar)
-	return r
+func (inst *Redelegate) SetClockSysvar(clockSysvar ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[10] = ag_solanago.Meta(clockSysvar)
+	return inst
 }
 
-func (r *Redelegate) SetStakeHistorySysvar(stakeHistorySysvar ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[11] = ag_solanago.Meta(stakeHistorySysvar)
-	return r
+func (inst *Redelegate) SetStakeHistorySysvar(stakeHistorySysvar ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[11] = ag_solanago.Meta(stakeHistorySysvar)
+	return inst
 }
 
-func (r *Redelegate) SetStakeConfigSysvar(stakeConfigSysvar ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[12] = ag_solanago.Meta(stakeConfigSysvar)
-	return r
+func (inst *Redelegate) SetStakeConfigSysvar(stakeConfigSysvar ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[12] = ag_solanago.Meta(stakeConfigSysvar)
+	return inst
 }
 
-func (r *Redelegate) SetSystemProgram(systemProgram ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[13] = ag_solanago.Meta(systemProgram)
-	return r
+func (inst *Redelegate) SetSystemProgram(systemProgram ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[13] = ag_solanago.Meta(systemProgram)
+	return inst
 }
 
-func (r *Redelegate) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *Redelegate {
-	r.Accounts[14] = ag_solanago.Meta(stakeProgram)
-	return r
+func (inst *Redelegate) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *Redelegate {
+	inst.Accounts[14] = ag_solanago.Meta(stakeProgram)
+	return inst
 }
 
-func (r *Redelegate) GetLamports() *uint64 {
-	return r.Lamports
+func (inst *Redelegate) GetLamports() *uint64 {
+	return inst.Lamports
 }
 
-func (r *Redelegate) GetSourceTransientStakeSeed() *uint64 {
-	return r.SourceTransientStakeSeed
+func (inst *Redelegate) GetSourceTransientStakeSeed() *uint64 {
+	return inst.SourceTransientStakeSeed
 }
 
-func (r *Redelegate) GetEphemeralStakeSeed() *uint64 {
-	return r.EphemeralStakeSeed
+func (inst *Redelegate) GetEphemeralStakeSeed() *uint64 {
+	return inst.EphemeralStakeSeed
 }
 
-func (r *Redelegate) GetDestinationTransientStakeSeed() *uint64 {
-	return r.DestinationTransientStakeSeed
+func (inst *Redelegate) GetDestinationTransientStakeSeed() *uint64 {
+	return inst.DestinationTransientStakeSeed
 }
 
-func (r *Redelegate) GetStakePool() ag_solanago.PublicKey {
-	return r.Accounts[0].PublicKey
+func (inst *Redelegate) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (r *Redelegate) GetStaker() ag_solanago.PublicKey {
-	return r.Accounts[1].PublicKey
+func (inst *Redelegate) GetStaker() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (r *Redelegate) GetWithdrawAuthority() ag_solanago.PublicKey {
-	return r.Accounts[2].PublicKey
+func (inst *Redelegate) GetWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (r *Redelegate) GetValidatorList() ag_solanago.PublicKey {
-	return r.Accounts[3].PublicKey
+func (inst *Redelegate) GetValidatorList() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (r *Redelegate) GetSourceCanonicalStakeAccount() ag_solanago.PublicKey {
-	return r.Accounts[4].PublicKey
+func (inst *Redelegate) GetSourceCanonicalStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (r *Redelegate) GetSourceTransientStakeAccount() ag_solanago.PublicKey {
-	return r.Accounts[5].PublicKey
+func (inst *Redelegate) GetSourceTransientStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (r *Redelegate) GetUninitializedEphemeralStakeAccount() ag_solanago.PublicKey {
-	return r.Accounts[6].PublicKey
+func (inst *Redelegate) GetUninitializedEphemeralStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (r *Redelegate) GetDestinationTransientStakeAccount() ag_solanago.PublicKey {
-	return r.Accounts[7].PublicKey
+func (inst *Redelegate) GetDestinationTransientStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (r *Redelegate) GetDestinationStakeAccount() ag_solanago.PublicKey {
-	return r.Accounts[8].PublicKey
+func (inst *Redelegate) GetDestinationStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[8].PublicKey
 }
 
-func (r *Redelegate) GetDestinationValidatorVoteAccount() ag_solanago.PublicKey {
-	return r.Accounts[9].PublicKey
+func (inst *Redelegate) GetDestinationValidatorVoteAccount() ag_solanago.PublicKey {
+	return inst.Accounts[9].PublicKey
 }
 
-func (r *Redelegate) GetClockSysvar() ag_solanago.PublicKey {
-	return r.Accounts[10].PublicKey
+func (inst *Redelegate) GetClockSysvar() ag_solanago.PublicKey {
+	return inst.Accounts[10].PublicKey
 }
 
-func (r *Redelegate) GetStakeHistorySysvar() ag_solanago.PublicKey {
-	return r.Accounts[11].PublicKey
+func (inst *Redelegate) GetStakeHistorySysvar() ag_solanago.PublicKey {
+	return inst.Accounts[11].PublicKey
 }
 
-func (r *Redelegate) GetStakeConfigSysvar() ag_solanago.PublicKey {
-	return r.Accounts[12].PublicKey
+func (inst *Redelegate) GetStakeConfigSysvar() ag_solanago.PublicKey {
+	return inst.Accounts[12].PublicKey
 }
 
-func (r *Redelegate) GetSystemProgram() ag_solanago.PublicKey {
-	return r.Accounts[13].PublicKey
+func (inst *Redelegate) GetSystemProgram() ag_solanago.PublicKey {
+	return inst.Accounts[13].PublicKey
 }
 
-func (r *Redelegate) GetStakeProgram() ag_solanago.PublicKey {
-	return r.Accounts[14].PublicKey
+func (inst *Redelegate) GetStakeProgram() ag_solanago.PublicKey {
+	return inst.Accounts[14].PublicKey
 }
 
-func (r *Redelegate) ValidateAndBuild() (*Instruction, error) {
-	if err := r.Validate(); err != nil {
+func (inst *Redelegate) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return r.Build(), nil
+	return inst.Build(), nil
 }
 
-func (r *Redelegate) Build() *Instruction {
+func (inst *Redelegate) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_Redelegate),
-			Impl:   r,
+			Impl:   inst,
 		},
 	}
 }
 
-func (r *Redelegate) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *Redelegate) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("Redelegate")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if r.Lamports != nil {
-							paramsBranch.Child(ag_format.Param("Lamports", *r.Lamports))
+						if inst.Lamports != nil {
+							paramsBranch.Child(ag_format.Param("Lamports", *inst.Lamports))
 						}
-						if r.SourceTransientStakeSeed != nil {
-							paramsBranch.Child(ag_format.Param("SourceTransientStakeSeed", *r.SourceTransientStakeSeed))
+						if inst.SourceTransientStakeSeed != nil {
+							paramsBranch.Child(ag_format.Param("SourceTransientStakeSeed", *inst.SourceTransientStakeSeed))
 						}
-						if r.EphemeralStakeSeed != nil {
-							paramsBranch.Child(ag_format.Param("EphemeralStakeSeed", *r.EphemeralStakeSeed))
+						if inst.EphemeralStakeSeed != nil {
+							paramsBranch.Child(ag_format.Param("EphemeralStakeSeed", *inst.EphemeralStakeSeed))
 						}
-						if r.DestinationTransientStakeSeed != nil {
-							paramsBranch.Child(ag_format.Param("DestinationTransientStakeSeed", *r.DestinationTransientStakeSeed))
+						if inst.DestinationTransientStakeSeed != nil {
+							paramsBranch.Child(ag_format.Param("DestinationTransientStakeSeed", *inst.DestinationTransientStakeSeed))
 						}
 					})
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range r.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(r.Signers)))
-						for j, signer := range r.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -321,28 +321,28 @@ func (r *Redelegate) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (r *Redelegate) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if r.Lamports != nil {
-		if err := encoder.Encode(r.Lamports); err != nil {
+func (inst *Redelegate) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.Lamports != nil {
+		if err := encoder.Encode(inst.Lamports); err != nil {
 			return err
 		}
 	}
-	if r.SourceTransientStakeSeed != nil {
-		if err := encoder.Encode(r.SourceTransientStakeSeed); err != nil {
+	if inst.SourceTransientStakeSeed != nil {
+		if err := encoder.Encode(inst.SourceTransientStakeSeed); err != nil {
 			return err
 		}
 	}
-	if r.EphemeralStakeSeed != nil {
-		if err := encoder.Encode(r.EphemeralStakeSeed); err != nil {
+	if inst.EphemeralStakeSeed != nil {
+		if err := encoder.Encode(inst.EphemeralStakeSeed); err != nil {
 			return err
 		}
 	}
-	if r.DestinationTransientStakeSeed != nil {
-		if err := encoder.Encode(r.DestinationTransientStakeSeed); err != nil {
+	if inst.DestinationTransientStakeSeed != nil {
+		if err := encoder.Encode(inst.DestinationTransientStakeSeed); err != nil {
 			return err
 		}
 	}
-	for _, account := range r.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -350,54 +350,54 @@ func (r *Redelegate) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
 	return nil
 }
 
-func (r *Redelegate) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if r.Lamports != nil {
-		if err := decoder.Decode(r.Lamports); err != nil {
+func (inst *Redelegate) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if inst.Lamports != nil {
+		if err := decoder.Decode(inst.Lamports); err != nil {
 			return err
 		}
 	}
-	if r.SourceTransientStakeSeed != nil {
-		if err := decoder.Decode(r.SourceTransientStakeSeed); err != nil {
+	if inst.SourceTransientStakeSeed != nil {
+		if err := decoder.Decode(inst.SourceTransientStakeSeed); err != nil {
 			return err
 		}
 	}
-	if r.EphemeralStakeSeed != nil {
-		if err := decoder.Decode(r.EphemeralStakeSeed); err != nil {
+	if inst.EphemeralStakeSeed != nil {
+		if err := decoder.Decode(inst.EphemeralStakeSeed); err != nil {
 			return err
 		}
 	}
-	if r.DestinationTransientStakeSeed != nil {
-		if err := decoder.Decode(r.DestinationTransientStakeSeed); err != nil {
+	if inst.DestinationTransientStakeSeed != nil {
+		if err := decoder.Decode(inst.DestinationTransientStakeSeed); err != nil {
 			return err
 		}
 	}
-	for i := range r.Accounts {
-		if err := decoder.Decode(r.Accounts[i]); err != nil {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (r *Redelegate) Validate() error {
-	if r.Lamports == nil {
+func (inst *Redelegate) Validate() error {
+	if inst.Lamports == nil {
 		return errors.New("lamports is not set")
 	}
-	if r.SourceTransientStakeSeed == nil {
+	if inst.SourceTransientStakeSeed == nil {
 		return errors.New("SourceTransientStakeSeed is not set")
 	}
-	if r.EphemeralStakeSeed == nil {
+	if inst.EphemeralStakeSeed == nil {
 		return errors.New("EphemeralStakeSeed is not set")
 	}
-	if r.DestinationTransientStakeSeed == nil {
+	if inst.DestinationTransientStakeSeed == nil {
 		return errors.New("DestinationTransientStakeSeed is not set")
 	}
-	for i, account := range r.Accounts {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(r.Signers) == 0 || !r.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.Staker should be a signer")
 	}
 	return nil

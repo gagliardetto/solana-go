@@ -92,186 +92,186 @@ func NewUpdateValidatorListBalanceInstructionBuilder() *UpdateValidatorListBalan
 	}
 }
 
-func (u *UpdateValidatorListBalance) SetStartIndex(index uint32) *UpdateValidatorListBalance {
-	u.StartIndex = &index
-	return u
+func (inst *UpdateValidatorListBalance) SetStartIndex(index uint32) *UpdateValidatorListBalance {
+	inst.StartIndex = &index
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetNoMerge(noMerge bool) *UpdateValidatorListBalance {
-	u.NoMerge = &noMerge
-	return u
+func (inst *UpdateValidatorListBalance) SetNoMerge(noMerge bool) *UpdateValidatorListBalance {
+	inst.NoMerge = &noMerge
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetStakePool(pool ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[0] = ag_solanago.Meta(pool)
-	return u
+func (inst *UpdateValidatorListBalance) SetStakePool(pool ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[0] = ag_solanago.Meta(pool)
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetStaker(staker ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
-	u.Signers[0] = ag_solanago.Meta(staker).SIGNER()
-	return u
+func (inst *UpdateValidatorListBalance) SetStaker(staker ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(staker).SIGNER()
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[2] = ag_solanago.Meta(withdrawAuthority)
-	return u
+func (inst *UpdateValidatorListBalance) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[2] = ag_solanago.Meta(withdrawAuthority)
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetValidatorList(validatorList ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[3] = ag_solanago.Meta(validatorList).WRITE()
-	return u
+func (inst *UpdateValidatorListBalance) SetValidatorList(validatorList ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[3] = ag_solanago.Meta(validatorList).WRITE()
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetReserveStake(reserveStake ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[4] = ag_solanago.Meta(reserveStake).WRITE()
-	return u
+func (inst *UpdateValidatorListBalance) SetReserveStake(reserveStake ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[4] = ag_solanago.Meta(reserveStake).WRITE()
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetTransientStakeAccount(transientStakeAccount ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[5] = ag_solanago.Meta(transientStakeAccount).WRITE()
-	return u
+func (inst *UpdateValidatorListBalance) SetTransientStakeAccount(transientStakeAccount ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[5] = ag_solanago.Meta(transientStakeAccount).WRITE()
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetValidatorStakeAccount(validatorStakeAccount ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[6] = ag_solanago.Meta(validatorStakeAccount)
-	return u
+func (inst *UpdateValidatorListBalance) SetValidatorStakeAccount(validatorStakeAccount ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[6] = ag_solanago.Meta(validatorStakeAccount)
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetValidatorVoteAccount(validatorVoteAccount ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[7] = ag_solanago.Meta(validatorVoteAccount)
-	return u
+func (inst *UpdateValidatorListBalance) SetValidatorVoteAccount(validatorVoteAccount ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[7] = ag_solanago.Meta(validatorVoteAccount)
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetClock(clock ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[8] = ag_solanago.Meta(clock)
-	return u
+func (inst *UpdateValidatorListBalance) SetClock(clock ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[8] = ag_solanago.Meta(clock)
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetRent(rent ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[9] = ag_solanago.Meta(rent)
-	return u
+func (inst *UpdateValidatorListBalance) SetRent(rent ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[9] = ag_solanago.Meta(rent)
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetStakeHistory(stakeHistory ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[10] = ag_solanago.Meta(stakeHistory)
-	return u
+func (inst *UpdateValidatorListBalance) SetStakeHistory(stakeHistory ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[10] = ag_solanago.Meta(stakeHistory)
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetStakeConfig(stakeConfig ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[11] = ag_solanago.Meta(stakeConfig)
-	return u
+func (inst *UpdateValidatorListBalance) SetStakeConfig(stakeConfig ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[11] = ag_solanago.Meta(stakeConfig)
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetSystemProgram(systemProgram ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[12] = ag_solanago.Meta(systemProgram)
-	return u
+func (inst *UpdateValidatorListBalance) SetSystemProgram(systemProgram ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[12] = ag_solanago.Meta(systemProgram)
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *UpdateValidatorListBalance {
-	u.Accounts[13] = ag_solanago.Meta(stakeProgram)
-	return u
+func (inst *UpdateValidatorListBalance) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *UpdateValidatorListBalance {
+	inst.Accounts[13] = ag_solanago.Meta(stakeProgram)
+	return inst
 }
 
-func (u *UpdateValidatorListBalance) GetStartIndex() *uint32 {
-	return u.StartIndex
+func (inst *UpdateValidatorListBalance) GetStartIndex() *uint32 {
+	return inst.StartIndex
 }
 
-func (u *UpdateValidatorListBalance) GetNoMerge() *bool {
-	return u.NoMerge
+func (inst *UpdateValidatorListBalance) GetNoMerge() *bool {
+	return inst.NoMerge
 }
 
-func (u *UpdateValidatorListBalance) GetStakePool() ag_solanago.PublicKey {
-	return u.Accounts[0].PublicKey
+func (inst *UpdateValidatorListBalance) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetStaker() ag_solanago.PublicKey {
-	return u.Accounts[1].PublicKey
+func (inst *UpdateValidatorListBalance) GetStaker() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetWithdrawAuthority() ag_solanago.PublicKey {
-	return u.Accounts[2].PublicKey
+func (inst *UpdateValidatorListBalance) GetWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetValidatorList() ag_solanago.PublicKey {
-	return u.Accounts[3].PublicKey
+func (inst *UpdateValidatorListBalance) GetValidatorList() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetReserveStake() ag_solanago.PublicKey {
-	return u.Accounts[4].PublicKey
+func (inst *UpdateValidatorListBalance) GetReserveStake() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetTransientStakeAccount() ag_solanago.PublicKey {
-	return u.Accounts[5].PublicKey
+func (inst *UpdateValidatorListBalance) GetTransientStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetValidatorStakeAccount() ag_solanago.PublicKey {
-	return u.Accounts[6].PublicKey
+func (inst *UpdateValidatorListBalance) GetValidatorStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetValidatorVoteAccount() ag_solanago.PublicKey {
-	return u.Accounts[7].PublicKey
+func (inst *UpdateValidatorListBalance) GetValidatorVoteAccount() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetClock() ag_solanago.PublicKey {
-	return u.Accounts[8].PublicKey
+func (inst *UpdateValidatorListBalance) GetClock() ag_solanago.PublicKey {
+	return inst.Accounts[8].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetRent() ag_solanago.PublicKey {
-	return u.Accounts[9].PublicKey
+func (inst *UpdateValidatorListBalance) GetRent() ag_solanago.PublicKey {
+	return inst.Accounts[9].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetStakeHistory() ag_solanago.PublicKey {
-	return u.Accounts[10].PublicKey
+func (inst *UpdateValidatorListBalance) GetStakeHistory() ag_solanago.PublicKey {
+	return inst.Accounts[10].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetStakeConfig() ag_solanago.PublicKey {
-	return u.Accounts[11].PublicKey
+func (inst *UpdateValidatorListBalance) GetStakeConfig() ag_solanago.PublicKey {
+	return inst.Accounts[11].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetSystemProgram() ag_solanago.PublicKey {
-	return u.Accounts[12].PublicKey
+func (inst *UpdateValidatorListBalance) GetSystemProgram() ag_solanago.PublicKey {
+	return inst.Accounts[12].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) GetStakeProgram() ag_solanago.PublicKey {
-	return u.Accounts[13].PublicKey
+func (inst *UpdateValidatorListBalance) GetStakeProgram() ag_solanago.PublicKey {
+	return inst.Accounts[13].PublicKey
 }
 
-func (u *UpdateValidatorListBalance) ValidateAndBuild() (*Instruction, error) {
-	if err := u.Validate(); err != nil {
+func (inst *UpdateValidatorListBalance) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return u.Build(), nil
+	return inst.Build(), nil
 }
 
-func (u *UpdateValidatorListBalance) Build() *Instruction {
+func (inst *UpdateValidatorListBalance) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_UpdateValidatorListBalance),
-			Impl:   u,
+			Impl:   inst,
 		},
 	}
 }
 
-func (u *UpdateValidatorListBalance) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *UpdateValidatorListBalance) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("UpdateValidatorListBalance")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if u.StartIndex != nil {
-							paramsBranch.Child(ag_format.Param("StartIndex", *u.StartIndex))
+						if inst.StartIndex != nil {
+							paramsBranch.Child(ag_format.Param("StartIndex", *inst.StartIndex))
 						}
-						if u.NoMerge != nil {
-							paramsBranch.Child(ag_format.Param("NoMerge", *u.NoMerge))
+						if inst.NoMerge != nil {
+							paramsBranch.Child(ag_format.Param("NoMerge", *inst.NoMerge))
 						}
 					})
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range u.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(u.Signers)))
-						for j, signer := range u.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -279,18 +279,18 @@ func (u *UpdateValidatorListBalance) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (u *UpdateValidatorListBalance) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if u.StartIndex != nil {
-		if err := encoder.Encode(u.StartIndex); err != nil {
+func (inst *UpdateValidatorListBalance) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.StartIndex != nil {
+		if err := encoder.Encode(inst.StartIndex); err != nil {
 			return err
 		}
 	}
-	if u.NoMerge != nil {
-		if err := encoder.Encode(u.NoMerge); err != nil {
+	if inst.NoMerge != nil {
+		if err := encoder.Encode(inst.NoMerge); err != nil {
 			return err
 		}
 	}
-	for _, account := range u.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -298,32 +298,32 @@ func (u *UpdateValidatorListBalance) MarshalWithEncoder(encoder *ag_binary.Encod
 	return nil
 }
 
-func (u *UpdateValidatorListBalance) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if u.StartIndex != nil {
-		if err := decoder.Decode(u.StartIndex); err != nil {
+func (inst *UpdateValidatorListBalance) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if inst.StartIndex != nil {
+		if err := decoder.Decode(inst.StartIndex); err != nil {
 			return err
 		}
 	}
-	if u.NoMerge != nil {
-		if err := decoder.Decode(u.NoMerge); err != nil {
+	if inst.NoMerge != nil {
+		if err := decoder.Decode(inst.NoMerge); err != nil {
 			return err
 		}
 	}
-	for i := range u.Accounts {
-		if err := decoder.Decode(u.Accounts[i]); err != nil {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (u *UpdateValidatorListBalance) Validate() error {
-	for i, account := range u.Accounts {
+func (inst *UpdateValidatorListBalance) Validate() error {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(u.Signers) == 0 || !u.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.Staker should be a signer")
 	}
 	return nil

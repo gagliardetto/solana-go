@@ -68,106 +68,106 @@ func NewRemoveValidatorFromPoolInstructionBuilder() *RemoveValidatorFromPool {
 	}
 }
 
-func (r *RemoveValidatorFromPool) SetStakePool(pool ag_solanago.PublicKey) *RemoveValidatorFromPool {
-	r.Accounts[0] = ag_solanago.Meta(pool).WRITE()
-	return r
+func (inst *RemoveValidatorFromPool) SetStakePool(pool ag_solanago.PublicKey) *RemoveValidatorFromPool {
+	inst.Accounts[0] = ag_solanago.Meta(pool).WRITE()
+	return inst
 }
 
-func (r *RemoveValidatorFromPool) SetStaker(staker ag_solanago.PublicKey) *RemoveValidatorFromPool {
-	r.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
-	r.Signers[0] = ag_solanago.Meta(staker).SIGNER()
-	return r
+func (inst *RemoveValidatorFromPool) SetStaker(staker ag_solanago.PublicKey) *RemoveValidatorFromPool {
+	inst.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(staker).SIGNER()
+	return inst
 }
 
-func (r *RemoveValidatorFromPool) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *RemoveValidatorFromPool {
-	r.Accounts[2] = ag_solanago.Meta(withdrawAuthority)
-	return r
+func (inst *RemoveValidatorFromPool) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *RemoveValidatorFromPool {
+	inst.Accounts[2] = ag_solanago.Meta(withdrawAuthority)
+	return inst
 }
 
-func (r *RemoveValidatorFromPool) SetValidatorList(validatorList ag_solanago.PublicKey) *RemoveValidatorFromPool {
-	r.Accounts[3] = ag_solanago.Meta(validatorList).WRITE()
-	return r
+func (inst *RemoveValidatorFromPool) SetValidatorList(validatorList ag_solanago.PublicKey) *RemoveValidatorFromPool {
+	inst.Accounts[3] = ag_solanago.Meta(validatorList).WRITE()
+	return inst
 }
 
-func (r *RemoveValidatorFromPool) SetValidatorStakeAccount(validatorStakeAccount ag_solanago.PublicKey) *RemoveValidatorFromPool {
-	r.Accounts[4] = ag_solanago.Meta(validatorStakeAccount).WRITE()
-	return r
+func (inst *RemoveValidatorFromPool) SetValidatorStakeAccount(validatorStakeAccount ag_solanago.PublicKey) *RemoveValidatorFromPool {
+	inst.Accounts[4] = ag_solanago.Meta(validatorStakeAccount).WRITE()
+	return inst
 }
 
-func (r *RemoveValidatorFromPool) SetTransientStakeAccount(transientStakeAccount ag_solanago.PublicKey) *RemoveValidatorFromPool {
-	r.Accounts[5] = ag_solanago.Meta(transientStakeAccount).WRITE()
-	return r
+func (inst *RemoveValidatorFromPool) SetTransientStakeAccount(transientStakeAccount ag_solanago.PublicKey) *RemoveValidatorFromPool {
+	inst.Accounts[5] = ag_solanago.Meta(transientStakeAccount).WRITE()
+	return inst
 }
 
-func (r *RemoveValidatorFromPool) SetClock(clock ag_solanago.PublicKey) *RemoveValidatorFromPool {
-	r.Accounts[6] = ag_solanago.Meta(clock)
-	return r
+func (inst *RemoveValidatorFromPool) SetClock(clock ag_solanago.PublicKey) *RemoveValidatorFromPool {
+	inst.Accounts[6] = ag_solanago.Meta(clock)
+	return inst
 }
 
-func (r *RemoveValidatorFromPool) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *RemoveValidatorFromPool {
-	r.Accounts[7] = ag_solanago.Meta(stakeProgram)
-	return r
+func (inst *RemoveValidatorFromPool) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *RemoveValidatorFromPool {
+	inst.Accounts[7] = ag_solanago.Meta(stakeProgram)
+	return inst
 }
 
-func (r *RemoveValidatorFromPool) GetStakePool() ag_solanago.PublicKey {
-	return r.Accounts[0].PublicKey
+func (inst *RemoveValidatorFromPool) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (r *RemoveValidatorFromPool) GetStaker() ag_solanago.PublicKey {
-	return r.Accounts[1].PublicKey
+func (inst *RemoveValidatorFromPool) GetStaker() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (r *RemoveValidatorFromPool) GetWithdrawAuthority() ag_solanago.PublicKey {
-	return r.Accounts[2].PublicKey
+func (inst *RemoveValidatorFromPool) GetWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (r *RemoveValidatorFromPool) GetValidatorList() ag_solanago.PublicKey {
-	return r.Accounts[3].PublicKey
+func (inst *RemoveValidatorFromPool) GetValidatorList() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (r *RemoveValidatorFromPool) GetValidatorStakeAccount() ag_solanago.PublicKey {
-	return r.Accounts[4].PublicKey
+func (inst *RemoveValidatorFromPool) GetValidatorStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (r *RemoveValidatorFromPool) GetTransientStakeAccount() ag_solanago.PublicKey {
-	return r.Accounts[5].PublicKey
+func (inst *RemoveValidatorFromPool) GetTransientStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (r *RemoveValidatorFromPool) GetClock() ag_solanago.PublicKey {
-	return r.Accounts[6].PublicKey
+func (inst *RemoveValidatorFromPool) GetClock() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (r *RemoveValidatorFromPool) GetStakeProgram() ag_solanago.PublicKey {
-	return r.Accounts[7].PublicKey
+func (inst *RemoveValidatorFromPool) GetStakeProgram() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (r *RemoveValidatorFromPool) ValidateAndBuild() (*Instruction, error) {
-	if err := r.Validate(); err != nil {
+func (inst *RemoveValidatorFromPool) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return r.Build(), nil
+	return inst.Build(), nil
 }
 
-func (r *RemoveValidatorFromPool) Build() *Instruction {
+func (inst *RemoveValidatorFromPool) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_RemoveValidatorFromPool),
-			Impl:   r,
+			Impl:   inst,
 		},
 	}
 }
 
-func (r *RemoveValidatorFromPool) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *RemoveValidatorFromPool) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("RemoveValidatorFromPool")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range r.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(r.Signers)))
-						for j, signer := range r.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -175,8 +175,8 @@ func (r *RemoveValidatorFromPool) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (r *RemoveValidatorFromPool) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	for _, account := range r.Accounts {
+func (inst *RemoveValidatorFromPool) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -184,22 +184,22 @@ func (r *RemoveValidatorFromPool) MarshalWithEncoder(encoder *ag_binary.Encoder)
 	return nil
 }
 
-func (r *RemoveValidatorFromPool) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	for i := range r.Accounts {
-		if err := decoder.Decode(r.Accounts[i]); err != nil {
+func (inst *RemoveValidatorFromPool) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (r *RemoveValidatorFromPool) Validate() error {
-	for i, account := range r.Accounts {
+func (inst *RemoveValidatorFromPool) Validate() error {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(r.Signers) == 0 || !r.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.Staker should be a signer")
 	}
 	return nil

@@ -47,47 +47,47 @@ func NewCleanupRemovedValidatorEntriesInstructionBuilder() *CleanupRemovedValida
 	}
 }
 
-func (e *CleanupRemovedValidatorEntries) SetStakePool(pool ag_solanago.PublicKey) *CleanupRemovedValidatorEntries {
-	e.Accounts[0] = ag_solanago.Meta(pool)
-	return e
+func (inst *CleanupRemovedValidatorEntries) SetStakePool(pool ag_solanago.PublicKey) *CleanupRemovedValidatorEntries {
+	inst.Accounts[0] = ag_solanago.Meta(pool)
+	return inst
 }
 
-func (e *CleanupRemovedValidatorEntries) SetValidatorList(validatorList ag_solanago.PublicKey) *CleanupRemovedValidatorEntries {
-	e.Accounts[1] = ag_solanago.Meta(validatorList).WRITE()
-	return e
+func (inst *CleanupRemovedValidatorEntries) SetValidatorList(validatorList ag_solanago.PublicKey) *CleanupRemovedValidatorEntries {
+	inst.Accounts[1] = ag_solanago.Meta(validatorList).WRITE()
+	return inst
 }
 
-func (e *CleanupRemovedValidatorEntries) GetStakePool() ag_solanago.PublicKey {
-	return e.Accounts[0].PublicKey
+func (inst *CleanupRemovedValidatorEntries) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (e *CleanupRemovedValidatorEntries) GetValidatorList() ag_solanago.PublicKey {
-	return e.Accounts[1].PublicKey
+func (inst *CleanupRemovedValidatorEntries) GetValidatorList() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (e *CleanupRemovedValidatorEntries) ValidateAndBuild() (*Instruction, error) {
-	if err := e.Validate(); err != nil {
+func (inst *CleanupRemovedValidatorEntries) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return e.Build(), nil
+	return inst.Build(), nil
 }
 
-func (e *CleanupRemovedValidatorEntries) Build() *Instruction {
+func (inst *CleanupRemovedValidatorEntries) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_CleanupRemovedValidatorEntries),
-			Impl:   e,
+			Impl:   inst,
 		},
 	}
 }
 
-func (e *CleanupRemovedValidatorEntries) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *CleanupRemovedValidatorEntries) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("CleanupRemovedValidatorEntries")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range e.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
 					})
@@ -95,8 +95,8 @@ func (e *CleanupRemovedValidatorEntries) EncodeToTree(parent ag_treeout.Branches
 		})
 }
 
-func (e *CleanupRemovedValidatorEntries) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	for _, account := range e.Accounts {
+func (inst *CleanupRemovedValidatorEntries) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -104,17 +104,17 @@ func (e *CleanupRemovedValidatorEntries) MarshalWithEncoder(encoder *ag_binary.E
 	return nil
 }
 
-func (e *CleanupRemovedValidatorEntries) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	for i := range e.Accounts {
-		if err := decoder.Decode(e.Accounts[i]); err != nil {
+func (inst *CleanupRemovedValidatorEntries) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (e *CleanupRemovedValidatorEntries) Validate() error {
-	for i, account := range e.Accounts {
+func (inst *CleanupRemovedValidatorEntries) Validate() error {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}

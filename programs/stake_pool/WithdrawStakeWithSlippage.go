@@ -90,177 +90,177 @@ func NewWithdrawStakeWithSlippageInstructionBuilder() *WithdrawStakeWithSlippage
 	}
 }
 
-func (w *WithdrawStakeWithSlippage) SetPoolTokensIn(in uint64) *WithdrawStakeWithSlippage {
-	w.PoolTokensIn = &in
-	return w
+func (inst *WithdrawStakeWithSlippage) SetPoolTokensIn(in uint64) *WithdrawStakeWithSlippage {
+	inst.PoolTokensIn = &in
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetMinLamportsOut(out uint64) *WithdrawStakeWithSlippage {
-	w.MinLamportsOut = &out
-	return w
+func (inst *WithdrawStakeWithSlippage) SetMinLamportsOut(out uint64) *WithdrawStakeWithSlippage {
+	inst.MinLamportsOut = &out
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetStakePool(pool ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[0] = ag_solanago.Meta(pool).WRITE()
-	return w
+func (inst *WithdrawStakeWithSlippage) SetStakePool(pool ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[0] = ag_solanago.Meta(pool).WRITE()
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetValidatorList(list ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[1] = ag_solanago.Meta(list).WRITE()
-	return w
+func (inst *WithdrawStakeWithSlippage) SetValidatorList(list ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[1] = ag_solanago.Meta(list).WRITE()
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetWithdrawAuthority(authority ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[2] = ag_solanago.Meta(authority)
-	return w
+func (inst *WithdrawStakeWithSlippage) SetWithdrawAuthority(authority ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[2] = ag_solanago.Meta(authority)
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetSplitFrom(from ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[3] = ag_solanago.Meta(from).WRITE()
-	return w
+func (inst *WithdrawStakeWithSlippage) SetSplitFrom(from ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[3] = ag_solanago.Meta(from).WRITE()
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetSplitTo(to ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[4] = ag_solanago.Meta(to).WRITE()
-	return w
+func (inst *WithdrawStakeWithSlippage) SetSplitTo(to ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[4] = ag_solanago.Meta(to).WRITE()
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetBeneficiary(beneficiary ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[5] = ag_solanago.Meta(beneficiary)
-	return w
+func (inst *WithdrawStakeWithSlippage) SetBeneficiary(beneficiary ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[5] = ag_solanago.Meta(beneficiary)
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetTransferAuthority(authority ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[6] = ag_solanago.Meta(authority).SIGNER()
-	w.Signers[0] = ag_solanago.Meta(authority).SIGNER()
-	return w
+func (inst *WithdrawStakeWithSlippage) SetTransferAuthority(authority ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[6] = ag_solanago.Meta(authority).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(authority).SIGNER()
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetBurnFrom(from ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[7] = ag_solanago.Meta(from).WRITE()
-	return w
+func (inst *WithdrawStakeWithSlippage) SetBurnFrom(from ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[7] = ag_solanago.Meta(from).WRITE()
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetManagerFeeAccount(account ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[8] = ag_solanago.Meta(account).WRITE()
-	return w
+func (inst *WithdrawStakeWithSlippage) SetManagerFeeAccount(account ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[8] = ag_solanago.Meta(account).WRITE()
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetPoolMint(mint ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[9] = ag_solanago.Meta(mint).WRITE()
-	return w
+func (inst *WithdrawStakeWithSlippage) SetPoolMint(mint ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[9] = ag_solanago.Meta(mint).WRITE()
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetClock(clock ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[10] = ag_solanago.Meta(clock)
-	return w
+func (inst *WithdrawStakeWithSlippage) SetClock(clock ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[10] = ag_solanago.Meta(clock)
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetTokenProgram(program ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[11] = ag_solanago.Meta(program)
-	return w
+func (inst *WithdrawStakeWithSlippage) SetTokenProgram(program ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[11] = ag_solanago.Meta(program)
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) SetStakeProgram(program ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
-	w.Accounts[12] = ag_solanago.Meta(program)
-	return w
+func (inst *WithdrawStakeWithSlippage) SetStakeProgram(program ag_solanago.PublicKey) *WithdrawStakeWithSlippage {
+	inst.Accounts[12] = ag_solanago.Meta(program)
+	return inst
 }
 
-func (w *WithdrawStakeWithSlippage) GetPoolTokensIn() *uint64 {
-	return w.PoolTokensIn
+func (inst *WithdrawStakeWithSlippage) GetPoolTokensIn() *uint64 {
+	return inst.PoolTokensIn
 }
 
-func (w *WithdrawStakeWithSlippage) GetMinLamportsOut() *uint64 {
-	return w.MinLamportsOut
+func (inst *WithdrawStakeWithSlippage) GetMinLamportsOut() *uint64 {
+	return inst.MinLamportsOut
 }
 
-func (w *WithdrawStakeWithSlippage) GetStakePool() ag_solanago.PublicKey {
-	return w.Accounts[0].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetValidatorList() ag_solanago.PublicKey {
-	return w.Accounts[1].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetValidatorList() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetWithdrawAuthority() ag_solanago.PublicKey {
-	return w.Accounts[2].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetSplitFrom() ag_solanago.PublicKey {
-	return w.Accounts[3].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetSplitFrom() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetSplitTo() ag_solanago.PublicKey {
-	return w.Accounts[4].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetSplitTo() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetBeneficiary() ag_solanago.PublicKey {
-	return w.Accounts[5].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetBeneficiary() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetTransferAuthority() ag_solanago.PublicKey {
-	return w.Accounts[6].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetTransferAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetBurnFrom() ag_solanago.PublicKey {
-	return w.Accounts[7].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetBurnFrom() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetManagerFeeAccount() ag_solanago.PublicKey {
-	return w.Accounts[8].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetManagerFeeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[8].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetPoolMint() ag_solanago.PublicKey {
-	return w.Accounts[9].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetPoolMint() ag_solanago.PublicKey {
+	return inst.Accounts[9].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetClock() ag_solanago.PublicKey {
-	return w.Accounts[10].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetClock() ag_solanago.PublicKey {
+	return inst.Accounts[10].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetTokenProgram() ag_solanago.PublicKey {
-	return w.Accounts[11].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetTokenProgram() ag_solanago.PublicKey {
+	return inst.Accounts[11].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) GetStakeProgram() ag_solanago.PublicKey {
-	return w.Accounts[12].PublicKey
+func (inst *WithdrawStakeWithSlippage) GetStakeProgram() ag_solanago.PublicKey {
+	return inst.Accounts[12].PublicKey
 }
 
-func (w *WithdrawStakeWithSlippage) ValidateAndBuild() (*Instruction, error) {
-	if err := w.Validate(); err != nil {
+func (inst *WithdrawStakeWithSlippage) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return w.Build(), nil
+	return inst.Build(), nil
 }
 
-func (w *WithdrawStakeWithSlippage) Build() *Instruction {
+func (inst *WithdrawStakeWithSlippage) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_WithdrawStakeWithSlippage),
-			Impl:   w,
+			Impl:   inst,
 		},
 	}
 }
 
-func (w *WithdrawStakeWithSlippage) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *WithdrawStakeWithSlippage) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("WithdrawStakeWithSlippage")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if w.PoolTokensIn != nil {
-							paramsBranch.Child(ag_format.Param("PoolTokensIn", *w.PoolTokensIn))
+						if inst.PoolTokensIn != nil {
+							paramsBranch.Child(ag_format.Param("PoolTokensIn", *inst.PoolTokensIn))
 						}
-						if w.MinLamportsOut != nil {
-							paramsBranch.Child(ag_format.Param("MinLamportsOut", *w.MinLamportsOut))
+						if inst.MinLamportsOut != nil {
+							paramsBranch.Child(ag_format.Param("MinLamportsOut", *inst.MinLamportsOut))
 						}
 					})
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range w.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(w.Signers)))
-						for j, signer := range w.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -268,18 +268,18 @@ func (w *WithdrawStakeWithSlippage) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (w *WithdrawStakeWithSlippage) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if w.PoolTokensIn != nil {
-		if err := encoder.Encode(w.PoolTokensIn); err != nil {
+func (inst *WithdrawStakeWithSlippage) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.PoolTokensIn != nil {
+		if err := encoder.Encode(inst.PoolTokensIn); err != nil {
 			return err
 		}
 	}
-	if w.MinLamportsOut != nil {
-		if err := encoder.Encode(w.MinLamportsOut); err != nil {
+	if inst.MinLamportsOut != nil {
+		if err := encoder.Encode(inst.MinLamportsOut); err != nil {
 			return err
 		}
 	}
-	for _, account := range w.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -287,38 +287,38 @@ func (w *WithdrawStakeWithSlippage) MarshalWithEncoder(encoder *ag_binary.Encode
 	return nil
 }
 
-func (w *WithdrawStakeWithSlippage) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if w.PoolTokensIn != nil {
-		if err := decoder.Decode(w.PoolTokensIn); err != nil {
+func (inst *WithdrawStakeWithSlippage) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if inst.PoolTokensIn != nil {
+		if err := decoder.Decode(inst.PoolTokensIn); err != nil {
 			return err
 		}
 	}
-	if w.MinLamportsOut != nil {
-		if err := decoder.Decode(w.MinLamportsOut); err != nil {
+	if inst.MinLamportsOut != nil {
+		if err := decoder.Decode(inst.MinLamportsOut); err != nil {
 			return err
 		}
 	}
-	for i := range w.Accounts {
-		if err := decoder.Decode(w.Accounts[i]); err != nil {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (w *WithdrawStakeWithSlippage) Validate() error {
-	if w.PoolTokensIn == nil {
+func (inst *WithdrawStakeWithSlippage) Validate() error {
+	if inst.PoolTokensIn == nil {
 		return errors.New("PoolTokensIn is not set")
 	}
-	if w.MinLamportsOut == nil {
+	if inst.MinLamportsOut == nil {
 		return errors.New("MinLamportsOut is not set")
 	}
-	for i, account := range w.Accounts {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(w.Signers) == 0 || !w.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.TransferAuthority should be a signer")
 	}
 	return nil

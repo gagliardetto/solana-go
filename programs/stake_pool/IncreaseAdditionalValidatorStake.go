@@ -90,174 +90,174 @@ func NewIncreaseAdditionalValidatorStakeInstructionBuilder() *IncreaseAdditional
 	}
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetArgs(args *AdditionalValidatorStakeArgs) *IncreaseAdditionalValidatorStake {
-	i.Args = args
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetArgs(args *AdditionalValidatorStakeArgs) *IncreaseAdditionalValidatorStake {
+	inst.Args = args
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetStakePool(stakePool ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[0] = ag_solanago.Meta(stakePool)
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetStakePool(stakePool ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[0] = ag_solanago.Meta(stakePool)
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetStaker(staker ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
-	i.Signers[0] = ag_solanago.Meta(staker).SIGNER()
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetStaker(staker ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(staker).SIGNER()
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[2] = ag_solanago.Meta(withdrawAuthority)
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[2] = ag_solanago.Meta(withdrawAuthority)
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetValidatorList(validatorList ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[3] = ag_solanago.Meta(validatorList).WRITE()
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetValidatorList(validatorList ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[3] = ag_solanago.Meta(validatorList).WRITE()
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetReserveStake(reserveStake ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[4] = ag_solanago.Meta(reserveStake).WRITE()
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetReserveStake(reserveStake ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[4] = ag_solanago.Meta(reserveStake).WRITE()
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetEphemeralStakeAccount(ephemeralStakeAccount ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[5] = ag_solanago.Meta(ephemeralStakeAccount).WRITE()
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetEphemeralStakeAccount(ephemeralStakeAccount ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[5] = ag_solanago.Meta(ephemeralStakeAccount).WRITE()
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetTransientStakeAccount(transientStakeAccount ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[6] = ag_solanago.Meta(transientStakeAccount).WRITE()
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetTransientStakeAccount(transientStakeAccount ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[6] = ag_solanago.Meta(transientStakeAccount).WRITE()
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetValidatorStakeAccount(validatorStakeAccount ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[7] = ag_solanago.Meta(validatorStakeAccount)
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetValidatorStakeAccount(validatorStakeAccount ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[7] = ag_solanago.Meta(validatorStakeAccount)
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetVoteAccount(voteAccount ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[8] = ag_solanago.Meta(voteAccount)
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetVoteAccount(voteAccount ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[8] = ag_solanago.Meta(voteAccount)
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetClock(clock ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[9] = ag_solanago.Meta(clock)
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetClock(clock ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[9] = ag_solanago.Meta(clock)
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetStakeHistory(stakeHistory ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[10] = ag_solanago.Meta(stakeHistory)
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetStakeHistory(stakeHistory ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[10] = ag_solanago.Meta(stakeHistory)
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetStakeConfig(stakeConfig ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[11] = ag_solanago.Meta(stakeConfig)
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetStakeConfig(stakeConfig ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[11] = ag_solanago.Meta(stakeConfig)
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetSystemProgram(systemProgram ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[12] = ag_solanago.Meta(systemProgram)
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetSystemProgram(systemProgram ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[12] = ag_solanago.Meta(systemProgram)
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
-	i.Accounts[13] = ag_solanago.Meta(stakeProgram)
-	return i
+func (inst *IncreaseAdditionalValidatorStake) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *IncreaseAdditionalValidatorStake {
+	inst.Accounts[13] = ag_solanago.Meta(stakeProgram)
+	return inst
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetArgs() *AdditionalValidatorStakeArgs {
-	return i.Args
+func (inst *IncreaseAdditionalValidatorStake) GetArgs() *AdditionalValidatorStakeArgs {
+	return inst.Args
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetStakePool() ag_solanago.PublicKey {
-	return i.Accounts[0].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetStaker() ag_solanago.PublicKey {
-	return i.Accounts[1].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetStaker() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetWithdrawAuthority() ag_solanago.PublicKey {
-	return i.Accounts[2].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetValidatorList() ag_solanago.PublicKey {
-	return i.Accounts[3].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetValidatorList() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetReserveStake() ag_solanago.PublicKey {
-	return i.Accounts[4].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetReserveStake() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetEphemeralStakeAccount() ag_solanago.PublicKey {
-	return i.Accounts[5].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetEphemeralStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetTransientStakeAccount() ag_solanago.PublicKey {
-	return i.Accounts[6].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetTransientStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetValidatorStakeAccount() ag_solanago.PublicKey {
-	return i.Accounts[7].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetValidatorStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetVoteAccount() ag_solanago.PublicKey {
-	return i.Accounts[8].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetVoteAccount() ag_solanago.PublicKey {
+	return inst.Accounts[8].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetClock() ag_solanago.PublicKey {
-	return i.Accounts[9].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetClock() ag_solanago.PublicKey {
+	return inst.Accounts[9].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetStakeHistory() ag_solanago.PublicKey {
-	return i.Accounts[10].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetStakeHistory() ag_solanago.PublicKey {
+	return inst.Accounts[10].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetStakeConfig() ag_solanago.PublicKey {
-	return i.Accounts[11].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetStakeConfig() ag_solanago.PublicKey {
+	return inst.Accounts[11].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetSystemProgram() ag_solanago.PublicKey {
-	return i.Accounts[12].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetSystemProgram() ag_solanago.PublicKey {
+	return inst.Accounts[12].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) GetStakeProgram() ag_solanago.PublicKey {
-	return i.Accounts[13].PublicKey
+func (inst *IncreaseAdditionalValidatorStake) GetStakeProgram() ag_solanago.PublicKey {
+	return inst.Accounts[13].PublicKey
 }
 
-func (i *IncreaseAdditionalValidatorStake) ValidateAndBuild() (*Instruction, error) {
-	if err := i.Validate(); err != nil {
+func (inst *IncreaseAdditionalValidatorStake) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return i.Build(), nil
+	return inst.Build(), nil
 }
 
-func (i *IncreaseAdditionalValidatorStake) Build() *Instruction {
+func (inst *IncreaseAdditionalValidatorStake) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_IncreaseAdditionalValidatorStake),
-			Impl:   i,
+			Impl:   inst,
 		},
 	}
 }
 
-func (i *IncreaseAdditionalValidatorStake) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *IncreaseAdditionalValidatorStake) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("IncreaseAdditionalValidatorStake")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if i.Args != nil {
-							paramsBranch.Child(ag_format.Param("Args", i.Args))
+						if inst.Args != nil {
+							paramsBranch.Child(ag_format.Param("Args", inst.Args))
 						}
 					})
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range i.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(i.Signers)))
-						for j, signer := range i.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -265,13 +265,13 @@ func (i *IncreaseAdditionalValidatorStake) EncodeToTree(parent ag_treeout.Branch
 		})
 }
 
-func (i *IncreaseAdditionalValidatorStake) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if i.Args != nil {
-		if err := encoder.Encode(i.Args); err != nil {
+func (inst *IncreaseAdditionalValidatorStake) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.Args != nil {
+		if err := encoder.Encode(inst.Args); err != nil {
 			return err
 		}
 	}
-	for _, account := range i.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -279,30 +279,30 @@ func (i *IncreaseAdditionalValidatorStake) MarshalWithEncoder(encoder *ag_binary
 	return nil
 }
 
-func (i *IncreaseAdditionalValidatorStake) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if i.Args != nil {
-		if err := decoder.Decode(i.Args); err != nil {
+func (inst *IncreaseAdditionalValidatorStake) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if inst.Args != nil {
+		if err := decoder.Decode(inst.Args); err != nil {
 			return err
 		}
 	}
-	for j := range i.Accounts {
-		if err := decoder.Decode(i.Accounts[j]); err != nil {
+	for j := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[j]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (i *IncreaseAdditionalValidatorStake) Validate() error {
-	if i.Args == nil {
+func (inst *IncreaseAdditionalValidatorStake) Validate() error {
+	if inst.Args == nil {
 		return errors.New("args is not set")
 	}
-	for j, account := range i.Accounts {
+	for j, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", j)
 		}
 	}
-	if len(i.Signers) == 0 || !i.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.Staker should be a signer")
 	}
 	return nil

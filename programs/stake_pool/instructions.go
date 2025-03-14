@@ -37,7 +37,9 @@ func SetProgramID(pubkey ag_solanago.PublicKey) {
 const ProgramName = "StakePool"
 
 func init() {
-	ag_solanago.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
+	if !ProgramID.IsZero() {
+		ag_solanago.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
+	}
 }
 
 const (
@@ -225,82 +227,4 @@ func DecodeInstruction(accounts []*ag_solanago.AccountMeta, data []byte) (*Instr
 		}
 	}
 	return inst, nil
-}
-
-func (inst *Instruction) DecodeInstructionData() (instructionData interface{}, instructionType uint8, err error) {
-	data, err := inst.Data()
-	if err != nil {
-		return nil, 0, err
-	}
-
-	if err := ag_binary.NewBinDecoder(data).Decode(&instructionType); err != nil {
-		return nil, 0, err
-	}
-
-	switch instructionType {
-	case Instruction_Initialize:
-		instructionData = new(Initialize)
-	case Instruction_AddValidatorToPool:
-		instructionData = new(AddValidatorToPool)
-	case Instruction_RemoveValidatorFromPool:
-		instructionData = new(RemoveValidatorFromPool)
-	case Instruction_DecreaseValidatorStake:
-		instructionData = new(DecreaseValidatorStake)
-	case Instruction_IncreaseValidatorStake:
-		instructionData = new(IncreaseValidatorStake)
-	case Instruction_SetPreferredValidator:
-		instructionData = new(SetPreferredValidator)
-	case Instruction_UpdateValidatorListBalance:
-		instructionData = new(UpdateValidatorListBalance)
-	case Instruction_UpdateStakePoolBalance:
-		instructionData = new(UpdateStakePoolBalance)
-	case Instruction_CleanupRemovedValidatorEntries:
-		instructionData = new(CleanupRemovedValidatorEntries)
-	case Instruction_DepositStake:
-		instructionData = new(DepositStake)
-	case Instruction_WithdrawStake:
-		instructionData = new(WithdrawStake)
-	case Instruction_SetManager:
-		instructionData = new(SetManager)
-	case Instruction_SetFee:
-		instructionData = new(SetFee)
-	case Instruction_SetStaker:
-		instructionData = new(SetStaker)
-	case Instruction_DecreaseAdditionalValidatorStake:
-		instructionData = new(DecreaseAdditionalValidatorStake)
-	case Instruction_IncreaseAdditionalValidatorStake:
-		instructionData = new(IncreaseAdditionalValidatorStake)
-	case Instruction_Redelegate:
-		instructionData = new(Redelegate)
-	case Instruction_SetFundingAuthority:
-		instructionData = new(SetFundingAuthority)
-	case Instruction_DepositSol:
-		instructionData = new(DepositSol)
-	case Instruction_WithdrawSol:
-		instructionData = new(WithdrawSol)
-	case Instruction_CreateTokenMetadata:
-		instructionData = new(CreateTokenMetadata)
-	case Instruction_UpdateTokenMetadata:
-		instructionData = new(UpdateTokenMetadata)
-	case Instruction_DepositStakeWithSlippage:
-		instructionData = new(DepositStakeWithSlippage)
-	case Instruction_WithdrawStakeWithSlippage:
-		instructionData = new(WithdrawStakeWithSlippage)
-	case Instruction_DepositSolWithSlippage:
-		instructionData = new(DepositSolWithSlippage)
-	case Instruction_WithdrawSolWithSlippage:
-		instructionData = new(WithdrawSolWithSlippage)
-	default:
-		return nil, instructionType, fmt.Errorf("unknown instruction type: %v", instructionType)
-	}
-
-	if v, ok := instructionData.(ag_solanago.AccountsSettable); ok {
-		_ = v.SetAccounts(inst.Accounts())
-	}
-
-	if err := ag_binary.NewBinDecoder(data[1:]).Decode(instructionData); err != nil {
-		return nil, instructionType, err
-	}
-
-	return instructionData, instructionType, nil
 }

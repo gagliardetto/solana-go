@@ -81,150 +81,150 @@ func NewDecreaseValidatorStakeInstructionBuilder() *DecreaseValidatorStake {
 	}
 }
 
-func (d *DecreaseValidatorStake) SetLamports(lamports uint64) *DecreaseValidatorStake {
-	d.Lamports = &lamports
-	return d
+func (inst *DecreaseValidatorStake) SetLamports(lamports uint64) *DecreaseValidatorStake {
+	inst.Lamports = &lamports
+	return inst
 }
 
-func (d *DecreaseValidatorStake) SetTransientStakeSeed(transientStakeSeed uint64) *DecreaseValidatorStake {
-	d.TransientStakeSeed = &transientStakeSeed
-	return d
+func (inst *DecreaseValidatorStake) SetTransientStakeSeed(transientStakeSeed uint64) *DecreaseValidatorStake {
+	inst.TransientStakeSeed = &transientStakeSeed
+	return inst
 }
 
-func (d *DecreaseValidatorStake) SetStakePool(pool ag_solanago.PublicKey) *DecreaseValidatorStake {
-	d.Accounts[0] = ag_solanago.Meta(pool)
-	return d
+func (inst *DecreaseValidatorStake) SetStakePool(pool ag_solanago.PublicKey) *DecreaseValidatorStake {
+	inst.Accounts[0] = ag_solanago.Meta(pool)
+	return inst
 }
 
-func (d *DecreaseValidatorStake) SetStaker(staker ag_solanago.PublicKey) *DecreaseValidatorStake {
-	d.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
-	d.Signers[0] = ag_solanago.Meta(staker).SIGNER()
-	return d
+func (inst *DecreaseValidatorStake) SetStaker(staker ag_solanago.PublicKey) *DecreaseValidatorStake {
+	inst.Accounts[1] = ag_solanago.Meta(staker).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(staker).SIGNER()
+	return inst
 }
 
-func (d *DecreaseValidatorStake) SetStakePoolWithdrawAuthority(stakePoolWithdrawAuthority ag_solanago.PublicKey) *DecreaseValidatorStake {
-	d.Accounts[2] = ag_solanago.Meta(stakePoolWithdrawAuthority)
-	return d
+func (inst *DecreaseValidatorStake) SetStakePoolWithdrawAuthority(stakePoolWithdrawAuthority ag_solanago.PublicKey) *DecreaseValidatorStake {
+	inst.Accounts[2] = ag_solanago.Meta(stakePoolWithdrawAuthority)
+	return inst
 }
 
-func (d *DecreaseValidatorStake) SetValidatorList(validatorList ag_solanago.PublicKey) *DecreaseValidatorStake {
-	d.Accounts[3] = ag_solanago.Meta(validatorList).WRITE()
-	return d
+func (inst *DecreaseValidatorStake) SetValidatorList(validatorList ag_solanago.PublicKey) *DecreaseValidatorStake {
+	inst.Accounts[3] = ag_solanago.Meta(validatorList).WRITE()
+	return inst
 }
 
-func (d *DecreaseValidatorStake) SetCanonicalStakeAccount(canonicalStakeAccount ag_solanago.PublicKey) *DecreaseValidatorStake {
-	d.Accounts[4] = ag_solanago.Meta(canonicalStakeAccount).WRITE()
-	return d
+func (inst *DecreaseValidatorStake) SetCanonicalStakeAccount(canonicalStakeAccount ag_solanago.PublicKey) *DecreaseValidatorStake {
+	inst.Accounts[4] = ag_solanago.Meta(canonicalStakeAccount).WRITE()
+	return inst
 }
 
-func (d *DecreaseValidatorStake) SetTransientStakeAccount(transientStakeAccount ag_solanago.PublicKey) *DecreaseValidatorStake {
-	d.Accounts[5] = ag_solanago.Meta(transientStakeAccount).WRITE()
-	return d
+func (inst *DecreaseValidatorStake) SetTransientStakeAccount(transientStakeAccount ag_solanago.PublicKey) *DecreaseValidatorStake {
+	inst.Accounts[5] = ag_solanago.Meta(transientStakeAccount).WRITE()
+	return inst
 }
 
-func (d *DecreaseValidatorStake) SetSysvarClock(sysvarClock ag_solanago.PublicKey) *DecreaseValidatorStake {
-	d.Accounts[6] = ag_solanago.Meta(sysvarClock)
-	return d
+func (inst *DecreaseValidatorStake) SetSysvarClock(sysvarClock ag_solanago.PublicKey) *DecreaseValidatorStake {
+	inst.Accounts[6] = ag_solanago.Meta(sysvarClock)
+	return inst
 }
 
-func (d *DecreaseValidatorStake) SetSysvarRent(sysvarRent ag_solanago.PublicKey) *DecreaseValidatorStake {
-	d.Accounts[7] = ag_solanago.Meta(sysvarRent)
-	return d
+func (inst *DecreaseValidatorStake) SetSysvarRent(sysvarRent ag_solanago.PublicKey) *DecreaseValidatorStake {
+	inst.Accounts[7] = ag_solanago.Meta(sysvarRent)
+	return inst
 }
 
-func (d *DecreaseValidatorStake) SetSystemProgram(systemProgram ag_solanago.PublicKey) *DecreaseValidatorStake {
-	d.Accounts[8] = ag_solanago.Meta(systemProgram)
-	return d
+func (inst *DecreaseValidatorStake) SetSystemProgram(systemProgram ag_solanago.PublicKey) *DecreaseValidatorStake {
+	inst.Accounts[8] = ag_solanago.Meta(systemProgram)
+	return inst
 }
 
-func (d *DecreaseValidatorStake) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *DecreaseValidatorStake {
-	d.Accounts[9] = ag_solanago.Meta(stakeProgram)
-	return d
+func (inst *DecreaseValidatorStake) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *DecreaseValidatorStake {
+	inst.Accounts[9] = ag_solanago.Meta(stakeProgram)
+	return inst
 }
 
-func (d *DecreaseValidatorStake) GetLamports() *uint64 {
-	return d.Lamports
+func (inst *DecreaseValidatorStake) GetLamports() *uint64 {
+	return inst.Lamports
 }
 
-func (d *DecreaseValidatorStake) GetTransientStakeSeed() *uint64 {
-	return d.TransientStakeSeed
+func (inst *DecreaseValidatorStake) GetTransientStakeSeed() *uint64 {
+	return inst.TransientStakeSeed
 }
 
-func (d *DecreaseValidatorStake) GetStakePool() ag_solanago.PublicKey {
-	return d.Accounts[0].PublicKey
+func (inst *DecreaseValidatorStake) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (d *DecreaseValidatorStake) GetStaker() ag_solanago.PublicKey {
-	return d.Accounts[1].PublicKey
+func (inst *DecreaseValidatorStake) GetStaker() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (d *DecreaseValidatorStake) GetStakePoolWithdrawAuthority() ag_solanago.PublicKey {
-	return d.Accounts[2].PublicKey
+func (inst *DecreaseValidatorStake) GetStakePoolWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (d *DecreaseValidatorStake) GetValidatorList() ag_solanago.PublicKey {
-	return d.Accounts[3].PublicKey
+func (inst *DecreaseValidatorStake) GetValidatorList() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (d *DecreaseValidatorStake) GetCanonicalStakeAccount() ag_solanago.PublicKey {
-	return d.Accounts[4].PublicKey
+func (inst *DecreaseValidatorStake) GetCanonicalStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (d *DecreaseValidatorStake) GetTransientStakeAccount() ag_solanago.PublicKey {
-	return d.Accounts[5].PublicKey
+func (inst *DecreaseValidatorStake) GetTransientStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (d *DecreaseValidatorStake) GetSysvarClock() ag_solanago.PublicKey {
-	return d.Accounts[6].PublicKey
+func (inst *DecreaseValidatorStake) GetSysvarClock() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (d *DecreaseValidatorStake) GetSysvarRent() ag_solanago.PublicKey {
-	return d.Accounts[7].PublicKey
+func (inst *DecreaseValidatorStake) GetSysvarRent() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (d *DecreaseValidatorStake) GetSystemProgram() ag_solanago.PublicKey {
-	return d.Accounts[8].PublicKey
+func (inst *DecreaseValidatorStake) GetSystemProgram() ag_solanago.PublicKey {
+	return inst.Accounts[8].PublicKey
 }
 
-func (d *DecreaseValidatorStake) GetStakeProgram() ag_solanago.PublicKey {
-	return d.Accounts[9].PublicKey
+func (inst *DecreaseValidatorStake) GetStakeProgram() ag_solanago.PublicKey {
+	return inst.Accounts[9].PublicKey
 }
 
-func (d *DecreaseValidatorStake) ValidateAndBuild() (*Instruction, error) {
-	if err := d.Validate(); err != nil {
+func (inst *DecreaseValidatorStake) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return d.Build(), nil
+	return inst.Build(), nil
 }
 
-func (d *DecreaseValidatorStake) Build() *Instruction {
+func (inst *DecreaseValidatorStake) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_DecreaseValidatorStake),
-			Impl:   d,
+			Impl:   inst,
 		},
 	}
 }
 
-func (d *DecreaseValidatorStake) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *DecreaseValidatorStake) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("DecreaseValidatorStake")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if d.Lamports != nil {
-							paramsBranch.Child(ag_format.Param("Lamports", *d.Lamports))
+						if inst.Lamports != nil {
+							paramsBranch.Child(ag_format.Param("Lamports", *inst.Lamports))
 						}
-						if d.TransientStakeSeed != nil {
-							paramsBranch.Child(ag_format.Param("TransientStakeSeed", *d.TransientStakeSeed))
+						if inst.TransientStakeSeed != nil {
+							paramsBranch.Child(ag_format.Param("TransientStakeSeed", *inst.TransientStakeSeed))
 						}
 					})
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range d.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(d.Signers)))
-						for j, signer := range d.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -232,18 +232,18 @@ func (d *DecreaseValidatorStake) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (d *DecreaseValidatorStake) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if d.Lamports != nil {
-		if err := encoder.Encode(d.Lamports); err != nil {
+func (inst *DecreaseValidatorStake) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.Lamports != nil {
+		if err := encoder.Encode(inst.Lamports); err != nil {
 			return err
 		}
 	}
-	if d.TransientStakeSeed != nil {
-		if err := encoder.Encode(d.TransientStakeSeed); err != nil {
+	if inst.TransientStakeSeed != nil {
+		if err := encoder.Encode(inst.TransientStakeSeed); err != nil {
 			return err
 		}
 	}
-	for _, account := range d.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -251,38 +251,38 @@ func (d *DecreaseValidatorStake) MarshalWithEncoder(encoder *ag_binary.Encoder) 
 	return nil
 }
 
-func (d *DecreaseValidatorStake) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if d.Lamports != nil {
-		if err := decoder.Decode(d.Lamports); err != nil {
+func (inst *DecreaseValidatorStake) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if inst.Lamports != nil {
+		if err := decoder.Decode(inst.Lamports); err != nil {
 			return err
 		}
 	}
-	if d.TransientStakeSeed != nil {
-		if err := decoder.Decode(d.TransientStakeSeed); err != nil {
+	if inst.TransientStakeSeed != nil {
+		if err := decoder.Decode(inst.TransientStakeSeed); err != nil {
 			return err
 		}
 	}
-	for i := range d.Accounts {
-		if err := decoder.Decode(d.Accounts[i]); err != nil {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (d *DecreaseValidatorStake) Validate() error {
-	if d.Lamports == nil {
+func (inst *DecreaseValidatorStake) Validate() error {
+	if inst.Lamports == nil {
 		return errors.New("lamports is not set")
 	}
-	if d.TransientStakeSeed == nil {
+	if inst.TransientStakeSeed == nil {
 		return errors.New("transientStakeSeed is not set")
 	}
-	for i, account := range d.Accounts {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(d.Signers) == 0 || !d.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.Staker should be a signer")
 	}
 	return nil

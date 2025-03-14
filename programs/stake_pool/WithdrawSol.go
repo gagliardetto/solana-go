@@ -85,165 +85,165 @@ func NewWithdrawSolBuilder() *WithdrawSol {
 	}
 }
 
-func (w *WithdrawSol) SetArg(arg uint64) *WithdrawSol {
-	w.Arg = &arg
-	return w
+func (inst *WithdrawSol) SetArg(arg uint64) *WithdrawSol {
+	inst.Arg = &arg
+	return inst
 }
 
-func (w *WithdrawSol) SetStakePool(stakePool ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[0] = ag_solanago.Meta(stakePool).WRITE()
-	return w
+func (inst *WithdrawSol) SetStakePool(stakePool ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[0] = ag_solanago.Meta(stakePool).WRITE()
+	return inst
 }
 
-func (w *WithdrawSol) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[1] = ag_solanago.Meta(withdrawAuthority)
-	return w
+func (inst *WithdrawSol) SetWithdrawAuthority(withdrawAuthority ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[1] = ag_solanago.Meta(withdrawAuthority)
+	return inst
 }
 
-func (w *WithdrawSol) SetTransferAuthority(transferAuthority ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[2] = ag_solanago.Meta(transferAuthority).SIGNER()
-	return w
+func (inst *WithdrawSol) SetTransferAuthority(transferAuthority ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[2] = ag_solanago.Meta(transferAuthority).SIGNER()
+	return inst
 }
 
-func (w *WithdrawSol) SetBurnPoolTokens(burnPoolTokens ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[3] = ag_solanago.Meta(burnPoolTokens).WRITE()
-	return w
+func (inst *WithdrawSol) SetBurnPoolTokens(burnPoolTokens ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[3] = ag_solanago.Meta(burnPoolTokens).WRITE()
+	return inst
 }
 
-func (w *WithdrawSol) SetReserveStakeAccount(reserveStakeAccount ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[4] = ag_solanago.Meta(reserveStakeAccount).WRITE()
-	return w
+func (inst *WithdrawSol) SetReserveStakeAccount(reserveStakeAccount ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[4] = ag_solanago.Meta(reserveStakeAccount).WRITE()
+	return inst
 }
 
-func (w *WithdrawSol) SetWithdrawAccount(withdrawAccount ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[5] = ag_solanago.Meta(withdrawAccount).WRITE()
-	return w
+func (inst *WithdrawSol) SetWithdrawAccount(withdrawAccount ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[5] = ag_solanago.Meta(withdrawAccount).WRITE()
+	return inst
 }
 
-func (w *WithdrawSol) SetFeeTokenAccount(feeTokenAccount ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[6] = ag_solanago.Meta(feeTokenAccount).WRITE()
-	return w
+func (inst *WithdrawSol) SetFeeTokenAccount(feeTokenAccount ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[6] = ag_solanago.Meta(feeTokenAccount).WRITE()
+	return inst
 }
 
-func (w *WithdrawSol) SetPoolTokenMint(poolTokenMint ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[7] = ag_solanago.Meta(poolTokenMint).WRITE()
-	return w
+func (inst *WithdrawSol) SetPoolTokenMint(poolTokenMint ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[7] = ag_solanago.Meta(poolTokenMint).WRITE()
+	return inst
 }
 
-func (w *WithdrawSol) SetSysvarClock(sysvarClock ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[8] = ag_solanago.Meta(sysvarClock)
-	return w
+func (inst *WithdrawSol) SetSysvarClock(sysvarClock ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[8] = ag_solanago.Meta(sysvarClock)
+	return inst
 }
 
-func (w *WithdrawSol) SetSysvarStakeHistory(sysvarStakeHistory ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[9] = ag_solanago.Meta(sysvarStakeHistory)
-	return w
+func (inst *WithdrawSol) SetSysvarStakeHistory(sysvarStakeHistory ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[9] = ag_solanago.Meta(sysvarStakeHistory)
+	return inst
 }
 
-func (w *WithdrawSol) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[10] = ag_solanago.Meta(stakeProgram)
-	return w
+func (inst *WithdrawSol) SetStakeProgram(stakeProgram ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[10] = ag_solanago.Meta(stakeProgram)
+	return inst
 }
 
-func (w *WithdrawSol) SetTokenProgram(tokenProgram ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[11] = ag_solanago.Meta(tokenProgram)
-	return w
+func (inst *WithdrawSol) SetTokenProgram(tokenProgram ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[11] = ag_solanago.Meta(tokenProgram)
+	return inst
 }
 
-func (w *WithdrawSol) SetSolWithdrawAuthority(solWithdrawAuthority ag_solanago.PublicKey) *WithdrawSol {
-	w.Accounts[12] = ag_solanago.Meta(solWithdrawAuthority).SIGNER()
-	w.Signers[0] = ag_solanago.Meta(solWithdrawAuthority).SIGNER()
-	return w
+func (inst *WithdrawSol) SetSolWithdrawAuthority(solWithdrawAuthority ag_solanago.PublicKey) *WithdrawSol {
+	inst.Accounts[12] = ag_solanago.Meta(solWithdrawAuthority).SIGNER()
+	inst.Signers[0] = ag_solanago.Meta(solWithdrawAuthority).SIGNER()
+	return inst
 }
 
-func (w *WithdrawSol) GetArg() *uint64 {
-	return w.Arg
+func (inst *WithdrawSol) GetArg() *uint64 {
+	return inst.Arg
 }
 
-func (w *WithdrawSol) GetStakePool() ag_solanago.PublicKey {
-	return w.Accounts[0].PublicKey
+func (inst *WithdrawSol) GetStakePool() ag_solanago.PublicKey {
+	return inst.Accounts[0].PublicKey
 }
 
-func (w *WithdrawSol) GetWithdrawAuthority() ag_solanago.PublicKey {
-	return w.Accounts[1].PublicKey
+func (inst *WithdrawSol) GetWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[1].PublicKey
 }
 
-func (w *WithdrawSol) GetTransferAuthority() ag_solanago.PublicKey {
-	return w.Accounts[2].PublicKey
+func (inst *WithdrawSol) GetTransferAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[2].PublicKey
 }
 
-func (w *WithdrawSol) GetBurnPoolTokens() ag_solanago.PublicKey {
-	return w.Accounts[3].PublicKey
+func (inst *WithdrawSol) GetBurnPoolTokens() ag_solanago.PublicKey {
+	return inst.Accounts[3].PublicKey
 }
 
-func (w *WithdrawSol) GetReserveStakeAccount() ag_solanago.PublicKey {
-	return w.Accounts[4].PublicKey
+func (inst *WithdrawSol) GetReserveStakeAccount() ag_solanago.PublicKey {
+	return inst.Accounts[4].PublicKey
 }
 
-func (w *WithdrawSol) GetWithdrawAccount() ag_solanago.PublicKey {
-	return w.Accounts[5].PublicKey
+func (inst *WithdrawSol) GetWithdrawAccount() ag_solanago.PublicKey {
+	return inst.Accounts[5].PublicKey
 }
 
-func (w *WithdrawSol) GetFeeTokenAccount() ag_solanago.PublicKey {
-	return w.Accounts[6].PublicKey
+func (inst *WithdrawSol) GetFeeTokenAccount() ag_solanago.PublicKey {
+	return inst.Accounts[6].PublicKey
 }
 
-func (w *WithdrawSol) GetPoolTokenMint() ag_solanago.PublicKey {
-	return w.Accounts[7].PublicKey
+func (inst *WithdrawSol) GetPoolTokenMint() ag_solanago.PublicKey {
+	return inst.Accounts[7].PublicKey
 }
 
-func (w *WithdrawSol) GetSysvarClock() ag_solanago.PublicKey {
-	return w.Accounts[8].PublicKey
+func (inst *WithdrawSol) GetSysvarClock() ag_solanago.PublicKey {
+	return inst.Accounts[8].PublicKey
 }
 
-func (w *WithdrawSol) GetSysvarStakeHistory() ag_solanago.PublicKey {
-	return w.Accounts[9].PublicKey
+func (inst *WithdrawSol) GetSysvarStakeHistory() ag_solanago.PublicKey {
+	return inst.Accounts[9].PublicKey
 }
 
-func (w *WithdrawSol) GetStakeProgram() ag_solanago.PublicKey {
-	return w.Accounts[10].PublicKey
+func (inst *WithdrawSol) GetStakeProgram() ag_solanago.PublicKey {
+	return inst.Accounts[10].PublicKey
 }
 
-func (w *WithdrawSol) GetTokenProgram() ag_solanago.PublicKey {
-	return w.Accounts[11].PublicKey
+func (inst *WithdrawSol) GetTokenProgram() ag_solanago.PublicKey {
+	return inst.Accounts[11].PublicKey
 }
 
-func (w *WithdrawSol) GetSolWithdrawAuthority() ag_solanago.PublicKey {
-	return w.Accounts[12].PublicKey
+func (inst *WithdrawSol) GetSolWithdrawAuthority() ag_solanago.PublicKey {
+	return inst.Accounts[12].PublicKey
 }
 
-func (w *WithdrawSol) ValidateAndBuild() (*Instruction, error) {
-	if err := w.Validate(); err != nil {
+func (inst *WithdrawSol) ValidateAndBuild() (*Instruction, error) {
+	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
-	return w.Build(), nil
+	return inst.Build(), nil
 }
 
-func (w *WithdrawSol) Build() *Instruction {
+func (inst *WithdrawSol) Build() *Instruction {
 	return &Instruction{
 		BaseVariant: ag_binary.BaseVariant{
 			TypeID: ag_binary.TypeIDFromUint8(Instruction_WithdrawSol),
-			Impl:   w,
+			Impl:   inst,
 		},
 	}
 }
 
-func (w *WithdrawSol) EncodeToTree(parent ag_treeout.Branches) {
+func (inst *WithdrawSol) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("WithdrawSol")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						if w.Arg != nil {
-							paramsBranch.Child(ag_format.Param("Arg", *w.Arg))
+						if inst.Arg != nil {
+							paramsBranch.Child(ag_format.Param("Arg", *inst.Arg))
 						}
 					})
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						for i, account := range w.Accounts {
+						for i, account := range inst.Accounts {
 							accountsBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), account))
 						}
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(w.Signers)))
-						for j, signer := range w.Signers {
+						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
+						for j, signer := range inst.Signers {
 							signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", j), signer))
 						}
 					})
@@ -251,13 +251,13 @@ func (w *WithdrawSol) EncodeToTree(parent ag_treeout.Branches) {
 		})
 }
 
-func (w *WithdrawSol) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if w.Arg != nil {
-		if err := encoder.Encode(w.Arg); err != nil {
+func (inst *WithdrawSol) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if inst.Arg != nil {
+		if err := encoder.Encode(inst.Arg); err != nil {
 			return err
 		}
 	}
-	for _, account := range w.Accounts {
+	for _, account := range inst.Accounts {
 		if err := encoder.Encode(account); err != nil {
 			return err
 		}
@@ -265,30 +265,30 @@ func (w *WithdrawSol) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
 	return nil
 }
 
-func (w *WithdrawSol) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if w.Arg != nil {
-		if err := decoder.Decode(w.Arg); err != nil {
+func (inst *WithdrawSol) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if inst.Arg != nil {
+		if err := decoder.Decode(inst.Arg); err != nil {
 			return err
 		}
 	}
-	for i := range w.Accounts {
-		if err := decoder.Decode(w.Accounts[i]); err != nil {
+	for i := range inst.Accounts {
+		if err := decoder.Decode(inst.Accounts[i]); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (w *WithdrawSol) Validate() error {
-	if w.Arg == nil {
+func (inst *WithdrawSol) Validate() error {
+	if inst.Arg == nil {
 		return errors.New("arg is not set")
 	}
-	for i, account := range w.Accounts {
+	for i, account := range inst.Accounts {
 		if account == nil {
 			return fmt.Errorf("accounts[%v] is not set", i)
 		}
 	}
-	if len(w.Signers) == 0 || !w.Signers[0].IsSigner {
+	if len(inst.Signers) == 0 || !inst.Signers[0].IsSigner {
 		return errors.New("accounts.solWithdrawAuthority should be a signer")
 	}
 	return nil
