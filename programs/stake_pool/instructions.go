@@ -27,7 +27,7 @@ import (
 	ag_text "github.com/gagliardetto/solana-go/text"
 )
 
-var ProgramID ag_solanago.PublicKey
+var ProgramID = ag_solanago.SPLStakePoolProgramID
 
 func SetProgramID(pubkey ag_solanago.PublicKey) {
 	ProgramID = pubkey
@@ -37,9 +37,7 @@ func SetProgramID(pubkey ag_solanago.PublicKey) {
 const ProgramName = "StakePool"
 
 func init() {
-	if !ProgramID.IsZero() {
-		ag_solanago.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
-	}
+	ag_solanago.RegisterInstructionDecoder(ProgramID, registryDecodeInstruction)
 }
 
 const (

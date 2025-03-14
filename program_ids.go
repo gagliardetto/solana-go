@@ -71,6 +71,10 @@ var (
 	// and know they were approved by zero or more addresses
 	// by inspecting the transaction log from a trusted provider.
 	MemoProgramID = MustPublicKeyFromBase58("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")
+
+	// A program for pooling together SOL to be staked by an off-chain agent running a Delegation Bot
+	// which redistributes the stakes across the network and tries to maximize censorship resistance and rewards.
+	SPLStakePoolProgramID = MustPublicKeyFromBase58("SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy")
 )
 
 var (
