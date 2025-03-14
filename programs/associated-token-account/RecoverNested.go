@@ -26,24 +26,25 @@ import (
 )
 
 type RecoverNested struct {
-	// [0] = [WRITE] Nested associated token account, must be owned by `3`
-	// ··········· The nested associated token account.
+	// [0] = [WRITE] NestedToken
+	// ··········· Nested associated token account, must be owned by `3`
 	//
-	// [1] = [] Token mint for the nested associated token account
+	// [1] = [] TokenMint
 	// ··········· Token mint for the nested associated token account.
 	//
-	// [2] = [WRITE] Wallet's associated token account
+	// [2] = [WRITE] AssociatedToken
 	// ··········· Wallet's associated token account.
 	//
-	// [3] = [] Owner associated token account address, must be owned by `5`
-	// ··········· Owner associated token account address.
+	// [3] = [] OwnerAssociatedToken
+	// ··········· Owner associated token account address, must be owned by `5`
 	//
+	// [4] = [] TokenMintForOwner
 	// ··········· Token mint for the owner associated token account.
 	//
-	// [5] = [WRITE, SIGNER] Wallet address for the owner associated token account
+	// [5] = [WRITE, SIGNER] OwnerAssociatedToken
 	// ··········· Wallet address for the owner associated token account.
 	//
-	// [6] = [] SPL Token program
+	// [6] = [] SplTokenProgram
 	// ··········· SPL Token program.
 	Accounts ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
@@ -90,14 +91,14 @@ func (inst *RecoverNested) GetTokenMintForNestedAccount() *ag_solanago.AccountMe
 	return inst.Accounts[1]
 }
 
-// SetWalletAssociatedTokenAccount sets the "wallet's associated token" account.
-func (inst *RecoverNested) SetWalletAssociatedTokenAccount(walletAssociatedToken ag_solanago.PublicKey) *RecoverNested {
+// SetAssociatedTokenAccount sets the "wallet's associated token" account.
+func (inst *RecoverNested) SetAssociatedTokenAccount(walletAssociatedToken ag_solanago.PublicKey) *RecoverNested {
 	inst.Accounts[2] = ag_solanago.Meta(walletAssociatedToken).WRITE()
 	return inst
 }
 
-// GetWalletAssociatedTokenAccount gets the "wallet's associated token" account.
-func (inst *RecoverNested) GetWalletAssociatedTokenAccount() *ag_solanago.AccountMeta {
+// GetAssociatedTokenAccount gets the "wallet's associated token" account.
+func (inst *RecoverNested) GetAssociatedTokenAccount() *ag_solanago.AccountMeta {
 	return inst.Accounts[2]
 }
 
@@ -134,14 +135,14 @@ func (inst *RecoverNested) GetWalletAccount() *ag_solanago.AccountMeta {
 	return inst.Accounts[5]
 }
 
-// SetTokenProgramAccount sets the "token program" account.
-func (inst *RecoverNested) SetTokenProgramAccount(tokenProgram ag_solanago.PublicKey) *RecoverNested {
+// SetSplTokenProgram sets the "token program" account.
+func (inst *RecoverNested) SetSplTokenProgram(tokenProgram ag_solanago.PublicKey) *RecoverNested {
 	inst.Accounts[6] = ag_solanago.Meta(tokenProgram)
 	return inst
 }
 
-// GetTokenProgramAccount gets the "token program" account.
-func (inst *RecoverNested) GetTokenProgramAccount() *ag_solanago.AccountMeta {
+// GetSplTokenProgram gets the "token program" account.
+func (inst *RecoverNested) GetSplTokenProgram() *ag_solanago.AccountMeta {
 	return inst.Accounts[6]
 }
 
@@ -178,20 +179,20 @@ func (inst *RecoverNested) EncodeToTree(parent ag_treeout.Branches) {
 			programBranch.Child(ag_format.Instruction("RecoverNested")).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("                   nested", inst.Accounts[0]))
-						accountsBranch.Child(ag_format.Meta("    token mint for nested", inst.Accounts[1]))
-						accountsBranch.Child(ag_format.Meta("wallet's associated token", inst.Accounts[2]))
-						accountsBranch.Child(ag_format.Meta("   owner associated token", inst.Accounts[3]))
-						accountsBranch.Child(ag_format.Meta("     token mint for owner", inst.Accounts[4]))
-						accountsBranch.Child(ag_format.Meta("                   wallet", inst.Accounts[5]))
-						accountsBranch.Child(ag_format.Meta("            token program", inst.Accounts[6]))
+						accountsBranch.Child(ag_format.Meta("          nestedToken", inst.Accounts[0]))
+						accountsBranch.Child(ag_format.Meta("            tokenMint", inst.Accounts[1]))
+						accountsBranch.Child(ag_format.Meta("     associatedToken", inst.Accounts[2]))
+						accountsBranch.Child(ag_format.Meta("ownerAssociatedToken", inst.Accounts[3]))
+						accountsBranch.Child(ag_format.Meta("      tokenMintOwner", inst.Accounts[4]))
+						accountsBranch.Child(ag_format.Meta("ownerAssociatedToken", inst.Accounts[5]))
+						accountsBranch.Child(ag_format.Meta("     splTokenProgram", inst.Accounts[6]))
 					})
 				})
 		})
 }
 
-func (inst RecoverNested) MarshalWithEncoder(_ *ag_binary.Encoder) (err error) {
-	return nil
+func (inst RecoverNested) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	return encoder.WriteBytes([]byte{}, false)
 }
 
 func (inst *RecoverNested) UnmarshalWithDecoder(_ *ag_binary.Decoder) (err error) {
@@ -212,9 +213,9 @@ func NewRecoverNestedInstruction(
 	return NewRecoverNestedInstructionBuilder().
 		SetNestedAccount(nested).
 		SetTokenMintForNestedAccount(tokenMintForNested).
-		SetWalletAssociatedTokenAccount(walletAssociatedToken).
+		SetAssociatedTokenAccount(walletAssociatedToken).
 		SetOwnerAssociatedTokenAccount(ownerAssociatedToken).
 		SetTokenMintForOwnerAccount(tokenMintForOwner).
 		SetWalletAccount(wallet).
-		SetTokenProgramAccount(tokenProgram)
+		SetSplTokenProgram(tokenProgram)
 }
