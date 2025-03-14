@@ -128,14 +128,26 @@ func registryDecodeInstruction(accounts []*ag_solanago.AccountMeta, data []byte)
 
 func DecodeInstruction(accounts []*ag_solanago.AccountMeta, data []byte) (*Instruction, error) {
 	inst := new(Instruction)
-	if err := ag_binary.NewBinDecoder(data).Decode(inst); err != nil {
+	decoder := ag_binary.NewBinDecoder(data)
+
+	if len(data) == 0 {
+		if v, ok := inst.Impl.(ag_solanago.AccountsSettable); ok {
+			if err := v.SetAccounts(accounts); err != nil {
+				return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
+			}
+		}
+		return inst, nil
+	}
+
+	if err := decoder.Decode(inst); err != nil {
 		return nil, fmt.Errorf("unable to decode instruction: %w", err)
 	}
+
 	if v, ok := inst.Impl.(ag_solanago.AccountsSettable); ok {
-		err := v.SetAccounts(accounts)
-		if err != nil {
+		if err := v.SetAccounts(accounts); err != nil {
 			return nil, fmt.Errorf("unable to set accounts for instruction: %w", err)
 		}
 	}
+
 	return inst, nil
 }
