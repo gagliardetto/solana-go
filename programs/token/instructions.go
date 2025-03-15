@@ -239,71 +239,49 @@ func (inst *Instruction) EncodeToTree(parent ag_treeout.Branches) {
 
 var InstructionImplDef = ag_binary.NewVariantDefinition(
 	ag_binary.Uint8TypeIDEncoding,
-	[]ag_binary.VariantType{
-		{
-			"InitializeMint", (*InitializeMint)(nil),
-		},
-		{
-			"InitializeAccount", (*InitializeAccount)(nil),
-		},
-		{
-			"InitializeMultisig", (*InitializeMultisig)(nil),
-		},
-		{
-			"Transfer", (*Transfer)(nil),
-		},
-		{
-			"Approve", (*Approve)(nil),
-		},
-		{
-			"Revoke", (*Revoke)(nil),
-		},
-		{
-			"SetAuthority", (*SetAuthority)(nil),
-		},
-		{
-			"MintTo", (*MintTo)(nil),
-		},
-		{
-			"Burn", (*Burn)(nil),
-		},
-		{
-			"CloseAccount", (*CloseAccount)(nil),
-		},
-		{
-			"FreezeAccount", (*FreezeAccount)(nil),
-		},
-		{
-			"ThawAccount", (*ThawAccount)(nil),
-		},
-		{
-			"TransferChecked", (*TransferChecked)(nil),
-		},
-		{
-			"ApproveChecked", (*ApproveChecked)(nil),
-		},
-		{
-			"MintToChecked", (*MintToChecked)(nil),
-		},
-		{
-			"BurnChecked", (*BurnChecked)(nil),
-		},
-		{
-			"InitializeAccount2", (*InitializeAccount2)(nil),
-		},
-		{
-			"SyncNative", (*SyncNative)(nil),
-		},
-		{
-			"InitializeAccount3", (*InitializeAccount3)(nil),
-		},
-		{
-			"InitializeMultisig2", (*InitializeMultisig2)(nil),
-		},
-		{
-			"InitializeMint2", (*InitializeMint2)(nil),
-		},
-	},
+	[]ag_binary.VariantType{{
+			Name: "InitializeMint", Type: (*InitializeMint)(nil),
+		}, {
+			Name: "InitializeAccount", Type: (*InitializeAccount)(nil),
+		}, {
+			Name: "InitializeMultisig", Type: (*InitializeMultisig)(nil),
+		}, {
+			Name: "Transfer", Type: (*Transfer)(nil),
+		}, {
+			Name: "Approve", Type: (*Approve)(nil),
+		}, {
+			Name: "Revoke", Type: (*Revoke)(nil),
+		}, {
+			Name: "SetAuthority", Type: (*SetAuthority)(nil),
+		}, {
+			Name: "MintTo", Type: (*MintTo)(nil),
+		}, {
+			Name: "Burn", Type: (*Burn)(nil),
+		}, {
+			Name: "CloseAccount", Type: (*CloseAccount)(nil),
+		}, {
+			Name: "FreezeAccount", Type: (*FreezeAccount)(nil),
+		}, {
+			Name: "ThawAccount", Type: (*ThawAccount)(nil),
+		}, {
+			Name: "TransferChecked", Type: (*TransferChecked)(nil),
+		}, {
+			Name: "ApproveChecked", Type: (*ApproveChecked)(nil),
+		}, {
+			Name: "MintToChecked", Type: (*MintToChecked)(nil),
+		}, {
+			Name: "BurnChecked", Type: (*BurnChecked)(nil),
+		}, {
+			Name: "InitializeAccount2", Type: (*InitializeAccount2)(nil),
+		}, {
+			Name: "SyncNative", Type: (*SyncNative)(nil),
+		}, {
+			Name: "InitializeAccount3", Type: (*InitializeAccount3)(nil),
+		}, {
+			Name: "InitializeMultisig2", Type: (*InitializeMultisig2)(nil),
+		}, {
+			Name: "InitializeMint2", Type: (*InitializeMint2)(nil),
+		}},
 )
 
 func (inst *Instruction) ProgramID() ag_solanago.PublicKey {
