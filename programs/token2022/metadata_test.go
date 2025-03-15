@@ -66,7 +66,7 @@ func TestCreateInitializeMetadataPointerInstruction(t *testing.T) {
 		mint.PublicKey(),
 	)
 
-	initializeMetadataIx := CreateInitializeMetadataPointerInstruction(
+	initializeMetadataIx := NewInitializeMetadataPointerInstruction(
 		mint.PublicKey(),
 		payer.PublicKey(),
 		mint.PublicKey(),

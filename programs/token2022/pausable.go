@@ -17,7 +17,7 @@ const (
 
 const DEFAULT_PAUSABLE_MINT_LEN = 203
 
-func CreatePausableInstruction(
+func NewPausableInstruction(
 	mint solana.PublicKey,
 	authority solana.PublicKey,
 ) solana.Instruction {

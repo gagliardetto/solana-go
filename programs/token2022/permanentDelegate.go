@@ -9,7 +9,7 @@ import (
 
 const DEFAULT_PERMANENT_DELEGATE_MINT_LEN = 202
 
-func CreateInitializePermanentDelegateInstruction(
+func NewInitializePermanentDelegateInstruction(
 	mint solana.PublicKey,
 	permanentDelegate solana.PublicKey,
 ) solana.Instruction {

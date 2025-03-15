@@ -54,7 +54,7 @@ func TestCreateScaledUiAmountInstruction(t *testing.T) {
 		mint.PublicKey(),
 	)
 
-	scaledUiAmuIx := CreateScaledUiAmountInstruction(
+	scaledUiAmuIx := NewScaledUiAmountInstruction(
 		mint.PublicKey(),
 		payer.PublicKey(),
 		3.9,

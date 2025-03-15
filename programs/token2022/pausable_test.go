@@ -54,7 +54,7 @@ func TestCreatePausableInstruction(t *testing.T) {
 		mint.PublicKey(),
 	)
 
-	pausableIx := CreatePausableInstruction(
+	pausableIx := NewPausableInstruction(
 		mint.PublicKey(),
 		payer.PublicKey(),
 	)

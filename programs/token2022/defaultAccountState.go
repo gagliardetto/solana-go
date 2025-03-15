@@ -11,7 +11,7 @@ import (
 const DEFAULT_ACCOUNT_STATE_MINT_LEN = 171
 
 // Instruction to initialize the DefaultAccountState Extension
-func CreateInitializeDefaultAccountStateInstruction(
+func NewInitializeDefaultAccountStateInstruction(
 	mint solana.PublicKey, // Mint Account address
 	accountState token.AccountState, // Default AccountState
 ) solana.Instruction {

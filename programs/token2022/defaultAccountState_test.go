@@ -61,7 +61,7 @@ func TestCreateInitializeDefaultAccountStateInstruction(t *testing.T) {
 		mint.PublicKey(),
 	)
 
-	initializeDefaultAccountStateIx := CreateInitializeDefaultAccountStateInstruction(
+	initializeDefaultAccountStateIx := NewInitializeDefaultAccountStateInstruction(
 		mint.PublicKey(),
 		token.Frozen,
 	)

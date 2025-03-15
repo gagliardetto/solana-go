@@ -53,7 +53,7 @@ func TestCreateInitializePermanentDelegateInstruction(t *testing.T) {
 		mint.PublicKey(),
 	)
 
-	permanentDelegateIx := CreateInitializePermanentDelegateInstruction(
+	permanentDelegateIx := NewInitializePermanentDelegateInstruction(
 		mint.PublicKey(),
 		payer.PublicKey(),
 	)

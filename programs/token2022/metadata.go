@@ -81,7 +81,7 @@ func (meta *TokenMetadata) LenForLamports() uint64 {
 }
 
 // Construct an Initialize MetadataPointer instruction
-func CreateInitializeMetadataPointerInstruction(
+func NewInitializeMetadataPointerInstruction(
 	mint solana.PublicKey,
 	authority solana.PublicKey,
 	metadataAddress solana.PublicKey,

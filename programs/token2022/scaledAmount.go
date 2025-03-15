@@ -9,7 +9,7 @@ import (
 
 const DEFAULT_SCALED_UI_AMOUNT_MINT_LEN = 226
 
-func CreateScaledUiAmountInstruction(
+func NewScaledUiAmountInstruction(
 	mint solana.PublicKey,
 	authority solana.PublicKey,
 	multiplier float64,
