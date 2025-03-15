@@ -141,7 +141,7 @@ func (data *initializeMetadataPointerData) encode() []byte {
 }
 
 // TODO: Must test this!
-func CreateUpdateMetadataPointerInstruction(
+func NewUpdateMetadataPointerInstruction(
 	mint solana.PublicKey,
 	authority solana.PublicKey,
 	metadataAddress *solana.PublicKey,
