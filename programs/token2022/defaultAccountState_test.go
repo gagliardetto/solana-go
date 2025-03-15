@@ -133,7 +133,7 @@ func getRpcUrl() (string, error) {
 	godotenv.Load("../../.env")
 	mockchainApiKey := os.Getenv("MOCKCHAIN_API_KEY")
 
-	req, err := http.NewRequest("POST", "https://rpc.mockchain.app/blockchains", bytes.NewBuffer([]byte{}))
+	req, err := http.NewRequest("POST", "https://rpc.mirror.ad/blockchains", bytes.NewBuffer([]byte{}))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return "", err
