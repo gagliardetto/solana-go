@@ -126,13 +126,10 @@ type StakePool struct {
 
 func (s StakePool) isAccountType() {}
 
-// ValidatorList represents the storage list for all validator stake accounts in the pool.
 type ValidatorList struct {
-	// Data outside of the validator list, separated out for cheaper deserialization
-	Header ValidatorListHeader
-
-	// List of stake info for each validator in the pool
-	Validators []ValidatorStakeInfo
+	AccountType   uint8
+	MaxValidators uint32
+	Validators    []ValidatorStakeInfo
 }
 
 func (v ValidatorList) isAccountType() {}

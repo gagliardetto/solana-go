@@ -61,6 +61,14 @@ func NewUpdateStakePoolBalanceInstructionBuilder() *UpdateStakePoolBalance {
 		Accounts: make(ag_solanago.AccountMetaSlice, 7),
 	}
 }
+func (inst *UpdateStakePoolBalance) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	inst.Accounts = accounts
+	return nil
+}
+
+func (inst *UpdateStakePoolBalance) GetAccounts() (accounts []*ag_solanago.AccountMeta) {
+	return inst.Accounts
+}
 
 func (inst *UpdateStakePoolBalance) SetStakePool(pool ag_solanago.PublicKey) *UpdateStakePoolBalance {
 	inst.Accounts[0] = ag_solanago.Meta(pool).WRITE()
@@ -156,20 +164,10 @@ func (inst *UpdateStakePoolBalance) EncodeToTree(parent ag_treeout.Branches) {
 }
 
 func (inst *UpdateStakePoolBalance) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	for _, account := range inst.Accounts {
-		if err := encoder.Encode(account); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
 func (inst *UpdateStakePoolBalance) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	for i := range inst.Accounts {
-		if err := decoder.Decode(inst.Accounts[i]); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 

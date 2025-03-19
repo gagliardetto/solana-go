@@ -15,7 +15,10 @@
 
 package stakepool
 
-import ag_solanago "github.com/gagliardetto/solana-go"
+import (
+	ag_binary "github.com/gagliardetto/binary"
+	ag_solanago "github.com/gagliardetto/solana-go"
+)
 
 // Fee rate as a ratio, minted on `UpdateStakePoolBalance` as a proportion of
 // the rewards
@@ -77,46 +80,6 @@ func (s StakeStatus) String() string {
 	default:
 		return "Unknown"
 	}
-}
-
-// ValidatorListHeader represents the header of the validator list.
-type ValidatorListHeader struct {
-	// Account type, must be `ValidatorList` currently
-	AccountType AccountType
-
-	// Maximum allowable number of validators
-	MaxValidators uint32
-}
-
-// ValidatorStakeInfo represents information about a validator in the pool.
-type ValidatorStakeInfo struct {
-	// Amount of lamports on the validator stake account, including rent
-	// Note that if `last_update_epoch` does not match the current epoch then
-	// this field may not be accurate
-	ActiveStakeLamports uint64
-
-	// Amount of transient stake delegated to this validator
-	// Note that if `last_update_epoch` does not match the current epoch then
-	// this field may not be accurate
-	TransientStakeLamports uint64
-
-	// Last epoch the active and transient stake lamports fields were updated
-	LastUpdateEpoch uint64
-
-	// Transient account seed suffix, used to derive the transient stake account address
-	TransientSeedSuffix uint64
-
-	// Unused space, initially meant to specify the end of seed suffixes
-	Unused uint32
-
-	// Validator account seed suffix
-	ValidatorSeedSuffix uint32
-
-	// Status of the validator stake account
-	Status StakeStatus
-
-	// Validator vote account address
-	VoteAccountAddress ag_solanago.PublicKey
 }
 
 type FeeType interface {
@@ -191,3 +154,56 @@ const (
 	// Preferred validator is a validator not in the validator list
 	PreferredValidatorTypeUntrustedValidator
 )
+
+type UpdateValidatorListBalanceArgs struct {
+	StartIndex uint32
+	NoMerge    bool
+}
+
+func (obj *UpdateValidatorListBalanceArgs) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `NoMerge` param:
+	err = encoder.Encode(obj.StartIndex)
+	if err != nil {
+		return err
+	}
+	// Serialize `StartIndex` param:
+	return encoder.Encode(obj.NoMerge)
+}
+
+func (obj *UpdateValidatorListBalanceArgs) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `NoMerge`:
+	err = decoder.Decode(&obj.StartIndex)
+	if err != nil {
+		return err
+	}
+	// Deserialize `StartIndex`:
+	return decoder.Decode(&obj.NoMerge)
+}
+
+// ValidatorStakeInfo represents information about a validator in the pool.
+type ValidatorStakeInfo struct {
+	// Amount of lamports on the validator stake account, including rent
+	// Note that if `last_update_epoch` does not match the current epoch then
+	// this field may not be accurate
+	ActiveStakeLamports uint64
+
+	// Amount of transient stake delegated to this validator
+	// Note that if `last_update_epoch` does not match the current epoch then
+	// this field may not be accurate
+	TransientStakeLamports uint64
+
+	// Last epoch the active and transient stake lamports fields were updated
+	LastUpdateEpoch uint64
+
+	// Transient account seed suffix start, used to derive the transient stake account address
+	TransientSeedSuffixStart uint64
+
+	// Transient account seed suffix end, used to derive the transient stake account address
+	TransientSeedSuffixEnd uint64
+
+	// Status of the validator stake account
+	Status StakeStatus
+
+	// Validator vote account address
+	VoteAccountAddress ag_solanago.PublicKey
+}
