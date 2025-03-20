@@ -16,6 +16,7 @@
 package stakepool
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 
@@ -88,6 +89,15 @@ func NewIncreaseAdditionalValidatorStakeInstructionBuilder() *IncreaseAdditional
 		Accounts: make(ag_solanago.AccountMetaSlice, 14),
 		Signers:  make(ag_solanago.AccountMetaSlice, 1),
 	}
+}
+
+func (inst *IncreaseAdditionalValidatorStake) GetAccounts() []*ag_solanago.AccountMeta {
+	return inst.Accounts
+}
+
+func (inst *IncreaseAdditionalValidatorStake) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
+	inst.Accounts = accounts
+	return nil
 }
 
 func (inst *IncreaseAdditionalValidatorStake) SetArgs(args *AdditionalValidatorStakeArgs) *IncreaseAdditionalValidatorStake {
@@ -266,31 +276,11 @@ func (inst *IncreaseAdditionalValidatorStake) EncodeToTree(parent ag_treeout.Bra
 }
 
 func (inst *IncreaseAdditionalValidatorStake) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	if inst.Args != nil {
-		if err := encoder.Encode(inst.Args); err != nil {
-			return err
-		}
-	}
-	for _, account := range inst.Accounts {
-		if err := encoder.Encode(account); err != nil {
-			return err
-		}
-	}
-	return nil
+	return encoder.Encode(inst.Args)
 }
 
 func (inst *IncreaseAdditionalValidatorStake) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	if inst.Args != nil {
-		if err := decoder.Decode(inst.Args); err != nil {
-			return err
-		}
-	}
-	for j := range inst.Accounts {
-		if err := decoder.Decode(inst.Accounts[j]); err != nil {
-			return err
-		}
-	}
-	return nil
+	return decoder.Decode(&inst.Args)
 }
 
 func (inst *IncreaseAdditionalValidatorStake) Validate() error {
@@ -306,4 +296,18 @@ func (inst *IncreaseAdditionalValidatorStake) Validate() error {
 		return errors.New("accounts.Staker should be a signer")
 	}
 	return nil
+}
+
+func (inst *IncreaseAdditionalValidatorStake) FindEphemeralAccount(programID, stakePoolAddress ag_solanago.PublicKey, seed uint64) (ag_solanago.PublicKey, uint8, error) {
+	seedBytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(seedBytes, seed)
+
+	seeds := [][]byte{
+		[]byte("ephemeral"),
+		stakePoolAddress.Bytes(),
+		seedBytes,
+	}
+
+	// Find Program Address (PDA)
+	return ag_solanago.FindProgramAddress(seeds, programID)
 }

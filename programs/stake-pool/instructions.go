@@ -57,14 +57,15 @@ const (
 	Instruction_SetManager
 	Instruction_SetFee
 	Instruction_SetStaker
-	Instruction_DecreaseAdditionalValidatorStake
-	Instruction_IncreaseAdditionalValidatorStake
-	Instruction_Redelegate
-	Instruction_SetFundingAuthority
 	Instruction_DepositSol
+	Instruction_SetFundingAuthority
 	Instruction_WithdrawSol
 	Instruction_CreateTokenMetadata
 	Instruction_UpdateTokenMetadata
+	Instruction_IncreaseAdditionalValidatorStake
+	Instruction_DecreaseAdditionalValidatorStake
+	Instruction_DecreaseValidatorStakeWithReserve
+	Instruction_Redelegate
 	Instruction_DepositStakeWithSlippage
 	Instruction_WithdrawStakeWithSlippage
 	Instruction_DepositSolWithSlippage
@@ -125,6 +126,8 @@ func InstructionIDToName(id uint8) string {
 		return "DepositSolWithSlippage"
 	case Instruction_WithdrawSolWithSlippage:
 		return "WithdrawSolWithSlippage"
+	case Instruction_DecreaseValidatorStakeWithReserve:
+		return "DecreaseValidatorStakeWithReserve"
 	default:
 		return "Unknown"
 	}
