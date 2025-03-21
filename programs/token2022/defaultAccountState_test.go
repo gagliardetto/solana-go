@@ -27,7 +27,7 @@ func TestCreateInitializeDefaultAccountStateInstruction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer clearMockchain(rpcUrl)
+	defer clearMirrorchain(rpcUrl)
 	rpcClient := rpc.New(rpcUrl)
 
 	payer, err := solana.NewRandomPrivateKey()
@@ -171,7 +171,7 @@ func getRpcUrl() (string, error) {
 
 }
 
-func clearMockchain(rpcUrl string) error {
+func clearMirrorchain(rpcUrl string) error {
 	godotenv.Load("../../.env")
 	mockchainApiKey := os.Getenv("MOCKCHAIN_API_KEY")
 	req, err := http.NewRequest("DELETE", rpcUrl, nil)

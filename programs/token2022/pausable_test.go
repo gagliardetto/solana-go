@@ -20,7 +20,7 @@ func TestCreatePausableInstruction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer clearMockchain(rpcUrl)
+	defer clearMirrorchain(rpcUrl)
 	rpcClient := rpc.New(rpcUrl)
 
 	payer, err := solana.NewRandomPrivateKey()
