@@ -18,6 +18,7 @@ import (
 	"errors"
 
 	bin "github.com/gagliardetto/binary"
+
 	ag_solanago "github.com/gagliardetto/solana-go"
 )
 
@@ -28,43 +29,39 @@ type Authorized struct {
 	Withdrawer *ag_solanago.PublicKey
 }
 
-func (auth *Authorized) UnmarshalWithDecoder(dec *bin.Decoder) error {
-	{
-		err := dec.Decode(&auth.Staker)
-		if err != nil {
-			return err
-		}
+func (inst *Authorized) UnmarshalWithDecoder(dec *bin.Decoder) error {
+	err := dec.Decode(&inst.Staker)
+	if err != nil {
+		return err
 	}
-	{
-		err := dec.Decode(&auth.Withdrawer)
-		if err != nil {
-			return err
-		}
+
+	err = dec.Decode(&inst.Withdrawer)
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 
-func (auth *Authorized) MarshalWithEncoder(encoder *bin.Encoder) error {
-	{
-		err := encoder.Encode(*auth.Staker)
-		if err != nil {
-			return err
-		}
+func (inst *Authorized) MarshalWithEncoder(encoder *bin.Encoder) error {
+	err := encoder.Encode(*inst.Staker)
+	if err != nil {
+		return err
 	}
-	{
-		err := encoder.Encode(*auth.Withdrawer)
-		if err != nil {
-			return err
-		}
+
+	err = encoder.Encode(*inst.Withdrawer)
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 
-func (auth *Authorized) Validate() error {
-	if auth.Staker == nil {
+func (inst *Authorized) Validate() error {
+	if inst.Staker == nil {
 		return errors.New("staker parameter is not set")
 	}
-	if auth.Withdrawer == nil {
+	if inst.Withdrawer == nil {
 		return errors.New("withdrawer parameter is not set")
 	}
 	return nil

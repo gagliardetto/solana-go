@@ -1,4 +1,5 @@
-// Copyright 2024 github.com/cordialsys
+// Copyright 2021 github.com/gagliardetto
+// Copyright 2025 github.com/liquid-collective
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,21 +26,29 @@ import (
 	"github.com/gagliardetto/solana-go/text/format"
 )
 
-type Initialize struct {
+type InitializeChecked struct {
 	// Authorization settings for stake account
 	Authorized *Authorized
+
 	// Lockup settings for stake account
 	Lockup *Lockup
+
 	// [0] = [WRITE SIGNER] StakeAccount
 	// ··········· Stake account getting initialized
 	//
 	// [1] = [] RentSysvar
 	// ··········· RentSysvar account
 	//
+	// [2] = [] StakeAuthority
+	// ··········· Stake authority account
+	//
+	// [3] = [] WithdrawAuthority
+	// ··········· Withdraw authority account
+	//
 	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
-func (inst *Initialize) UnmarshalWithDecoder(dec *bin.Decoder) error {
+func (inst *InitializeChecked) UnmarshalWithDecoder(dec *bin.Decoder) error {
 	err := dec.Decode(&inst.Authorized)
 	if err != nil {
 		return err
@@ -53,7 +62,7 @@ func (inst *Initialize) UnmarshalWithDecoder(dec *bin.Decoder) error {
 	return nil
 }
 
-func (inst *Initialize) MarshalWithEncoder(encoder *bin.Encoder) error {
+func (inst *InitializeChecked) MarshalWithEncoder(encoder *bin.Encoder) error {
 	err := encoder.Encode(*inst.Authorized)
 	if err != nil {
 		return err
@@ -67,7 +76,7 @@ func (inst *Initialize) MarshalWithEncoder(encoder *bin.Encoder) error {
 	return nil
 }
 
-func (inst *Initialize) Validate() error {
+func (inst *InitializeChecked) Validate() error {
 	// Check whether all (required) parameters are set:
 	if inst.Authorized == nil {
 		return errors.New("authorized parameter is not set")
@@ -95,101 +104,126 @@ func (inst *Initialize) Validate() error {
 }
 
 // Stake account account
-func (inst *Initialize) SetStakeAccount(stakeAccount solana.PublicKey) *Initialize {
+func (inst *InitializeChecked) SetStakeAccount(stakeAccount solana.PublicKey) *InitializeChecked {
 	inst.AccountMetaSlice[0] = solana.Meta(stakeAccount).WRITE().SIGNER()
 	return inst
 }
 
 // Rent sysvar account
-func (inst *Initialize) SetRentSysvarAccount(rentSysvar solana.PublicKey) *Initialize {
+func (inst *InitializeChecked) SetRentSysvarAccount(rentSysvar solana.PublicKey) *InitializeChecked {
 	inst.AccountMetaSlice[1] = solana.Meta(rentSysvar)
 	return inst
 }
-func (inst *Initialize) GetStakeAccount() *solana.AccountMeta      { return inst.AccountMetaSlice[0] }
-func (inst *Initialize) GetRentSysvarAccount() *solana.AccountMeta { return inst.AccountMetaSlice[1] }
 
-func (inst *Initialize) SetStaker(staker solana.PublicKey) *Initialize {
+// Stake authority account
+func (inst *InitializeChecked) SetStakeAuthorityAccount(stakeAuthority solana.PublicKey) *InitializeChecked {
+	inst.AccountMetaSlice[2] = solana.Meta(stakeAuthority)
+	return inst
+}
+
+// Withdraw authority account
+func (inst *InitializeChecked) SetWithdrawAuthorityAccount(withdrawAuthority solana.PublicKey) *InitializeChecked {
+	inst.AccountMetaSlice[3] = solana.Meta(withdrawAuthority)
+	return inst
+}
+
+func (inst *InitializeChecked) GetStakeAccount() *solana.AccountMeta { return inst.AccountMetaSlice[0] }
+func (inst *InitializeChecked) GetRentSysvarAccount() *solana.AccountMeta {
+	return inst.AccountMetaSlice[1]
+}
+func (inst *InitializeChecked) GetStakeAuthorityAccount() *solana.AccountMeta {
+	return inst.AccountMetaSlice[2]
+}
+func (inst *InitializeChecked) GetWithdrawAuthorityAccount() *solana.AccountMeta {
+	return inst.AccountMetaSlice[3]
+}
+
+func (inst *InitializeChecked) SetStaker(staker solana.PublicKey) *InitializeChecked {
 	inst.Authorized.Staker = &staker
 	return inst
 }
 
-func (inst *Initialize) SetWithdrawer(withdrawer solana.PublicKey) *Initialize {
+func (inst *InitializeChecked) SetWithdrawer(withdrawer solana.PublicKey) *InitializeChecked {
 	inst.Authorized.Withdrawer = &withdrawer
 	return inst
 }
 
-func (inst *Initialize) SetLockupTimestamp(unixTimestamp int64) *Initialize {
+func (inst *InitializeChecked) SetLockupTimestamp(unixTimestamp int64) *InitializeChecked {
 	inst.Lockup.UnixTimestamp = &unixTimestamp
 	return inst
 }
 
-func (inst *Initialize) SetLockupEpoch(epoch uint64) *Initialize {
+func (inst *InitializeChecked) SetLockupEpoch(epoch uint64) *InitializeChecked {
 	inst.Lockup.Epoch = &epoch
 	return inst
 }
 
-func (inst *Initialize) SetCustodian(custodian solana.PublicKey) *Initialize {
+func (inst *InitializeChecked) SetCustodian(custodian solana.PublicKey) *InitializeChecked {
 	inst.Lockup.Custodian = &custodian
 	return inst
 }
 
-func (inst Initialize) Build() *Instruction {
+func (inst InitializeChecked) Build() *Instruction {
 	return &Instruction{BaseVariant: bin.BaseVariant{
 		Impl:   inst,
-		TypeID: bin.TypeIDFromUint32(Instruction_Initialize, bin.LE),
+		TypeID: bin.TypeIDFromUint32(Instruction_InitializeChecked, bin.LE),
 	}}
 }
 
-func (inst *Initialize) EncodeToTree(parent treeout.Branches) {
+func (inst *InitializeChecked) EncodeToTree(parent treeout.Branches) {
 	parent.Child(format.Program(ProgramName, ProgramID)).
 		//
 		ParentFunc(func(programBranch treeout.Branches) {
-			programBranch.Child(format.Instruction("Initialize")).
+			programBranch.Child(format.Instruction("InitializeChecked")).
 				//
 				ParentFunc(func(instructionBranch treeout.Branches) {
 					// Parameters of the instruction:
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch treeout.Branches) {
 						paramsBranch.Child("Authorized").ParentFunc(func(authBranch treeout.Branches) {
-							authBranch.Child(format.Account("Staker", *inst.Authorized.Staker))
+							authBranch.Child(format.Account("    Staker", *inst.Authorized.Staker))
 							authBranch.Child(format.Account("Withdrawer", *inst.Authorized.Withdrawer))
 						})
 						paramsBranch.Child("Lockup").ParentFunc(func(authBranch treeout.Branches) {
-							authBranch.Child(format.Param("UnixTimestamp", inst.Lockup.UnixTimestamp))
-							authBranch.Child(format.Param("Epoch", inst.Lockup.Epoch))
-							authBranch.Child(format.Account("Custodian", *inst.Lockup.Custodian))
+							authBranch.Child(format.Param("  UnixTimestamp", inst.Lockup.UnixTimestamp))
+							authBranch.Child(format.Param("          Epoch", inst.Lockup.Epoch))
+							authBranch.Child(format.Account("    Custodian", *inst.Lockup.Custodian))
 						})
 					})
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.Meta("StakeAccount", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(format.Meta("RentSysvar", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(format.Meta("     StakeAccount", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(format.Meta("       RentSysvar", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(format.Meta("   StakeAuthority", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(format.Meta("WithdrawAuthority", inst.AccountMetaSlice.Get(3)))
 					})
 				})
 		})
 }
 
-// NewInitializeInstructionBuilder creates a new `Initialize` instruction builder.
-func NewInitializeInstructionBuilder() *Initialize {
-	nd := &Initialize{
-		AccountMetaSlice: make(solana.AccountMetaSlice, 2),
+// NewInitializeCheckedInstructionBuilder creates a new `InitializeChecked` instruction builder.
+func NewInitializeCheckedInstructionBuilder() *InitializeChecked {
+	nd := &InitializeChecked{
+		AccountMetaSlice: make(solana.AccountMetaSlice, 4),
 		Authorized:       &Authorized{},
 		Lockup:           &Lockup{},
 	}
 	return nd
 }
 
-// NewInitializeInstruction declares a new Initialize instruction with the provided parameters and accounts.
-func NewInitializeInstruction(
+// NewInitializeCheckedInstruction declares a new InitializeChecked instruction with the provided parameters and accounts.
+func NewInitializeCheckedInstruction(
 	// parameters:
 	staker solana.PublicKey,
 	withdrawer solana.PublicKey,
 	// Accounts:
 	stakeAccount solana.PublicKey,
-) *Initialize {
-	return NewInitializeInstructionBuilder().
+) *InitializeChecked {
+	return NewInitializeCheckedInstructionBuilder().
 		SetStakeAccount(stakeAccount).
 		SetRentSysvarAccount(solana.SysVarRentPubkey).
+		SetStakeAuthorityAccount(staker).
+		SetWithdrawAuthorityAccount(withdrawer).
 		SetStaker(staker).
 		SetWithdrawer(withdrawer).
 		SetLockupEpoch(0).

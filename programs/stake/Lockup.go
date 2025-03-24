@@ -17,72 +17,79 @@ package stake
 import (
 	"errors"
 
-	bin "github.com/gagliardetto/binary"
+	ag_binary "github.com/gagliardetto/binary"
+	ag_treeout "github.com/gagliardetto/treeout"
+
 	ag_solanago "github.com/gagliardetto/solana-go"
+	ag_format "github.com/gagliardetto/solana-go/text/format"
 )
 
 type Lockup struct {
-	// UnixTimestamp at which this stake will allow withdrawal, unless the transaction is signed by the custodian
 	UnixTimestamp *int64
-	// Epoch height at which this stake will allow withdrawal, unless the transaction is signed by the custodian
-	Epoch *uint64
-	// Custodian signature on a transaction exempts the operation from lockup constraints
-	Custodian *ag_solanago.PublicKey
+	Epoch         *uint64
+	Custodian     *ag_solanago.PublicKey
 }
 
-func (lockup *Lockup) UnmarshalWithDecoder(dec *bin.Decoder) error {
-	{
-		err := dec.Decode(&lockup.UnixTimestamp)
-		if err != nil {
-			return err
-		}
-	}
-	{
-		err := dec.Decode(&lockup.Epoch)
-		if err != nil {
-			return err
-		}
-	}
-	{
-		err := dec.Decode(&lockup.Custodian)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+func (obj *Lockup) SetUnixTimestamp(unixTimestamp int64) *Lockup {
+	obj.UnixTimestamp = &unixTimestamp
+	return obj
 }
 
-func (lockup *Lockup) MarshalWithEncoder(encoder *bin.Encoder) error {
-	{
-		err := encoder.Encode(*lockup.UnixTimestamp)
-		if err != nil {
-			return err
-		}
-	}
-	{
-		err := encoder.Encode(*lockup.Epoch)
-		if err != nil {
-			return err
-		}
-	}
-	{
-		err := encoder.Encode(*lockup.Custodian)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+func (obj *Lockup) SetEpoch(epoch uint64) *Lockup {
+	obj.Epoch = &epoch
+	return obj
 }
 
-func (lockup *Lockup) Validate() error {
-	if lockup.Custodian == nil {
-		return errors.New("custodian parameter is not set")
+func (obj *Lockup) SetCustodian(custodian ag_solanago.PublicKey) *Lockup {
+	obj.Custodian = &custodian
+	return obj
+}
+
+func (obj *Lockup) Validate() error {
+	if obj.UnixTimestamp == nil {
+		return errors.New("UnixTimestamp parameter is not set")
 	}
-	if lockup.Epoch == nil {
+	if obj.Epoch == nil {
 		return errors.New("epoch parameter is not set")
 	}
-	if lockup.UnixTimestamp == nil {
-		return errors.New("unix timestamp parameter is not set")
+	if obj.Custodian == nil {
+		return errors.New("custodian parameter is not set")
 	}
 	return nil
+}
+
+func (obj *Lockup) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
+	if err := encoder.Encode(obj.UnixTimestamp); err != nil {
+		return err
+	}
+	if err := encoder.Encode(obj.Epoch); err != nil {
+		return err
+	}
+	if err := encoder.Encode(obj.Custodian); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *Lockup) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
+	if err := decoder.Decode(&obj.UnixTimestamp); err != nil {
+		return err
+	}
+	if err := decoder.Decode(&obj.Epoch); err != nil {
+		return err
+	}
+	if err := decoder.Decode(&obj.Custodian); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *Lockup) EncodeToTree(parent ag_treeout.Branches) {
+	parent.Child(ag_format.Param("UnixTimestamp", obj.UnixTimestamp))
+	parent.Child(ag_format.Param("Epoch", obj.Epoch))
+	parent.Child(ag_format.Account("Custodian", *obj.Custodian))
+}
+
+func NewLockup() *Lockup {
+	return &Lockup{}
 }

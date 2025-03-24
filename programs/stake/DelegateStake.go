@@ -17,10 +17,11 @@ package stake
 import (
 	"fmt"
 
-	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/text/format"
-	"github.com/gagliardetto/treeout"
+	ag_binary "github.com/gagliardetto/binary"
+	ag_treeout "github.com/gagliardetto/treeout"
+
+	ag_solanago "github.com/gagliardetto/solana-go"
+	ag_format "github.com/gagliardetto/solana-go/text/format"
 )
 
 type DelegateStake struct {
@@ -42,7 +43,7 @@ type DelegateStake struct {
 	// [5] = [WRITE SIGNER] Stake Authoriy
 	// ··········· The Stake Authority
 	//
-	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 func (inst *DelegateStake) Validate() error {
@@ -54,65 +55,71 @@ func (inst *DelegateStake) Validate() error {
 	}
 	return nil
 }
-func (inst *DelegateStake) SetStakeAccount(stakeAccount solana.PublicKey) *DelegateStake {
-	inst.AccountMetaSlice[0] = solana.Meta(stakeAccount).WRITE().SIGNER()
+func (inst *DelegateStake) SetStakeAccount(stakeAccount ag_solanago.PublicKey) *DelegateStake {
+	inst.AccountMetaSlice[0] = ag_solanago.Meta(stakeAccount).WRITE().SIGNER()
 	return inst
 }
-func (inst *DelegateStake) SetVoteAccount(voteAcc solana.PublicKey) *DelegateStake {
-	inst.AccountMetaSlice[1] = solana.Meta(voteAcc)
+func (inst *DelegateStake) SetVoteAccount(voteAcc ag_solanago.PublicKey) *DelegateStake {
+	inst.AccountMetaSlice[1] = ag_solanago.Meta(voteAcc)
 	return inst
 }
-func (inst *DelegateStake) SetClockSysvar(clockSysVarAcc solana.PublicKey) *DelegateStake {
-	inst.AccountMetaSlice[2] = solana.Meta(clockSysVarAcc)
+func (inst *DelegateStake) SetClockSysvar(clockSysVarAcc ag_solanago.PublicKey) *DelegateStake {
+	inst.AccountMetaSlice[2] = ag_solanago.Meta(clockSysVarAcc)
 	return inst
 }
-func (inst *DelegateStake) SetStakeHistorySysvar(stakeHistorySysVarAcc solana.PublicKey) *DelegateStake {
-	inst.AccountMetaSlice[3] = solana.Meta(stakeHistorySysVarAcc)
+func (inst *DelegateStake) SetStakeHistorySysvar(stakeHistorySysVarAcc ag_solanago.PublicKey) *DelegateStake {
+	inst.AccountMetaSlice[3] = ag_solanago.Meta(stakeHistorySysVarAcc)
 	return inst
 }
-func (inst *DelegateStake) SetConfigAccount(stakeConfigAcc solana.PublicKey) *DelegateStake {
-	inst.AccountMetaSlice[4] = solana.Meta(stakeConfigAcc)
+func (inst *DelegateStake) SetConfigAccount(stakeConfigAcc ag_solanago.PublicKey) *DelegateStake {
+	inst.AccountMetaSlice[4] = ag_solanago.Meta(stakeConfigAcc)
 	return inst
 }
-func (inst *DelegateStake) SetStakeAuthority(stakeAuthority solana.PublicKey) *DelegateStake {
-	inst.AccountMetaSlice[5] = solana.Meta(stakeAuthority).WRITE().SIGNER()
+func (inst *DelegateStake) SetStakeAuthority(stakeAuthority ag_solanago.PublicKey) *DelegateStake {
+	inst.AccountMetaSlice[5] = ag_solanago.Meta(stakeAuthority).WRITE().SIGNER()
 	return inst
 }
-func (inst *DelegateStake) GetStakeAccount() *solana.AccountMeta { return inst.AccountMetaSlice[0] }
-func (inst *DelegateStake) GetVoteAccount() *solana.AccountMeta  { return inst.AccountMetaSlice[1] }
-func (inst *DelegateStake) GetClockSysvar() *solana.AccountMeta  { return inst.AccountMetaSlice[2] }
-func (inst *DelegateStake) GetStakeHistorySysvar() *solana.AccountMeta {
+func (inst *DelegateStake) GetStakeAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice[0]
+}
+func (inst *DelegateStake) GetVoteAccount() *ag_solanago.AccountMeta { return inst.AccountMetaSlice[1] }
+func (inst *DelegateStake) GetClockSysvar() *ag_solanago.AccountMeta { return inst.AccountMetaSlice[2] }
+func (inst *DelegateStake) GetStakeHistorySysvar() *ag_solanago.AccountMeta {
 	return inst.AccountMetaSlice[3]
 }
-func (inst *DelegateStake) GetConfigAccount() *solana.AccountMeta  { return inst.AccountMetaSlice[4] }
-func (inst *DelegateStake) GetStakeAuthority() *solana.AccountMeta { return inst.AccountMetaSlice[5] }
+func (inst *DelegateStake) GetConfigAccount() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice[4]
+}
+func (inst *DelegateStake) GetStakeAuthority() *ag_solanago.AccountMeta {
+	return inst.AccountMetaSlice[5]
+}
 
 func (inst DelegateStake) Build() *Instruction {
-	return &Instruction{BaseVariant: bin.BaseVariant{
+	return &Instruction{BaseVariant: ag_binary.BaseVariant{
 		Impl:   inst,
-		TypeID: bin.TypeIDFromUint32(Instruction_DelegateStake, bin.LE),
+		TypeID: ag_binary.TypeIDFromUint32(Instruction_DelegateStake, ag_binary.LE),
 	}}
 }
 
-func (inst *DelegateStake) EncodeToTree(parent treeout.Branches) {
-	parent.Child(format.Program(ProgramName, ProgramID)).
+func (inst *DelegateStake) EncodeToTree(parent ag_treeout.Branches) {
+	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch treeout.Branches) {
-			programBranch.Child(format.Instruction("DelegateStake")).
+		ParentFunc(func(programBranch ag_treeout.Branches) {
+			programBranch.Child(ag_format.Instruction("DelegateStake")).
 				//
-				ParentFunc(func(instructionBranch treeout.Branches) {
+				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch treeout.Branches) {
+					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
 					})
 
 					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.Meta("           StakeAccount", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(format.Meta("           VoteAccount", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(format.Meta("           ClockSysvar", inst.AccountMetaSlice.Get(2)))
-						accountsBranch.Child(format.Meta("           StakeHistorySysvar", inst.AccountMetaSlice.Get(3)))
-						accountsBranch.Child(format.Meta("           StakeConfigAccount", inst.AccountMetaSlice.Get(4)))
-						accountsBranch.Child(format.Meta("           StakeAuthoriy", inst.AccountMetaSlice.Get(5)))
+					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
+						accountsBranch.Child(ag_format.Meta("StakeAccount", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(ag_format.Meta("VoteAccount", inst.AccountMetaSlice.Get(1)))
+						accountsBranch.Child(ag_format.Meta("ClockSysvar", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(ag_format.Meta("StakeHistorySysvar", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(ag_format.Meta("StakeConfigAccount", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(ag_format.Meta("StakeAuthoriy", inst.AccountMetaSlice.Get(5)))
 					})
 				})
 		})
@@ -121,7 +128,7 @@ func (inst *DelegateStake) EncodeToTree(parent treeout.Branches) {
 // NewDelegateStakeInstructionBuilder creates a new `DelegateStake` instruction builder.
 func NewDelegateStakeInstructionBuilder() *DelegateStake {
 	nd := &DelegateStake{
-		AccountMetaSlice: make(solana.AccountMetaSlice, 6),
+		AccountMetaSlice: make(ag_solanago.AccountMetaSlice, 6),
 	}
 	return nd
 }
@@ -129,15 +136,15 @@ func NewDelegateStakeInstructionBuilder() *DelegateStake {
 // NewDelegateStakeInstruction declares a new DelegateStake instruction with the provided parameters and accounts.
 func NewDelegateStakeInstruction(
 	// Accounts:
-	validatorVoteAccount solana.PublicKey,
-	stakeAuthority solana.PublicKey,
-	stakeAccount solana.PublicKey,
+	validatorVoteAccount ag_solanago.PublicKey,
+	stakeAuthority ag_solanago.PublicKey,
+	stakeAccount ag_solanago.PublicKey,
 ) *DelegateStake {
 	return NewDelegateStakeInstructionBuilder().
 		SetStakeAccount(stakeAccount).
 		SetVoteAccount(validatorVoteAccount).
-		SetClockSysvar(solana.SysVarClockPubkey).
-		SetStakeHistorySysvar(solana.SysVarStakeHistoryPubkey).
-		SetConfigAccount(solana.SysVarStakeConfigPubkey).
+		SetClockSysvar(ag_solanago.SysVarClockPubkey).
+		SetStakeHistorySysvar(ag_solanago.SysVarStakeHistoryPubkey).
+		SetConfigAccount(ag_solanago.SysVarStakeConfigPubkey).
 		SetStakeAuthority(stakeAuthority)
 }
