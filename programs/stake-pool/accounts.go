@@ -17,7 +17,6 @@ package stakepool
 
 import (
 	ag_solanago "github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/programs/stake"
 )
 
 type AccountType interface {
@@ -29,10 +28,19 @@ type Uninitialized struct {
 
 func (u Uninitialized) isAccountType() {}
 
-// StakePool represents a stake pool account.
+type Lockup struct {
+	UnixTimestamp uint64
+	Epoch         uint64
+	Custodian     ag_solanago.PublicKey
+}
+
+type FutureEpoch[T any] struct {
+	Value T
+}
+
 type StakePool struct {
 	// Account type, must be `StakePool` currently
-	AccountType AccountType
+	AccountType uint8
 
 	// Manager authority, allows for updating the staker, manager, and fee account
 	Manager ag_solanago.PublicKey
@@ -59,7 +67,7 @@ type StakePool struct {
 	ManagerFeeAccount ag_solanago.PublicKey
 
 	// Pool token program id
-	TokenProgram ag_solanago.PublicKey
+	TokenProgramID ag_solanago.PublicKey
 
 	// Total stake under management.
 	TotalLamports uint64
@@ -71,13 +79,13 @@ type StakePool struct {
 	LastUpdateEpoch uint64
 
 	// Lockup that all stakes in the pool must have
-	Lockup stake.Lockup
+	Lockup Lockup
 
 	// Fee taken as a proportion of rewards each epoch
 	EpochFee Fee
 
 	// Fee for next epoch
-	NextEpochFee FutureEpochFee
+	NextEpochFee FutureEpoch[Fee]
 
 	// Preferred deposit validator vote account pubkey
 	PreferredDepositValidatorVoteAddress *ag_solanago.PublicKey
@@ -92,7 +100,7 @@ type StakePool struct {
 	StakeWithdrawalFee Fee
 
 	// Future stake withdrawal fee, to be set for the following epoch
-	NextStakeWithdrawalFee FutureEpochFee
+	NextStakeWithdrawalFee FutureEpoch[Fee]
 
 	// Fees paid out to referrers on referred stake deposits.
 	// Expressed as a percentage (0 - 100) of deposit fees.
@@ -115,7 +123,7 @@ type StakePool struct {
 	SolWithdrawalFee Fee
 
 	// Future SOL withdrawal fee, to be set for the following epoch
-	NextSolWithdrawalFee FutureEpochFee
+	NextSolWithdrawalFee FutureEpoch[Fee]
 
 	// Last epoch's total pool tokens, used only for APR estimation
 	LastEpochPoolTokenSupply uint64
