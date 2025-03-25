@@ -19,6 +19,7 @@ package solana
 
 import (
 	"crypto/ed25519"
+	"database/sql/driver"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -84,6 +85,25 @@ func (ha *Hash) UnmarshalJSON(data []byte) (err error) {
 	}
 	*ha = tmp
 	return
+}
+
+// Scan implements the sql.Scanner interface.
+func (h *Hash) Scan(value interface{}) error {
+	str, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("unsupported Scan, storing driver.Value type %T into type Hash", value)
+	}
+	hash, err := HashFromBase58(str)
+	if err != nil {
+		return err
+	}
+	*h = hash
+	return nil
+}
+
+// Value implements the driver.Valuer interface.
+func (h Hash) Value() (driver.Value, error) {
+	return h.String(), nil
 }
 
 func (ha Hash) Equals(pb Hash) bool {
@@ -191,6 +211,25 @@ func (p *Signature) UnmarshalJSON(data []byte) (err error) {
 	copy(target[:], dat)
 	*p = target
 	return
+}
+
+// Scan implements the sql.Scanner interface.
+func (s *Signature) Scan(value interface{}) error {
+	str, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("unsupported Scan, storing driver.Value type %T into type Signature", value)
+	}
+	sig, err := SignatureFromBase58(str)
+	if err != nil {
+		return err
+	}
+	*s = sig
+	return nil
+}
+
+// Value implements the driver.Valuer interface.
+func (s Signature) Value() (driver.Value, error) {
+	return s.String(), nil
 }
 
 // Verify checks that the signature is valid for the given public key and message.
