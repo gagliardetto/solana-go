@@ -23,6 +23,7 @@ import (
 	"crypto/ed25519"
 	crypto_rand "crypto/rand"
 	"crypto/sha256"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -158,6 +159,25 @@ func (p PublicKey) Verify(message []byte, signature Signature) bool {
 }
 
 type PublicKey [PublicKeyLength]byte
+
+// Scan implements the sql.Scanner interface.
+func (p *PublicKey) Scan(value interface{}) error {
+	str, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("unsupported Scan, storing driver.Value type %T into type PublicKey", value)
+	}
+	pubKey, err := PublicKeyFromBase58(str)
+	if err != nil {
+		return err
+	}
+	*p = pubKey
+	return nil
+}
+
+// Value implements the driver.Valuer interface.
+func (p PublicKey) Value() (driver.Value, error) {
+	return p.String(), nil
+}
 
 // PublicKeyFromBytes creates a PublicKey from a byte slice that must be 32 bytes long.
 // NOTE: it will accept on- and off-curve pubkeys.
