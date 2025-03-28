@@ -65,4 +65,7 @@ var (
 
 	// The stake config account is used to store parameters and settings that govern the behavior of staking on the Solana network.
 	SysVarStakeConfigPubkey = MustPublicKeyFromBase58("StakeConfig11111111111111111111111111111111")
+
+	//
+	SysVarStakePubkey = MustPublicKeyFromBase58("Stake11111111111111111111111111111111111111")
 )
