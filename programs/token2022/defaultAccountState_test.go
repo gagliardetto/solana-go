@@ -131,14 +131,14 @@ func TestCreateInitializeDefaultAccountStateInstruction(t *testing.T) {
 
 func getRpcUrl() (string, error) {
 	godotenv.Load("../../.env")
-	mockchainApiKey := os.Getenv("MOCKCHAIN_API_KEY")
+	mirrorApiKey := os.Getenv("MIRROR_API_KEY")
 
 	req, err := http.NewRequest("POST", "https://rpc.mirror.ad/blockchains", bytes.NewBuffer([]byte{}))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return "", err
 	}
-	req.Header.Set("api_key", mockchainApiKey)
+	req.Header.Set("api_key", mirrorApiKey)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -173,7 +173,7 @@ func getRpcUrl() (string, error) {
 
 func clearMirrorchain(rpcUrl string) error {
 	godotenv.Load("../../.env")
-	mockchainApiKey := os.Getenv("MOCKCHAIN_API_KEY")
+	mockchainApiKey := os.Getenv("MIRROR_API_KEY")
 	req, err := http.NewRequest("DELETE", rpcUrl, nil)
 	if err != nil {
 		fmt.Println("Error creating request to clear mockchain:", err)
