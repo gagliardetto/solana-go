@@ -17,7 +17,10 @@
 
 package ws
 
-import "context"
+import (
+	"context"
+	"sync"
+)
 
 type Subscription struct {
 	req               *request
@@ -25,6 +28,7 @@ type Subscription struct {
 	stream            chan result
 	err               chan error
 	closeFunc         func(err error)
+	mutex             sync.Mutex
 	closed            bool
 	unsubscribeMethod string
 	decoderFunc       decoderFunc
@@ -65,6 +69,8 @@ func (s *Subscription) Unsubscribe() {
 }
 
 func (s *Subscription) unsubscribe(err error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	s.closeFunc(err)
 	s.closed = true
 	close(s.stream)

@@ -254,10 +254,11 @@ func (c *Client) handleSubscriptionMessage(subID uint64, message []byte) {
 		return
 	}
 
+	sub.mutex.Lock()
+	defer sub.mutex.Unlock()
 	if !sub.closed {
 		sub.stream <- result
 	}
-	return
 }
 
 func (c *Client) closeAllSubscription(err error) {
