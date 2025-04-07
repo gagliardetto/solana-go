@@ -1,10 +1,11 @@
-module github.com/gagliardetto/solana-go
+module github.com/bloXroute-Labs/solana-go
 
 go 1.19
 
 require (
 	github.com/gagliardetto/binary v0.8.0
 	github.com/gagliardetto/gofuzz v1.2.2
+	github.com/gagliardetto/solana-go v1.12.0
 	github.com/gagliardetto/treeout v0.1.4
 	github.com/google/uuid v1.6.0
 )
