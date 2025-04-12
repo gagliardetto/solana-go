@@ -262,13 +262,13 @@ type InstructionParsedData struct {
 }
 
 type InstructionInfoFields struct {
-	Authority   *string `json:"authority,omitempty"`
-	Destination *string `json:"destination,omitempty"`
-	Source      *string `json:"source,omitempty"`
-	Account     *string `json:"account,omitempty"`
-	Mint        *string `json:"mint,omitempty"`
-	Owner       *string `json:"owner,omitempty"`
-	NewAccount  *string `json:"newAccount,omitempty"`
+	Authority   *solana.PublicKey `json:"authority,omitempty"`
+	Destination *solana.PublicKey `json:"destination,omitempty"`
+	Source      *solana.PublicKey `json:"source,omitempty"`
+	Account     *solana.PublicKey `json:"account,omitempty"`
+	Mint        *solana.PublicKey `json:"mint,omitempty"`
+	Owner       *solana.PublicKey `json:"owner,omitempty"`
+	NewAccount  *solana.PublicKey `json:"newAccount,omitempty"`
 
 	// Token transfer
 	TokenAmount *UiTokenAmount `json:"tokenAmount,omitempty"`
@@ -591,7 +591,7 @@ type ParsedInstruction struct {
 	Parsed      *InstructionInfoEnvelope `json:"parsed,omitempty"`
 	Data        solana.Base58            `json:"data,omitempty"`
 	Accounts    []solana.PublicKey       `json:"accounts,omitempty"`
-	StackHeight int64                    `json:"stackHeight"`
+	StackHeight uint16                   `json:"stackHeight"`
 }
 
 type InstructionInfoEnvelope struct {
