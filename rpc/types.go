@@ -237,6 +237,50 @@ type InnerInstruction struct {
 	Instructions []CompiledInstruction `json:"instructions"`
 }
 
+// The parsed data of inner instructions returned by RPC when simulating transaction
+type SimulatedInnerInstructions struct {
+	// TODO: <number> == int64 ???
+	// Index of the transaction instruction from which the inner instruction(s) originated
+	Index uint16 `json:"index"`
+
+	// Ordered list of inner program instructions that were invoked during a single transaction instruction.
+	Instructions []SimulatedParsedInstruction `json:"instructions"`
+}
+
+// The parsed inner instruction returned by RPC when simulating transaction
+type SimulatedParsedInstruction struct {
+	Parsed      InstructionParsedData `json:"parsed"`
+	Accounts    []solana.PublicKey    `json:"accounts"`
+	ProgramId   solana.PublicKey      `json:"programId"`
+	Data        solana.Base58         `json:"data"`
+	StackHeight uint16                `json:"stackHeight"`
+}
+
+type InstructionParsedData struct {
+	Info InstructionInfoFields `json:"info"`
+	Type InstructionActionType `json:"type"`
+}
+
+type InstructionInfoFields struct {
+	Authority   *string `json:"authority,omitempty"`
+	Destination *string `json:"destination,omitempty"`
+	Source      *string `json:"source,omitempty"`
+	Account     *string `json:"account,omitempty"`
+	Mint        *string `json:"mint,omitempty"`
+	Owner       *string `json:"owner,omitempty"`
+	NewAccount  *string `json:"newAccount,omitempty"`
+
+	// Token transfer
+	TokenAmount *UiTokenAmount `json:"tokenAmount,omitempty"`
+
+	// Create account
+	Lamports *uint64 `json:"lamports,omitempty"`
+	Space    *uint64 `json:"space,omitempty"`
+
+	// Extension types
+	ExtensionTypes *[]string `json:"extensionTypes,omitempty"`
+}
+
 type CompiledInstruction struct {
 	// Index into the message.accountKeys array indicating the program account that executes this instruction.
 	// NOTE: it is actually a uint8, but using a uint16 because uint8 is treated as a byte everywhere,
@@ -474,6 +518,18 @@ const (
 
 	// The node will query its most recent block. Note that the block may still be skipped by the cluster.
 	CommitmentProcessed CommitmentType = "processed"
+)
+
+// action type for parsed simulated inner instruction
+type InstructionActionType string
+
+const (
+	CreateAccount            InstructionActionType = "createAccount"
+	Transfer                 InstructionActionType = "transfer"
+	TransferChecked          InstructionActionType = "transferChecked"
+	GetAccountDataSize       InstructionActionType = "getAccountDataSize"
+	InitializeImmutableOwner InstructionActionType = "initializeImmutableOwner"
+	InitializeAccount3       InstructionActionType = "initializeAccount3"
 )
 
 type ParsedTransaction struct {
