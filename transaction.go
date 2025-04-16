@@ -26,6 +26,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/treeout"
+	"github.com/mr-tron/base58"
 	"go.uber.org/zap"
 
 	"github.com/gagliardetto/solana-go/text"
@@ -87,6 +88,27 @@ func TransactionFromDecoder(decoder *bin.Decoder) (*Transaction, error) {
 	return out, nil
 }
 
+func TransactionFromBytes(data []byte) (*Transaction, error) {
+	decoder := bin.NewBinDecoder(data)
+	return TransactionFromDecoder(decoder)
+}
+
+func TransactionFromBase64(b64 string) (*Transaction, error) {
+	data, err := base64.StdEncoding.DecodeString(b64)
+	if err != nil {
+		return nil, err
+	}
+	return TransactionFromBytes(data)
+}
+
+func TransactionFromBase58(b58 string) (*Transaction, error) {
+	data, err := base58.Decode(b58)
+	if err != nil {
+		return nil, err
+	}
+	return TransactionFromBytes(data)
+}
+
 // MustTransactionFromDecoder decodes a transaction from a decoder.
 // Panics on error.
 func MustTransactionFromDecoder(decoder *bin.Decoder) *Transaction {
@@ -96,6 +118,11 @@ func MustTransactionFromDecoder(decoder *bin.Decoder) *Transaction {
 	}
 	return out
 }
+
+const (
+	AccountsTypeIndex = "Fee"
+	AccountsTypeKey   = "Key"
+)
 
 type CompiledInstruction struct {
 	// Index into the message.accountKeys array indicating the program account that executes this instruction.
@@ -483,6 +510,9 @@ func (tx *Transaction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 		if err != nil {
 			return fmt.Errorf("unable to read numSignatures: %w", err)
 		}
+		if numSignatures < 0 {
+			return fmt.Errorf("numSignatures is negative")
+		}
 		if numSignatures > decoder.Remaining()/64 {
 			return fmt.Errorf("numSignatures %d is too large for remaining bytes %d", numSignatures, decoder.Remaining())
 		}
@@ -511,18 +541,26 @@ func (tx *Transaction) PartialSign(getter privateKeyGetter) (out []Signature, er
 	}
 	signerKeys := tx.Message.signerKeys()
 
-	signedSignatures := []Signature{}
-	for _, key := range signerKeys {
+	// Ensure that the transaction has the correct number of signatures initialized
+	if len(tx.Signatures) == 0 {
+		// Initialize the Signatures slice to the correct length if it's empty
+		tx.Signatures = make([]Signature, len(signerKeys))
+	} else if len(tx.Signatures) != len(signerKeys) {
+		// Return an error if the current length of the Signatures slice doesn't match the expected number
+		return nil, fmt.Errorf("invalid signatures length, expected %d, actual %d", len(signerKeys), len(tx.Signatures))
+	}
+
+	for i, key := range signerKeys {
 		privateKey := getter(key)
 		if privateKey != nil {
 			s, err := privateKey.Sign(messageContent)
 			if err != nil {
 				return nil, fmt.Errorf("failed to signed with key %q: %w", key.String(), err)
 			}
-			signedSignatures = append(signedSignatures, s)
+			// Directly assign the signature to the corresponding position in the transaction's signature slice
+			tx.Signatures[i] = s
 		}
 	}
-	tx.Signatures = append(tx.Signatures, signedSignatures...)
 	return tx.Signatures, nil
 }
 
@@ -672,4 +710,95 @@ func (tx *Transaction) VerifySignatures() error {
 	}
 
 	return nil
+}
+
+func (tx *Transaction) GetProgramIDs() (PublicKeySlice, error) {
+	programIDs := make(PublicKeySlice, 0)
+	for ixi, inst := range tx.Message.Instructions {
+		progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
+		if err == nil {
+			programIDs = append(programIDs, progKey)
+		} else {
+			return nil, fmt.Errorf("cannot resolve program ID for instruction %d: %w", ixi, err)
+		}
+	}
+	return programIDs, nil
+}
+
+func (tx *Transaction) NumWriteableAccounts() int {
+	return countWriteableAccounts(tx)
+}
+
+func (tx *Transaction) NumSigners() int {
+	return countSigners(tx)
+}
+
+func countSigners(tx *Transaction) (count int) {
+	if tx == nil {
+		return -1
+	}
+	return tx.Message.Signers().Len()
+}
+
+func (tx *Transaction) NumReadonlyAccounts() int {
+	return countReadonlyAccounts(tx)
+}
+
+func countReadonlyAccounts(tx *Transaction) (count int) {
+	if tx == nil {
+		return -1
+	}
+	return int(tx.Message.Header.NumReadonlyUnsignedAccounts) + int(tx.Message.Header.NumReadonlySignedAccounts)
+}
+
+func countWriteableAccounts(tx *Transaction) (count int) {
+	if tx == nil {
+		return -1
+	}
+	if !tx.Message.IsVersioned() {
+		metas, err := tx.Message.AccountMetaList()
+		if err != nil {
+			return -1
+		}
+		for _, meta := range metas {
+			if meta.IsWritable {
+				count++
+			}
+		}
+		return count
+	}
+	numStatisKeys := len(tx.Message.AccountKeys)
+	statisKeys := tx.Message.AccountKeys
+	h := tx.Message.Header
+	for _, key := range statisKeys {
+		accIndex, ok := getStaticAccountIndex(tx, key)
+		if !ok {
+			continue
+		}
+		index := int(accIndex)
+		is := false
+		if index >= int(h.NumRequiredSignatures) {
+			// unsignedAccountIndex < numWritableUnsignedAccounts
+			is = index-int(h.NumRequiredSignatures) < (numStatisKeys-int(h.NumRequiredSignatures))-int(h.NumReadonlyUnsignedAccounts)
+		} else {
+			is = index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)
+		}
+		if is {
+			count++
+		}
+	}
+	if tx.Message.IsResolved() {
+		return count
+	}
+	count += tx.Message.NumWritableLookups()
+	return count
+}
+
+func getStaticAccountIndex(tx *Transaction, key PublicKey) (int, bool) {
+	for idx, a := range tx.Message.AccountKeys {
+		if a.Equals(key) {
+			return (idx), true
+		}
+	}
+	return -1, false
 }

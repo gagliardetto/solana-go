@@ -45,7 +45,7 @@ func Test_AccountSubscribe(t *testing.T) {
 	sub, err := c.AccountSubscribe(accountID, "")
 	require.NoError(t, err)
 
-	data, err := sub.Recv()
+	data, err := sub.Recv(context.Background())
 	if err != nil {
 		fmt.Println("receive an error: ", err)
 		return
@@ -95,7 +95,7 @@ func Test_AccountSubscribeWithHttpHeader(t *testing.T) {
 		sub.Unsubscribe()
 	}(sub)
 
-	data, err := sub.Recv()
+	data, err := sub.Recv(context.Background())
 	if err != nil {
 		t.Errorf("Received an error: %v", err)
 	}
@@ -127,7 +127,7 @@ func Test_ProgramSubscribe(t *testing.T) {
 	require.NoError(t, err)
 
 	for {
-		data, err := sub.Recv()
+		data, err := sub.Recv(context.Background())
 		if err != nil {
 			fmt.Println("receive an error: ", err)
 			return
@@ -148,7 +148,7 @@ func Test_SlotSubscribe(t *testing.T) {
 	sub, err := c.SlotSubscribe()
 	require.NoError(t, err)
 
-	data, err := sub.Recv()
+	data, err := sub.Recv(context.Background())
 	if err != nil {
 		fmt.Println("receive an error: ", err)
 		return

@@ -15,6 +15,8 @@
 package ws
 
 import (
+	"context"
+
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 )
@@ -107,9 +109,14 @@ type LogSubscription struct {
 	sub *Subscription
 }
 
-func (sw *LogSubscription) Recv() (*LogResult, error) {
+func (sw *LogSubscription) Recv(ctx context.Context) (*LogResult, error) {
 	select {
-	case d := <-sw.sub.stream:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case d, ok := <-sw.sub.stream:
+		if !ok {
+			return nil, ErrSubscriptionClosed
+		}
 		return d.(*LogResult), nil
 	case err := <-sw.sub.err:
 		return nil, err

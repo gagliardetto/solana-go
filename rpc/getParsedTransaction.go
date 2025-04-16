@@ -22,6 +22,7 @@ type GetParsedTransactionResult struct {
 	BlockTime   *solana.UnixTimeSeconds
 	Transaction *ParsedTransaction
 	Meta        *ParsedTransactionMeta
+	Version     TransactionVersion `json:"version"`
 }
 
 func (cl *Client) GetParsedTransaction(

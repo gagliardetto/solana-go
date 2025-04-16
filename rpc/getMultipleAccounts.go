@@ -65,6 +65,9 @@ func (cl *Client) GetMultipleAccountsWithOpts(
 				return nil, errors.New("cannot use dataSlice with EncodingJSONParsed")
 			}
 		}
+		if opts.MinContextSlot != nil {
+			obj["minContextSlot"] = *opts.MinContextSlot
+		}
 		if len(obj) > 0 {
 			params = append(params, obj)
 		}
@@ -74,7 +77,7 @@ func (cl *Client) GetMultipleAccountsWithOpts(
 	if err != nil {
 		return nil, err
 	}
-	if out.Value == nil {
+	if out == nil || out.Value == nil {
 		return nil, ErrNotFound
 	}
 	return

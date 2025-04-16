@@ -83,7 +83,7 @@ func TestNewTransaction(t *testing.T) {
 
 	assert.Equal(t, trx.Message.RecentBlockhash, blockhash)
 
-	assert.Equal(t, trx.Message.AccountKeys, []PublicKey{
+	assert.Equal(t, trx.Message.AccountKeys, PublicKeySlice{
 		MustPublicKeyFromBase58("A9QnpgfhCkmiBSjgBuWk76Wo3HxzxvDopUq9x6UUMmjn"),
 		MustPublicKeyFromBase58("9hFtYBYmBJCVguRYs9pBTWKYAFoKfjYR7zBPpEkVsmD"),
 		MustPublicKeyFromBase58("6FzXPEhCJoBx7Zw3SN9qhekHemd6E2b8kVguitmVAngW"),
@@ -111,12 +111,14 @@ func TestPartialSignTransaction(t *testing.T) {
 	signers := []PrivateKey{
 		NewWallet().PrivateKey,
 		NewWallet().PrivateKey,
+		NewWallet().PrivateKey,
 	}
 	instructions := []Instruction{
 		&testTransactionInstructions{
 			accounts: []*AccountMeta{
 				{PublicKey: signers[0].PublicKey(), IsSigner: true, IsWritable: false},
 				{PublicKey: signers[1].PublicKey(), IsSigner: true, IsWritable: true},
+				{PublicKey: signers[2].PublicKey(), IsSigner: true, IsWritable: false},
 			},
 			data:      []byte{0xaa, 0xbb},
 			programID: MustPublicKeyFromBase58("11111111111111111111111111111111"),
@@ -129,16 +131,37 @@ func TestPartialSignTransaction(t *testing.T) {
 	trx, err := NewTransaction(instructions, blockhash)
 	require.NoError(t, err)
 
-	assert.Equal(t, trx.Message.Header.NumRequiredSignatures, uint8(2))
+	assert.Equal(t, trx.Message.Header.NumRequiredSignatures, uint8(3))
 
-	signatures, err := trx.PartialSign(func(key PublicKey) *PrivateKey {
-		if key.Equals(signers[0].PublicKey()) {
-			return &signers[0]
+	// Test various signing orders
+	signingOrders := [][]int{
+		{0, 1, 2}, // ABC
+		{0, 2, 1}, // ACB
+		{1, 0, 2}, // BAC
+		{1, 2, 0}, // BCA
+		{2, 0, 1}, // CAB
+		{2, 1, 0}, // CBA
+	}
+
+	for _, order := range signingOrders {
+		// Reset the transaction signatures before each test
+		trx.Signatures = make([]Signature, len(signers))
+
+		// Sign the transaction in the specified order
+		for _, idx := range order {
+			signer := signers[idx]
+			signatures, err := trx.PartialSign(func(key PublicKey) *PrivateKey {
+				if key.Equals(signer.PublicKey()) {
+					return &signer
+				}
+				return nil
+			})
+			require.NoError(t, err)
+			assert.Equal(t, len(signatures), 3)
 		}
-		return nil
-	})
-	require.NoError(t, err)
-	assert.Equal(t, len(signatures), 1)
+		// Verify Signatures
+		require.NoError(t, trx.VerifySignatures())
+	}
 }
 
 func TestSignTransaction(t *testing.T) {
@@ -189,6 +212,19 @@ func TestSignTransaction(t *testing.T) {
 	})
 }
 
+func FuzzTransaction(f *testing.F) {
+	encoded := "AfjEs3XhTc3hrxEvlnMPkm/cocvAUbFNbCl00qKnrFue6J53AhEqIFmcJJlJW3EDP5RmcMz+cNTTcZHW/WJYwAcBAAEDO8hh4VddzfcO5jbCt95jryl6y8ff65UcgukHNLWH+UQGgxCGGpgyfQVQV02EQYqm4QwzUt2qf9f1gVLM7rI4hwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6ANIF55zOZWROWRkeh+lExxZBnKFqbvIxZDLE7EijjoBAgIAAQwCAAAAOTAAAAAAAAA="
+	data, err := base64.StdEncoding.DecodeString(encoded)
+	require.NoError(f, err)
+	f.Add(data)
+
+	f.Fuzz(func(t *testing.T, data []byte) {
+		require.NotPanics(t, func() {
+			TransactionFromDecoder(bin.NewBinDecoder(data))
+		})
+	})
+}
+
 func TestTransactionDecode(t *testing.T) {
 	encoded := "AfjEs3XhTc3hrxEvlnMPkm/cocvAUbFNbCl00qKnrFue6J53AhEqIFmcJJlJW3EDP5RmcMz+cNTTcZHW/WJYwAcBAAEDO8hh4VddzfcO5jbCt95jryl6y8ff65UcgukHNLWH+UQGgxCGGpgyfQVQV02EQYqm4QwzUt2qf9f1gVLM7rI4hwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6ANIF55zOZWROWRkeh+lExxZBnKFqbvIxZDLE7EijjoBAgIAAQwCAAAAOTAAAAAAAAA="
 	data, err := base64.StdEncoding.DecodeString(encoded)
@@ -205,7 +241,7 @@ func TestTransactionDecode(t *testing.T) {
 	)
 
 	require.Equal(t,
-		[]PublicKey{
+		PublicKeySlice{
 			MustPublicKeyFromBase58("52NGrUqh6tSGhr59ajGxsH3VnAaoRdSdTbAaV9G3UW35"),
 			MustPublicKeyFromBase58("SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"),
 			MustPublicKeyFromBase58("11111111111111111111111111111111"),

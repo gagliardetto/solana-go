@@ -17,12 +17,15 @@
 
 package ws
 
+import "context"
+
 type Subscription struct {
 	req               *request
 	subID             uint64
 	stream            chan result
 	err               chan error
 	closeFunc         func(err error)
+	closed            bool
 	unsubscribeMethod string
 	decoderFunc       decoderFunc
 }
@@ -46,8 +49,10 @@ func newSubscription(
 	}
 }
 
-func (s *Subscription) Recv() (interface{}, error) {
+func (s *Subscription) Recv(ctx context.Context) (interface{}, error) {
 	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	case d := <-s.stream:
 		return d, nil
 	case err := <-s.err:
@@ -61,6 +66,7 @@ func (s *Subscription) Unsubscribe() {
 
 func (s *Subscription) unsubscribe(err error) {
 	s.closeFunc(err)
+	s.closed = true
 	close(s.stream)
 	close(s.err)
 }

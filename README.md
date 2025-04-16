@@ -1,6 +1,6 @@
 # Solana SDK library for Go
 
-[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v1.10.0?tab=doc)
+[![GoDoc](https://pkg.go.dev/badge/github.com/gagliardetto/solana-go?status.svg)](https://pkg.go.dev/github.com/gagliardetto/solana-go@v1.11.0?tab=doc)
 [![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/gagliardetto/solana-go?include_prereleases&label=release-tag)](https://github.com/gagliardetto/solana-go/releases)
 [![Build Status](https://github.com/gagliardetto/solana-go/workflows/tests/badge.svg?branch=main)](https://github.com/gagliardetto/solana-go/actions?query=branch%3Amain)
 [![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/gagliardetto/solana-go/main)](https://www.tickgit.com/browse?repo=github.com/gagliardetto/solana-go&branch=main)
@@ -22,7 +22,7 @@ More contracts to come.
 
 `solana-go` is exclusively supported by my own time (which is money).
 
-If my work has been useful in building your for-profit services/infra/bots/etc., consider donating at 47EhAdBKitfqHRv16Y6wLff8duFBNx3JLxBozcSY36ac (solana) to support future development.
+If my work has been useful in building your for-profit services/infra/bots/etc., consider donating at 8tTwBazKr2ST1b2kNrM7JMXwixRTvZicn7eRBihThymm (solana) to support future development.
 
 Thanks!
 
@@ -69,7 +69,7 @@ Thanks!
 - [ ] Clients for Solana Program Library (SPL)
   - [x] [SPL token](/programs/token)
   - [x] [associated-token-account](/programs/associated-token-account)
-  - [ ] memo
+  - [x] memo
   - [ ] name-service
   - [ ] ...
 - [ ] Client for Serum
@@ -83,7 +83,7 @@ Thanks!
 
 ## Current development status
 
-There is currently **no stable release**. The SDK is actively developed and latest is `v1.10.0` which is an `alpha` release.
+There is currently **no stable release**. The SDK is actively developed and latest is `v1.11.0` which is an `alpha` release.
 
 The RPC and WS client implementation is based on [this RPC spec](https://github.com/solana-labs/solana/blob/c2435363f39723cef59b91322f3b6a815008af29/docs/src/developing/clients/jsonrpc-api.md).
 
@@ -94,13 +94,13 @@ The RPC and WS client implementation is based on [this RPC spec](https://github.
 
 ## Requirements
 
-- Go 1.18 or later
+- Go 1.19 or later
 
 ## Installation
 
 ```bash
 $ cd my-project
-$ go get github.com/gagliardetto/solana-go@v1.10.0
+$ go get github.com/gagliardetto/solana-go@v1.11.0
 ```
 
 ## Pretty-Print transactions/instructions
@@ -194,10 +194,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	processTransactionWithAddressLookups(*parsed, rpcClient)
+	processTransactionWithAddressLookups(parsed, rpcClient)
 }
 
-func processTransactionWithAddressLookups(txx solana.Transaction, rpcClient *rpc.Client) {
+func processTransactionWithAddressLookups(txx *solana.Transaction, rpcClient *rpc.Client) {
 	if !txx.Message.IsVersioned() {
 		fmt.Println("tx is not versioned; only versioned transactions can contain lookups")
 		return
@@ -762,7 +762,7 @@ func main() {
   }
   //---------------
 
-  recent, err := rpcClient.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
+  recent, err := rpcClient.GetLatestBlockhash(context.TODO(), rpc.CommitmentFinalized)
   if err != nil {
     panic(err)
   }
@@ -1072,7 +1072,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
+  example, err := client.GetLatestBlockhash(context.TODO(), rpc.CommitmentFinalized)
   if err != nil {
     panic(err)
   }
@@ -1125,7 +1125,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
+  example, err := client.GetLatestBlockhash(context.TODO(), rpc.CommitmentFinalized)
   if err != nil {
     panic(err)
   }
@@ -1227,7 +1227,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1263,7 +1263,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1301,7 +1301,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1367,7 +1367,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1424,7 +1424,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1465,7 +1465,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -1631,7 +1631,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  example, err := client.GetRecentBlockhash(
+  example, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -2212,6 +2212,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
+  // DEPRECATED: This method is only available in solana-core v1.8 or older. Please use getLatestBlockhash for solana-core v1.9 or newer.
   recent, err := client.GetRecentBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
@@ -2409,7 +2410,7 @@ func main() {
   endpoint := rpc.TestNet_RPC
   client := rpc.New(endpoint)
 
-  recent, err := client.GetRecentBlockhash(
+  recent, err := client.GetLatestBlockhash(
     context.TODO(),
     rpc.CommitmentFinalized,
   )
@@ -2954,6 +2955,7 @@ import (
 )
 
 func main() {
+  ctx := context.Background()	
   client, err := ws.Connect(context.Background(), rpc.MainNetBeta_WS)
   if err != nil {
     panic(err)
@@ -2971,7 +2973,7 @@ func main() {
     defer sub.Unsubscribe()
 
     for {
-      got, err := sub.Recv()
+      got, err := sub.Recv(ctx)
       if err != nil {
         panic(err)
       }
@@ -2991,7 +2993,7 @@ func main() {
     defer sub.Unsubscribe()
 
     for {
-      got, err := sub.Recv()
+      got, err := sub.Recv(ctx)
       if err != nil {
         panic(err)
       }
@@ -3016,6 +3018,7 @@ import (
 )
 
 func main() {
+  ctx := context.Background()	
   client, err := ws.Connect(context.Background(), rpc.MainNetBeta_WS)
   if err != nil {
     panic(err)
@@ -3034,7 +3037,7 @@ func main() {
     defer sub.Unsubscribe()
 
     for {
-      got, err := sub.Recv()
+      got, err := sub.Recv(ctx)
       if err != nil {
         panic(err)
       }
@@ -3053,7 +3056,7 @@ func main() {
     defer sub.Unsubscribe()
 
     for {
-      got, err := sub.Recv()
+      got, err := sub.Recv(ctx)
       if err != nil {
         panic(err)
       }
@@ -3078,6 +3081,7 @@ import (
 )
 
 func main() {
+  ctx := context.Background()	
   client, err := ws.Connect(context.Background(), rpc.MainNetBeta_WS)
   if err != nil {
     panic(err)
@@ -3096,7 +3100,7 @@ func main() {
   defer sub.Unsubscribe()
 
   for {
-    got, err := sub.Recv()
+    got, err := sub.Recv(ctx)
     if err != nil {
       panic(err)
     }
@@ -3130,6 +3134,7 @@ import (
 )
 
 func main() {
+  ctx := context.Background()
   client, err := ws.Connect(context.Background(), rpc.TestNet_WS)
   if err != nil {
     panic(err)
@@ -3141,7 +3146,7 @@ func main() {
   }
 
   for {
-    got, err := sub.Recv()
+    got, err := sub.Recv(ctx)
     if err != nil {
       panic(err)
     }
@@ -3165,6 +3170,7 @@ import (
 )
 
 func main() {
+  ctx := context.Background()
   client, err := ws.Connect(context.Background(), rpc.TestNet_WS)
   if err != nil {
     panic(err)
@@ -3182,7 +3188,7 @@ func main() {
   defer sub.Unsubscribe()
 
   for {
-    got, err := sub.Recv()
+    got, err := sub.Recv(ctx)
     if err != nil {
       panic(err)
     }
@@ -3205,6 +3211,7 @@ import (
 )
 
 func main() {
+  ctx := context.Background()
   client, err := ws.Connect(context.Background(), rpc.TestNet_WS)
   if err != nil {
     panic(err)
@@ -3217,7 +3224,7 @@ func main() {
   defer sub.Unsubscribe()
 
   for {
-    got, err := sub.Recv()
+    got, err := sub.Recv(ctx)
     if err != nil {
       panic(err)
     }
@@ -3240,6 +3247,7 @@ import (
 )
 
 func main() {
+  ctx := context.Background()
   client, err := ws.Connect(context.Background(), rpc.MainNetBeta_WS)
   if err != nil {
     panic(err)
@@ -3254,7 +3262,7 @@ func main() {
   defer sub.Unsubscribe()
 
   for {
-    got, err := sub.Recv()
+    got, err := sub.Recv(ctx)
     if err != nil {
       panic(err)
     }

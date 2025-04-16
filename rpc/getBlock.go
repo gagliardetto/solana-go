@@ -63,6 +63,11 @@ type GetBlockOpts struct {
 	MaxSupportedTransactionVersion *uint64
 }
 
+var (
+	MaxSupportedTransactionVersion0 uint64 = 0
+	MaxSupportedTransactionVersion1 uint64 = 1
+)
+
 // GetBlock returns identity and transaction information about a confirmed block in the ledger.
 func (cl *Client) GetBlock(
 	ctx context.Context,
@@ -84,7 +89,6 @@ func (cl *Client) GetBlockWithOpts(
 	slot uint64,
 	opts *GetBlockOpts,
 ) (out *GetBlockResult, err error) {
-
 	obj := M{
 		"encoding": solana.EncodingBase64,
 	}
@@ -104,7 +108,7 @@ func (cl *Client) GetBlockWithOpts(
 				opts.Encoding,
 				// Valid encodings:
 				// solana.EncodingJSON, // TODO
-				// solana.EncodingJSONParsed, // TODO
+				solana.EncodingJSONParsed, // TODO
 				solana.EncodingBase58,
 				solana.EncodingBase64,
 				solana.EncodingBase64Zstd,
@@ -121,7 +125,6 @@ func (cl *Client) GetBlockWithOpts(
 	params := []interface{}{slot, obj}
 
 	err = cl.rpcClient.CallForInto(ctx, &out, "getBlock", params)
-
 	if err != nil {
 		return nil, err
 	}
@@ -160,4 +163,78 @@ type GetBlockResult struct {
 
 	// The number of blocks beneath this block.
 	BlockHeight *uint64 `json:"blockHeight"`
+}
+
+func (cl *Client) GetParsedBlockWithOpts(
+	ctx context.Context,
+	slot uint64,
+	opts *GetBlockOpts,
+) (out *GetParsedBlockResult, err error) {
+	obj := M{
+		"encoding": solana.EncodingJSONParsed,
+	}
+
+	if opts != nil {
+		if opts.TransactionDetails != "" {
+			obj["transactionDetails"] = opts.TransactionDetails
+		}
+		if opts.Rewards != nil {
+			obj["rewards"] = opts.Rewards
+		}
+		if opts.Commitment != "" {
+			obj["commitment"] = opts.Commitment
+		}
+		if opts.MaxSupportedTransactionVersion != nil {
+			obj["maxSupportedTransactionVersion"] = *opts.MaxSupportedTransactionVersion
+		}
+	}
+
+	params := []interface{}{slot, obj}
+
+	err = cl.rpcClient.CallForInto(ctx, &out, "getBlock", params)
+	if err != nil {
+		return nil, err
+	}
+	if out == nil {
+		// Block is not confirmed.
+		return nil, ErrNotConfirmed
+	}
+	return
+}
+
+type GetParsedBlockResult struct {
+	// The blockhash of this block.
+	Blockhash solana.Hash `json:"blockhash"`
+
+	// The blockhash of this block's parent;
+	// if the parent block is not available due to ledger cleanup,
+	// this field will return "11111111111111111111111111111111".
+	PreviousBlockhash solana.Hash `json:"previousBlockhash"`
+
+	// The slot index of this block's parent.
+	ParentSlot uint64 `json:"parentSlot"`
+
+	// Present if "full" transaction details are requested.
+	Transactions []ParsedTransactionWithMeta `json:"transactions"`
+
+	// Present if "signatures" are requested for transaction details;
+	// an array of signatures, corresponding to the transaction order in the block.
+	Signatures []solana.Signature `json:"signatures"`
+
+	// Present if rewards are requested.
+	Rewards []BlockReward `json:"rewards"`
+
+	// Estimated production time, as Unix timestamp (seconds since the Unix epoch).
+	// Nil if not available.
+	BlockTime *solana.UnixTimeSeconds `json:"blockTime"`
+
+	// The number of blocks beneath this block.
+	BlockHeight *uint64 `json:"blockHeight"`
+}
+
+type ParsedTransactionWithMeta struct {
+	Slot        uint64
+	BlockTime   *solana.UnixTimeSeconds
+	Transaction *ParsedTransaction
+	Meta        *ParsedTransactionMeta
 }

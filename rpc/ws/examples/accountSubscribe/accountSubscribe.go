@@ -42,7 +42,7 @@ func main() {
 		defer sub.Unsubscribe()
 
 		for {
-			got, err := sub.Recv()
+			got, err := sub.Recv(context.Background())
 			if err != nil {
 				panic(err)
 			}
@@ -62,7 +62,7 @@ func main() {
 		defer sub.Unsubscribe()
 
 		for {
-			got, err := sub.Recv()
+			got, err := sub.Recv(context.Background())
 			if err != nil {
 				panic(err)
 			}

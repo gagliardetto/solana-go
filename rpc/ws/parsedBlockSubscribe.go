@@ -16,62 +16,20 @@ package ws
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 )
 
-type BlockResult struct {
+type ParsedBlockResult struct {
 	Context struct {
 		Slot uint64
 	} `json:"context"`
 	Value struct {
-		Slot  uint64              `json:"slot"`
-		Err   interface{}         `json:"err,omitempty"`
-		Block *rpc.GetBlockResult `json:"block,omitempty"`
+		Slot  uint64                    `json:"slot"`
+		Err   interface{}               `json:"err,omitempty"`
+		Block *rpc.GetParsedBlockResult `json:"block,omitempty"`
 	} `json:"value"`
-}
-
-type BlockSubscribeFilter interface {
-	isBlockSubscribeFilter()
-}
-
-var _ BlockSubscribeFilter = BlockSubscribeFilterAll("")
-
-type BlockSubscribeFilterAll string
-
-func (_ BlockSubscribeFilterAll) isBlockSubscribeFilter() {}
-
-type BlockSubscribeFilterMentionsAccountOrProgram struct {
-	Pubkey solana.PublicKey `json:"pubkey"`
-}
-
-func (_ BlockSubscribeFilterMentionsAccountOrProgram) isBlockSubscribeFilter() {}
-
-func NewBlockSubscribeFilterAll() BlockSubscribeFilter {
-	return BlockSubscribeFilterAll("")
-}
-
-func NewBlockSubscribeFilterMentionsAccountOrProgram(pubkey solana.PublicKey) *BlockSubscribeFilterMentionsAccountOrProgram {
-	return &BlockSubscribeFilterMentionsAccountOrProgram{
-		Pubkey: pubkey,
-	}
-}
-
-type BlockSubscribeOpts struct {
-	Commitment rpc.CommitmentType
-	Encoding   solana.EncodingType `json:"encoding,omitempty"`
-
-	// Level of transaction detail to return.
-	TransactionDetails rpc.TransactionDetailsType
-
-	// Whether to populate the rewards array. If parameter not provided, the default includes rewards.
-	Rewards *bool
-
-	// Max transaction version to return in responses.
-	// If the requested block contains a transaction with a higher version, an error will be returned.
-	MaxSupportedTransactionVersion *uint64
 }
 
 // NOTE: Unstable, disabled by default
@@ -81,10 +39,10 @@ type BlockSubscribeOpts struct {
 // **This subscription is unstable and only available if the validator was started
 // with the `--rpc-pubsub-enable-block-subscription` flag. The format of this
 // subscription may change in the future**
-func (cl *Client) BlockSubscribe(
+func (cl *Client) ParsedBlockSubscribe(
 	filter BlockSubscribeFilter,
 	opts *BlockSubscribeOpts,
-) (*BlockSubscription, error) {
+) (*ParsedBlockSubscription, error) {
 	var params []interface{}
 	if filter != nil {
 		switch v := filter.(type) {
@@ -99,20 +57,7 @@ func (cl *Client) BlockSubscribe(
 		if opts.Commitment != "" {
 			obj["commitment"] = opts.Commitment
 		}
-		if opts.Encoding != "" {
-			if !solana.IsAnyOfEncodingType(
-				opts.Encoding,
-				// Valid encodings:
-				// solana.EncodingJSON, // TODO
-				solana.EncodingJSONParsed, // TODO
-				solana.EncodingBase58,
-				solana.EncodingBase64,
-				solana.EncodingBase64Zstd,
-			) {
-				return nil, fmt.Errorf("provided encoding is not supported: %s", opts.Encoding)
-			}
-			obj["encoding"] = opts.Encoding
-		}
+		obj["encoding"] = solana.EncodingJSONParsed
 		if opts.TransactionDetails != "" {
 			obj["transactionDetails"] = opts.TransactionDetails
 		}
@@ -132,7 +77,7 @@ func (cl *Client) BlockSubscribe(
 		"blockSubscribe",
 		"blockUnsubscribe",
 		func(msg []byte) (interface{}, error) {
-			var res BlockResult
+			var res ParsedBlockResult
 			err := decodeResponseFromMessage(msg, &res)
 			return &res, err
 		},
@@ -140,46 +85,43 @@ func (cl *Client) BlockSubscribe(
 	if err != nil {
 		return nil, err
 	}
-	return &BlockSubscription{
+	return &ParsedBlockSubscription{
 		sub: genSub,
 	}, nil
 }
 
-type BlockSubscription struct {
+type ParsedBlockSubscription struct {
 	sub *Subscription
 }
 
-func (sw *BlockSubscription) Recv(ctx context.Context) (*BlockResult, error) {
+func (sw *ParsedBlockSubscription) Recv(ctx context.Context) (*ParsedBlockResult, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
-	case d, ok := <-sw.sub.stream:
-		if !ok {
-			return nil, ErrSubscriptionClosed
-		}
-		return d.(*BlockResult), nil
+	case d := <-sw.sub.stream:
+		return d.(*ParsedBlockResult), nil
 	case err := <-sw.sub.err:
 		return nil, err
 	}
 }
 
-func (sw *BlockSubscription) Err() <-chan error {
+func (sw *ParsedBlockSubscription) Err() <-chan error {
 	return sw.sub.err
 }
 
-func (sw *BlockSubscription) Response() <-chan *BlockResult {
-	typedChan := make(chan *BlockResult, 1)
-	go func(ch chan *BlockResult) {
+func (sw *ParsedBlockSubscription) Response() <-chan *ParsedBlockResult {
+	typedChan := make(chan *ParsedBlockResult, 1)
+	go func(ch chan *ParsedBlockResult) {
 		// TODO: will this subscription yield more than one result?
 		d, ok := <-sw.sub.stream
 		if !ok {
 			return
 		}
-		ch <- d.(*BlockResult)
+		ch <- d.(*ParsedBlockResult)
 	}(typedChan)
 	return typedChan
 }
 
-func (sw *BlockSubscription) Unsubscribe() {
+func (sw *ParsedBlockSubscription) Unsubscribe() {
 	sw.sub.Unsubscribe()
 }

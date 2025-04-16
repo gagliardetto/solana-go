@@ -153,6 +153,8 @@ type TokenBalance struct {
 
 	// Pubkey of token balance's owner.
 	Owner *solana.PublicKey `json:"owner,omitempty"`
+	// Pubkey of token program.
+	ProgramId *solana.PublicKey `json:"programId,omitempty"`
 
 	// Pubkey of the token's mint.
 	Mint          solana.PublicKey `json:"mint"`
@@ -215,8 +217,15 @@ type TransactionMeta struct {
 	Rewards []BlockReward `json:"rewards"`
 
 	LoadedAddresses LoadedAddresses `json:"loadedAddresses"`
-	
+
+	ReturnData ReturnData `json:"returnData"`
+
 	ComputeUnitsConsumed *uint64 `json:"computeUnitsConsumed"`
+}
+
+type ReturnData struct {
+	ProgramId solana.PublicKey `json:"programId"`
+	Data      solana.Data      `json:"data"`
 }
 
 type InnerInstruction struct {
@@ -498,11 +507,12 @@ type ParsedMessage struct {
 }
 
 type ParsedInstruction struct {
-	Program   string                   `json:"program,omitempty"`
-	ProgramId solana.PublicKey         `json:"programId,omitempty"`
-	Parsed    *InstructionInfoEnvelope `json:"parsed,omitempty"`
-	Data      solana.Base58            `json:"data,omitempty"`
-	Accounts  []solana.PublicKey       `json:"accounts,omitempty"`
+	Program     string                   `json:"program,omitempty"`
+	ProgramId   solana.PublicKey         `json:"programId,omitempty"`
+	Parsed      *InstructionInfoEnvelope `json:"parsed,omitempty"`
+	Data        solana.Base58            `json:"data,omitempty"`
+	Accounts    []solana.PublicKey       `json:"accounts,omitempty"`
+	StackHeight int64                    `json:"stackHeight"`
 }
 
 type InstructionInfoEnvelope struct {

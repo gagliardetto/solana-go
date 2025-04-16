@@ -98,6 +98,12 @@ func (inst *Withdraw) SetWithdrawAuthorityAccount(withdrawAccount solana.PublicK
 	return inst
 }
 
+func (inst *Withdraw) GetVoteAccount() *solana.AccountMeta      { return inst.AccountMetaSlice[0] }
+func (inst *Withdraw) GetRecipientAccount() *solana.AccountMeta { return inst.AccountMetaSlice[1] }
+func (inst *Withdraw) GetWithdrawAuthorityAccount() *solana.AccountMeta {
+	return inst.AccountMetaSlice[2]
+}
+
 // Number of lamports to transfer to the recipient account
 func (inst *Withdraw) SetLamports(lamports uint64) *Withdraw {
 	inst.Lamports = &lamports

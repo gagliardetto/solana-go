@@ -202,6 +202,28 @@ func (p Signature) String() string {
 	return base58.Encode(p[:])
 }
 
+type Base64 []byte
+
+func (t Base64) MarshalJSON() ([]byte, error) {
+	return json.Marshal(base64.StdEncoding.EncodeToString(t))
+}
+
+func (t *Base64) UnmarshalJSON(data []byte) (err error) {
+	var s string
+	err = json.Unmarshal(data, &s)
+	if err != nil {
+		return
+	}
+
+	if s == "" {
+		*t = []byte{}
+		return nil
+	}
+
+	*t, err = base64.StdEncoding.DecodeString(s)
+	return
+}
+
 type Base58 []byte
 
 func (t Base58) MarshalJSON() ([]byte, error) {
