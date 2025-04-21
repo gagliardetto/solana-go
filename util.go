@@ -15,6 +15,8 @@
 package solana
 
 import (
+	"golang.org/x/text/collate"
+	"golang.org/x/text/language"
 	"math/big"
 )
 
@@ -60,3 +62,14 @@ func DecimalsInBigInt(decimal uint32) *big.Int {
 //	gcd := new(big.Int).GCD(nil, nil, remainder, denomiator)
 //
 //}
+
+var (
+	collator = collate.New(language.English)
+)
+
+func compareString(a, b string) int {
+	if res := collator.CompareString(a, b); res != 0 {
+		return res
+	}
+	return 0
+}
