@@ -117,7 +117,7 @@ func (obj *FreezeAddressLookupTable) UnmarshalWithDecoder(decoder *ag_binary.Dec
 
 // NewFreezeAddressLookupTableInstruction declares a new FreezeAddressLookupTable instruction with the provided parameters and accounts.
 func NewFreezeAddressLookupTableInstruction(
-// Accounts:
+	// Accounts:
 	address ag_solanago.PublicKey,
 	authority ag_solanago.PublicKey) *FreezeAddressLookupTable {
 	return NewFreezeAddressLookupTableInstructionBuilder().
