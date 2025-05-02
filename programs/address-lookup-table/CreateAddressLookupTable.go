@@ -194,10 +194,10 @@ func (obj *CreateAddressLookupTable) UnmarshalWithDecoder(decoder *ag_binary.Dec
 
 // NewCreateAddressLookupTableInstruction declares a new CreateAddressLookupTable instruction with the provided parameters and accounts.
 func NewCreateAddressLookupTableInstruction(
-// Parameters:
+	// Parameters:
 	recentSlot uint64,
 	bump uint8,
-// Accounts:
+	// Accounts:
 	address ag_solanago.PublicKey,
 	authority ag_solanago.PublicKey,
 	payer ag_solanago.PublicKey) *CreateAddressLookupTable {

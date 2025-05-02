@@ -132,9 +132,9 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 		{
 			"CreateAddressLookupTable", (*CreateAddressLookupTable)(nil),
 		},
-		//{
-		//	"FreezeAddressLookupTable", (*FreezeAddressLookupTable)(nil),
-		//},
+		{
+			"FreezeAddressLookupTable", (*FreezeAddressLookupTable)(nil),
+		},
 		//{
 		//	"ExtendAddressLookupTable", (*ExtendAddressLookupTable)(nil),
 		//},
