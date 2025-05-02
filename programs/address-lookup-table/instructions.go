@@ -141,9 +141,9 @@ var InstructionImplDef = ag_binary.NewVariantDefinition(
 		{
 			"DeactivateAddressLookupTable", (*DeactivateAddressLookupTable)(nil),
 		},
-		//{
-		//	"CloseAddressLookupTable", (*CloseAddressLookupTable)(nil),
-		//},
+		{
+			"CloseAddressLookupTable", (*CloseAddressLookupTable)(nil),
+		},
 	},
 )
 
