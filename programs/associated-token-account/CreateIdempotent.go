@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ import (
 	treeout "github.com/gagliardetto/treeout"
 )
 
-type Close struct {
+type CreateIdempotent struct {
 	Payer  solana.PublicKey `bin:"-" borsh_skip:"true"`
 	Wallet solana.PublicKey `bin:"-" borsh_skip:"true"`
 	Mint   solana.PublicKey `bin:"-" borsh_skip:"true"`
@@ -52,28 +52,28 @@ type Close struct {
 	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
-// NewCloseInstructionBuilder creates a new `Close` instruction builder.
-func NewCloseInstructionBuilder() *Close {
-	nd := &Close{}
+// NewCreateInstructionBuilder creates a new `Create` instruction builder.
+func NewCreateIdempotentInstructionBuilder() *CreateIdempotent {
+	nd := &CreateIdempotent{}
 	return nd
 }
 
-func (inst *Close) SetPayer(payer solana.PublicKey) *Close {
+func (inst *CreateIdempotent) SetPayer(payer solana.PublicKey) *CreateIdempotent {
 	inst.Payer = payer
 	return inst
 }
 
-func (inst *Close) SetWallet(wallet solana.PublicKey) *Close {
+func (inst *CreateIdempotent) SetWallet(wallet solana.PublicKey) *CreateIdempotent {
 	inst.Wallet = wallet
 	return inst
 }
 
-func (inst *Close) SetMint(mint solana.PublicKey) *Close {
+func (inst *CreateIdempotent) SetMint(mint solana.PublicKey) *CreateIdempotent {
 	inst.Mint = mint
 	return inst
 }
 
-func (inst Close) Build() *Instruction {
+func (inst CreateIdempotent) Build() *Instruction {
 
 	// Find the associatedTokenAddress;
 	associatedTokenAddress, _, _ := solana.FindAssociatedTokenAddress(
@@ -130,14 +130,14 @@ func (inst Close) Build() *Instruction {
 // ValidateAndBuild validates the instruction accounts.
 // If there is a validation error, return the error.
 // Otherwise, build and return the instruction.
-func (inst Close) ValidateAndBuild() (*Instruction, error) {
+func (inst CreateIdempotent) ValidateAndBuild() (*Instruction, error) {
 	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
 	return inst.Build(), nil
 }
 
-func (inst *Close) Validate() error {
+func (inst *CreateIdempotent) Validate() error {
 	if inst.Payer.IsZero() {
 		return errors.New("Payer not set")
 	}
@@ -157,12 +157,10 @@ func (inst *Close) Validate() error {
 	return nil
 }
 
-func (inst *Close) EncodeToTree(parent treeout.Branches) {
+func (inst *CreateIdempotent) EncodeToTree(parent treeout.Branches) {
 	parent.Child(format.Program(ProgramName, ProgramID)).
-		//
 		ParentFunc(func(programBranch treeout.Branches) {
-			programBranch.Child(format.Instruction("Close")).
-				//
+			programBranch.Child(format.Instruction("CreateIdempotent")).
 				ParentFunc(func(instructionBranch treeout.Branches) {
 
 					// Parameters of the instruction:
@@ -170,32 +168,32 @@ func (inst *Close) EncodeToTree(parent treeout.Branches) {
 
 					// Accounts of the instruction:
 					instructionBranch.Child("Accounts[len=7").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.Meta("                 payer", inst.AccountMetaSlice.Get(0)))
+						accountsBranch.Child(format.Meta(" payer", inst.AccountMetaSlice.Get(0)))
 						accountsBranch.Child(format.Meta("associatedTokenAddress", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(format.Meta("                wallet", inst.AccountMetaSlice.Get(2)))
-						accountsBranch.Child(format.Meta("             tokenMint", inst.AccountMetaSlice.Get(3)))
-						accountsBranch.Child(format.Meta("         systemProgram", inst.AccountMetaSlice.Get(4)))
-						accountsBranch.Child(format.Meta("          tokenProgram", inst.AccountMetaSlice.Get(5)))
-						accountsBranch.Child(format.Meta("            sysVarRent", inst.AccountMetaSlice.Get(6)))
+						accountsBranch.Child(format.Meta(" wallet", inst.AccountMetaSlice.Get(2)))
+						accountsBranch.Child(format.Meta(" tokenMint", inst.AccountMetaSlice.Get(3)))
+						accountsBranch.Child(format.Meta(" systemProgram", inst.AccountMetaSlice.Get(4)))
+						accountsBranch.Child(format.Meta(" tokenProgram", inst.AccountMetaSlice.Get(5)))
+						accountsBranch.Child(format.Meta(" sysVarRent", inst.AccountMetaSlice.Get(6)))
 					})
 				})
 		})
 }
 
-func (inst Close) MarshalWithEncoder(encoder *bin.Encoder) error {
+func (inst CreateIdempotent) MarshalWithEncoder(encoder *bin.Encoder) error {
 	return encoder.WriteBytes([]byte{}, false)
 }
 
-func (inst *Close) UnmarshalWithDecoder(decoder *bin.Decoder) error {
+func (inst *CreateIdempotent) UnmarshalWithDecoder(decoder *bin.Decoder) error {
 	return nil
 }
 
-func NewCloseInstruction(
+func NewCreateIdempotentInstruction(
 	payer solana.PublicKey,
 	walletAddress solana.PublicKey,
 	splTokenMintAddress solana.PublicKey,
-) *Close {
-	return NewCloseInstructionBuilder().
+) *CreateIdempotent {
+	return NewCreateIdempotentInstructionBuilder().
 		SetPayer(payer).
 		SetWallet(walletAddress).
 		SetMint(splTokenMintAddress)

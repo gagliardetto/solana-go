@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,11 +50,10 @@ func (inst *Instruction) EncodeToTree(parent treeout.Branches) {
 }
 
 var InstructionImplDef = bin.NewVariantDefinition(
-	bin.NoTypeIDEncoding, // NOTE: the associated-token-account program has no ID encoding.
+	bin.Uint8TypeIDEncoding, // NOTE: the associated-token-account program has no ID encoding.
 	[]bin.VariantType{
-		{
-			"Create", (*Create)(nil),
-		},
+		{"Create", (*Create)(nil)},
+		{"CreateIdempotent", (*CreateIdempotent)(nil)},
 	},
 )
 
