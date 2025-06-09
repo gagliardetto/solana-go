@@ -415,7 +415,7 @@ func (mx *Message) UnmarshalBase64(b64 string) error {
 // in the actual address tables, and returns the accounts.
 // NOTE: you need to call `SetAddressTables` before calling this method,
 // so that the lookups can be associated with the accounts in the address tables.
-func (mx Message) GetAddressTableLookupAccounts() (PublicKeySlice, error) {
+func (mx *Message) GetAddressTableLookupAccounts() (PublicKeySlice, error) {
 	err := mx.checkPreconditions()
 	if err != nil {
 		return nil, err
@@ -468,7 +468,7 @@ func (mx Message) IsResolved() bool {
 }
 
 // GetAllKeys returns ALL the message's account keys (including the keys from resolved address lookup tables).
-func (mx Message) GetAllKeys() (keys PublicKeySlice, err error) {
+func (mx *Message) GetAllKeys() (keys PublicKeySlice, err error) {
 	if mx.resolved {
 		// If the message has been resolved, then the account keys have already
 		// been appended to the `AccountKeys` field of the message.
@@ -642,7 +642,7 @@ func (mx *Message) UnmarshalLegacy(decoder *bin.Decoder) (err error) {
 	return nil
 }
 
-func (m Message) checkPreconditions() error {
+func (m *Message) checkPreconditions() error {
 	// if this is versioned,
 	// and there are > 0 lookups,
 	// but the address table is empty,
@@ -654,7 +654,7 @@ func (m Message) checkPreconditions() error {
 	return nil
 }
 
-func (m Message) AccountMetaList() (AccountMetaSlice, error) {
+func (m *Message) AccountMetaList() (AccountMetaSlice, error) {
 	err := m.checkPreconditions()
 	if err != nil {
 		return nil, err
@@ -678,7 +678,7 @@ func (m Message) AccountMetaList() (AccountMetaSlice, error) {
 	return out, nil
 }
 
-func (m Message) IsVersioned() bool {
+func (m *Message) IsVersioned() bool {
 	return m.version != MessageVersionLegacy
 }
 
@@ -786,7 +786,7 @@ func (m Message) HasAccount(account PublicKey) (bool, error) {
 	return false, nil
 }
 
-func (m Message) IsSigner(account PublicKey) bool {
+func (m *Message) IsSigner(account PublicKey) bool {
 	// signers always in AccountKeys
 	for idx, acc := range m.AccountKeys {
 		if acc.Equals(account) {
@@ -802,14 +802,14 @@ func (m *Message) accountIndexIsSigner(index int) bool {
 
 // numStaticAccounts returns the number of accounts that are always present in the
 // account keys list (i.e. all the accounts that are NOT in the lookup table).
-func (m Message) numStaticAccounts() int {
+func (m *Message) numStaticAccounts() int {
 	if !m.resolved {
 		return len(m.AccountKeys)
 	}
 	return len(m.AccountKeys) - m.NumLookups()
 }
 
-func (m Message) isWritableInLookups(idx int) bool {
+func (m *Message) isWritableInLookups(idx int) bool {
 	if idx < m.numStaticAccounts() {
 		return false
 	}
@@ -841,7 +841,7 @@ func (m Message) IsWritable(account PublicKey) (bool, error) {
 }
 
 // uncheckedAccountIndexIsWritable does not check preconditions. It assumes index is an account index into the slice of resolved accounts.
-func (m Message) uncheckedAccountIndexIsWritable(index int) bool {
+func (m *Message) uncheckedAccountIndexIsWritable(index int) bool {
 	h := m.Header
 
 	if index >= m.numStaticAccounts() {
