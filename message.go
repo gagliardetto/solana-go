@@ -32,9 +32,9 @@ type MessageAddressTableLookupSlice []MessageAddressTableLookup
 // NumLookups returns the number of accounts from all the lookups.
 func (lookups MessageAddressTableLookupSlice) NumLookups() int {
 	count := 0
-	for _, lookup := range lookups {
-		count += len(lookup.ReadonlyIndexes)
-		count += len(lookup.WritableIndexes)
+	for i := range lookups {
+		count += len(lookups[i].ReadonlyIndexes)
+		count += len(lookups[i].WritableIndexes)
 	}
 	return count
 }
@@ -43,8 +43,8 @@ func (lookups MessageAddressTableLookupSlice) NumLookups() int {
 // across all the lookups (all the address tables).
 func (lookups MessageAddressTableLookupSlice) NumWritableLookups() int {
 	count := 0
-	for _, lookup := range lookups {
-		count += len(lookup.WritableIndexes)
+	for i := range lookups {
+		count += len(lookups[i].WritableIndexes)
 	}
 	return count
 }
