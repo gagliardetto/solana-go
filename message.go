@@ -790,7 +790,7 @@ func (m *Message) IsSigner(account PublicKey) bool {
 	// signers always in AccountKeys
 	for idx, acc := range m.AccountKeys {
 		if acc.Equals(account) {
-			return m.accountIndexIsSigner(index)
+			return m.accountIndexIsSigner(idx)
 		}
 	}
 	return false
@@ -810,10 +810,11 @@ func (m *Message) numStaticAccounts() int {
 }
 
 func (m *Message) isWritableInLookups(idx int) bool {
-	if idx < m.numStaticAccounts() {
+	numStaticAccts := m.numStaticAccounts()
+	if idx < numStaticAccts {
 		return false
 	}
-	return idx-m.numStaticAccounts() < m.AddressTableLookups.NumWritableLookups()
+	return idx-numStaticAccts < m.AddressTableLookups.NumWritableLookups()
 }
 
 func (m Message) IsWritable(account PublicKey) (bool, error) {
@@ -843,12 +844,13 @@ func (m Message) IsWritable(account PublicKey) (bool, error) {
 // uncheckedAccountIndexIsWritable does not check preconditions. It assumes index is an account index into the slice of resolved accounts.
 func (m *Message) uncheckedAccountIndexIsWritable(index int) bool {
 	h := m.Header
+	numStaticAccts := m.numStaticAccounts()
 
-	if index >= m.numStaticAccounts() {
+	if index >= numStaticAccts {
 		return m.isWritableInLookups(index)
 	} else if index >= int(h.NumRequiredSignatures) {
 		// unsignedAccountIndex < numWritableUnsignedAccounts
-		return index-int(h.NumRequiredSignatures) < (m.numStaticAccounts()-int(h.NumRequiredSignatures))-int(h.NumReadonlyUnsignedAccounts)
+		return index-int(h.NumRequiredSignatures) < (numStaticAccts-int(h.NumRequiredSignatures))-int(h.NumReadonlyUnsignedAccounts)
 	}
 	return index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)
 }
