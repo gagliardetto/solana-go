@@ -666,14 +666,11 @@ func (m Message) AccountMetaList() (AccountMetaSlice, error) {
 	out := make(AccountMetaSlice, len(accountKeys))
 
 	for i, a := range accountKeys {
-		isWritable, err := m.IsWritable(a)
-		if err != nil {
-			return nil, err
-		}
+		isWritable := m.uncheckedAccountIndexIsWritable(i)
 
 		out[i] = &AccountMeta{
 			PublicKey:  a,
-			IsSigner:   m.IsSigner(a),
+			IsSigner:   m.accountIndexIsSigner(i),
 			IsWritable: isWritable,
 		}
 	}
@@ -689,8 +686,8 @@ func (m Message) IsVersioned() bool {
 func (m Message) Signers() PublicKeySlice {
 	// signers always in AccountKeys
 	out := make(PublicKeySlice, 0, len(m.AccountKeys))
-	for _, a := range m.AccountKeys {
-		if m.IsSigner(a) {
+	for i, a := range m.AccountKeys {
+		if m.accountIndexIsSigner(i) {
 			out = append(out, a)
 		}
 	}
@@ -709,11 +706,8 @@ func (m Message) Writable() (out PublicKeySlice, err error) {
 		return nil, err
 	}
 
-	for _, a := range accountKeys {
-		isWritable, err := m.IsWritable(a)
-		if err != nil {
-			return nil, err
-		}
+	for i, a := range accountKeys {
+		isWritable := m.uncheckedAccountIndexIsWritable(i)
 
 		if isWritable {
 			out = append(out, a)
@@ -796,10 +790,14 @@ func (m Message) IsSigner(account PublicKey) bool {
 	// signers always in AccountKeys
 	for idx, acc := range m.AccountKeys {
 		if acc.Equals(account) {
-			return idx < int(m.Header.NumRequiredSignatures)
+			return m.accountIndexIsSigner(index)
 		}
 	}
 	return false
+}
+
+func (m *Message) accountIndexIsSigner(index int) bool {
+	return index < int(m.Header.NumRequiredSignatures)
 }
 
 // numStaticAccounts returns the number of accounts that are always present in the
@@ -839,15 +837,20 @@ func (m Message) IsWritable(account PublicKey) (bool, error) {
 	if !found {
 		return false, err
 	}
+	return m.uncheckedAccountIndexIsWritable(index), nil
+}
+
+// uncheckedAccountIndexIsWritable does not check preconditions. It assumes index is an account index into the slice of resolved accounts.
+func (m Message) uncheckedAccountIndexIsWritable(index int) bool {
 	h := m.Header
 
 	if index >= m.numStaticAccounts() {
-		return m.isWritableInLookups(index), nil
+		return m.isWritableInLookups(index)
 	} else if index >= int(h.NumRequiredSignatures) {
 		// unsignedAccountIndex < numWritableUnsignedAccounts
-		return index-int(h.NumRequiredSignatures) < (m.numStaticAccounts()-int(h.NumRequiredSignatures))-int(h.NumReadonlyUnsignedAccounts), nil
+		return index-int(h.NumRequiredSignatures) < (m.numStaticAccounts()-int(h.NumRequiredSignatures))-int(h.NumReadonlyUnsignedAccounts)
 	}
-	return index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts), nil
+	return index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)
 }
 
 func (m Message) signerKeys() PublicKeySlice {
