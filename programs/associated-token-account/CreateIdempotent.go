@@ -84,9 +84,12 @@ func (inst *CreateIdempotent) SetTokenProgramId(tokenProgramId solana.PublicKey)
 func (inst CreateIdempotent) Build() *Instruction {
 
     // Find the associatedTokenAddress;
-    associatedTokenAddress, _, _ := solana.FindAssociatedTokenAddress(
-       inst.Wallet,
-       inst.Mint,
+    associatedTokenAddress, _, _ := solana.FindProgramAddress([][]byte{
+       inst.Wallet[:],
+       inst.TokenProgramId[:],
+       inst.Mint[:],
+    },
+       solana.SPLAssociatedTokenAccountProgramID,
     )
 
     keys := []*solana.AccountMeta{
@@ -96,9 +99,14 @@ func (inst CreateIdempotent) Build() *Instruction {
           IsWritable: true,
        },
        {
-          PublicKey:  inst.Wallet,
+          PublicKey:  associatedTokenAddress,
           IsSigner:   false,
           IsWritable: true,
+       },
+       {
+          PublicKey:  inst.Wallet,
+          IsSigner:   false,
+          IsWritable: false,
        },
        {
           PublicKey:  inst.Mint,
@@ -112,11 +120,6 @@ func (inst CreateIdempotent) Build() *Instruction {
        },
        {
           PublicKey:  inst.TokenProgramId,
-          IsSigner:   false,
-          IsWritable: false,
-       },
-       {
-          PublicKey:  associatedTokenAddress,
           IsSigner:   false,
           IsWritable: false,
        },
