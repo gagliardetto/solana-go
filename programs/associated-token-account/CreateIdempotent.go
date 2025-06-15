@@ -96,14 +96,9 @@ func (inst CreateIdempotent) Build() *Instruction {
           IsWritable: true,
        },
        {
-          PublicKey:  associatedTokenAddress,
-          IsSigner:   false,
-          IsWritable: true,
-       },
-       {
           PublicKey:  inst.Wallet,
           IsSigner:   false,
-          IsWritable: false,
+          IsWritable: true,
        },
        {
           PublicKey:  inst.Mint,
@@ -117,6 +112,11 @@ func (inst CreateIdempotent) Build() *Instruction {
        },
        {
           PublicKey:  inst.TokenProgramId,
+          IsSigner:   false,
+          IsWritable: false,
+       },
+       {
+          PublicKey:  associatedTokenAddress,
           IsSigner:   false,
           IsWritable: false,
        },
