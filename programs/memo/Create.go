@@ -122,7 +122,8 @@ func (inst Create) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
 func (inst *Create) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
 	// Deserialize `Message` param:
 	{
-		err := decoder.Decode(&inst.Message)
+		var err error
+		inst.Message, err = decoder.ReadBytes(decoder.Len())
 		if err != nil {
 			return err
 		}
