@@ -831,6 +831,29 @@ func (m Message) isWritableInLookups(idx int) bool {
 	return idx-m.numStaticAccounts() < m.AddressTableLookups.NumWritableLookups()
 }
 
+// IsWritableStatic checks if the account is a writable account in the static accounts list, ignoring the accounts in the address table lookups.
+func (m *Message) IsWritableStatic(account PublicKey) bool {
+	// check only the static accounts (i.e. not the ones in the address table lookups); no check preconditions needed.
+	accountKeys := m.getStaticKeys()
+	index := 0
+	found := false
+	for idx, acc := range accountKeys {
+		if acc.Equals(account) {
+			found = true
+			index = idx
+		}
+	}
+	if !found {
+		return false
+	}
+	h := m.Header
+	if index >= int(h.NumRequiredSignatures) {
+		// unsignedAccountIndex < numWritableUnsignedAccounts
+		return index-int(h.NumRequiredSignatures) < (m.numStaticAccounts()-int(h.NumRequiredSignatures))-int(h.NumReadonlyUnsignedAccounts)
+	}
+	return index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)
+}
+
 func (m Message) IsWritable(account PublicKey) (bool, error) {
 	err := m.checkPreconditions()
 	if err != nil {
@@ -850,7 +873,7 @@ func (m Message) IsWritable(account PublicKey) (bool, error) {
 		}
 	}
 	if !found {
-		return false, err
+		return false, nil
 	}
 	h := m.Header
 
