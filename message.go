@@ -463,6 +463,19 @@ func (mx *Message) ResolveLookups() (err error) {
 	return nil
 }
 
+var ErrAlreadyResolved = fmt.Errorf("lookups already resolved")
+
+// ResolveLookupsWith resolves the address table lookups with the provided writable and readonly accounts,
+// assuming that the order of the accounts is correct.
+func (mx *Message) ResolveLookupsWith(writable, readonly PublicKeySlice) (err error) {
+	if mx.resolved {
+		return ErrAlreadyResolved
+	}
+	mx.AccountKeys = append(mx.AccountKeys, append(writable, readonly...)...)
+	mx.resolved = true
+	return nil
+}
+
 func (mx Message) IsResolved() bool {
 	return mx.resolved
 }
