@@ -24,7 +24,7 @@ import (
 	treeout "github.com/gagliardetto/treeout"
 )
 
-type Create struct {
+type CreateIdempotent struct {
 	Payer  solana.PublicKey `bin:"-" borsh_skip:"true"`
 	Wallet solana.PublicKey `bin:"-" borsh_skip:"true"`
 	Mint   solana.PublicKey `bin:"-" borsh_skip:"true"`
@@ -52,28 +52,28 @@ type Create struct {
 	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
-// NewCreateInstructionBuilder creates a new `Create` instruction builder.
-func NewCreateInstructionBuilder() *Create {
-	nd := &Create{}
+// NewCreateIdempotentInstructionBuilder creates a new `CreateIdempotent` instruction builder.
+func NewCreateIdempotentInstructionBuilder() *CreateIdempotent {
+	nd := &CreateIdempotent{}
 	return nd
 }
 
-func (inst *Create) SetPayer(payer solana.PublicKey) *Create {
+func (inst *CreateIdempotent) SetPayer(payer solana.PublicKey) *CreateIdempotent {
 	inst.Payer = payer
 	return inst
 }
 
-func (inst *Create) SetWallet(wallet solana.PublicKey) *Create {
+func (inst *CreateIdempotent) SetWallet(wallet solana.PublicKey) *CreateIdempotent {
 	inst.Wallet = wallet
 	return inst
 }
 
-func (inst *Create) SetMint(mint solana.PublicKey) *Create {
+func (inst *CreateIdempotent) SetMint(mint solana.PublicKey) *CreateIdempotent {
 	inst.Mint = mint
 	return inst
 }
 
-func (inst Create) Build() *Instruction {
+func (inst CreateIdempotent) Build() *Instruction {
 
 	// Find the associatedTokenAddress;
 	associatedTokenAddress, _, _ := solana.FindAssociatedTokenAddress(
@@ -124,21 +124,21 @@ func (inst Create) Build() *Instruction {
 
 	return &Instruction{BaseVariant: bin.BaseVariant{
 		Impl:   inst,
-		TypeID: bin.TypeIDFromUint8(Instruction_Create),
+		TypeID: bin.TypeIDFromUint8(Instruction_CreateIdempotent),
 	}}
 }
 
 // ValidateAndBuild validates the instruction accounts.
 // If there is a validation error, return the error.
 // Otherwise, build and return the instruction.
-func (inst Create) ValidateAndBuild() (*Instruction, error) {
+func (inst CreateIdempotent) ValidateAndBuild() (*Instruction, error) {
 	if err := inst.Validate(); err != nil {
 		return nil, err
 	}
 	return inst.Build(), nil
 }
 
-func (inst *Create) Validate() error {
+func (inst *CreateIdempotent) Validate() error {
 	if inst.Payer.IsZero() {
 		return errors.New("Payer not set")
 	}
@@ -159,11 +159,11 @@ func (inst *Create) Validate() error {
 	return nil
 }
 
-func (inst *Create) EncodeToTree(parent treeout.Branches) {
+func (inst *CreateIdempotent) EncodeToTree(parent treeout.Branches) {
 	parent.Child(format.Program(ProgramName, ProgramID)).
 		//
 		ParentFunc(func(programBranch treeout.Branches) {
-			programBranch.Child(format.Instruction("Create")).
+			programBranch.Child(format.Instruction("CreateIdempotent")).
 				//
 				ParentFunc(func(instructionBranch treeout.Branches) {
 
@@ -184,20 +184,20 @@ func (inst *Create) EncodeToTree(parent treeout.Branches) {
 		})
 }
 
-func (inst Create) MarshalWithEncoder(encoder *bin.Encoder) error {
+func (inst CreateIdempotent) MarshalWithEncoder(encoder *bin.Encoder) error {
 	return encoder.WriteBytes([]byte{}, false)
 }
 
-func (inst *Create) UnmarshalWithDecoder(decoder *bin.Decoder) error {
+func (inst *CreateIdempotent) UnmarshalWithDecoder(decoder *bin.Decoder) error {
 	return nil
 }
 
-func NewCreateInstruction(
+func NewCreateIdempotentInstruction(
 	payer solana.PublicKey,
 	walletAddress solana.PublicKey,
 	splTokenMintAddress solana.PublicKey,
-) *Create {
-	return NewCreateInstructionBuilder().
+) *CreateIdempotent {
+	return NewCreateIdempotentInstructionBuilder().
 		SetPayer(payer).
 		SetWallet(walletAddress).
 		SetMint(splTokenMintAddress)
