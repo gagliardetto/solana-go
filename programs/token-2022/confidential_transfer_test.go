@@ -1,6 +1,8 @@
 package token2022
 
 import (
+	"bytes"
+	"encoding/binary"
 	"reflect"
 	"strings"
 	"testing"
@@ -198,6 +200,52 @@ func TestConfidentialTransferRejectsUnsetProofLocation(t *testing.T) {
 	if _, err := NewConfidentialTransferInnerEmptyAccountInstruction(
 		ctTokenAccount, ctAuthority, nil, nilData); err == nil {
 		t.Error("builder accepted typed nil proof data")
+	}
+}
+
+func TestConfidentialTransferRawInstruction(t *testing.T) {
+	t.Parallel()
+	rawInstructionData := append(binary.LittleEndian.AppendUint64(nil, ctAmount), ctDecimals)
+	instruction, err := NewConfidentialTransferInstruction(
+		ConfidentialTransfer_Deposit, rawInstructionData,
+		*solana.Meta(ctTokenAccount).WRITE(),
+		*solana.Meta(ctMint),
+		*solana.Meta(ctAuthority).SIGNER(),
+	).ValidateAndBuild()
+	if err != nil {
+		t.Fatalf("ValidateAndBuild: %v", err)
+	}
+	encodedInstruction, err := instruction.Data()
+	if err != nil {
+		t.Fatalf("Data: %v", err)
+	}
+	expectedEncodedInstruction := append([]byte{Instruction_ConfidentialTransferExtension, ConfidentialTransfer_Deposit}, rawInstructionData...)
+	if !bytes.Equal(encodedInstruction, expectedEncodedInstruction) {
+		t.Errorf("encoded data = %x, want %x", encodedInstruction, expectedEncodedInstruction)
+	}
+
+	decodedInstruction, err := DecodeInstruction(instruction.Accounts(), encodedInstruction)
+	if err != nil {
+		t.Fatalf("DecodeInstruction: %v", err)
+	}
+	decodedCTInstruction, ok := decodedInstruction.Impl.(*ConfidentialTransferExtension)
+	if !ok {
+		t.Fatalf("decoded to %T, want *ConfidentialTransferExtension", decodedInstruction.Impl)
+	}
+	if decodedCTInstruction.SubInstruction != ConfidentialTransfer_Deposit || !bytes.Equal(decodedCTInstruction.RawData, rawInstructionData) {
+		t.Errorf("decoded raw form = (%d, %x), want (%d, %x)",
+			decodedCTInstruction.SubInstruction, decodedCTInstruction.RawData, ConfidentialTransfer_Deposit, rawInstructionData)
+	}
+	decodedInstructionData, err := decodedCTInstruction.DecodeSubInstructionData()
+	if err != nil {
+		t.Fatalf("DecodeSubInstructionData: %v", err)
+	}
+	ctDepositInstuctionData, ok := decodedInstructionData.(*ConfidentialTransferDepositData)
+	if !ok {
+		t.Fatalf("sub-instruction decoded to %T, want *ConfidentialTransferDepositData", decodedInstructionData)
+	}
+	if ctDepositInstuctionData.Amount != ctAmount || ctDepositInstuctionData.Decimals != ctDecimals {
+		t.Errorf("decoded data = %+v, want amount %d decimals %d", ctDepositInstuctionData, ctAmount, ctDecimals)
 	}
 }
 
