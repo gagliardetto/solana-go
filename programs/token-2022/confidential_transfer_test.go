@@ -194,6 +194,11 @@ func TestConfidentialTransferRejectsUnsetProofLocation(t *testing.T) {
 		ctTokenAccount, ctAuthority, nil, unset); err == nil {
 		t.Error("builder accepted zero-value proof location")
 	}
+	nilData := zkprogram.ProofLocationInstructionOffset(1, (*proofdata.ZeroCiphertextProofData)(nil))
+	if _, err := NewConfidentialTransferInnerEmptyAccountInstruction(
+		ctTokenAccount, ctAuthority, nil, nilData); err == nil {
+		t.Error("builder accepted typed nil proof data")
+	}
 }
 
 // TestConfidentialTransferMultisigSigners checks the authority only signs
