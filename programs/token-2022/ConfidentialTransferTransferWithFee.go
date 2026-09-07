@@ -3,7 +3,6 @@ package token2022
 import (
 	"fmt"
 
-	ag_binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/encryption"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/proofdata"
@@ -183,7 +182,7 @@ type ConfidentialTransferTransferWithFeeData struct {
 
 const confidentialTransferTransferWithFeeDataSize = aeCiphertextSize + 2*elGamalCiphertextSize + 5*proofOffsetSize
 
-func (d ConfidentialTransferTransferWithFeeData) MarshalBinary() ([]byte, error) {
+func (d ConfidentialTransferTransferWithFeeData) bytes() []byte {
 	out := make([]byte, 0, confidentialTransferTransferWithFeeDataSize)
 	out = append(out, d.NewSourceDecryptableAvailableBalance[:]...)
 	out = append(out, d.TransferAmountAuditorCiphertextLo[:]...)
@@ -193,7 +192,11 @@ func (d ConfidentialTransferTransferWithFeeData) MarshalBinary() ([]byte, error)
 	out = append(out, byte(d.FeeSigmaProofInstructionOffset))
 	out = append(out, byte(d.FeeCiphertextValidityProofInstructionOffset))
 	out = append(out, byte(d.RangeProofInstructionOffset))
-	return out, nil
+	return out
+}
+
+func (d ConfidentialTransferTransferWithFeeData) MarshalBinary() ([]byte, error) {
+	return d.bytes(), nil
 }
 
 func (d *ConfidentialTransferTransferWithFeeData) UnmarshalBinary(b []byte) error {
@@ -209,12 +212,4 @@ func (d *ConfidentialTransferTransferWithFeeData) UnmarshalBinary(b []byte) erro
 	d.FeeCiphertextValidityProofInstructionOffset = int8(b[167])
 	d.RangeProofInstructionOffset = int8(b[168])
 	return nil
-}
-
-func (d ConfidentialTransferTransferWithFeeData) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	return ctMarshalData(encoder, d)
-}
-
-func (d *ConfidentialTransferTransferWithFeeData) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	return ctUnmarshalData(decoder, d)
 }

@@ -1,7 +1,6 @@
 package token2022
 
 import (
-	ag_binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -51,7 +50,7 @@ func NewConfidentialTransferDisableNonConfidentialCreditsInstruction(
 
 func newBalanceCreditsInstruction(
 	subInstruction uint8,
-	data ag_binary.EncoderDecoder,
+	data ConfidentialTransferInstructionData,
 	tokenAccount solana.PublicKey,
 	authority solana.PublicKey,
 	multisigSigners []solana.PublicKey,

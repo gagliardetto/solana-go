@@ -117,9 +117,13 @@ func TestConfidentialTransferTypedDecode(t *testing.T) {
 	if !ok {
 		t.Fatalf("decoded to %T, want *ConfidentialTransferExtension", decoded.Impl)
 	}
-	deposit, ok := wrapper.Impl.(*ConfidentialTransferDepositData)
+	sub, err := wrapper.DecodeSubInstructionData()
+	if err != nil {
+		t.Fatalf("DecodeSubInstruction: %v", err)
+	}
+	deposit, ok := sub.(*ConfidentialTransferDepositData)
 	if !ok {
-		t.Fatalf("sub-instruction decoded to %T, want *ConfidentialTransferDepositData", wrapper.Impl)
+		t.Fatalf("sub-instruction decoded to %T, want *ConfidentialTransferDepositData", sub)
 	}
 	if deposit.Amount != ctAmount || deposit.Decimals != ctDecimals {
 		t.Errorf("decoded data = %+v, want amount %d decimals %d", deposit, ctAmount, ctDecimals)
@@ -139,8 +143,11 @@ func TestConfidentialTransferDecodeRejectsMalformed(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			var inst ConfidentialTransferExtension
-			if err := inst.UnmarshalWithDecoder(ag_binary.NewBinDecoder(tc.data)); err == nil {
-				t.Error("UnmarshalWithDecoder accepted malformed instruction")
+			if err := inst.UnmarshalWithDecoder(ag_binary.NewBinDecoder(tc.data)); err != nil {
+				t.Fatalf("UnmarshalWithDecoder: %v", err)
+			}
+			if _, err := inst.DecodeSubInstructionData(); err == nil {
+				t.Error("DecodeSubInstructionData accepted malformed sub-instruction data")
 			}
 		})
 	}

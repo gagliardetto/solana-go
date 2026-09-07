@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	ag_binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/encryption"
 )
@@ -46,11 +45,15 @@ type ConfidentialTransferApplyPendingBalanceData struct {
 
 const confidentialTransferApplyPendingBalanceDataSize = u64Size + aeCiphertextSize
 
-func (d ConfidentialTransferApplyPendingBalanceData) MarshalBinary() ([]byte, error) {
+func (d ConfidentialTransferApplyPendingBalanceData) bytes() []byte {
 	out := make([]byte, 0, confidentialTransferApplyPendingBalanceDataSize)
 	out = binary.LittleEndian.AppendUint64(out, d.ExpectedPendingBalanceCreditCounter)
 	out = append(out, d.NewDecryptableAvailableBalance[:]...)
-	return out, nil
+	return out
+}
+
+func (d ConfidentialTransferApplyPendingBalanceData) MarshalBinary() ([]byte, error) {
+	return d.bytes(), nil
 }
 
 func (d *ConfidentialTransferApplyPendingBalanceData) UnmarshalBinary(b []byte) error {
@@ -60,12 +63,4 @@ func (d *ConfidentialTransferApplyPendingBalanceData) UnmarshalBinary(b []byte) 
 	d.ExpectedPendingBalanceCreditCounter = binary.LittleEndian.Uint64(b[:8])
 	copy(d.NewDecryptableAvailableBalance[:], b[8:])
 	return nil
-}
-
-func (d ConfidentialTransferApplyPendingBalanceData) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	return ctMarshalData(encoder, d)
-}
-
-func (d *ConfidentialTransferApplyPendingBalanceData) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	return ctUnmarshalData(decoder, d)
 }

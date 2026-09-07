@@ -1,7 +1,6 @@
 package token2022
 
 import (
-	ag_binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -24,12 +23,10 @@ func NewConfidentialTransferConfigureAccountWithRegistryInstruction(
 		)
 	}
 	return &ConfidentialTransferExtension{
-		BaseVariant: ag_binary.BaseVariant{
-			TypeID: ag_binary.TypeIDFromUint8(ConfidentialTransfer_ConfigureAccountWithRegistry),
-			Impl:   &ConfidentialTransferConfigureAccountWithRegistryData{},
-		},
-		Accounts: accounts,
-		Signers:  make(solana.AccountMetaSlice, 0),
+		SubInstruction: ConfidentialTransfer_ConfigureAccountWithRegistry,
+		RawData:        ConfidentialTransferConfigureAccountWithRegistryData{}.bytes(),
+		Accounts:       accounts,
+		Signers:        make(solana.AccountMetaSlice, 0),
 	}
 }
 

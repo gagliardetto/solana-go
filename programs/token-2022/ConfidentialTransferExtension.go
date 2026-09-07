@@ -1,7 +1,9 @@
 package token2022
 
 import (
+	"encoding"
 	"errors"
+	"fmt"
 
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
@@ -28,65 +30,65 @@ const (
 	ConfidentialTransfer_ConfigureAccountWithRegistry
 )
 
+const (
+	// Deprecated: sub-instruction 13 is TransferWithFee; use
+	// ConfidentialTransfer_TransferWithFee.
+	ConfidentialTransfer_TransferWithSplitProofs = ConfidentialTransfer_TransferWithFee
+	// Deprecated: sub-instruction 14 is ConfigureAccountWithRegistry; use
+	// ConfidentialTransfer_ConfigureAccountWithRegistry.
+	ConfidentialTransfer_TransferWithSplitProofsInParallel = ConfidentialTransfer_ConfigureAccountWithRegistry
+)
+
+// ConfidentialTransferInstructionData is the data of a ConfidentialTransfer
+// sub-instruction, implemented by the ConfidentialTransfer*Data structs.
+type ConfidentialTransferInstructionData interface {
+	encoding.BinaryMarshaler
+	encoding.BinaryUnmarshaler
+	bytes() []byte
+}
+
+// ctSubInstructions describes every ConfidentialTransfer sub-instruction.
+var ctSubInstructions = [...]struct {
+	name    string
+	newData func() ConfidentialTransferInstructionData
+}{
+	ConfidentialTransfer_InitializeMint:      {"InitializeMint", func() ConfidentialTransferInstructionData { return &ConfidentialTransferInitializeMintData{} }},
+	ConfidentialTransfer_UpdateMint:          {"UpdateMint", func() ConfidentialTransferInstructionData { return &ConfidentialTransferUpdateMintData{} }},
+	ConfidentialTransfer_ConfigureAccount:    {"ConfigureAccount", func() ConfidentialTransferInstructionData { return &ConfidentialTransferConfigureAccountData{} }},
+	ConfidentialTransfer_ApproveAccount:      {"ApproveAccount", func() ConfidentialTransferInstructionData { return &ConfidentialTransferApproveAccountData{} }},
+	ConfidentialTransfer_EmptyAccount:        {"EmptyAccount", func() ConfidentialTransferInstructionData { return &ConfidentialTransferEmptyAccountData{} }},
+	ConfidentialTransfer_Deposit:             {"Deposit", func() ConfidentialTransferInstructionData { return &ConfidentialTransferDepositData{} }},
+	ConfidentialTransfer_Withdraw:            {"Withdraw", func() ConfidentialTransferInstructionData { return &ConfidentialTransferWithdrawData{} }},
+	ConfidentialTransfer_Transfer:            {"Transfer", func() ConfidentialTransferInstructionData { return &ConfidentialTransferTransferData{} }},
+	ConfidentialTransfer_ApplyPendingBalance: {"ApplyPendingBalance", func() ConfidentialTransferInstructionData { return &ConfidentialTransferApplyPendingBalanceData{} }},
+	ConfidentialTransfer_EnableConfidentialCredits: {"EnableConfidentialCredits", func() ConfidentialTransferInstructionData {
+		return &ConfidentialTransferEnableConfidentialCreditsData{}
+	}},
+	ConfidentialTransfer_DisableConfidentialCredits: {"DisableConfidentialCredits", func() ConfidentialTransferInstructionData {
+		return &ConfidentialTransferDisableConfidentialCreditsData{}
+	}},
+	ConfidentialTransfer_EnableNonConfidentialCredits: {"EnableNonConfidentialCredits", func() ConfidentialTransferInstructionData {
+		return &ConfidentialTransferEnableNonConfidentialCreditsData{}
+	}},
+	ConfidentialTransfer_DisableNonConfidentialCredits: {"DisableNonConfidentialCredits", func() ConfidentialTransferInstructionData {
+		return &ConfidentialTransferDisableNonConfidentialCreditsData{}
+	}},
+	ConfidentialTransfer_TransferWithFee: {"TransferWithFee", func() ConfidentialTransferInstructionData { return &ConfidentialTransferTransferWithFeeData{} }},
+	ConfidentialTransfer_ConfigureAccountWithRegistry: {"ConfigureAccountWithRegistry", func() ConfidentialTransferInstructionData {
+		return &ConfidentialTransferConfigureAccountWithRegistryData{}
+	}},
+}
+
 // ConfidentialTransferExtension is the instruction wrapper for the ConfidentialTransfer extension (ID 27).
 // This is a complex extension with many sub-instructions involving zero-knowledge proofs.
 type ConfidentialTransferExtension struct {
-	ag_binary.BaseVariant
+	SubInstruction uint8
+	// Raw data for the sub-instruction.
+	RawData []byte
 
 	Accounts ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 	Signers  ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
-
-var ConfidentialTransferImplDef = ag_binary.NewVariantDefinition(
-	ag_binary.Uint8TypeIDEncoding,
-	[]ag_binary.VariantType{
-		{
-			Name: "InitializeMint", Type: (*ConfidentialTransferInitializeMintData)(nil),
-		},
-		{
-			Name: "UpdateMint", Type: (*ConfidentialTransferUpdateMintData)(nil),
-		},
-		{
-			Name: "ConfigureAccount", Type: (*ConfidentialTransferConfigureAccountData)(nil),
-		},
-		{
-			Name: "ApproveAccount", Type: (*ConfidentialTransferApproveAccountData)(nil),
-		},
-		{
-			Name: "EmptyAccount", Type: (*ConfidentialTransferEmptyAccountData)(nil),
-		},
-		{
-			Name: "Deposit", Type: (*ConfidentialTransferDepositData)(nil),
-		},
-		{
-			Name: "Withdraw", Type: (*ConfidentialTransferWithdrawData)(nil),
-		},
-		{
-			Name: "Transfer", Type: (*ConfidentialTransferTransferData)(nil),
-		},
-		{
-			Name: "ApplyPendingBalance", Type: (*ConfidentialTransferApplyPendingBalanceData)(nil),
-		},
-		{
-			Name: "EnableConfidentialCredits", Type: (*ConfidentialTransferEnableConfidentialCreditsData)(nil),
-		},
-		{
-			Name: "DisableConfidentialCredits", Type: (*ConfidentialTransferDisableConfidentialCreditsData)(nil),
-		},
-		{
-			Name: "EnableNonConfidentialCredits", Type: (*ConfidentialTransferEnableNonConfidentialCreditsData)(nil),
-		},
-		{
-			Name: "DisableNonConfidentialCredits", Type: (*ConfidentialTransferDisableNonConfidentialCreditsData)(nil),
-		},
-		{
-			Name: "TransferWithFee", Type: (*ConfidentialTransferTransferWithFeeData)(nil),
-		},
-		{
-			Name: "ConfigureAccountWithRegistry", Type: (*ConfidentialTransferConfigureAccountWithRegistryData)(nil),
-		},
-	},
-)
 
 func (obj *ConfidentialTransferExtension) SetAccounts(accounts []*ag_solanago.AccountMeta) error {
 	obj.Accounts = ag_solanago.AccountMetaSlice(accounts)
@@ -97,6 +99,26 @@ func (slice ConfidentialTransferExtension) GetAccounts() (accounts []*ag_solanag
 	accounts = append(accounts, slice.Accounts...)
 	accounts = append(accounts, slice.Signers...)
 	return
+}
+
+// DecodeSubInstructionData outputs the typed instruction data for SubInstruction.
+func (obj ConfidentialTransferExtension) DecodeSubInstructionData() (ConfidentialTransferInstructionData, error) {
+	if int(obj.SubInstruction) >= len(ctSubInstructions) {
+		return nil, fmt.Errorf("token2022: unknown ConfidentialTransfer sub-instruction %d", obj.SubInstruction)
+	}
+	instructionData := ctSubInstructions[obj.SubInstruction].newData()
+	if err := instructionData.UnmarshalBinary(obj.RawData); err != nil {
+		return nil, err
+	}
+	return instructionData, nil
+}
+
+// subInstructionName is the name of SubInstruction, or "Unknown" for an ID the program does not define.
+func (obj ConfidentialTransferExtension) subInstructionName() string {
+	if int(obj.SubInstruction) >= len(ctSubInstructions) {
+		return "Unknown"
+	}
+	return ctSubInstructions[obj.SubInstruction].name
 }
 
 func (inst ConfidentialTransferExtension) Build() *Instruction {
@@ -114,9 +136,6 @@ func (inst ConfidentialTransferExtension) ValidateAndBuild() (*Instruction, erro
 }
 
 func (inst *ConfidentialTransferExtension) Validate() error {
-	if inst.Impl == nil {
-		return errors.New("sub-instruction data is not set")
-	}
 	if len(inst.Accounts) == 0 {
 		return errors.New("accounts is empty")
 	}
@@ -124,36 +143,68 @@ func (inst *ConfidentialTransferExtension) Validate() error {
 }
 
 func (inst *ConfidentialTransferExtension) EncodeToTree(parent ag_treeout.Branches) {
-	names := []string{
-		"InitializeMint", "UpdateMint", "ConfigureAccount", "ApproveAccount",
-		"EmptyAccount", "Deposit", "Withdraw", "Transfer",
-		"ApplyPendingBalance", "EnableConfidentialCredits", "DisableConfidentialCredits",
-		"EnableNonConfidentialCredits", "DisableNonConfidentialCredits",
-		"TransferWithFee", "ConfigureAccountWithRegistry",
-	}
-	name := "Unknown"
-	if id := int(inst.TypeID.Uint8()); id < len(names) {
-		name = names[id]
-	}
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("ConfidentialTransfer." + name)).
+			programBranch.Child(ag_format.Instruction("ConfidentialTransfer." + inst.subInstructionName())).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("Data", inst.Impl))
+						if ctData, err := inst.DecodeSubInstructionData(); err == nil {
+							paramsBranch.Child(ag_format.Param("Data", ctData))
+						} else {
+							// Fall back to the payload length for malformed instruction data.
+							paramsBranch.Child(ag_format.Param("RawData (len)", len(inst.RawData)))
+						}
 					})
 				})
 		})
 }
 
-func (obj ConfidentialTransferExtension) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	err := encoder.WriteUint8(obj.TypeID.Uint8())
+func (obj ConfidentialTransferExtension) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	err = encoder.WriteUint8(obj.SubInstruction)
 	if err != nil {
 		return err
 	}
-	return encoder.Encode(obj.Impl)
+	if len(obj.RawData) > 0 {
+		err = encoder.WriteBytes(obj.RawData, false)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func (obj *ConfidentialTransferExtension) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	return obj.BaseVariant.UnmarshalBinaryVariant(decoder, ConfidentialTransferImplDef)
+func (obj *ConfidentialTransferExtension) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	obj.SubInstruction, err = decoder.ReadUint8()
+	if err != nil {
+		return err
+	}
+	remaining := decoder.Remaining()
+	if remaining > 0 {
+		obj.RawData, err = decoder.ReadNBytes(remaining)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// NewConfidentialTransferInstruction creates a confidential transfer extension
+// instruction from an raw sub-instruction payload.
+//
+// Prefer the typed NewConfidentialTransfer*Instruction builders.
+func NewConfidentialTransferInstruction(
+	subInstruction uint8,
+	rawData []byte,
+	accounts ...ag_solanago.AccountMeta,
+) *ConfidentialTransferExtension {
+	inst := &ConfidentialTransferExtension{
+		SubInstruction: subInstruction,
+		RawData:        rawData,
+		Accounts:       make(ag_solanago.AccountMetaSlice, len(accounts)),
+		Signers:        make(ag_solanago.AccountMetaSlice, 0),
+	}
+	for i := range accounts {
+		inst.Accounts[i] = &accounts[i]
+	}
+	return inst
 }

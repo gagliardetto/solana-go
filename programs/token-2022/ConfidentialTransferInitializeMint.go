@@ -3,7 +3,6 @@ package token2022
 import (
 	"fmt"
 
-	ag_binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/encryption"
 )
@@ -29,12 +28,10 @@ func NewConfidentialTransferInitializeMintInstruction(
 		data.AuditorElGamalPubkey = *auditorElGamalPubkey
 	}
 	return &ConfidentialTransferExtension{
-		BaseVariant: ag_binary.BaseVariant{
-			TypeID: ag_binary.TypeIDFromUint8(ConfidentialTransfer_InitializeMint),
-			Impl:   &data,
-		},
-		Accounts: solana.AccountMetaSlice{solana.Meta(mint).WRITE()},
-		Signers:  make(solana.AccountMetaSlice, 0),
+		SubInstruction: ConfidentialTransfer_InitializeMint,
+		RawData:        data.bytes(),
+		Accounts:       solana.AccountMetaSlice{solana.Meta(mint).WRITE()},
+		Signers:        make(solana.AccountMetaSlice, 0),
 	}
 }
 
@@ -53,12 +50,16 @@ type ConfidentialTransferInitializeMintData struct {
 
 const confidentialTransferInitializeMintDataSize = accountKeySize + boolSize + elGamalPubkeySize
 
-func (d ConfidentialTransferInitializeMintData) MarshalBinary() ([]byte, error) {
+func (d ConfidentialTransferInitializeMintData) bytes() []byte {
 	out := make([]byte, 0, confidentialTransferInitializeMintDataSize)
 	out = append(out, d.Authority[:]...)
 	out = append(out, boolToByte(d.AutoApproveNewAccounts))
 	out = append(out, d.AuditorElGamalPubkey[:]...)
-	return out, nil
+	return out
+}
+
+func (d ConfidentialTransferInitializeMintData) MarshalBinary() ([]byte, error) {
+	return d.bytes(), nil
 }
 
 func (d *ConfidentialTransferInitializeMintData) UnmarshalBinary(b []byte) error {
@@ -69,12 +70,4 @@ func (d *ConfidentialTransferInitializeMintData) UnmarshalBinary(b []byte) error
 	d.AutoApproveNewAccounts = b[32] != 0
 	copy(d.AuditorElGamalPubkey[:], b[33:])
 	return nil
-}
-
-func (d ConfidentialTransferInitializeMintData) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	return ctMarshalData(encoder, d)
-}
-
-func (d *ConfidentialTransferInitializeMintData) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	return ctUnmarshalData(decoder, d)
 }

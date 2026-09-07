@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	ag_binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 )
 
@@ -42,12 +41,14 @@ type ConfidentialTransferDepositData struct {
 
 const confidentialTransferDepositDataSize = u64Size + u8Size
 
-func (d ConfidentialTransferDepositData) MarshalBinary() ([]byte, error) {
+func (d ConfidentialTransferDepositData) bytes() []byte {
 	out := make([]byte, 0, confidentialTransferDepositDataSize)
 	out = binary.LittleEndian.AppendUint64(out, d.Amount)
 	out = append(out, d.Decimals)
-	return out, nil
+	return out
 }
+
+func (d ConfidentialTransferDepositData) MarshalBinary() ([]byte, error) { return d.bytes(), nil }
 
 func (d *ConfidentialTransferDepositData) UnmarshalBinary(b []byte) error {
 	if len(b) != confidentialTransferDepositDataSize {
@@ -56,12 +57,4 @@ func (d *ConfidentialTransferDepositData) UnmarshalBinary(b []byte) error {
 	d.Amount = binary.LittleEndian.Uint64(b[:8])
 	d.Decimals = b[8]
 	return nil
-}
-
-func (d ConfidentialTransferDepositData) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	return ctMarshalData(encoder, d)
-}
-
-func (d *ConfidentialTransferDepositData) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	return ctUnmarshalData(decoder, d)
 }

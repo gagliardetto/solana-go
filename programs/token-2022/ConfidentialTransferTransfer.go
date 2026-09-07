@@ -3,7 +3,6 @@ package token2022
 import (
 	"fmt"
 
-	ag_binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/encryption"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/proofdata"
@@ -141,7 +140,7 @@ type ConfidentialTransferTransferData struct {
 
 const confidentialTransferTransferDataSize = aeCiphertextSize + 2*elGamalCiphertextSize + 3*proofOffsetSize
 
-func (d ConfidentialTransferTransferData) MarshalBinary() ([]byte, error) {
+func (d ConfidentialTransferTransferData) bytes() []byte {
 	out := make([]byte, 0, confidentialTransferTransferDataSize)
 	out = append(out, d.NewSourceDecryptableAvailableBalance[:]...)
 	out = append(out, d.TransferAmountAuditorCiphertextLo[:]...)
@@ -149,8 +148,10 @@ func (d ConfidentialTransferTransferData) MarshalBinary() ([]byte, error) {
 	out = append(out, byte(d.EqualityProofInstructionOffset))
 	out = append(out, byte(d.CiphertextValidityProofInstructionOffset))
 	out = append(out, byte(d.RangeProofInstructionOffset))
-	return out, nil
+	return out
 }
+
+func (d ConfidentialTransferTransferData) MarshalBinary() ([]byte, error) { return d.bytes(), nil }
 
 func (d *ConfidentialTransferTransferData) UnmarshalBinary(b []byte) error {
 	if len(b) != confidentialTransferTransferDataSize {
@@ -163,12 +164,4 @@ func (d *ConfidentialTransferTransferData) UnmarshalBinary(b []byte) error {
 	d.CiphertextValidityProofInstructionOffset = int8(b[165])
 	d.RangeProofInstructionOffset = int8(b[166])
 	return nil
-}
-
-func (d ConfidentialTransferTransferData) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	return ctMarshalData(encoder, d)
-}
-
-func (d *ConfidentialTransferTransferData) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	return ctUnmarshalData(decoder, d)
 }

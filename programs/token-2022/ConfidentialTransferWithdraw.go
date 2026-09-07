@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	ag_binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/encryption"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/proofdata"
@@ -113,15 +112,17 @@ type ConfidentialTransferWithdrawData struct {
 
 const confidentialTransferWithdrawDataSize = u64Size + u8Size + aeCiphertextSize + 2*proofOffsetSize
 
-func (d ConfidentialTransferWithdrawData) MarshalBinary() ([]byte, error) {
+func (d ConfidentialTransferWithdrawData) bytes() []byte {
 	out := make([]byte, 0, confidentialTransferWithdrawDataSize)
 	out = binary.LittleEndian.AppendUint64(out, d.Amount)
 	out = append(out, d.Decimals)
 	out = append(out, d.NewDecryptableAvailableBalance[:]...)
 	out = append(out, byte(d.EqualityProofInstructionOffset))
 	out = append(out, byte(d.RangeProofInstructionOffset))
-	return out, nil
+	return out
 }
+
+func (d ConfidentialTransferWithdrawData) MarshalBinary() ([]byte, error) { return d.bytes(), nil }
 
 func (d *ConfidentialTransferWithdrawData) UnmarshalBinary(b []byte) error {
 	if len(b) != confidentialTransferWithdrawDataSize {
@@ -133,12 +134,4 @@ func (d *ConfidentialTransferWithdrawData) UnmarshalBinary(b []byte) error {
 	d.EqualityProofInstructionOffset = int8(b[45])
 	d.RangeProofInstructionOffset = int8(b[46])
 	return nil
-}
-
-func (d ConfidentialTransferWithdrawData) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	return ctMarshalData(encoder, d)
-}
-
-func (d *ConfidentialTransferWithdrawData) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	return ctUnmarshalData(decoder, d)
 }

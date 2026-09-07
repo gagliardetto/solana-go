@@ -3,7 +3,6 @@ package token2022
 import (
 	"fmt"
 
-	ag_binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/encryption"
 )
@@ -45,12 +44,14 @@ type ConfidentialTransferUpdateMintData struct {
 
 const confidentialTransferUpdateMintDataSize = boolSize + elGamalPubkeySize
 
-func (d ConfidentialTransferUpdateMintData) MarshalBinary() ([]byte, error) {
+func (d ConfidentialTransferUpdateMintData) bytes() []byte {
 	out := make([]byte, 0, confidentialTransferUpdateMintDataSize)
 	out = append(out, boolToByte(d.AutoApproveNewAccounts))
 	out = append(out, d.AuditorElGamalPubkey[:]...)
-	return out, nil
+	return out
 }
+
+func (d ConfidentialTransferUpdateMintData) MarshalBinary() ([]byte, error) { return d.bytes(), nil }
 
 func (d *ConfidentialTransferUpdateMintData) UnmarshalBinary(b []byte) error {
 	if len(b) != confidentialTransferUpdateMintDataSize {
@@ -59,12 +60,4 @@ func (d *ConfidentialTransferUpdateMintData) UnmarshalBinary(b []byte) error {
 	d.AutoApproveNewAccounts = b[0] != 0
 	copy(d.AuditorElGamalPubkey[:], b[1:])
 	return nil
-}
-
-func (d ConfidentialTransferUpdateMintData) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
-	return ctMarshalData(encoder, d)
-}
-
-func (d *ConfidentialTransferUpdateMintData) UnmarshalWithDecoder(decoder *ag_binary.Decoder) error {
-	return ctUnmarshalData(decoder, d)
 }
