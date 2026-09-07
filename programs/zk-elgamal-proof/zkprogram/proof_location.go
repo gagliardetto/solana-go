@@ -2,6 +2,7 @@ package zkprogram
 
 import (
 	"errors"
+	"reflect"
 
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/proofdata"
@@ -37,10 +38,25 @@ func (l ProofLocation[T]) ProofData() T { return l.proofData }
 func (l ProofLocation[T]) ContextStateAccount() solana.PublicKey { return l.contextStateAccount }
 
 // Validate rejects the zero value, which names neither a sibling instruction
-// nor a context state account.
+// nor a context state account, and the instruction offset form with nil proof
+// data.
 func (l ProofLocation[T]) Validate() error {
-	if !l.IsInstructionOffset() && l.contextStateAccount.IsZero() {
-		return errors.New("zk: proof location is not set")
+	if !l.IsInstructionOffset() {
+		if l.contextStateAccount.IsZero() {
+			return errors.New("zk: proof location is not set")
+		}
+		return nil
+	}
+	if isNilProofData(l.proofData) {
+		return errors.New("zk: proof location has no proof data")
 	}
 	return nil
+}
+
+func isNilProofData(data proofdata.ProofData) bool {
+	if data == nil {
+		return true
+	}
+	v := reflect.ValueOf(data)
+	return v.Kind() == reflect.Pointer && v.IsNil()
 }
