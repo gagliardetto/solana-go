@@ -19,7 +19,7 @@ func NewConfidentialTransferDepositInstruction(
 	multisigSigners []solana.PublicKey,
 ) *ConfidentialTransferExtension {
 	data := ConfidentialTransferDepositData{Amount: amount, Decimals: decimals}
-	return newConfidentialTransferInstruction(
+	return newConfidentialTransferSubInstruction(
 		ConfidentialTransfer_Deposit,
 		&data,
 		solana.AccountMetaSlice{
@@ -31,7 +31,7 @@ func NewConfidentialTransferDepositInstruction(
 	)
 }
 
-// ConfidentialTransferDepositData is the instruction data for ConfidentialTransfer.Deposit.
+// ConfidentialTransferDepositData is the instruction data for ConfidentialTransfer_Deposit.
 type ConfidentialTransferDepositData struct {
 	// Amount is the amount of tokens to deposit.
 	Amount uint64

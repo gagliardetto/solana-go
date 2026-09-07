@@ -39,9 +39,9 @@ const (
 	ConfidentialTransfer_TransferWithSplitProofsInParallel = ConfidentialTransfer_ConfigureAccountWithRegistry
 )
 
-// ConfidentialTransferInstructionData is the data of a ConfidentialTransfer
+// ConfidentialTransferSubInstructionData is the data of a ConfidentialTransfer
 // sub-instruction, implemented by the ConfidentialTransfer*Data structs.
-type ConfidentialTransferInstructionData interface {
+type ConfidentialTransferSubInstructionData interface {
 	encoding.BinaryMarshaler
 	encoding.BinaryUnmarshaler
 	bytes() []byte
@@ -50,31 +50,31 @@ type ConfidentialTransferInstructionData interface {
 // ctSubInstructions describes every ConfidentialTransfer sub-instruction.
 var ctSubInstructions = [...]struct {
 	name    string
-	newData func() ConfidentialTransferInstructionData
+	newData func() ConfidentialTransferSubInstructionData
 }{
-	ConfidentialTransfer_InitializeMint:      {"InitializeMint", func() ConfidentialTransferInstructionData { return &ConfidentialTransferInitializeMintData{} }},
-	ConfidentialTransfer_UpdateMint:          {"UpdateMint", func() ConfidentialTransferInstructionData { return &ConfidentialTransferUpdateMintData{} }},
-	ConfidentialTransfer_ConfigureAccount:    {"ConfigureAccount", func() ConfidentialTransferInstructionData { return &ConfidentialTransferConfigureAccountData{} }},
-	ConfidentialTransfer_ApproveAccount:      {"ApproveAccount", func() ConfidentialTransferInstructionData { return &ConfidentialTransferApproveAccountData{} }},
-	ConfidentialTransfer_EmptyAccount:        {"EmptyAccount", func() ConfidentialTransferInstructionData { return &ConfidentialTransferEmptyAccountData{} }},
-	ConfidentialTransfer_Deposit:             {"Deposit", func() ConfidentialTransferInstructionData { return &ConfidentialTransferDepositData{} }},
-	ConfidentialTransfer_Withdraw:            {"Withdraw", func() ConfidentialTransferInstructionData { return &ConfidentialTransferWithdrawData{} }},
-	ConfidentialTransfer_Transfer:            {"Transfer", func() ConfidentialTransferInstructionData { return &ConfidentialTransferTransferData{} }},
-	ConfidentialTransfer_ApplyPendingBalance: {"ApplyPendingBalance", func() ConfidentialTransferInstructionData { return &ConfidentialTransferApplyPendingBalanceData{} }},
-	ConfidentialTransfer_EnableConfidentialCredits: {"EnableConfidentialCredits", func() ConfidentialTransferInstructionData {
+	ConfidentialTransfer_InitializeMint:      {"InitializeMint", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferInitializeMintData{} }},
+	ConfidentialTransfer_UpdateMint:          {"UpdateMint", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferUpdateMintData{} }},
+	ConfidentialTransfer_ConfigureAccount:    {"ConfigureAccount", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferConfigureAccountData{} }},
+	ConfidentialTransfer_ApproveAccount:      {"ApproveAccount", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferApproveAccountData{} }},
+	ConfidentialTransfer_EmptyAccount:        {"EmptyAccount", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferEmptyAccountData{} }},
+	ConfidentialTransfer_Deposit:             {"Deposit", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferDepositData{} }},
+	ConfidentialTransfer_Withdraw:            {"Withdraw", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferWithdrawData{} }},
+	ConfidentialTransfer_Transfer:            {"Transfer", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferTransferData{} }},
+	ConfidentialTransfer_ApplyPendingBalance: {"ApplyPendingBalance", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferApplyPendingBalanceData{} }},
+	ConfidentialTransfer_EnableConfidentialCredits: {"EnableConfidentialCredits", func() ConfidentialTransferSubInstructionData {
 		return &ConfidentialTransferEnableConfidentialCreditsData{}
 	}},
-	ConfidentialTransfer_DisableConfidentialCredits: {"DisableConfidentialCredits", func() ConfidentialTransferInstructionData {
+	ConfidentialTransfer_DisableConfidentialCredits: {"DisableConfidentialCredits", func() ConfidentialTransferSubInstructionData {
 		return &ConfidentialTransferDisableConfidentialCreditsData{}
 	}},
-	ConfidentialTransfer_EnableNonConfidentialCredits: {"EnableNonConfidentialCredits", func() ConfidentialTransferInstructionData {
+	ConfidentialTransfer_EnableNonConfidentialCredits: {"EnableNonConfidentialCredits", func() ConfidentialTransferSubInstructionData {
 		return &ConfidentialTransferEnableNonConfidentialCreditsData{}
 	}},
-	ConfidentialTransfer_DisableNonConfidentialCredits: {"DisableNonConfidentialCredits", func() ConfidentialTransferInstructionData {
+	ConfidentialTransfer_DisableNonConfidentialCredits: {"DisableNonConfidentialCredits", func() ConfidentialTransferSubInstructionData {
 		return &ConfidentialTransferDisableNonConfidentialCreditsData{}
 	}},
-	ConfidentialTransfer_TransferWithFee: {"TransferWithFee", func() ConfidentialTransferInstructionData { return &ConfidentialTransferTransferWithFeeData{} }},
-	ConfidentialTransfer_ConfigureAccountWithRegistry: {"ConfigureAccountWithRegistry", func() ConfidentialTransferInstructionData {
+	ConfidentialTransfer_TransferWithFee: {"TransferWithFee", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferTransferWithFeeData{} }},
+	ConfidentialTransfer_ConfigureAccountWithRegistry: {"ConfigureAccountWithRegistry", func() ConfidentialTransferSubInstructionData {
 		return &ConfidentialTransferConfigureAccountWithRegistryData{}
 	}},
 }
@@ -102,7 +102,7 @@ func (slice ConfidentialTransferExtension) GetAccounts() (accounts []*ag_solanag
 }
 
 // DecodeSubInstructionData outputs the typed instruction data for SubInstruction.
-func (obj ConfidentialTransferExtension) DecodeSubInstructionData() (ConfidentialTransferInstructionData, error) {
+func (obj ConfidentialTransferExtension) DecodeSubInstructionData() (ConfidentialTransferSubInstructionData, error) {
 	if int(obj.SubInstruction) >= len(ctSubInstructions) {
 		return nil, fmt.Errorf("token2022: unknown ConfidentialTransfer sub-instruction %d", obj.SubInstruction)
 	}

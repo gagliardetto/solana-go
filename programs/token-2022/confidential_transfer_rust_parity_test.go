@@ -71,19 +71,19 @@ func ctBuilders() map[string]func() ([]solana.Instruction, error) {
 			return NewConfidentialTransferConfigureAccountInstructions(
 				ctTokenAccount, ctMint, ctDecryptableBalance, ctMaxPendingCounter,
 				ctAuthority, nil,
-				zkprogram.ProofLocationOffset(1, &proofdata.PubkeyValidityProofData{}))
+				zkprogram.ProofLocationInstructionOffset(1, &proofdata.PubkeyValidityProofData{}))
 		},
 		"configure_account_context": func() ([]solana.Instruction, error) {
 			return NewConfidentialTransferConfigureAccountInstructions(
 				ctTokenAccount, ctMint, ctDecryptableBalance, ctMaxPendingCounter,
 				ctAuthority, nil,
-				zkprogram.ProofLocationContextState[*proofdata.PubkeyValidityProofData](ctContextSingle))
+				zkprogram.ProofLocationContextStateAccount[*proofdata.PubkeyValidityProofData](ctContextSingle))
 		},
 		"inner_configure_account_offset_minus_1": func() ([]solana.Instruction, error) {
-			return single(NewConfidentialTransferConfigureAccountInstruction(
+			return single(NewConfidentialTransferInnerConfigureAccountInstruction(
 				ctTokenAccount, ctMint, ctDecryptableBalance, ctMaxPendingCounter,
 				ctAuthority, nil,
-				zkprogram.ProofLocationOffset(-1, &proofdata.PubkeyValidityProofData{})))
+				zkprogram.ProofLocationInstructionOffset(-1, &proofdata.PubkeyValidityProofData{})))
 		},
 		"approve_account": func() ([]solana.Instruction, error) {
 			return noErr(NewConfidentialTransferApproveAccountInstruction(
@@ -92,12 +92,12 @@ func ctBuilders() map[string]func() ([]solana.Instruction, error) {
 		"empty_account_offset": func() ([]solana.Instruction, error) {
 			return NewConfidentialTransferEmptyAccountInstructions(
 				ctTokenAccount, ctAuthority, nil,
-				zkprogram.ProofLocationOffset(1, &proofdata.ZeroCiphertextProofData{}))
+				zkprogram.ProofLocationInstructionOffset(1, &proofdata.ZeroCiphertextProofData{}))
 		},
 		"empty_account_context": func() ([]solana.Instruction, error) {
 			return NewConfidentialTransferEmptyAccountInstructions(
 				ctTokenAccount, ctAuthority, nil,
-				zkprogram.ProofLocationContextState[*proofdata.ZeroCiphertextProofData](ctContextSingle))
+				zkprogram.ProofLocationContextStateAccount[*proofdata.ZeroCiphertextProofData](ctContextSingle))
 		},
 		"deposit": func() ([]solana.Instruction, error) {
 			return noErr(NewConfidentialTransferDepositInstruction(
@@ -111,38 +111,38 @@ func ctBuilders() map[string]func() ([]solana.Instruction, error) {
 			return NewConfidentialTransferWithdrawInstructions(
 				ctTokenAccount, ctMint, ctAmount, ctDecimals, ctDecryptableBalance,
 				ctAuthority, nil,
-				zkprogram.ProofLocationOffset(1, &proofdata.CiphertextCommitmentEqualityProofData{}),
-				zkprogram.ProofLocationOffset(2, &proofdata.BatchedRangeProofU64Data{}))
+				zkprogram.ProofLocationInstructionOffset(1, &proofdata.CiphertextCommitmentEqualityProofData{}),
+				zkprogram.ProofLocationInstructionOffset(2, &proofdata.BatchedRangeProofU64Data{}))
 		},
 		"withdraw_context": func() ([]solana.Instruction, error) {
 			return NewConfidentialTransferWithdrawInstructions(
 				ctTokenAccount, ctMint, ctAmount, ctDecimals, ctDecryptableBalance,
 				ctAuthority, nil,
-				zkprogram.ProofLocationContextState[*proofdata.CiphertextCommitmentEqualityProofData](ctContextEquality),
-				zkprogram.ProofLocationContextState[*proofdata.BatchedRangeProofU64Data](ctContextRange))
+				zkprogram.ProofLocationContextStateAccount[*proofdata.CiphertextCommitmentEqualityProofData](ctContextEquality),
+				zkprogram.ProofLocationContextStateAccount[*proofdata.BatchedRangeProofU64Data](ctContextRange))
 		},
 		"withdraw_mixed": func() ([]solana.Instruction, error) {
 			return NewConfidentialTransferWithdrawInstructions(
 				ctTokenAccount, ctMint, ctAmount, ctDecimals, ctDecryptableBalance,
 				ctAuthority, nil,
-				zkprogram.ProofLocationOffset(1, &proofdata.CiphertextCommitmentEqualityProofData{}),
-				zkprogram.ProofLocationContextState[*proofdata.BatchedRangeProofU64Data](ctContextRange))
+				zkprogram.ProofLocationInstructionOffset(1, &proofdata.CiphertextCommitmentEqualityProofData{}),
+				zkprogram.ProofLocationContextStateAccount[*proofdata.BatchedRangeProofU64Data](ctContextRange))
 		},
 		"transfer_offset": func() ([]solana.Instruction, error) {
 			return NewConfidentialTransferTransferInstructions(
 				ctTokenAccount, ctMint, ctDestination, ctDecryptableBalance,
 				ctCiphertextLo, ctCiphertextHi, ctAuthority, nil,
-				zkprogram.ProofLocationOffset(1, &proofdata.CiphertextCommitmentEqualityProofData{}),
-				zkprogram.ProofLocationOffset(2, &proofdata.BatchedGroupedCiphertext3HandlesValidityProofData{}),
-				zkprogram.ProofLocationOffset(3, &proofdata.BatchedRangeProofU128Data{}))
+				zkprogram.ProofLocationInstructionOffset(1, &proofdata.CiphertextCommitmentEqualityProofData{}),
+				zkprogram.ProofLocationInstructionOffset(2, &proofdata.BatchedGroupedCiphertext3HandlesValidityProofData{}),
+				zkprogram.ProofLocationInstructionOffset(3, &proofdata.BatchedRangeProofU128Data{}))
 		},
 		"transfer_context": func() ([]solana.Instruction, error) {
 			return NewConfidentialTransferTransferInstructions(
 				ctTokenAccount, ctMint, ctDestination, ctDecryptableBalance,
 				ctCiphertextLo, ctCiphertextHi, ctAuthority, nil,
-				zkprogram.ProofLocationContextState[*proofdata.CiphertextCommitmentEqualityProofData](ctContextEquality),
-				zkprogram.ProofLocationContextState[*proofdata.BatchedGroupedCiphertext3HandlesValidityProofData](ctContextValidity),
-				zkprogram.ProofLocationContextState[*proofdata.BatchedRangeProofU128Data](ctContextRange))
+				zkprogram.ProofLocationContextStateAccount[*proofdata.CiphertextCommitmentEqualityProofData](ctContextEquality),
+				zkprogram.ProofLocationContextStateAccount[*proofdata.BatchedGroupedCiphertext3HandlesValidityProofData](ctContextValidity),
+				zkprogram.ProofLocationContextStateAccount[*proofdata.BatchedRangeProofU128Data](ctContextRange))
 		},
 		"apply_pending_balance": func() ([]solana.Instruction, error) {
 			return noErr(NewConfidentialTransferApplyPendingBalanceInstruction(
@@ -168,21 +168,21 @@ func ctBuilders() map[string]func() ([]solana.Instruction, error) {
 			return NewConfidentialTransferTransferWithFeeInstructions(
 				ctTokenAccount, ctMint, ctDestination, ctDecryptableBalance,
 				ctCiphertextLo, ctCiphertextHi, ctAuthority, nil,
-				zkprogram.ProofLocationOffset(1, &proofdata.CiphertextCommitmentEqualityProofData{}),
-				zkprogram.ProofLocationOffset(2, &proofdata.BatchedGroupedCiphertext3HandlesValidityProofData{}),
-				zkprogram.ProofLocationOffset(3, &proofdata.PercentageWithCapProofData{}),
-				zkprogram.ProofLocationOffset(4, &proofdata.BatchedGroupedCiphertext2HandlesValidityProofData{}),
-				zkprogram.ProofLocationOffset(5, &proofdata.BatchedRangeProofU256Data{}))
+				zkprogram.ProofLocationInstructionOffset(1, &proofdata.CiphertextCommitmentEqualityProofData{}),
+				zkprogram.ProofLocationInstructionOffset(2, &proofdata.BatchedGroupedCiphertext3HandlesValidityProofData{}),
+				zkprogram.ProofLocationInstructionOffset(3, &proofdata.PercentageWithCapProofData{}),
+				zkprogram.ProofLocationInstructionOffset(4, &proofdata.BatchedGroupedCiphertext2HandlesValidityProofData{}),
+				zkprogram.ProofLocationInstructionOffset(5, &proofdata.BatchedRangeProofU256Data{}))
 		},
 		"transfer_with_fee_context": func() ([]solana.Instruction, error) {
 			return NewConfidentialTransferTransferWithFeeInstructions(
 				ctTokenAccount, ctMint, ctDestination, ctDecryptableBalance,
 				ctCiphertextLo, ctCiphertextHi, ctAuthority, nil,
-				zkprogram.ProofLocationContextState[*proofdata.CiphertextCommitmentEqualityProofData](ctContextEquality),
-				zkprogram.ProofLocationContextState[*proofdata.BatchedGroupedCiphertext3HandlesValidityProofData](ctContextValidity),
-				zkprogram.ProofLocationContextState[*proofdata.PercentageWithCapProofData](ctContextFeeSigma),
-				zkprogram.ProofLocationContextState[*proofdata.BatchedGroupedCiphertext2HandlesValidityProofData](ctContextFeeValidity),
-				zkprogram.ProofLocationContextState[*proofdata.BatchedRangeProofU256Data](ctContextRange))
+				zkprogram.ProofLocationContextStateAccount[*proofdata.CiphertextCommitmentEqualityProofData](ctContextEquality),
+				zkprogram.ProofLocationContextStateAccount[*proofdata.BatchedGroupedCiphertext3HandlesValidityProofData](ctContextValidity),
+				zkprogram.ProofLocationContextStateAccount[*proofdata.PercentageWithCapProofData](ctContextFeeSigma),
+				zkprogram.ProofLocationContextStateAccount[*proofdata.BatchedGroupedCiphertext2HandlesValidityProofData](ctContextFeeValidity),
+				zkprogram.ProofLocationContextStateAccount[*proofdata.BatchedRangeProofU256Data](ctContextRange))
 		},
 		"configure_account_with_registry": func() ([]solana.Instruction, error) {
 			return noErr(NewConfidentialTransferConfigureAccountWithRegistryInstruction(

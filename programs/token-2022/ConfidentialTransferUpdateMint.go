@@ -22,7 +22,7 @@ func NewConfidentialTransferUpdateMintInstruction(
 	if auditorElGamalPubkey != nil {
 		data.AuditorElGamalPubkey = *auditorElGamalPubkey
 	}
-	return newConfidentialTransferInstruction(
+	return newConfidentialTransferSubInstruction(
 		ConfidentialTransfer_UpdateMint,
 		&data,
 		solana.AccountMetaSlice{solana.Meta(mint).WRITE()},

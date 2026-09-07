@@ -10,7 +10,7 @@ import (
 )
 
 // NewConfidentialTransferTransferWithFeeInstructions builds a confidential transfer TransferWithFee instruction.
-// Append verification instructions for any associated proofs that are in a sibling intruction.
+// Append verification instructions for any associated proofs that are in a sibling instruction.
 func NewConfidentialTransferTransferWithFeeInstructions(
 	sourceTokenAccount solana.PublicKey,
 	mint solana.PublicKey,
@@ -26,7 +26,7 @@ func NewConfidentialTransferTransferWithFeeInstructions(
 	feeCiphertextValidityProofDataLocation zkprogram.ProofLocation[*proofdata.BatchedGroupedCiphertext2HandlesValidityProofData],
 	rangeProofDataLocation zkprogram.ProofLocation[*proofdata.BatchedRangeProofU256Data],
 ) ([]solana.Instruction, error) {
-	inner, err := NewConfidentialTransferTransferWithFeeInstruction(
+	inner, err := NewConfidentialTransferInnerTransferWithFeeInstruction(
 		sourceTokenAccount, mint, destinationTokenAccount,
 		newSourceDecryptableAvailableBalance,
 		transferAmountAuditorCiphertextLo, transferAmountAuditorCiphertextHi,
@@ -66,8 +66,8 @@ func NewConfidentialTransferTransferWithFeeInstructions(
 		zkprogram.VerifyBatchedRangeProofU256, rangeProofDataLocation)
 }
 
-// NewConfidentialTransferTransferWithFeeInstructions builds a confidential transfer TransferWithFee instruction.
-func NewConfidentialTransferTransferWithFeeInstruction(
+// NewConfidentialTransferInnerTransferWithFeeInstruction builds a confidential transfer TransferWithFee instruction.
+func NewConfidentialTransferInnerTransferWithFeeInstruction(
 	sourceTokenAccount solana.PublicKey,
 	mint solana.PublicKey,
 	destinationTokenAccount solana.PublicKey,
@@ -139,7 +139,7 @@ func NewConfidentialTransferTransferWithFeeInstruction(
 		FeeCiphertextValidityProofInstructionOffset:            feeCiphertextValidityProofInstructionOffset,
 		RangeProofInstructionOffset:                            rangeProofInstructionOffset,
 	}
-	return newConfidentialTransferInstruction(
+	return newConfidentialTransferSubInstruction(
 		ConfidentialTransfer_TransferWithFee,
 		&data,
 		accounts,
@@ -149,7 +149,7 @@ func NewConfidentialTransferTransferWithFeeInstruction(
 }
 
 // ConfidentialTransferTransferWithFeeData is the instruction data for
-// ConfidentialTransfer.TransferWithFee.
+// ConfidentialTransfer_TransferWithFee.
 type ConfidentialTransferTransferWithFeeData struct {
 	// NewSourceDecryptableAvailableBalance is the new source decryptable
 	// balance if the transfer succeeds.

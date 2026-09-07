@@ -16,7 +16,7 @@ func NewConfidentialTransferEmptyAccountInstructions(
 	multisigSigners []solana.PublicKey,
 	proofDataLocation zkprogram.ProofLocation[*proofdata.ZeroCiphertextProofData],
 ) ([]solana.Instruction, error) {
-	inner, err := NewConfidentialTransferEmptyAccountInstruction(
+	inner, err := NewConfidentialTransferInnerEmptyAccountInstruction(
 		tokenAccount, authority, multisigSigners, proofDataLocation,
 	)
 	if err != nil {
@@ -31,10 +31,10 @@ func NewConfidentialTransferEmptyAccountInstructions(
 		zkprogram.VerifyZeroCiphertext, proofDataLocation)
 }
 
-// NewConfidentialTransferEmptyAccountInstruction empties the confidential
+// NewConfidentialTransferInnerEmptyAccountInstruction empties the confidential
 // balances of a token account so it can be closed, proving that the available
 // balance ciphertext encrypts zero.
-func NewConfidentialTransferEmptyAccountInstruction(
+func NewConfidentialTransferInnerEmptyAccountInstruction(
 	tokenAccount solana.PublicKey,
 	authority solana.PublicKey,
 	multisigSigners []solana.PublicKey,
@@ -49,7 +49,7 @@ func NewConfidentialTransferEmptyAccountInstruction(
 	}
 	accounts = append(accounts, proofLocationAccount)
 	data := ConfidentialTransferEmptyAccountData{ProofInstructionOffset: proofInstructionOffset}
-	return newConfidentialTransferInstruction(
+	return newConfidentialTransferSubInstruction(
 		ConfidentialTransfer_EmptyAccount,
 		&data,
 		accounts,

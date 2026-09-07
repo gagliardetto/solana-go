@@ -11,7 +11,7 @@ import (
 )
 
 // NewConfidentialTransferWithdrawInstructions builds a confidential transfer Withdraw instruction.
-// Append verification instructions for any associated proofs that are in a sibling intruction.
+// Append verification instructions for any associated proofs that are in a sibling instruction.
 func NewConfidentialTransferWithdrawInstructions(
 	tokenAccount solana.PublicKey,
 	mint solana.PublicKey,
@@ -23,7 +23,7 @@ func NewConfidentialTransferWithdrawInstructions(
 	equalityProofDataLocation zkprogram.ProofLocation[*proofdata.CiphertextCommitmentEqualityProofData],
 	rangeProofDataLocation zkprogram.ProofLocation[*proofdata.BatchedRangeProofU64Data],
 ) ([]solana.Instruction, error) {
-	inner, err := NewConfidentialTransferWithdrawInstruction(
+	inner, err := NewConfidentialTransferInnerWithdrawInstruction(
 		tokenAccount, mint, amount, decimals, newDecryptableAvailableBalance,
 		authority, multisigSigners, equalityProofDataLocation, rangeProofDataLocation,
 	)
@@ -44,8 +44,8 @@ func NewConfidentialTransferWithdrawInstructions(
 		zkprogram.VerifyBatchedRangeProofU64, rangeProofDataLocation)
 }
 
-// NewConfidentialTransferWithdrawInstructions builds a confidential transfer Withdraw instruction.
-func NewConfidentialTransferWithdrawInstruction(
+// NewConfidentialTransferInnerWithdrawInstruction builds a confidential transfer Withdraw instruction.
+func NewConfidentialTransferInnerWithdrawInstruction(
 	tokenAccount solana.PublicKey,
 	mint solana.PublicKey,
 	amount uint64,
@@ -84,7 +84,7 @@ func NewConfidentialTransferWithdrawInstruction(
 		EqualityProofInstructionOffset: equalityProofInstructionOffset,
 		RangeProofInstructionOffset:    rangeProofInstructionOffset,
 	}
-	return newConfidentialTransferInstruction(
+	return newConfidentialTransferSubInstruction(
 		ConfidentialTransfer_Withdraw,
 		&data,
 		accounts,
@@ -94,7 +94,7 @@ func NewConfidentialTransferWithdrawInstruction(
 }
 
 // ConfidentialTransferWithdrawData is the instruction data for
-// ConfidentialTransfer.Withdraw.
+// ConfidentialTransfer_Withdraw.
 type ConfidentialTransferWithdrawData struct {
 	// Amount is the amount of tokens to withdraw.
 	Amount uint64

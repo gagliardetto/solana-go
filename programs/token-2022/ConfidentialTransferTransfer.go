@@ -10,7 +10,7 @@ import (
 )
 
 // NewConfidentialTransferTransferInstructions builds a confidential transfer Transfer instruction.
-// Append verification instructions for any associated proofs that are in a sibling intruction.
+// Append verification instructions for any associated proofs that are in a sibling instruction.
 func NewConfidentialTransferTransferInstructions(
 	sourceTokenAccount solana.PublicKey,
 	mint solana.PublicKey,
@@ -24,7 +24,7 @@ func NewConfidentialTransferTransferInstructions(
 	ciphertextValidityProofDataLocation zkprogram.ProofLocation[*proofdata.BatchedGroupedCiphertext3HandlesValidityProofData],
 	rangeProofDataLocation zkprogram.ProofLocation[*proofdata.BatchedRangeProofU128Data],
 ) ([]solana.Instruction, error) {
-	inner, err := NewConfidentialTransferTransferInstruction(
+	inner, err := NewConfidentialTransferInnerTransferInstruction(
 		sourceTokenAccount, mint, destinationTokenAccount,
 		newSourceDecryptableAvailableBalance,
 		transferAmountAuditorCiphertextLo, transferAmountAuditorCiphertextHi,
@@ -53,8 +53,8 @@ func NewConfidentialTransferTransferInstructions(
 		zkprogram.VerifyBatchedRangeProofU128, rangeProofDataLocation)
 }
 
-// NewConfidentialTransferTransferInstructions builds a confidential transfer Transfer instruction.
-func NewConfidentialTransferTransferInstruction(
+// NewConfidentialTransferInnerTransferInstruction builds a confidential transfer Transfer instruction.
+func NewConfidentialTransferInnerTransferInstruction(
 	sourceTokenAccount solana.PublicKey,
 	mint solana.PublicKey,
 	destinationTokenAccount solana.PublicKey,
@@ -106,7 +106,7 @@ func NewConfidentialTransferTransferInstruction(
 		CiphertextValidityProofInstructionOffset: ciphertextValidityProofInstructionOffset,
 		RangeProofInstructionOffset:              rangeProofInstructionOffset,
 	}
-	return newConfidentialTransferInstruction(
+	return newConfidentialTransferSubInstruction(
 		ConfidentialTransfer_Transfer,
 		&data,
 		accounts,
@@ -116,7 +116,7 @@ func NewConfidentialTransferTransferInstruction(
 }
 
 // ConfidentialTransferTransferData is the instruction data for
-// ConfidentialTransfer.Transfer.
+// ConfidentialTransfer_Transfer.
 type ConfidentialTransferTransferData struct {
 	// NewSourceDecryptableAvailableBalance is the new source decryptable
 	// balance if the transfer succeeds.

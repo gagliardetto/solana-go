@@ -4,58 +4,58 @@ import (
 	"github.com/gagliardetto/solana-go"
 )
 
-// Create a `EnableConfidentialCreditsInstruction`.
+// NewConfidentialTransferEnableConfidentialCreditsInstruction creates an EnableConfidentialCredits instruction.
 func NewConfidentialTransferEnableConfidentialCreditsInstruction(
 	tokenAccount solana.PublicKey,
 	authority solana.PublicKey,
 	multisigSigners []solana.PublicKey,
 ) *ConfidentialTransferExtension {
-	return newBalanceCreditsInstruction(ConfidentialTransfer_EnableConfidentialCredits,
+	return newCreditsInstruction(ConfidentialTransfer_EnableConfidentialCredits,
 		&ConfidentialTransferEnableConfidentialCreditsData{},
 		tokenAccount, authority, multisigSigners)
 }
 
-// Create a `DisableConfidentialCreditsInstruction`.
+// NewConfidentialTransferDisableConfidentialCreditsInstruction creates a DisableConfidentialCredits instruction.
 func NewConfidentialTransferDisableConfidentialCreditsInstruction(
 	tokenAccount solana.PublicKey,
 	authority solana.PublicKey,
 	multisigSigners []solana.PublicKey,
 ) *ConfidentialTransferExtension {
-	return newBalanceCreditsInstruction(ConfidentialTransfer_DisableConfidentialCredits,
+	return newCreditsInstruction(ConfidentialTransfer_DisableConfidentialCredits,
 		&ConfidentialTransferDisableConfidentialCreditsData{},
 		tokenAccount, authority, multisigSigners)
 }
 
-// Create a `EnableNonConfidentialCreditsInstruction`.
+// NewConfidentialTransferEnableNonConfidentialCreditsInstruction creates an EnableNonConfidentialCredits instruction.
 func NewConfidentialTransferEnableNonConfidentialCreditsInstruction(
 	tokenAccount solana.PublicKey,
 	authority solana.PublicKey,
 	multisigSigners []solana.PublicKey,
 ) *ConfidentialTransferExtension {
-	return newBalanceCreditsInstruction(ConfidentialTransfer_EnableNonConfidentialCredits,
+	return newCreditsInstruction(ConfidentialTransfer_EnableNonConfidentialCredits,
 		&ConfidentialTransferEnableNonConfidentialCreditsData{},
 		tokenAccount, authority, multisigSigners)
 }
 
-// Create a `DisableNonConfidentialCreditsInstruction`.
+// NewConfidentialTransferDisableNonConfidentialCreditsInstruction creates a DisableNonConfidentialCredits instruction.
 func NewConfidentialTransferDisableNonConfidentialCreditsInstruction(
 	tokenAccount solana.PublicKey,
 	authority solana.PublicKey,
 	multisigSigners []solana.PublicKey,
 ) *ConfidentialTransferExtension {
-	return newBalanceCreditsInstruction(ConfidentialTransfer_DisableNonConfidentialCredits,
+	return newCreditsInstruction(ConfidentialTransfer_DisableNonConfidentialCredits,
 		&ConfidentialTransferDisableNonConfidentialCreditsData{},
 		tokenAccount, authority, multisigSigners)
 }
 
-func newBalanceCreditsInstruction(
+func newCreditsInstruction(
 	subInstruction uint8,
-	data ConfidentialTransferInstructionData,
+	data ConfidentialTransferSubInstructionData,
 	tokenAccount solana.PublicKey,
 	authority solana.PublicKey,
 	multisigSigners []solana.PublicKey,
 ) *ConfidentialTransferExtension {
-	return newConfidentialTransferInstruction(
+	return newConfidentialTransferSubInstruction(
 		subInstruction,
 		data,
 		solana.AccountMetaSlice{

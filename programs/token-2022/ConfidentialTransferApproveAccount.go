@@ -7,13 +7,13 @@ import (
 // NewConfidentialTransferApproveAccountInstruction approves a token account
 // for confidential transfers, on mints where new accounts are not
 // auto-approved. authority is the mint's confidential transfer authority and
-// must sign directly
+// must sign directly.
 func NewConfidentialTransferApproveAccountInstruction(
 	accountToApprove solana.PublicKey,
 	mint solana.PublicKey,
 	authority solana.PublicKey,
 ) *ConfidentialTransferExtension {
-	return newConfidentialTransferInstruction(
+	return newConfidentialTransferSubInstruction(
 		ConfidentialTransfer_ApproveAccount,
 		&ConfidentialTransferApproveAccountData{},
 		solana.AccountMetaSlice{

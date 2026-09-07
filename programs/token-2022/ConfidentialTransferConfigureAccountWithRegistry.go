@@ -4,7 +4,7 @@ import (
 	"github.com/gagliardetto/solana-go"
 )
 
-// Create a `ConfigureAccountWithRegistry` instruction.
+// NewConfidentialTransferConfigureAccountWithRegistryInstruction creates a ConfigureAccountWithRegistry instruction.
 func NewConfidentialTransferConfigureAccountWithRegistryInstruction(
 	tokenAccount solana.PublicKey,
 	mint solana.PublicKey,

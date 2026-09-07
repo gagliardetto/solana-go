@@ -21,7 +21,7 @@ func NewConfidentialTransferConfigureAccountInstructions(
 	multisigSigners []solana.PublicKey,
 	proofDataLocation zkprogram.ProofLocation[*proofdata.PubkeyValidityProofData],
 ) ([]solana.Instruction, error) {
-	accountConfigInstruction, err := NewConfidentialTransferConfigureAccountInstruction(
+	accountConfigInstruction, err := NewConfidentialTransferInnerConfigureAccountInstruction(
 		tokenAccount, mint, decryptableZeroBalance, maximumPendingBalanceCreditCounter,
 		authority, multisigSigners, proofDataLocation,
 	)
@@ -37,8 +37,8 @@ func NewConfidentialTransferConfigureAccountInstructions(
 		zkprogram.VerifyPubkeyValidity, proofDataLocation)
 }
 
-// NewConfidentialTransferConfigureAccountInstruction builds the a ConfigureAccount instruction.
-func NewConfidentialTransferConfigureAccountInstruction(
+// NewConfidentialTransferInnerConfigureAccountInstruction builds a ConfigureAccount instruction.
+func NewConfidentialTransferInnerConfigureAccountInstruction(
 	tokenAccount solana.PublicKey,
 	mint solana.PublicKey,
 	decryptableZeroBalance encryption.AeCiphertext,
@@ -62,7 +62,7 @@ func NewConfidentialTransferConfigureAccountInstruction(
 		MaximumPendingBalanceCreditCounter: maximumPendingBalanceCreditCounter,
 		ProofInstructionOffset:             proofInstructionOffset,
 	}
-	return newConfidentialTransferInstruction(
+	return newConfidentialTransferSubInstruction(
 		ConfidentialTransfer_ConfigureAccount,
 		&data,
 		accounts,

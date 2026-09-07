@@ -48,7 +48,7 @@ type ConfidentialTransferInitializeMintData struct {
 	AuditorElGamalPubkey encryption.ElGamalPubkey
 }
 
-const confidentialTransferInitializeMintDataSize = accountKeySize + boolSize + elGamalPubkeySize
+const confidentialTransferInitializeMintDataSize = pubkeySize + boolSize + elGamalPubkeySize
 
 func (d ConfidentialTransferInitializeMintData) bytes() []byte {
 	out := make([]byte, 0, confidentialTransferInitializeMintDataSize)

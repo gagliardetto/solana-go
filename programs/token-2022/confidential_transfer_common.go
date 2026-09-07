@@ -12,7 +12,7 @@ import (
 // Encoded sizes of the field types appearing in ConfidentialTransfer
 // instruction data.
 const (
-	accountKeySize        = solana.PublicKeyLength
+	pubkeySize            = solana.PublicKeyLength
 	elGamalPubkeySize     = len(encryption.ElGamalPubkey{})
 	elGamalCiphertextSize = len(encryption.ElGamalCiphertext{})
 	aeCiphertextSize      = len(encryption.AeCiphertext{})
@@ -22,10 +22,10 @@ const (
 	proofOffsetSize       = 1
 )
 
-// newConfidentialTransferInstruction assembles a ConfidentialTransfer sub-instruction
-func newConfidentialTransferInstruction(
+// newConfidentialTransferSubInstruction assembles a ConfidentialTransfer sub-instruction
+func newConfidentialTransferSubInstruction(
 	subInstruction uint8,
-	data ConfidentialTransferInstructionData,
+	data ConfidentialTransferSubInstructionData,
 	accounts solana.AccountMetaSlice,
 	authority solana.PublicKey,
 	multisigSigners []solana.PublicKey,
@@ -35,16 +35,16 @@ func newConfidentialTransferInstruction(
 	if len(multisigSigners) == 0 {
 		authorityMeta.SIGNER()
 	}
-	ct_instruction := &ConfidentialTransferExtension{
+	instruction := &ConfidentialTransferExtension{
 		SubInstruction: subInstruction,
 		RawData:        data.bytes(),
 		Accounts:       append(accounts, authorityMeta),
 		Signers:        make(solana.AccountMetaSlice, 0, len(multisigSigners)),
 	}
 	for _, signer := range multisigSigners {
-		ct_instruction.Signers = append(ct_instruction.Signers, solana.Meta(signer).SIGNER())
+		instruction.Signers = append(instruction.Signers, solana.Meta(signer).SIGNER())
 	}
-	return ct_instruction
+	return instruction
 }
 
 // ctNoData is embedded by the data structs of sub-instructions that carry no

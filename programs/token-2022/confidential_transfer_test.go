@@ -158,7 +158,7 @@ func TestConfidentialTransferOuterOffsetValidation(t *testing.T) {
 	_, err := NewConfidentialTransferConfigureAccountInstructions(
 		ctTokenAccount, ctMint, ctDecryptableBalance, ctMaxPendingCounter,
 		ctAuthority, nil,
-		zkprogram.ProofLocationOffset(2, &proofdata.PubkeyValidityProofData{}))
+		zkprogram.ProofLocationInstructionOffset(2, &proofdata.PubkeyValidityProofData{}))
 	if err == nil || !strings.Contains(err.Error(), "offset") {
 		t.Errorf("offset 2 err = %v, want proof instruction offset error", err)
 	}
@@ -166,8 +166,8 @@ func TestConfidentialTransferOuterOffsetValidation(t *testing.T) {
 	_, err = NewConfidentialTransferWithdrawInstructions(
 		ctTokenAccount, ctMint, ctAmount, ctDecimals, ctDecryptableBalance,
 		ctAuthority, nil,
-		zkprogram.ProofLocationOffset(1, &proofdata.CiphertextCommitmentEqualityProofData{}),
-		zkprogram.ProofLocationOffset(3, &proofdata.BatchedRangeProofU64Data{}))
+		zkprogram.ProofLocationInstructionOffset(1, &proofdata.CiphertextCommitmentEqualityProofData{}),
+		zkprogram.ProofLocationInstructionOffset(3, &proofdata.BatchedRangeProofU64Data{}))
 	if err == nil || !strings.Contains(err.Error(), "offset") {
 		t.Errorf("offsets 1,3 err = %v, want proof instruction offset error", err)
 	}
@@ -177,8 +177,8 @@ func TestConfidentialTransferOuterOffsetValidation(t *testing.T) {
 	instructions, err := NewConfidentialTransferWithdrawInstructions(
 		ctTokenAccount, ctMint, ctAmount, ctDecimals, ctDecryptableBalance,
 		ctAuthority, nil,
-		zkprogram.ProofLocationContextState[*proofdata.CiphertextCommitmentEqualityProofData](ctContextEquality),
-		zkprogram.ProofLocationOffset(1, &proofdata.BatchedRangeProofU64Data{}))
+		zkprogram.ProofLocationContextStateAccount[*proofdata.CiphertextCommitmentEqualityProofData](ctContextEquality),
+		zkprogram.ProofLocationInstructionOffset(1, &proofdata.BatchedRangeProofU64Data{}))
 	if err != nil {
 		t.Fatalf("context+offset(1): %v", err)
 	}
@@ -190,7 +190,7 @@ func TestConfidentialTransferOuterOffsetValidation(t *testing.T) {
 func TestConfidentialTransferRejectsUnsetProofLocation(t *testing.T) {
 	t.Parallel()
 	var unset zkprogram.ProofLocation[*proofdata.ZeroCiphertextProofData]
-	if _, err := NewConfidentialTransferEmptyAccountInstruction(
+	if _, err := NewConfidentialTransferInnerEmptyAccountInstruction(
 		ctTokenAccount, ctAuthority, nil, unset); err == nil {
 		t.Error("builder accepted zero-value proof location")
 	}

@@ -21,7 +21,7 @@ func NewConfidentialTransferApplyPendingBalanceInstruction(
 		ExpectedPendingBalanceCreditCounter: expectedPendingBalanceCreditCounter,
 		NewDecryptableAvailableBalance:      newDecryptableAvailableBalance,
 	}
-	return newConfidentialTransferInstruction(
+	return newConfidentialTransferSubInstruction(
 		ConfidentialTransfer_ApplyPendingBalance,
 		&data,
 		solana.AccountMetaSlice{
@@ -33,7 +33,7 @@ func NewConfidentialTransferApplyPendingBalanceInstruction(
 }
 
 // ConfidentialTransferApplyPendingBalanceData is the instruction data for
-// ConfidentialTransfer.ApplyPendingBalance.
+// ConfidentialTransfer_ApplyPendingBalance.
 type ConfidentialTransferApplyPendingBalanceData struct {
 	// ExpectedPendingBalanceCreditCounter is the expected number of pending
 	// balance credits since the last successful ApplyPendingBalance.

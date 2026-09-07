@@ -13,13 +13,13 @@ func TestProofLocationValidate(t *testing.T) {
 	if err := zero.Validate(); err == nil {
 		t.Error("Validate accepted the zero value")
 	}
-	if err := ProofLocationOffset(1, (*proofdata.ZeroCiphertextProofData)(nil)).Validate(); err == nil {
+	if err := ProofLocationInstructionOffset(1, (*proofdata.ZeroCiphertextProofData)(nil)).Validate(); err == nil {
 		t.Error("Validate accepted a typed nil proof")
 	}
-	if err := ProofLocationOffset(1, &proofdata.ZeroCiphertextProofData{}).Validate(); err != nil {
+	if err := ProofLocationInstructionOffset(1, &proofdata.ZeroCiphertextProofData{}).Validate(); err != nil {
 		t.Errorf("Validate rejected an inline proof: %v", err)
 	}
-	if err := ProofLocationContextState[*proofdata.ZeroCiphertextProofData](solana.PublicKey{1}).Validate(); err != nil {
+	if err := ProofLocationContextStateAccount[*proofdata.ZeroCiphertextProofData](solana.PublicKey{1}).Validate(); err != nil {
 		t.Errorf("Validate rejected a context state account: %v", err)
 	}
 }
