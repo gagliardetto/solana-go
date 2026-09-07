@@ -189,7 +189,7 @@ func (obj *ConfidentialTransferExtension) UnmarshalWithDecoder(decoder *ag_binar
 }
 
 // NewConfidentialTransferInstruction creates a confidential transfer extension
-// instruction from an raw sub-instruction payload.
+// instruction from a raw sub-instruction payload.
 //
 // Prefer the typed NewConfidentialTransfer*Instruction builders.
 func NewConfidentialTransferInstruction(
