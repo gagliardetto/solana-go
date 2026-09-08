@@ -98,8 +98,8 @@ type WithdrawAccountInfo struct {
 	decryptableAvailableBalance encryption.AeCiphertext
 }
 
-// NewWithdrawInfo extracts the state a Withdraw instruction needs from a confidential transfer account.
-func NewWithdrawInfo(s *token2022.ConfidentialTransferAccountState) WithdrawAccountInfo {
+// NewWithdrawAccountInfo extracts the state a Withdraw instruction needs from a confidential transfer account.
+func NewWithdrawAccountInfo(s *token2022.ConfidentialTransferAccountState) WithdrawAccountInfo {
 	return WithdrawAccountInfo{
 		availableBalance:            encryption.ElGamalCiphertext(s.AvailableBalance),
 		decryptableAvailableBalance: encryption.AeCiphertext(s.DecryptableAvailableBalance),
@@ -133,8 +133,8 @@ type TransferAccountInfo struct {
 	decryptableAvailableBalance encryption.AeCiphertext
 }
 
-// NewTransferInfo extracts the TransferInfo state from a confidential transfer account.
-func NewTransferInfo(s *token2022.ConfidentialTransferAccountState) TransferAccountInfo {
+// NewTransferAccountInfo extracts the TransferInfo state from a confidential transfer account.
+func NewTransferAccountInfo(s *token2022.ConfidentialTransferAccountState) TransferAccountInfo {
 	return TransferAccountInfo{
 		availableBalance:            encryption.ElGamalCiphertext(s.AvailableBalance),
 		decryptableAvailableBalance: encryption.AeCiphertext(s.DecryptableAvailableBalance),
