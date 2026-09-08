@@ -178,8 +178,8 @@ func (obj *ConfidentialTransferExtension) UnmarshalWithDecoder(decoder *ag_binar
 	if err != nil {
 		return err
 	}
-	remaining := decoder.Remaining()
-	if remaining > 0 {
+	obj.RawData = nil
+	if remaining := decoder.Remaining(); remaining > 0 {
 		obj.RawData, err = decoder.ReadNBytes(remaining)
 		if err != nil {
 			return err
