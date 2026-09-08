@@ -92,22 +92,22 @@ func (i ApplyPendingBalanceAccountInfo) NewDecryptableAvailableBalance(
 
 // --- Withdraw ---
 
-// WithdrawInfo is the account state a confidential Withdraw instruction is built from.
-type WithdrawInfo struct {
+// WithdrawAccountInfo is the account state a confidential Withdraw instruction is built from.
+type WithdrawAccountInfo struct {
 	availableBalance            encryption.ElGamalCiphertext
 	decryptableAvailableBalance encryption.AeCiphertext
 }
 
 // NewWithdrawInfo extracts the state a Withdraw instruction needs from a confidential transfer account.
-func NewWithdrawInfo(s *token2022.ConfidentialTransferAccountState) WithdrawInfo {
-	return WithdrawInfo{
+func NewWithdrawInfo(s *token2022.ConfidentialTransferAccountState) WithdrawAccountInfo {
+	return WithdrawAccountInfo{
 		availableBalance:            encryption.ElGamalCiphertext(s.AvailableBalance),
 		decryptableAvailableBalance: encryption.AeCiphertext(s.DecryptableAvailableBalance),
 	}
 }
 
 // GenerateProofData builds the proofs the Withdraw instruction carries.
-func (i WithdrawInfo) GenerateProofData(
+func (i WithdrawAccountInfo) GenerateProofData(
 	amount uint64, kp *encryption.ElGamalKeypair, aesKey zkencryption.AeKey,
 ) (*WithdrawProofData, error) {
 	balance, err := encryption.AeDecrypt(aesKey, i.decryptableAvailableBalance)
@@ -119,7 +119,7 @@ func (i WithdrawInfo) GenerateProofData(
 
 // NewDecryptableAvailableBalance is the AE ciphertext the Withdraw instruction
 // carries: the available balance less the withdrawn amount, encrypted with aesKey.
-func (i WithdrawInfo) NewDecryptableAvailableBalance(
+func (i WithdrawAccountInfo) NewDecryptableAvailableBalance(
 	amount uint64, aesKey zkencryption.AeKey,
 ) (encryption.AeCiphertext, error) {
 	return decryptableBalanceAfterSpend(aesKey, i.decryptableAvailableBalance, amount)
@@ -127,22 +127,22 @@ func (i WithdrawInfo) NewDecryptableAvailableBalance(
 
 // --- Transfer ---
 
-// TransferInfo is the account state a confidential Transfer or TransferWithFee instruction is built from.
-type TransferInfo struct {
+// TransferAccountInfo is the account state a confidential Transfer or TransferWithFee instruction is built from.
+type TransferAccountInfo struct {
 	availableBalance            encryption.ElGamalCiphertext
 	decryptableAvailableBalance encryption.AeCiphertext
 }
 
 // NewTransferInfo extracts the TransferInfo state from a confidential transfer account.
-func NewTransferInfo(s *token2022.ConfidentialTransferAccountState) TransferInfo {
-	return TransferInfo{
+func NewTransferInfo(s *token2022.ConfidentialTransferAccountState) TransferAccountInfo {
+	return TransferAccountInfo{
 		availableBalance:            encryption.ElGamalCiphertext(s.AvailableBalance),
 		decryptableAvailableBalance: encryption.AeCiphertext(s.DecryptableAvailableBalance),
 	}
 }
 
 // GenerateSplitTransferProofData builds the three proofs a confidential transfer requires.
-func (i TransferInfo) GenerateSplitTransferProofData(
+func (i TransferAccountInfo) GenerateSplitTransferProofData(
 	amount uint64,
 	kp *encryption.ElGamalKeypair,
 	aesKey zkencryption.AeKey,
@@ -154,7 +154,7 @@ func (i TransferInfo) GenerateSplitTransferProofData(
 }
 
 // GenerateSplitTransferWithFeeProofData builds the five proofs a confidential transfer on a fee-extended mint requires.
-func (i TransferInfo) GenerateSplitTransferWithFeeProofData(
+func (i TransferAccountInfo) GenerateSplitTransferWithFeeProofData(
 	amount uint64,
 	kp *encryption.ElGamalKeypair,
 	aesKey zkencryption.AeKey,
@@ -171,7 +171,7 @@ func (i TransferInfo) GenerateSplitTransferWithFeeProofData(
 
 // NewDecryptableAvailableBalance is the AE ciphertext a Transfer instruction
 // carries: the available balance less the transferred amount, encrypted with aesKey.
-func (i TransferInfo) NewDecryptableAvailableBalance(
+func (i TransferAccountInfo) NewDecryptableAvailableBalance(
 	amount uint64, aesKey zkencryption.AeKey,
 ) (encryption.AeCiphertext, error) {
 	return decryptableBalanceAfterSpend(aesKey, i.decryptableAvailableBalance, amount)
@@ -204,7 +204,7 @@ func NewEmptyAccountInfo(s *token2022.ConfidentialTransferAccountState) EmptyAcc
 	return EmptyAccountInfo{availableBalance: encryption.ElGamalCiphertext(s.AvailableBalance)}
 }
 
-// GenerateProofData builds the  proof the EmptyAccount instruction carries.
+// GenerateProofData builds the proof the EmptyAccount instruction carries.
 func (i EmptyAccountInfo) GenerateProofData(kp *encryption.ElGamalKeypair) (*proofdata.ZeroCiphertextProofData, error) {
 	return proofdata.NewZeroCiphertextProofData(kp, i.availableBalance)
 }
