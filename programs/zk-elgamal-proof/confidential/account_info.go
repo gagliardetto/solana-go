@@ -52,7 +52,7 @@ func (i ApplyPendingBalanceAccountInfo) PendingBalance(kp *encryption.ElGamalKey
 		return 0, err
 	}
 	// hi stores the summed high part of account credits,
-	// which must be recovered by right-shifting by `AmountLoBitLength`.
+	// which must be recovered by left-shifting by `AmountLoBitLength`.
 	return hi<<AmountLoBitLength + lo, nil
 }
 
