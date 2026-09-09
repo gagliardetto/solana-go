@@ -1,30 +1,28 @@
-package confidential
+package token2022
 
 import (
 	"errors"
 	"math"
 	"testing"
 
-	token2022 "github.com/gagliardetto/solana-go/programs/token-2022"
 	"github.com/gagliardetto/solana-go/programs/token-2022/zkencryption"
 	zk "github.com/gagliardetto/solana-go/programs/zk-elgamal-proof"
+	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/confidential"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/encryption"
-	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/internal/zktest"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/proofdata"
 )
 
 func TestApplyPendingBalanceAccountInfo(t *testing.T) {
-	kp, aesKey := generateSourceAccount(t)
 	const (
 		pendingLo     = uint64(65535)
 		pendingHi     = uint64(3)
 		available     = uint64(1000)
 		creditCounter = uint64(2)
 	)
-	pendingCombined := pendingHi<<AmountLoBitLength + pendingLo
+	pendingCombined := pendingHi<<confidential.AmountLoBitLength + pendingLo
 
-	applyPendingBalanceAccountInfo := NewApplyPendingBalanceAccountInfo(makeAccountState(t, kp, aesKey,
-		pendingLo, pendingHi, available, creditCounter))
+	state, kp, aesKey := makeAccountState(t, pendingLo, pendingHi, available, creditCounter)
+	applyPendingBalanceAccountInfo := NewApplyPendingBalanceAccountInfo(state)
 
 	if storedCreditCounter := applyPendingBalanceAccountInfo.PendingBalanceCreditCounter(); storedCreditCounter != creditCounter {
 		t.Fatalf("PendingBalanceCreditCounter() = %d, want %d", storedCreditCounter, creditCounter)
@@ -51,21 +49,23 @@ func TestApplyPendingBalanceAccountInfo(t *testing.T) {
 	}
 
 	// Assert that account with zero pending balance reports HasPendingBalance() as false and reports TotalBalance equal to available balance
-	zeroPendingBalanceAccountInfo := NewApplyPendingBalanceAccountInfo(makeAccountState(t, kp, aesKey, 0, 0, available, 0))
+	zeroPendingState, zeroKp, zeroAesKey := makeAccountState(t, 0, 0, available, 0)
+	zeroPendingBalanceAccountInfo := NewApplyPendingBalanceAccountInfo(zeroPendingState)
 	if zeroPendingBalanceAccountInfo.HasPendingBalance() {
 		t.Fatal("HasPendingBalance() = true with no pending credits")
 	}
-	if storedTotalBalance, err := zeroPendingBalanceAccountInfo.TotalBalance(kp, aesKey); err != nil || storedTotalBalance != available {
+	if storedTotalBalance, err := zeroPendingBalanceAccountInfo.TotalBalance(zeroKp, zeroAesKey); err != nil || storedTotalBalance != available {
 		t.Fatalf("TotalBalance() = (%d, %v), want (%d, nil)", storedTotalBalance, err, available)
 	}
 
 	// Assert that full token account cannot perform operations involving pending balance
 	// i.e cannot report total balance or a new encryption of what the balance wil be after application of pending balance.
-	applyPendingBalanceFullAccountInfo := NewApplyPendingBalanceAccountInfo(makeAccountState(t, kp, aesKey, 1, 0, math.MaxUint64, 1))
-	if _, err := applyPendingBalanceFullAccountInfo.TotalBalance(kp, aesKey); !errors.Is(err, ErrBalanceOverflow) {
+	fullState, fullKp, fullAesKey := makeAccountState(t, 1, 0, math.MaxUint64, 1)
+	applyPendingBalanceFullAccountInfo := NewApplyPendingBalanceAccountInfo(fullState)
+	if _, err := applyPendingBalanceFullAccountInfo.TotalBalance(fullKp, fullAesKey); !errors.Is(err, confidential.ErrBalanceOverflow) {
 		t.Fatalf("TotalBalance() on overflowing account: got %v, want ErrBalanceOverflow", err)
 	}
-	if _, err := applyPendingBalanceFullAccountInfo.NewDecryptableAvailableBalance(kp, aesKey); !errors.Is(err, ErrBalanceOverflow) {
+	if _, err := applyPendingBalanceFullAccountInfo.NewDecryptableAvailableBalance(fullKp, fullAesKey); !errors.Is(err, confidential.ErrBalanceOverflow) {
 		t.Fatalf("NewDecryptableAvailableBalance() on overflowing account: got %v, want ErrBalanceOverflow", err)
 	}
 
@@ -80,12 +80,12 @@ func TestApplyPendingBalanceAccountInfo(t *testing.T) {
 }
 
 func TestWithdrawAccountInfo(t *testing.T) {
-	kp, aesKey := generateSourceAccount(t)
 	const (
 		available = uint64(1000)
 		amount    = uint64(400)
 	)
-	withdrawAccountInfo := NewWithdrawAccountInfo(makeAccountState(t, kp, aesKey, 0, 0, available, 0))
+	state, kp, aesKey := makeAccountState(t, 0, 0, available, 0)
+	withdrawAccountInfo := NewWithdrawAccountInfo(state)
 
 	withdrawalProofData, err := withdrawAccountInfo.GenerateProofData(amount, kp, aesKey)
 	if err != nil {
@@ -105,24 +105,24 @@ func TestWithdrawAccountInfo(t *testing.T) {
 	}
 
 	// A withdrawal exceeding the balance is rejected.
-	if _, err := withdrawAccountInfo.GenerateProofData(available+1, kp, aesKey); !errors.Is(err, ErrNotEnoughFunds) {
+	if _, err := withdrawAccountInfo.GenerateProofData(available+1, kp, aesKey); !errors.Is(err, confidential.ErrNotEnoughFunds) {
 		t.Fatalf("GenerateProofData() exceeding balance: got %v, want ErrNotEnoughFunds", err)
 	}
-	if _, err := withdrawAccountInfo.NewDecryptableAvailableBalance(available+1, aesKey); !errors.Is(err, ErrNotEnoughFunds) {
+	if _, err := withdrawAccountInfo.NewDecryptableAvailableBalance(available+1, aesKey); !errors.Is(err, confidential.ErrNotEnoughFunds) {
 		t.Fatalf("NewDecryptableAvailableBalance() exceeding balance: got %v, want ErrNotEnoughFunds", err)
 	}
 }
 
 func TestTransferAccountInfo(t *testing.T) {
-	sender, aesKey := generateSourceAccount(t)
-	recipient := zktest.GenKeyPair(t)
-	auditor := zktest.GenKeyPair(t)
-	feeCollector := zktest.GenKeyPair(t)
+	recipient := genKeyPair(t)
+	auditor := genKeyPair(t)
+	feeCollector := genKeyPair(t)
 	const (
 		available = uint64(1000)
 		amount    = uint64(500)
 	)
-	transferAccountInfo := NewTransferAccountInfo(makeAccountState(t, sender, aesKey, 0, 0, available, 0))
+	state, sender, aesKey := makeAccountState(t, 0, 0, available, 0)
+	transferAccountInfo := NewTransferAccountInfo(state)
 
 	transferproofData, err := transferAccountInfo.GenerateSplitTransferProofData(amount, sender, aesKey,
 		recipient.Pubkey, &auditor.Pubkey)
@@ -158,18 +158,17 @@ func TestTransferAccountInfo(t *testing.T) {
 
 	// A transfer exceeding the balance is rejected.
 	if _, err := transferAccountInfo.GenerateSplitTransferProofData(available+1, sender, aesKey,
-		recipient.Pubkey, &auditor.Pubkey); !errors.Is(err, ErrNotEnoughFunds) {
+		recipient.Pubkey, &auditor.Pubkey); !errors.Is(err, confidential.ErrNotEnoughFunds) {
 		t.Fatalf("GenerateSplitTransferProofData() exceeding balance: got %v, want ErrNotEnoughFunds", err)
 	}
-	if _, err := transferAccountInfo.NewDecryptableAvailableBalance(available+1, aesKey); !errors.Is(err, ErrNotEnoughFunds) {
+	if _, err := transferAccountInfo.NewDecryptableAvailableBalance(available+1, aesKey); !errors.Is(err, confidential.ErrNotEnoughFunds) {
 		t.Fatalf("NewDecryptableAvailableBalance() exceeding balance: got %v, want ErrNotEnoughFunds", err)
 	}
 }
 
 func TestEmptyAccountInfo(t *testing.T) {
-	kp, aesKey := generateSourceAccount(t)
-
-	emptyAccountInfo := NewEmptyAccountInfo(makeAccountState(t, kp, aesKey, 0, 0, 0, 0))
+	emptyState, kp, _ := makeAccountState(t, 0, 0, 0, 0)
+	emptyAccountInfo := NewEmptyAccountInfo(emptyState)
 	emptyAccountProofData, err := emptyAccountInfo.GenerateProofData(kp)
 	if err != nil {
 		t.Fatal(err)
@@ -179,8 +178,9 @@ func TestEmptyAccountInfo(t *testing.T) {
 	}
 
 	// Assert that account with pending balance is considered empty.
-	pendingBalanceEmptyAccountInfo := NewEmptyAccountInfo(makeAccountState(t, kp, aesKey, 1, 0, 0, 0))
-	pendingBalanceEmptyAccountProofData, err := pendingBalanceEmptyAccountInfo.GenerateProofData(kp)
+	pendingBalanceEmptyState, pendingBalanceKp, _ := makeAccountState(t, 1, 0, 0, 0)
+	pendingBalanceEmptyAccountInfo := NewEmptyAccountInfo(pendingBalanceEmptyState)
+	pendingBalanceEmptyAccountProofData, err := pendingBalanceEmptyAccountInfo.GenerateProofData(pendingBalanceKp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -189,21 +189,26 @@ func TestEmptyAccountInfo(t *testing.T) {
 	}
 
 	// Assert account with funds cannot prove a zero balance.
-	nonEmptyAccountInfo := NewEmptyAccountInfo(makeAccountState(t, kp, aesKey, 0, 0, 1, 0))
-	if _, err := nonEmptyAccountInfo.GenerateProofData(kp); !errors.Is(err, zk.ErrProofGeneration) {
+	nonEmptyState, nonEmptyKp, _ := makeAccountState(t, 0, 0, 1, 0)
+	nonEmptyAccountInfo := NewEmptyAccountInfo(nonEmptyState)
+	if _, err := nonEmptyAccountInfo.GenerateProofData(nonEmptyKp); !errors.Is(err, zk.ErrProofGeneration) {
 		t.Fatalf("GenerateProofData() on non-empty account: got %v, want zk.ErrProofGeneration", err)
 	}
 
 }
 
-// makeAccountState builds a confidential transfer account state  for testing
+// makeAccountState builds a confidential transfer account state for testing,
+// returning it with the fresh ElGamal keypair and AE key it is encrypted under.
 func makeAccountState(
 	t *testing.T,
-	kp *encryption.ElGamalKeypair,
-	aesKey zkencryption.AeKey,
 	pendingLo, pendingHi, available, creditCounter uint64,
-) *token2022.ConfidentialTransferAccountState {
+) (*ConfidentialTransferAccountState, *encryption.ElGamalKeypair, zkencryption.AeKey) {
 	t.Helper()
+	kp := genKeyPair(t)
+	aesKey, err := encryption.NewAeKey()
+	if err != nil {
+		t.Fatal(err)
+	}
 	encrypt := func(amount uint64) [64]byte {
 		ct, err := kp.Pubkey.Encrypt(amount)
 		if err != nil {
@@ -215,12 +220,31 @@ func makeAccountState(
 	if err != nil {
 		t.Fatal(err)
 	}
-	return &token2022.ConfidentialTransferAccountState{
+	return &ConfidentialTransferAccountState{
 		ElGamalPubkey:               kp.Pubkey,
 		PendingBalanceLo:            encrypt(pendingLo),
 		PendingBalanceHi:            encrypt(pendingHi),
 		AvailableBalance:            encrypt(available),
 		DecryptableAvailableBalance: decryptable,
 		PendingBalanceCreditCounter: creditCounter,
+	}, kp, aesKey
+}
+
+// genKeyPair returns a fresh random ElGamal keypair.
+func genKeyPair(t *testing.T) *encryption.ElGamalKeypair {
+	t.Helper()
+	kp, err := encryption.NewElGamalKeypair()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return kp
+}
+
+func verifyAll(t *testing.T, proofs map[string]proofdata.ProofData) {
+	t.Helper()
+	for name, proof := range proofs {
+		if err := proof.Verify(); err != nil {
+			t.Fatalf("%s proof rejected: %v", name, err)
+		}
 	}
 }

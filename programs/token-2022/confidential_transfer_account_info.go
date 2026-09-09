@@ -1,10 +1,10 @@
-package confidential
+package token2022
 
 import (
 	"math"
 
-	token2022 "github.com/gagliardetto/solana-go/programs/token-2022"
 	"github.com/gagliardetto/solana-go/programs/token-2022/zkencryption"
+	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/confidential"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/encryption"
 	"github.com/gagliardetto/solana-go/programs/zk-elgamal-proof/proofdata"
 )
@@ -21,7 +21,7 @@ type ApplyPendingBalanceAccountInfo struct {
 
 // NewApplyPendingBalanceAccountInfo extracts the state an ApplyPendingBalance
 // instruction needs from a confidential transfer account state.
-func NewApplyPendingBalanceAccountInfo(s *token2022.ConfidentialTransferAccountState) ApplyPendingBalanceAccountInfo {
+func NewApplyPendingBalanceAccountInfo(s *ConfidentialTransferAccountState) ApplyPendingBalanceAccountInfo {
 	return ApplyPendingBalanceAccountInfo{
 		pendingBalanceCreditCounter: s.PendingBalanceCreditCounter,
 		pendingBalanceLo:            encryption.ElGamalCiphertext(s.PendingBalanceLo),
@@ -53,7 +53,7 @@ func (i ApplyPendingBalanceAccountInfo) PendingBalance(kp *encryption.ElGamalKey
 	}
 	// hi stores the summed high part of account credits,
 	// which must be recovered by left-shifting by `AmountLoBitLength`.
-	return hi<<AmountLoBitLength + lo, nil
+	return hi<<confidential.AmountLoBitLength + lo, nil
 }
 
 // AvailableBalance decrypts the account's decryptable available balance.
@@ -73,7 +73,7 @@ func (i ApplyPendingBalanceAccountInfo) TotalBalance(kp *encryption.ElGamalKeypa
 		return 0, err
 	}
 	if pending > math.MaxUint64-available {
-		return 0, ErrBalanceOverflow
+		return 0, confidential.ErrBalanceOverflow
 	}
 	return available + pending, nil
 }
@@ -99,7 +99,7 @@ type WithdrawAccountInfo struct {
 }
 
 // NewWithdrawAccountInfo extracts the state a Withdraw instruction needs from a confidential transfer account.
-func NewWithdrawAccountInfo(s *token2022.ConfidentialTransferAccountState) WithdrawAccountInfo {
+func NewWithdrawAccountInfo(s *ConfidentialTransferAccountState) WithdrawAccountInfo {
 	return WithdrawAccountInfo{
 		availableBalance:            encryption.ElGamalCiphertext(s.AvailableBalance),
 		decryptableAvailableBalance: encryption.AeCiphertext(s.DecryptableAvailableBalance),
@@ -109,12 +109,12 @@ func NewWithdrawAccountInfo(s *token2022.ConfidentialTransferAccountState) Withd
 // GenerateProofData builds the proofs the Withdraw instruction carries.
 func (i WithdrawAccountInfo) GenerateProofData(
 	amount uint64, kp *encryption.ElGamalKeypair, aesKey zkencryption.AeKey,
-) (*WithdrawProofData, error) {
+) (*confidential.WithdrawProofData, error) {
 	balance, err := encryption.AeDecrypt(aesKey, i.decryptableAvailableBalance)
 	if err != nil {
 		return nil, err
 	}
-	return NewWithdrawProofData(i.availableBalance, balance, amount, kp)
+	return confidential.NewWithdrawProofData(i.availableBalance, balance, amount, kp)
 }
 
 // NewDecryptableAvailableBalance is the AE ciphertext the Withdraw instruction
@@ -134,7 +134,7 @@ type TransferAccountInfo struct {
 }
 
 // NewTransferAccountInfo extracts the TransferInfo state from a confidential transfer account.
-func NewTransferAccountInfo(s *token2022.ConfidentialTransferAccountState) TransferAccountInfo {
+func NewTransferAccountInfo(s *ConfidentialTransferAccountState) TransferAccountInfo {
 	return TransferAccountInfo{
 		availableBalance:            encryption.ElGamalCiphertext(s.AvailableBalance),
 		decryptableAvailableBalance: encryption.AeCiphertext(s.DecryptableAvailableBalance),
@@ -148,8 +148,8 @@ func (i TransferAccountInfo) GenerateSplitTransferProofData(
 	aesKey zkencryption.AeKey,
 	destinationPubkey encryption.ElGamalPubkey,
 	auditorPubkey *encryption.ElGamalPubkey,
-) (*TransferProofData, error) {
-	return TransferSplitProofData(i.availableBalance, i.decryptableAvailableBalance,
+) (*confidential.TransferProofData, error) {
+	return confidential.TransferSplitProofData(i.availableBalance, i.decryptableAvailableBalance,
 		amount, kp, aesKey, destinationPubkey, auditorPubkey)
 }
 
@@ -163,8 +163,8 @@ func (i TransferAccountInfo) GenerateSplitTransferWithFeeProofData(
 	withdrawWithheldAuthorityPubkey encryption.ElGamalPubkey,
 	feeRateBasisPoints uint16,
 	maximumFee uint64,
-) (*TransferWithFeeProofData, error) {
-	return TransferWithFeeSplitProofData(i.availableBalance, i.decryptableAvailableBalance,
+) (*confidential.TransferWithFeeProofData, error) {
+	return confidential.TransferWithFeeSplitProofData(i.availableBalance, i.decryptableAvailableBalance,
 		amount, kp, aesKey, destinationPubkey, auditorPubkey,
 		withdrawWithheldAuthorityPubkey, feeRateBasisPoints, maximumFee)
 }
@@ -187,7 +187,7 @@ func decryptableBalanceAfterSpend(
 		return encryption.AeCiphertext{}, err
 	}
 	if amount > balance {
-		return encryption.AeCiphertext{}, ErrNotEnoughFunds
+		return encryption.AeCiphertext{}, confidential.ErrNotEnoughFunds
 	}
 	return encryption.AeEncrypt(aesKey, balance-amount)
 }
@@ -200,7 +200,7 @@ type EmptyAccountInfo struct {
 }
 
 // NewEmptyAccountInfo extracts the state an EmptyAccount instruction needs from a confidential transfer account.
-func NewEmptyAccountInfo(s *token2022.ConfidentialTransferAccountState) EmptyAccountInfo {
+func NewEmptyAccountInfo(s *ConfidentialTransferAccountState) EmptyAccountInfo {
 	return EmptyAccountInfo{availableBalance: encryption.ElGamalCiphertext(s.AvailableBalance)}
 }
 
