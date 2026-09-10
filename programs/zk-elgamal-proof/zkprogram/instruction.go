@@ -71,7 +71,7 @@ func (i ProofInstruction) EncodeVerifyProof(
 	contextStateInfo *ContextStateInfo,
 	data proofdata.ProofData,
 ) (*solana.GenericInstruction, error) {
-	if data == nil {
+	if isNilProofData(data) {
 		return nil, errors.New("zk: proof data not set")
 	}
 	if !i.verifiesProofs() || data.ProofType() != proofdata.ProofType(i) {
