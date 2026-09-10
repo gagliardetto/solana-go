@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.0.0](https://github.com/solana-foundation/solana-go/compare/v1.23.0...v2.0.0) (2026-09-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **zkencryption:** derived keys change from the SHA3-512 scheme. Reproduce pre-migration keys with the deprecated *Legacy functions.
+
+### Features
+
+* Add API to construct confidential transfer instructions ([#496](https://github.com/solana-foundation/solana-go/issues/496)) ([f16816a](https://github.com/solana-foundation/solana-go/commit/f16816a54bd644a665a6ba1822343ae2503d4ad4))
+* add confidential transfer proof generation API ([#484](https://github.com/solana-foundation/solana-go/issues/484)) ([547b8e9](https://github.com/solana-foundation/solana-go/commit/547b8e9c2669921f7e7cee6be27674719e1487c2))
+* client API for ZK El Gamal Program ([#492](https://github.com/solana-foundation/solana-go/issues/492)) ([18f2794](https://github.com/solana-foundation/solana-go/commit/18f27944a11baa793b3dcaec7802cebd201de7ed))
+* **rpc:** add costUnits to transaction meta ([#494](https://github.com/solana-foundation/solana-go/issues/494)) ([937b550](https://github.com/solana-foundation/solana-go/commit/937b5507386a1f329fd336d64ecc1f556dab16c5))
+* **rpc:** add deactivated stake reward type ([#491](https://github.com/solana-foundation/solana-go/issues/491)) ([bd5e929](https://github.com/solana-foundation/solana-go/commit/bd5e929399a1ad898527067e7a9a71633dbbc73d))
+
+
+### Bug Fixes
+
+* **deps:** bump otel, x/net, x/crypto, grpc ([#493](https://github.com/solana-foundation/solana-go/issues/493)) ([274fbb8](https://github.com/solana-foundation/solana-go/commit/274fbb8b549b3384438c9b8a5dd4e3a17295c57b))
+* **keys:** do not mutate caller's seed slice in FindProgramAddress ([#490](https://github.com/solana-foundation/solana-go/issues/490)) ([10f2bf3](https://github.com/solana-foundation/solana-go/commit/10f2bf356f015778b08552462656fc3ebac0ca98))
+* **zkencryption:** align key derivation with solana-conf-bal/v1 ([#485](https://github.com/solana-foundation/solana-go/issues/485)) ([7015419](https://github.com/solana-foundation/solana-go/commit/701541987754b9b540bca87bf3134c1af6e1fabf))
+
 ## [1.23.0](https://github.com/solana-foundation/solana-go/compare/v1.22.0...v1.23.0) (2026-08-26)
 
 
