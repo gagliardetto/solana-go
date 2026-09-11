@@ -11,4 +11,5 @@ var (
 	ErrNotEnoughFunds         = errors.New("zk: not enough funds in account")
 	ErrIllegalAmountBitLength = errors.New("zk: amount has illegal bit length")
 	ErrFeeCalculation         = errors.New("zk: fee calculation failed")
+	ErrBalanceOverflow        = errors.New("zk: balance overflows a uint64")
 )

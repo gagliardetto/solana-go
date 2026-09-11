@@ -1,7 +1,5 @@
 package confidential
 
-import token2022 "github.com/gagliardetto/solana-go/programs/token-2022"
-
 const (
 	// The number of bits in account or mint balance.
 	BalanceBitLength = 64
@@ -20,7 +18,7 @@ const (
 	// The number of bits in the high part of a transfer fee.
 	FeeAmountHiBitLength = 32
 	// MaxFeeBasisPoints is the maximum possible fee in basis points: 100%.
-	MaxFeeBasisPoints = uint64(token2022.MaxFeeBasisPoints)
+	MaxFeeBasisPoints = uint64(10_000)
 	// deltaBitLength bounds the fee rounding error certified by the percentage-with-cap proof.
 	deltaBitLength = 16
 	// netAmountBitLength covers the transfer amount less the fee.

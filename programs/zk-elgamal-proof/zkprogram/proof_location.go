@@ -2,6 +2,7 @@ package zkprogram
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 
 	"github.com/gagliardetto/solana-go"
@@ -12,6 +13,17 @@ type ProofLocation[T proofdata.ProofData] struct {
 	offset              int8
 	proofData           T
 	contextStateAccount solana.PublicKey
+}
+
+func ConfidentialTransferProofLocation[T proofdata.ProofData](
+	contextStateAccount *solana.PublicKey,
+	offset int8,
+	proofData T,
+) ProofLocation[T] {
+	if contextStateAccount != nil {
+		return ProofLocationContextStateAccount[T](*contextStateAccount)
+	}
+	return ProofLocationInstructionOffset(offset, proofData)
 }
 
 func ProofLocationInstructionOffset[T proofdata.ProofData](offset int8, proofData T) ProofLocation[T] {
@@ -59,4 +71,12 @@ func isNilProofData(data proofdata.ProofData) bool {
 	}
 	v := reflect.ValueOf(data)
 	return v.Kind() == reflect.Pointer && v.IsNil()
+}
+
+func ProofContextSize(t proofdata.ProofType) (uint64, error) {
+	emptyProof := proofdata.NewProofData(t)
+	if emptyProof == nil {
+		return 0, fmt.Errorf("zk: proof type %d: %w", t, proofdata.ErrInvalidProofType)
+	}
+	return ContextStateSize(emptyProof.ContextData()), nil
 }
