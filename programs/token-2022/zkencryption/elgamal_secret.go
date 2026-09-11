@@ -40,10 +40,24 @@ const maxSeedLen = 65535
 // key; byte-for-byte equivalent to ElGamalSecretKey::as_bytes in solana-zk-sdk.
 type ElGamalSecretKey [ElGamalSecretKeyLen]byte
 
-// ConfidentialDerivationMessage returns the canonical confidential-balances
+// StandardDerivationMessage returns the standard confidential-balances
+// derivation message: the constant bytes "solana-conf-bal/v1" a wallet signs
+// once to derive its wallet-level keys via DeriveConfidentialKeys.
+//
+// Wallets SHOULD recognize these exact bytes, expose the signature only
+// through a dedicated key-derivation API, and refuse any generic signMessage
+// request whose message starts with this prefix: the resulting signature is
+// the input key material for the wallet's confidential-balance decryption
+// keys.
+func StandardDerivationMessage() []byte {
+	return []byte(SigningDomain)
+}
+
+// ConfidentialDerivationMessage returns the non-standard, seed-scoped
 // derivation message, b"solana-conf-bal/v1" || publicSeed. Mirrors
-// confidential_derivation_message in solana-zk-sdk; this is the exact message
-// a Signer must sign to derive confidential-balances keys.
+// confidential_derivation_message in solana-zk-sdk. With an empty seed it
+// equals StandardDerivationMessage; a non-empty seed is the opt-out used by
+// DeriveConfidentialKeysWithSeed.
 func ConfidentialDerivationMessage(publicSeed []byte) []byte {
 	msg := make([]byte, 0, len(SigningDomain)+len(publicSeed))
 	msg = append(msg, SigningDomain...)
@@ -96,12 +110,16 @@ func ElGamalSecretKeyFromSignature(sig solana.Signature) (ElGamalSecretKey, erro
 	return deriveElGamalSecretKey(sig[:])
 }
 
-// ElGamalSecretKeyFromSigner deterministically derives an ElGamal secret key
-// from a Solana signer and a public seed. The signer signs
+// ElGamalSecretKeyFromSignerWithSeed derives an ElGamal secret key from a
+// Solana signer and a non-standard public seed. The signer signs
 // b"solana-conf-bal/v1" || publicSeed (see ConfidentialDerivationMessage); the
 // signature is fed through the HKDF-SHA512 solana-conf-bal/v1 derivation. The
 // all-zero signature rejection lives in ElGamalSecretKeyFromSignature.
-func ElGamalSecretKeyFromSigner(signer Signer, publicSeed []byte) (ElGamalSecretKey, error) {
+//
+// Keys derived with a non-empty seed will not match the standard keys other
+// clients derive for the same wallet. For the standard wallet-level keys use
+// DeriveConfidentialKeys, which also signs only once for both keys.
+func ElGamalSecretKeyFromSignerWithSeed(signer Signer, publicSeed []byte) (ElGamalSecretKey, error) {
 	sig, err := signer.Sign(ConfidentialDerivationMessage(publicSeed))
 	if err != nil {
 		return ElGamalSecretKey{}, fmt.Errorf("zkencryption: sign confidential-balances public seed: %w", err)
