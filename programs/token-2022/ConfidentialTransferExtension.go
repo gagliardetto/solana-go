@@ -1,7 +1,9 @@
 package token2022
 
 import (
+	"encoding"
 	"errors"
+	"fmt"
 
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
@@ -24,16 +26,64 @@ const (
 	ConfidentialTransfer_DisableConfidentialCredits
 	ConfidentialTransfer_EnableNonConfidentialCredits
 	ConfidentialTransfer_DisableNonConfidentialCredits
-	ConfidentialTransfer_TransferWithSplitProofs
-	ConfidentialTransfer_TransferWithSplitProofsInParallel
+	ConfidentialTransfer_TransferWithFee
+	ConfidentialTransfer_ConfigureAccountWithRegistry
 )
+
+const (
+	// Deprecated: sub-instruction 13 is TransferWithFee; use
+	// ConfidentialTransfer_TransferWithFee.
+	ConfidentialTransfer_TransferWithSplitProofs = ConfidentialTransfer_TransferWithFee
+	// Deprecated: sub-instruction 14 is ConfigureAccountWithRegistry; use
+	// ConfidentialTransfer_ConfigureAccountWithRegistry.
+	ConfidentialTransfer_TransferWithSplitProofsInParallel = ConfidentialTransfer_ConfigureAccountWithRegistry
+)
+
+// ConfidentialTransferSubInstructionData is the data of a ConfidentialTransfer
+// sub-instruction, implemented by the ConfidentialTransfer*Data structs.
+type ConfidentialTransferSubInstructionData interface {
+	encoding.BinaryMarshaler
+	encoding.BinaryUnmarshaler
+	bytes() []byte
+}
+
+// ctSubInstructions describes every ConfidentialTransfer sub-instruction.
+var ctSubInstructions = [...]struct {
+	name    string
+	newData func() ConfidentialTransferSubInstructionData
+}{
+	ConfidentialTransfer_InitializeMint:      {"InitializeMint", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferInitializeMintData{} }},
+	ConfidentialTransfer_UpdateMint:          {"UpdateMint", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferUpdateMintData{} }},
+	ConfidentialTransfer_ConfigureAccount:    {"ConfigureAccount", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferConfigureAccountData{} }},
+	ConfidentialTransfer_ApproveAccount:      {"ApproveAccount", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferApproveAccountData{} }},
+	ConfidentialTransfer_EmptyAccount:        {"EmptyAccount", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferEmptyAccountData{} }},
+	ConfidentialTransfer_Deposit:             {"Deposit", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferDepositData{} }},
+	ConfidentialTransfer_Withdraw:            {"Withdraw", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferWithdrawData{} }},
+	ConfidentialTransfer_Transfer:            {"Transfer", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferTransferData{} }},
+	ConfidentialTransfer_ApplyPendingBalance: {"ApplyPendingBalance", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferApplyPendingBalanceData{} }},
+	ConfidentialTransfer_EnableConfidentialCredits: {"EnableConfidentialCredits", func() ConfidentialTransferSubInstructionData {
+		return &ConfidentialTransferEnableConfidentialCreditsData{}
+	}},
+	ConfidentialTransfer_DisableConfidentialCredits: {"DisableConfidentialCredits", func() ConfidentialTransferSubInstructionData {
+		return &ConfidentialTransferDisableConfidentialCreditsData{}
+	}},
+	ConfidentialTransfer_EnableNonConfidentialCredits: {"EnableNonConfidentialCredits", func() ConfidentialTransferSubInstructionData {
+		return &ConfidentialTransferEnableNonConfidentialCreditsData{}
+	}},
+	ConfidentialTransfer_DisableNonConfidentialCredits: {"DisableNonConfidentialCredits", func() ConfidentialTransferSubInstructionData {
+		return &ConfidentialTransferDisableNonConfidentialCreditsData{}
+	}},
+	ConfidentialTransfer_TransferWithFee: {"TransferWithFee", func() ConfidentialTransferSubInstructionData { return &ConfidentialTransferTransferWithFeeData{} }},
+	ConfidentialTransfer_ConfigureAccountWithRegistry: {"ConfigureAccountWithRegistry", func() ConfidentialTransferSubInstructionData {
+		return &ConfidentialTransferConfigureAccountWithRegistryData{}
+	}},
+}
 
 // ConfidentialTransferExtension is the instruction wrapper for the ConfidentialTransfer extension (ID 27).
 // This is a complex extension with many sub-instructions involving zero-knowledge proofs.
-// The raw sub-instruction data is preserved for encoding/decoding.
 type ConfidentialTransferExtension struct {
 	SubInstruction uint8
-	// Raw data for the sub-instruction (after the sub-instruction byte).
+	// Raw data for the sub-instruction.
 	RawData []byte
 
 	Accounts ag_solanago.AccountMetaSlice `bin:"-" borsh_skip:"true"`
@@ -49,6 +99,26 @@ func (slice ConfidentialTransferExtension) GetAccounts() (accounts []*ag_solanag
 	accounts = append(accounts, slice.Accounts...)
 	accounts = append(accounts, slice.Signers...)
 	return
+}
+
+// DecodeSubInstructionData outputs the typed instruction data for SubInstruction.
+func (obj ConfidentialTransferExtension) DecodeSubInstructionData() (ConfidentialTransferSubInstructionData, error) {
+	if int(obj.SubInstruction) >= len(ctSubInstructions) {
+		return nil, fmt.Errorf("token2022: unknown ConfidentialTransfer sub-instruction %d", obj.SubInstruction)
+	}
+	instructionData := ctSubInstructions[obj.SubInstruction].newData()
+	if err := instructionData.UnmarshalBinary(obj.RawData); err != nil {
+		return nil, err
+	}
+	return instructionData, nil
+}
+
+// subInstructionName is the name of SubInstruction, or "Unknown" for an ID the program does not define.
+func (obj ConfidentialTransferExtension) subInstructionName() string {
+	if int(obj.SubInstruction) >= len(ctSubInstructions) {
+		return "Unknown"
+	}
+	return ctSubInstructions[obj.SubInstruction].name
 }
 
 func (inst ConfidentialTransferExtension) Build() *Instruction {
@@ -73,23 +143,17 @@ func (inst *ConfidentialTransferExtension) Validate() error {
 }
 
 func (inst *ConfidentialTransferExtension) EncodeToTree(parent ag_treeout.Branches) {
-	names := []string{
-		"InitializeMint", "UpdateMint", "ConfigureAccount", "ApproveAccount",
-		"EmptyAccount", "Deposit", "Withdraw", "Transfer",
-		"ApplyPendingBalance", "EnableConfidentialCredits", "DisableConfidentialCredits",
-		"EnableNonConfidentialCredits", "DisableNonConfidentialCredits",
-		"TransferWithSplitProofs", "TransferWithSplitProofsInParallel",
-	}
-	name := "Unknown"
-	if int(inst.SubInstruction) < len(names) {
-		name = names[inst.SubInstruction]
-	}
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("ConfidentialTransfer." + name)).
+			programBranch.Child(ag_format.Instruction("ConfidentialTransfer." + inst.subInstructionName())).
 				ParentFunc(func(instructionBranch ag_treeout.Branches) {
 					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("RawData (len)", len(inst.RawData)))
+						if ctData, err := inst.DecodeSubInstructionData(); err == nil {
+							paramsBranch.Child(ag_format.Param("Data", ctData))
+						} else {
+							// Fall back to the payload length for malformed instruction data.
+							paramsBranch.Child(ag_format.Param("RawData (len)", len(inst.RawData)))
+						}
 					})
 				})
 		})
@@ -114,8 +178,8 @@ func (obj *ConfidentialTransferExtension) UnmarshalWithDecoder(decoder *ag_binar
 	if err != nil {
 		return err
 	}
-	remaining := decoder.Remaining()
-	if remaining > 0 {
+	obj.RawData = nil
+	if remaining := decoder.Remaining(); remaining > 0 {
 		obj.RawData, err = decoder.ReadNBytes(remaining)
 		if err != nil {
 			return err
@@ -124,8 +188,10 @@ func (obj *ConfidentialTransferExtension) UnmarshalWithDecoder(decoder *ag_binar
 	return nil
 }
 
-// NewConfidentialTransferInstruction creates a raw confidential transfer extension instruction.
-// Due to the complexity of ZK proof data, this provides a low-level interface.
+// NewConfidentialTransferInstruction creates a confidential transfer extension
+// instruction from a raw sub-instruction payload.
+//
+// Prefer the typed NewConfidentialTransfer*Instruction builders.
 func NewConfidentialTransferInstruction(
 	subInstruction uint8,
 	rawData []byte,
