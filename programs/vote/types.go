@@ -349,6 +349,10 @@ func (u *VoteStateUpdate) UnmarshalWithDecoder(dec *bin.Decoder) error {
 	if err != nil {
 		return err
 	}
+	// Each lockout is a u64 slot and a u32 confirmation count (12 bytes).
+	if count > uint64(dec.Remaining())/12 {
+		return fmt.Errorf("vote state update: lockout count %d exceeds remaining data (%d bytes)", count, dec.Remaining())
+	}
 	u.Lockouts = make([]Lockout, count)
 	for i := range count {
 		if err := u.Lockouts[i].UnmarshalWithDecoder(dec); err != nil {

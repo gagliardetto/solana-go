@@ -164,6 +164,10 @@ func (inst *ExtendLookupTable) UnmarshalWithDecoder(decoder *bin.Decoder) error 
 	if err != nil {
 		return err
 	}
+	// Reject a count the remaining data cannot hold before allocating.
+	if count > uint64(decoder.Remaining())/uint64(solana.PublicKeyLength) {
+		return fmt.Errorf("extend lookup table: address count %d exceeds remaining data (%d bytes)", count, decoder.Remaining())
+	}
 	inst.Addresses = make([]solana.PublicKey, count)
 	for i := uint64(0); i < count; i++ {
 		_, err := decoder.Read(inst.Addresses[i][:])
