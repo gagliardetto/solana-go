@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.26.0](https://github.com/solana-foundation/solana-go/compare/v1.25.0...v1.26.0) (2026-10-21)
+
+
+### Features
+
+* **token-2022:** add ConfidentialMintBurn and ConfidentialTransferFee client API ([#511](https://github.com/solana-foundation/solana-go/issues/511)) ([4ab4b22](https://github.com/solana-foundation/solana-go/commit/4ab4b22e9aa1ac67da59a5c1d03a3b2efff80693))
+
+
+### Bug Fixes
+
+* reject oversized element counts in ExtendLookupTable and VoteStateUpdate instruction decoding ([#513](https://github.com/solana-foundation/solana-go/issues/513)) ([b44dbce](https://github.com/solana-foundation/solana-go/commit/b44dbce00a3f330e9b1efde39b95c99943dcde76))
+
 ## [1.25.0](https://github.com/solana-foundation/solana-go/compare/v1.24.1...v1.25.0) (2026-10-06)
 
 
